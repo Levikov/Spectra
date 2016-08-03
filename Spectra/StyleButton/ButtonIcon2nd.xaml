@@ -1,0 +1,62 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:Spectra.StyleButton">
+    <ControlTemplate x:Key="ButtonIcon2nd" TargetType="RadioButton">
+        <Grid x:Name="grid">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="70"/>
+                <ColumnDefinition Width="130"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+            <Grid Grid.Column="1">
+                <!--<Rectangle x:Name="bord" Stroke="{StaticResource WindowBorder}" StrokeThickness="1" Grid.RowSpan="1" Visibility="Collapsed" VerticalAlignment="Stretch" Width="120"/>-->
+                <Label x:Name="icon" Background="{TemplateBinding Background}" Margin="0"/>
+            </Grid>
+            <Grid Grid.Column="2">
+                <Label x:Name="label" Content="{TemplateBinding Content}" FontSize="30" FontFamily="YouYuan" HorizontalAlignment="Center" VerticalAlignment="Center" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
+            </Grid>
+        </Grid>
+        <ControlTemplate.Resources>
+            <Storyboard x:Key="story1">
+                <!--故事板-->
+                <DoubleAnimationUsingKeyFrames BeginTime="00:00:00" Storyboard.TargetName="label" Storyboard.TargetProperty="FontSize">
+                    <!--开始时间、应用对象、应用属性-->
+                    <SplineDoubleKeyFrame KeyTime="00:00:00.00" Value="32"/>
+                    <!--发生时间、值-->
+                    <SplineDoubleKeyFrame KeyTime="00:00:00.10" Value="30"/>
+                    <!--发生时间、值-->
+                </DoubleAnimationUsingKeyFrames>
+            </Storyboard>
+            <Storyboard x:Key="story2">
+                <!--故事板-->
+                <DoubleAnimationUsingKeyFrames BeginTime="00:00:00" Storyboard.TargetName="icon" Storyboard.TargetProperty="Width">
+                    <!--开始时间、应用对象、应用属性-->
+                    <SplineDoubleKeyFrame KeyTime="00:00:00.00" Value="69"/>
+                    <!--发生时间、值-->
+                    <SplineDoubleKeyFrame KeyTime="00:00:00.50" Value="70"/>
+                    <!--发生时间、值-->
+                </DoubleAnimationUsingKeyFrames>
+            </Storyboard>
+        </ControlTemplate.Resources>
+        <ControlTemplate.Triggers>
+            <Trigger Property="IsChecked" Value="True">
+                <Setter Property="Foreground" TargetName="label" Value="{StaticResource ButtonFore}"/>
+                <Setter Property="Background" TargetName="grid" Value="{StaticResource ButtonBack}"/>
+            </Trigger>
+            <MultiTrigger>
+                <MultiTrigger.Conditions>
+                    <Condition Property="IsMouseOver" Value="True"/>
+                    <Condition Property="IsChecked" Value="false"/>
+                </MultiTrigger.Conditions>
+                <Setter Property="Background" TargetName="grid" Value="{StaticResource Btn2ndBackMove}"/>
+            </MultiTrigger>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Trigger.EnterActions>
+                    <BeginStoryboard Storyboard="{StaticResource story1}"/>
+                    <BeginStoryboard Storyboard="{StaticResource story2}"/>
+                </Trigger.EnterActions>
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+</ResourceDictionary>

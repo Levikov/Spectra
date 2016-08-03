@@ -1,0 +1,30 @@
+﻿<Application x:Class="Spectra.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:Spectra"
+             StartupUri="MainWindow.xaml" Startup="Application_Startup">
+    <Application.Resources>
+        <ResourceDictionary>
+            <!-- 引用资源字典 -->
+            <ResourceDictionary.MergedDictionaries>
+                <!--调色板-->
+                <ResourceDictionary Source="StyleColor\Color_SkyBlue.xaml"/>
+                <!--<ResourceDictionary Source="StyleColor\Color_Apple.xaml"/>-->
+                <!--Button-->
+                <ResourceDictionary Source="StyleLabel\LabelIcon.xaml"/>
+                <ResourceDictionary Source="StyleButton\ButtonDefault.xaml"/>
+                <ResourceDictionary Source="StyleButton\ButtonIcon1st.xaml"/>
+                <ResourceDictionary Source="StyleButton\ButtonIcon2nd.xaml"/>
+                <ResourceDictionary Source="StyleGroupBox\GroupBoxDefault.xaml"/>
+                <ResourceDictionary Source="StyleButton\ButtonClose.xaml"/>
+                <ResourceDictionary Source="StyleButton\ButtonMinMax.xaml"/>
+                <!--<ResourceDictionary Source="StyleButton\ButtonRadio_1st_SkyBlue.xaml"/>-->
+                <ResourceDictionary Source="StyleButton\ButtonRadio_2nd_SkyBlue.xaml"/>
+                <ResourceDictionary Source="StyleDataGrid\DataGrid_SkyBlue.xaml"/>
+                <ResourceDictionary Source="StyleCalendar\Calendar_Size.xaml"/>
+                <!--TextBox-->
+                <ResourceDictionary Source="StyleTextBox\TextBoxDefault.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

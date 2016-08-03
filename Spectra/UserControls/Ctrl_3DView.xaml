@@ -1,0 +1,33 @@
+﻿<UserControl x:Class="Spectra.Ctrl_3DView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+             xmlns:xcdg="http://schemas.xceed.com/wpf/xaml/datagrid"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Spectra"
+             xmlns:Custom="WFTools3D"
+             mc:Ignorable="d" 
+             d:DesignHeight="768" d:DesignWidth="1024">
+    <UserControl.Resources>
+        <ImageBrush x:Key="Facade" ImageSource="Facade.jpg"/>
+        <ImageBrush x:Key="Ground" ImageSource="Ground.jpg"/>
+        <ImageBrush x:Key="Poster" ImageSource="Poster.jpg"/>
+    </UserControl.Resources>
+    <Grid Name="grid">
+        <Custom:Scene3D BorderBrush="Black" Name="scene" BorderThickness="1" MouseDown="scene_MouseDown">
+            <Custom:Scene3D.Background>
+                <ImageBrush ImageSource="/Spectra;component/image/1920.jpg" Opacity="0.9"/>
+            </Custom:Scene3D.Background>
+        </Custom:Scene3D>
+        <Label HorizontalAlignment="Left" Content="坐标:" VerticalAlignment="Top" Margin="20,20,0,0" FontSize="24" Foreground="White"/>
+        <TextBlock x:Name="tb_3DCoord" Text="(0,0,0)" VerticalAlignment="Top" Margin="100,25,0,0" FontSize="24" Foreground="White" HorizontalAlignment="Left"/>
+        <Label HorizontalAlignment="Left" Content="行号:" VerticalAlignment="Top" Margin="20,60,0,0" FontSize="24" Foreground="White"/>
+        <TextBlock Text="0" VerticalAlignment="Top" Margin="100,65,0,0" FontSize="24" Foreground="White" HorizontalAlignment="Left"/>
+        <Label HorizontalAlignment="Left" Content="列号:" VerticalAlignment="Top" Margin="20,100,0,0" FontSize="24" Foreground="White"/>
+        <TextBlock Text="0" VerticalAlignment="Top" Margin="100,105,0,0" FontSize="24" Foreground="White" HorizontalAlignment="Left"/>
+        <Label HorizontalAlignment="Left" Content="谱段:" VerticalAlignment="Top" Margin="20,140,0,0" FontSize="24" Foreground="White"/>
+        <TextBlock Text="0" VerticalAlignment="Top" Margin="100,145,0,0" FontSize="24" Foreground="White" HorizontalAlignment="Left"/>
+        <local:Ctrl_BusyMask x:Name="Busy"></local:Ctrl_BusyMask>
+    </Grid>
+</UserControl>

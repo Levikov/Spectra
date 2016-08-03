@@ -1,0 +1,30 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:Spectra.StyleColor">
+    <!--最小化-->
+    <SolidColorBrush x:Key="MinBack" Color="#FFA3CFFB"/>
+    <SolidColorBrush x:Key="MinMove" Color="WhiteSmoke"/>
+    <SolidColorBrush x:Key="MinFontFore" Color="White"/>
+    <SolidColorBrush x:Key="MinFontMove" Color="Black"/>
+    <!--关闭-->
+    <SolidColorBrush x:Key="CloseBack" Color="LightBlue"/>
+    <SolidColorBrush x:Key="CloseMove" Color="#FFC70808"/>
+    <SolidColorBrush x:Key="CloseFontFore" Color="White"/>
+    <SolidColorBrush x:Key="CloseFontMove" Color="#FFE0E0E0"/>
+    <!--窗体-->
+    <!--<SolidColorBrush x:Key="WindowBack" Color="#FF9FE0FF"/>-->
+    <!--<SolidColorBrush x:Key="TitleBack" Color="Gray"/>-->
+    <SolidColorBrush x:Key="WindowBorder" Color="#FF1BA1E2"/>
+    <!--默认Button-->
+    <SolidColorBrush x:Key="ButtonBack" Color="#FF5499FD"/>
+    <SolidColorBrush x:Key="ButtonFore" Color="White"/>
+    <SolidColorBrush x:Key="ButtonBackMove" Color="#FF2C2C2C"/>
+    <SolidColorBrush x:Key="ButtonForeMove" Color="#FFE3E3E3"/>
+    <!--1级Button-->
+    <SolidColorBrush x:Key="Btn1stNotSelected" Color="#FF999292"/>
+    <!--2级Button-->
+    <SolidColorBrush x:Key="Btn2ndBackMove" Color="#FF58C3F7"/>
+    <!--DataGrid-->
+    <SolidColorBrush x:Key="DgvColHeader" Color="#FFD1F0FF"/>
+    <SolidColorBrush x:Key="DgvRowMove" Color="LightGray"/>
+</ResourceDictionary>

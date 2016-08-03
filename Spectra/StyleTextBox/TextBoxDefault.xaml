@@ -1,0 +1,16 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:Spectra.StyleTextBox">
+    <Style TargetType="{x:Type TextBox}">
+        <Setter Property="Height" Value="40"/>
+        <Setter Property="BorderBrush" Value="{StaticResource ButtonBack}"/>
+        <Setter Property="SelectionBrush" Value="{StaticResource ButtonBackMove}"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Style.Triggers>
+            <Trigger Property="IsReadOnly" Value="True">
+                <Setter Property="Background" Value="{StaticResource DgvRowMove}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style> 
+</ResourceDictionary>
