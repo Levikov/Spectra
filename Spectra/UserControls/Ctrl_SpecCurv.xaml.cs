@@ -17,7 +17,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Drawing;
 
-namespace Microsat
+namespace Spectra
 {
     /// <summary>
     /// Ctrl_SpecCurv.xaml 的交互逻辑
@@ -38,9 +38,11 @@ namespace Microsat
 
             //chart1st.AddLineGraph(dtsChart1st, Colors.DeepSkyBlue, 2, "Sin");
             lm = chart1st.AddLineGraph(dtsChart1st,
-            new System.Windows.Media.Pen(System.Windows.Media.Brushes.Green, 2),
-            new CirclePointMarker { Size = 3.0, Fill = System.Windows.Media.Brushes.Red },
-            new PenDescription("Gray-level value"));
+            new System.Windows.Media.Pen(System.Windows.Media.Brushes.Yellow, 3),
+            new CirclePointMarker { Size = 3.0, Fill = System.Windows.Media.Brushes.Yellow },
+            new PenDescription());
+
+
 
         }
 
@@ -48,7 +50,7 @@ namespace Microsat
         {
 
 
-            System.Windows.Point[] points = await BackgroundTasks.SpecProc.GetSpecCurv(p);
+            System.Windows.Point[] points = await SpecProc.GetSpecCurv(p);
             dtsChart1st = new ObservableDataSource<System.Windows.Point>();
             foreach (System.Windows.Point point in points)
             {
@@ -57,6 +59,10 @@ namespace Microsat
             chart1st.Children.Remove(lm.LineGraph);
             chart1st.Children.Remove(lm.MarkerGraph);
             initChart();
+
+
+            chart1st.Viewport.Visible = new Rect(new System.Windows.Point(400,4096), new System.Windows.Point(1020, 0));
+            
         }
     }
 }

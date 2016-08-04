@@ -23,8 +23,14 @@
                 <Image Name="IMG1" RenderTransform="{StaticResource Imageview}" RenderOptions.BitmapScalingMode="NearestNeighbor" MouseDown="IMG1_MouseDown" StretchDirection="DownOnly"/>
             </ContentControl>
         </ScrollViewer>
-        <TextBox Height="40" TextWrapping="Wrap" Text="谱段:80" Margin="0,20" VerticalAlignment="Top" HorizontalAlignment="Center" FontSize="24" Background="{x:Null}" Foreground="White"/>
-        <TextBox x:Name="txtPosi" Height="40" TextWrapping="Wrap" Text="&#xD;&#xA;" Margin="10,10,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="24" Background="{x:Null}" Foreground="White"/>
+        <Label HorizontalAlignment="Left" Content="坐标:" VerticalAlignment="Top" Margin="20,20,0,0" FontSize="24" Foreground="White"/>
+        <TextBlock x:Name="tb_3DCoord" Text="(0,0,0)" VerticalAlignment="Top" Margin="100,25,0,0" FontSize="24" Foreground="White" HorizontalAlignment="Left"/>
+        <Label HorizontalAlignment="Left" Content="行号:" VerticalAlignment="Top" Margin="20,60,0,0" FontSize="24" Foreground="White"/>
+        <TextBlock x:Name="Row" Text="0" VerticalAlignment="Top" Margin="100,65,0,0" FontSize="24" Foreground="White" HorizontalAlignment="Left"/>
+        <Label HorizontalAlignment="Left" Content="列号:" VerticalAlignment="Top" Margin="20,100,0,0" FontSize="24" Foreground="White"/>
+        <TextBlock x:Name="Col" Text="0" VerticalAlignment="Top" Margin="100,105,0,0" FontSize="24" Foreground="White" HorizontalAlignment="Left"/>
+        <Label HorizontalAlignment="Left" Content="谱段:" VerticalAlignment="Top" Margin="20,140,0,0" FontSize="24" Foreground="White"/>
+        <TextBlock x:Name="Band" Text="0" VerticalAlignment="Top" Margin="100,145,0,0" FontSize="24" Foreground="White" HorizontalAlignment="Left"/>
         <local:Ctrl_BusyMask x:Name="Busy"></local:Ctrl_BusyMask>
     </Grid>
 </UserControl>

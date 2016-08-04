@@ -74,30 +74,29 @@ namespace Spectra
         /*点击打开文件*/
         private async void b_Open_Click(object sender, RoutedEventArgs e)
         {
-
-           
             OpenFileDialog openFile = new OpenFileDialog();
             openFile.Filter = "All Files(*.*)|*.*";
             if ((bool)openFile.ShowDialog())
             {
                 IProgress<DataView> IProg_DataView = new Progress<DataView>((Prog_DataView) => { dataGrid_Errors.ItemsSource = Prog_DataView; });
                 IProgress<double> IProgress_Prog = new Progress<double>((ProgressValue) => { prog_Import.Value = ProgressValue * this.prog_Import.Maximum; });
-                IProgress<string> IProgress_List = new Progress<string>((ProgressString) => { this.tb_Console.Text = ProgressString + "\n"; });
+                IProgress<string> IProgress_List = new Progress<string>((ProgressString) => { this.tb_Console.Text = ProgressString + "\n" + this.tb_Console.Text; });
                 FileInfo.srcFilePathName = openFile.FileName;
                 this.tb_Path.Text = openFile.FileName;
                 int i=await DataProc.GetFileDetail(FileInfo.srcFilePathName,IProg_DataView,IProgress_Prog,IProgress_List);
                 this.b_Start_Import.IsEnabled = true;
             }
         }
-        
         #endregion
 
         #region 数据解压
-
+        /*用于放弃操作*/
         private CancellationTokenSource cancelImport = new CancellationTokenSource();
-
+        /*点击导入*/
         private async void b_Start_Import_Click(object sender, RoutedEventArgs e)
         {
+            if (FileInfo.isDecomp)
+                if (MessageBox.Show("该文件已解压,是否要重新解压并覆盖?", "提示", MessageBoxButton.OKCancel, MessageBoxImage.Information) == MessageBoxResult.Cancel) return;
             Button b = sender as Button;
             IProgress<double> IProgress_Prog = new Progress<double>((ProgressValue) => { prog_Import.Value = ProgressValue * this.prog_Import.Maximum; });
             IProgress<string> IProgress_List = new Progress<string>((ProgressString) => { this.tb_Console.Text = ProgressString + "\n"+ this.tb_Console.Text; });
@@ -218,11 +217,16 @@ namespace Spectra
             //App.global_Win_SpecImg.Refresh(80,0);
 
             App.global_Win_SpecImg.Show();
+            App.global_Win_SpecImg.DisplayMode = SpecImgWindow.GridMode.Two;
+            App.global_Win_SpecImg.u[0].Refresh(20,ColorRenderMode.Grayscale);
+            App.global_Win_SpecImg.u[1].Refresh(0,ColorRenderMode.TrueColor);
 
             App.global_Win_3D.Show();
             App.global_Win_3D._3DViewer.Refresh();
 
-            //App.global_Win_Curve.Show();
+            App.global_Win_Curve.Show();
+            App.global_Win_Curve.DisplayMode = SpecCurvWindow.GridMode.Two;
+
 
             //App.global_Win_SpecImg.grid.ColumnDefinitions[0].Width = new GridLength(1, GridUnitType.Star);
             //App.global_Win_SpecImg.grid.ColumnDefinitions[1].Width = new GridLength(1,GridUnitType.Star);
@@ -239,7 +243,8 @@ namespace Spectra
             SelectedScreen -= 1;
             ScreenCnt -= 1;
             App.global_Win_SpecImg.DisplayMode = (SpecImgWindow.GridMode)ScreenCnt;
-            App.global_Win_SpecImg.u[SelectedScreen].Refresh(band);
+            App.global_Win_Curve.DisplayMode = (SpecCurvWindow.GridMode)ScreenCnt;
+            App.global_Win_SpecImg.u[SelectedScreen].Refresh(band,ColorRenderMode.Grayscale);
         }
         #endregion
 

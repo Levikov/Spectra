@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -30,6 +31,9 @@ namespace Spectra
         public enum DisplayContent { Single,Pick,Sync};
         public int SpecNum;
         public int[] RgbSpec=new int[3];
+        public int ImgW;
+        public int ImgH;
+
 
         public Ctrl_ImageView()
         {
@@ -46,19 +50,24 @@ namespace Spectra
            // this.IMG1.Source = bmp;
         }
 
-        public async void Refresh(int band)
+        public async void Refresh(int band,ColorRenderMode cMode)
         {
             this.Busy.isBusy = true;
             
-            Bitmap bmp = await DataProc.GetBmp(band);
+            Bitmap bmp = await DataProc.GetBmp(band,cMode);
             MemoryStream ms = new MemoryStream();
             bmp.Save(ms, System.Drawing.Imaging.ImageFormat.Bmp);
+            ImgW = bmp.Width;
+            ImgH = bmp.Height;
             BitmapImage bmpSource = new BitmapImage();
             bmpSource.BeginInit();
             bmpSource.StreamSource = ms;
             bmpSource.EndInit();
             this.IMG1.Source = bmpSource;
+            SpecNum = band;
+            Band.Text = $"{SpecNum}";
             this.Busy.isBusy = false;
+
             
         }
 
@@ -147,12 +156,15 @@ namespace Spectra
             System.Windows.Point p = Mouse.GetPosition(e.Source as FrameworkElement);
             p.X = (p.X/IMG1.ActualWidth);
             p.Y = (p.Y / IMG1.ActualHeight);
-            txtPosi.Text = "x:" + p.X.ToString() + "y:" + p.X.ToString();
-
-            //App.global_Win_Curve.u[this.ScreenIndex].Draw(p);
+            tb_3DCoord.Text = $"({Math.Floor(p.X*ImgW)},{Math.Floor(p.Y* ImgH)},{SpecNum})";
+            Col.Text = $"{Math.Floor(p.X * ImgW)}";
+            Row.Text = $"{Math.Floor(p.Y * ImgH)}";
+            Band.Text = $"{SpecNum}";
+            App.global_Win_Curve.u[this.ScreenIndex].Draw(p);
             IMG1.MouseDown += IMG1_MouseDown;
 
         }
+
 
 
         /*
@@ -175,4 +187,5 @@ namespace Spectra
     */
 
     }
+
 }

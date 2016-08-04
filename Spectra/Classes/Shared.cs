@@ -15,9 +15,11 @@ namespace Spectra
     public static class FileInfo
     {
         public static string srcFilePathName;       /*源文件全称*/
-        public static string upkFilePathName;       /*解包后文件全称*/
         public static long sizeSrcFile;             /*源文件大小*/
+        public static string upkFilePathName;       /*解包后文件全称*/
         public static long sizeUpkFile;             /*解包后文件大小*/
+        public static bool isUnpack = false;        /*是否已解包*/
+        public static bool isDecomp = false;        /*是否已解压*/
     }
 
     public static class Variables

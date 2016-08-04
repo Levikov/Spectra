@@ -18,6 +18,7 @@ namespace Spectra
         public static _3DWindow global_Win_3D;
         public static SpecImgWindow global_Win_SpecImg;
         public static MapWindow global_Win_Map;
+        public static SpecCurvWindow global_Win_Curve;
         private void Application_Startup(object sender, StartupEventArgs e)
         {
             Variables.Screen_Locations = new Rectangle[4];
@@ -32,6 +33,7 @@ namespace Spectra
             global_Win_3D = new _3DWindow();
             global_Win_SpecImg = new SpecImgWindow();
             global_Win_Map = new MapWindow();
+            global_Win_Curve = new SpecCurvWindow();
             //global_Win_Map.Show();
             //global_Win_ImageShow.Show();
         }

@@ -69,10 +69,10 @@ namespace Spectra
             MeshGeometry3D mg3d_Down = new MeshGeometry3D();
 
             #region 3D立方体正视图
-            mg3d_Top.Positions.Add(new Point3D(0, 0, 64.0));
-            mg3d_Top.Positions.Add(new Point3D(204.8, 0, 64.0));
-            mg3d_Top.Positions.Add(new Point3D(204.8, lines/10, 64.0));
-            mg3d_Top.Positions.Add(new Point3D(0, lines/10, 64.0));
+            mg3d_Top.Positions.Add(new Point3D(-102.4, -lines/20, 32.0));
+            mg3d_Top.Positions.Add(new Point3D(102.4, -lines/20, 32.0));
+            mg3d_Top.Positions.Add(new Point3D(102.4, lines/20, 32.0));
+            mg3d_Top.Positions.Add(new Point3D(-102.4, lines/20, 32.0));
             mg3d_Top.TriangleIndices.Add(0);
             mg3d_Top.TriangleIndices.Add(1);
             mg3d_Top.TriangleIndices.Add(2);
@@ -86,10 +86,10 @@ namespace Spectra
             #endregion
 
             #region 3D立方体左视图
-            mg3d_Left.Positions.Add(new Point3D(0, 0, 0));
-            mg3d_Left.Positions.Add(new Point3D(0, 0, 64.0));
-            mg3d_Left.Positions.Add(new Point3D(0, lines/10, 64.0));
-            mg3d_Left.Positions.Add(new Point3D(0, lines/10, 0));
+            mg3d_Left.Positions.Add(new Point3D(-102.4, -lines/20, -32.0));
+            mg3d_Left.Positions.Add(new Point3D(-102.4, -lines/20, 32.0));
+            mg3d_Left.Positions.Add(new Point3D(-102.4, lines/20, 32.0));
+            mg3d_Left.Positions.Add(new Point3D(-102.4, lines/20, -32.0));
             mg3d_Left.TriangleIndices.Add(0);
             mg3d_Left.TriangleIndices.Add(1);
             mg3d_Left.TriangleIndices.Add(2);
@@ -103,10 +103,10 @@ namespace Spectra
             #endregion
 
             #region 3D立方体右视图
-            mg3d_Right.Positions.Add(new Point3D(204.8, 0, 0));
-            mg3d_Right.Positions.Add(new Point3D(204.8, lines/10, 0));
-            mg3d_Right.Positions.Add(new Point3D(204.8, lines/10, 64.0));
-            mg3d_Right.Positions.Add(new Point3D(204.8, 0, 64.0));
+            mg3d_Right.Positions.Add(new Point3D(102.4, -lines/20, -32));
+            mg3d_Right.Positions.Add(new Point3D(102.4, lines/20, -32));
+            mg3d_Right.Positions.Add(new Point3D(102.4, lines/20, 32.0));
+            mg3d_Right.Positions.Add(new Point3D(102.4, -lines/20, 32.0));
             mg3d_Right.TriangleIndices.Add(0);
             mg3d_Right.TriangleIndices.Add(1);
             mg3d_Right.TriangleIndices.Add(2);
@@ -120,10 +120,10 @@ namespace Spectra
             #endregion
 
             #region 3D立方体背视图
-            mg3d_Bottom.Positions.Add(new Point3D(0, 0, 0));
-            mg3d_Bottom.Positions.Add(new Point3D(0, lines/10, 0));
-            mg3d_Bottom.Positions.Add(new Point3D(204.8, lines/10, 0));
-            mg3d_Bottom.Positions.Add(new Point3D(204.8, 0, 0));
+            mg3d_Bottom.Positions.Add(new Point3D(-102.4, -lines/20, -32));
+            mg3d_Bottom.Positions.Add(new Point3D(-102.4, lines/20, -32));
+            mg3d_Bottom.Positions.Add(new Point3D(102.4, lines/20, -32));
+            mg3d_Bottom.Positions.Add(new Point3D(102.4, -lines/20, -32));
             mg3d_Bottom.TriangleIndices.Add(0);
             mg3d_Bottom.TriangleIndices.Add(1);
             mg3d_Bottom.TriangleIndices.Add(2);
@@ -137,10 +137,10 @@ namespace Spectra
             #endregion
 
             #region 3D立方体顶视图
-            mg3d_Up.Positions.Add(new Point3D(0, lines/10, 0));
-            mg3d_Up.Positions.Add(new Point3D(0, lines/10, 64.0));
-            mg3d_Up.Positions.Add(new Point3D(204.8, lines/10, 64.0));
-            mg3d_Up.Positions.Add(new Point3D(204.8, lines/10, 0));
+            mg3d_Up.Positions.Add(new Point3D(-102.4, lines/20, -32));
+            mg3d_Up.Positions.Add(new Point3D(-102.4, lines/20, 32.0));
+            mg3d_Up.Positions.Add(new Point3D(102.4, lines/20, 32.0));
+            mg3d_Up.Positions.Add(new Point3D(102.4, lines/20, -32));
             mg3d_Up.TriangleIndices.Add(0);
             mg3d_Up.TriangleIndices.Add(1);
             mg3d_Up.TriangleIndices.Add(2);
@@ -154,10 +154,10 @@ namespace Spectra
             #endregion
 
             #region 3D立方体底视图
-            mg3d_Down.Positions.Add(new Point3D(0, 0, 0));
-            mg3d_Down.Positions.Add(new Point3D(204.8, 0, 0));
-            mg3d_Down.Positions.Add(new Point3D(204.8, 0, 64.0));
-            mg3d_Down.Positions.Add(new Point3D(0, 0, 64.0));
+            mg3d_Down.Positions.Add(new Point3D(-102.4, -lines/20, -32));
+            mg3d_Down.Positions.Add(new Point3D(102.4, -lines / 20, -32));
+            mg3d_Down.Positions.Add(new Point3D(102.4, -lines / 20, 32.0));
+            mg3d_Down.Positions.Add(new Point3D(-102.4, -lines / 20, 32.0));
             mg3d_Down.TriangleIndices.Add(0);
             mg3d_Down.TriangleIndices.Add(1);
             mg3d_Down.TriangleIndices.Add(2);
@@ -380,25 +380,9 @@ namespace Spectra
 
         void InitializeCameras()
         {
-            scene.ActivateCamera(2);
-            scene.Camera.Position = new Point3D(-67, 19, 1);
-            scene.Camera.LookDirection = new Vector3D(1, -0.24, 0);
-            scene.Camera.UpDirection = Math3D.UnitZ;
-            scene.Camera.FieldOfView = 60;
-            scene.Camera.Speed = 15;
 
-            scene.ActivateCamera(1);
-            scene.Camera.Position = new Point3D(-8, 12, 2);
-            scene.Camera.LookDirection = -Math3D.UnitY;
-            scene.Camera.UpDirection = Math3D.UnitZ;
-            scene.Camera.ChangeRoll(15);
-            scene.Camera.Speed = 15;
-
-            scene.ActivateCamera(0);
-            scene.Camera.Position = new Point3D(2000, 2000, 2000);
-            scene.Camera.FieldOfView = 60;
             //scene.Camera.LookAtOrigin();
-            double scalar = 0.2;
+            double scalar = 0.1;
             scene.Camera.Position = new Point3D(scalar*2048, scalar * imheight, scalar * 2048);
             scene.Camera.LookDirection = new Vector3D(-2048, -imheight , -2048);
             scene.Camera.UpDirection = Math3D.UnitY;
@@ -462,10 +446,13 @@ namespace Spectra
 
         private void scene_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            int X = (int)(scene.touchPoint.X * 10);
-            int Y = (int)(scene.touchPoint.Y * 10);
-            int Z = (int)(scene.touchPoint.Z * 10 / 4);
+            int X = (int)(scene.touchPoint.X * 10) +1024;
+            int Y = (int)(scene.touchPoint.Y * 10+imheight / 2) ;
+            int Z = (int)(scene.touchPoint.Z * 10 / 4+80);
             this.tb_3DCoord.Text = $"({X},{Y},{Z})";
+            this.Row.Text = $"{Y}";
+            this.Col.Text = $"{X}";
+            this.Band.Text = $"{Z}";
             if (IsValid(ref X,ref Y,ref Z))
             {
                 //App.global_Win_SpecImg.Refresh(Z, 1);                
