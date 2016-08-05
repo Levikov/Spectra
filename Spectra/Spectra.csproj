@@ -69,6 +69,7 @@
       <HintPath>DLL\System.Data.SQLite.dll</HintPath>
     </Reference>
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -103,11 +104,17 @@
     <Compile Include="UserControls\Ctrl_SpecCurv.xaml.cs">
       <DependentUpon>Ctrl_SpecCurv.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UserControls\Ctrl_ScreenManage.xaml.cs">
+      <DependentUpon>Ctrl_ScreenManage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Windows\3DWindow.xaml.cs">
       <DependentUpon>3DWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Windows\MapWindow.xaml.cs">
       <DependentUpon>MapWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\MultiFuncWindow.xaml.cs">
+      <DependentUpon>MultiFuncWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Windows\SpecCurvWindow.xaml.cs">
       <DependentUpon>SpecCurvWindow.xaml</DependentUpon>
@@ -204,11 +211,19 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="UserControls\Ctrl_ScreenManage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Windows\3DWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Windows\MapWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\MultiFuncWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

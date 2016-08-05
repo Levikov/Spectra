@@ -4,6 +4,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:System="clr-namespace:System;assembly=mscorlib" mc:Ignorable="d" x:Name="WindowMain" x:Class="Spectra.MainWindow"
         Title="光谱微纳卫星数据分析系统" Height="768" Width="1366" MinHeight="430" MinWidth="800"
         WindowStartupLocation="CenterScreen" MouseLeftButtonDown="WindowMain_MouseLeftButtonDown" WindowStyle="None" Icon="image/ICON/14.ico">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+    </Window.Resources>
     <Window.Background>
         <LinearGradientBrush EndPoint="1,1" StartPoint="1,0">
             <GradientStop Color="White" Offset="0.12"/>
@@ -212,7 +215,7 @@
             </Grid.ColumnDefinitions>
             <GridSplitter x:Name="splitB" Grid.RowSpan="1" Margin="0,50" Width="1" Background="{StaticResource ButtonBack}"/>
             <StackPanel>
-                <RadioButton x:Name="btnLeftB1" Content="图像提取" Template="{DynamicResource ButtonIcon2nd}" Margin="0,50,0,0" Height="70" VerticalAlignment="Top" IsChecked="True">
+                <RadioButton x:Name="btnLeftB1" Content="图像提取" Template="{DynamicResource ButtonIcon2nd}" Margin="0,50,0,0" Height="70" VerticalAlignment="Top">
                     <RadioButton.Background>
                         <ImageBrush ImageSource="image/ICON/1.ico"/>
                     </RadioButton.Background>
@@ -222,7 +225,7 @@
                         <ImageBrush ImageSource="image/ICON/2.ico"/>
                     </RadioButton.Background>
                 </RadioButton>
-                <RadioButton x:Name="btnLeftB3" Content="立方成像" Template="{DynamicResource ButtonIcon2nd}" Margin="0" Height="70" VerticalAlignment="Top">
+                <RadioButton x:Name="btnLeftB3" Content="混合模式" Template="{DynamicResource ButtonIcon2nd}" Margin="0" Height="70" VerticalAlignment="Top" IsChecked="True">
                     <RadioButton.Background>
                         <ImageBrush ImageSource="image/ICON/3.ico"/>
                     </RadioButton.Background>
@@ -439,6 +442,139 @@
                         <Label Grid.Row="2" Grid.Column="0" Content="谱段值:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
                         <TextBox x:Name="tb_SpecIndex" Grid.Row="2" Grid.Column="1" Text="80" Margin="5,0" VerticalAlignment="Center"></TextBox>
                         <Button x:Name="button_SetImage" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Content="设置" Width="160" Template="{DynamicResource ButtonDefault}" VerticalAlignment="Center" Click="button_SetImage_Click"/>
+                    </Grid>
+                </GroupBox>
+            </Grid>
+            <Grid x:Name="gridLeftB3" Grid.Column="2">
+                <!--触发Grid的显示与隐藏-->
+                <Grid.Resources>
+                    <Style TargetType="{x:Type Grid}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsChecked, ElementName=btnLeftB3}" Value="False">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Resources>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="40"/>
+                    <RowDefinition Height="160"/>
+                    <RowDefinition Height="20"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="50"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="350"/>
+                    <ColumnDefinition Width="20*"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+                <GroupBox Grid.Row="1" Grid.Column="1" Grid.RowSpan="3" Margin="10,0" FontSize="26" Header="窗口设置">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="1*" MaxHeight="120"/>
+                            <RowDefinition Height="1*" MaxHeight="120"/>
+                            <RowDefinition Height="1*" MaxHeight="120"/>
+                            <RowDefinition Height="1*" MaxHeight="120"/>
+                            <RowDefinition Height="1*" MaxHeight="120"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="110"/>
+                            <ColumnDefinition Width="1*"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Row="0" Grid.Column="0" Content="窗口数:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
+                        <ComboBox x:Name="Combo_FormCnt" Grid.Row="0" Grid.Column="1" Text="1" Margin="5,0" VerticalAlignment="Center" SelectedIndex="0" >
+                            <ComboBoxItem Content="1"/>
+                            <ComboBoxItem Content="2"/>
+                            <ComboBoxItem Content="3" Visibility="Collapsed"/>
+                            <ComboBoxItem Content="4"/>
+                        </ComboBox>
+                        <Label Grid.Row="1" Grid.Column="0" Content="分屏数:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
+                        <ComboBox x:Name="Combo_ScreenCnt" Grid.Row="1" Grid.Column="1" Text="2" Margin="5,0" VerticalAlignment="Center" SelectedIndex="0" >
+                            <ComboBoxItem Content="1"/>
+                            <ComboBoxItem Content="2"/>
+                            <ComboBoxItem Content="3" Visibility="Collapsed"/>
+                            <ComboBoxItem Content="4"/>
+                        </ComboBox>
+                        <Label Grid.Row="2" Grid.Column="0" Content="设置屏:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
+                        <ComboBox x:Name="Combo_ScreenIndex" Grid.Row="2" Grid.Column="1" Text="1" Margin="5,0" VerticalAlignment="Center" SelectedIndex="0">
+                            <ComboBoxItem Content="1"/>
+                            <ComboBoxItem Content="2"/>
+                            <ComboBoxItem Content="3"/>
+                            <ComboBoxItem Content="4"/>
+                        </ComboBox>
+                        <Label Grid.Row="3" Grid.Column="0" Content="屏类型:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
+                        <ComboBox x:Name="Combo_ScreenType" Grid.Row="3" Grid.Column="1" Text="80" Margin="5,0" VerticalAlignment="Center" SelectedIndex="0">
+                            <ComboBoxItem x:Name="ComboItem_Image" Content="图像"/>
+                            <ComboBoxItem x:Name="ComboItem_Curve"  Content="曲线"/>
+                            <ComboBoxItem x:Name="ComboItem_Cube" Content="立方体"/>
+                            <ComboBoxItem x:Name="ComboItem_Map"  Content="地图"/>
+                        </ComboBox>
+                        <Button x:Name="button_SetScreen" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Content="设置" Width="160" Template="{DynamicResource ButtonDefault}" VerticalAlignment="Center" Click="button_SetScreen_Click"/>
+                    </Grid>
+                </GroupBox>
+                <GroupBox Grid.Row="1" Grid.Column="2" Grid.RowSpan="3" Margin="10,0" FontSize="26" Header="图像设置" Visibility="{Binding IsSelected, Converter={StaticResource BooleanToVisibilityConverter}, ElementName=ComboItem_Image}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="1*" MaxHeight="120"/>
+                            <RowDefinition Height="1*" MaxHeight="120"/>
+                            <RowDefinition Height="1*" MaxHeight="120"/>
+                            <RowDefinition Height="1*" MaxHeight="120"/>
+                            <RowDefinition Height="1*" MaxHeight="120"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="130"/>
+                            <ColumnDefinition Width="1*"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Row="0" Grid.Column="0" Content="图像模式:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
+                        <ComboBox x:Name="Combo_ImgMode" Grid.Row="0" Grid.Column="1" Text="1" Margin="5,0" VerticalAlignment="Center" SelectedIndex="0" >
+                            <ComboBoxItem Content="单一灰度图像"/>
+                            <ComboBoxItem Content="伪彩图像"/>
+                            <ComboBoxItem Content="单色图像"/>
+                        </ComboBox>
+                        <Label Grid.Row="1" Grid.Column="0" Content="谱段:" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0"></Label>
+                        <TextBox Grid.Row="1" Grid.Column="1" Text="120" Margin="0" VerticalAlignment="Center"/>
+                        <Grid Grid.Row="1" Grid.Column="0" Grid.RowSpan="3" Grid.ColumnSpan="2" Visibility="Collapsed">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="130"/>
+                                <ColumnDefinition Width="1*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="1*"/>
+                                <RowDefinition Height="1*"/>
+                                <RowDefinition Height="1*"/>
+                            </Grid.RowDefinitions>
+                            <Label Grid.Row="0" Grid.Column="0" Content="色彩R:" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0"></Label>
+                            <TextBox Grid.Row="0" Text="120" Margin="0" VerticalAlignment="Center" Grid.Column="1"/>
+                            <Label Grid.Row="1" Grid.Column="0" Content="色彩G:" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0"></Label>
+                            <TextBox Grid.Row="1" Text="84" Margin="0" VerticalAlignment="Center" Grid.Column="1"/>
+                            <Label Grid.Row="2" Grid.Column="0" Content="色彩B:" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0"></Label>
+                            <TextBox Grid.Row="2" Text="84" Margin="0" VerticalAlignment="Center" Grid.Column="1"/>
+                        </Grid>
+                        <Button x:Name="button_SetBand" Click="button_SetBand_Click" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Content="设置" Width="160" Template="{DynamicResource ButtonDefault}" VerticalAlignment="Center"/>
+                    </Grid>
+                </GroupBox>
+                <GroupBox Grid.Row="1" Grid.Column="2" Grid.RowSpan="3" Margin="10,0" FontSize="26" Header="曲线设置" Visibility="{Binding IsSelected, Converter={StaticResource BooleanToVisibilityConverter}, ElementName=ComboItem_Curve}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="1*" MaxHeight="120"/>
+                            <RowDefinition Height="1*" MaxHeight="120"/>
+                            <RowDefinition Height="1*" MaxHeight="120"/>
+                            <RowDefinition Height="1*" MaxHeight="120"/>
+                            <RowDefinition Height="1*" MaxHeight="120"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="130"/>
+                            <ColumnDefinition Width="1*"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Row="0" Grid.Column="0" Content="响应编号:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
+                        <ComboBox Grid.Row="0" Grid.Column="1" Text="1" Margin="5,0" VerticalAlignment="Center" SelectedIndex="0" >
+                            <ComboBoxItem Content="1"/>
+                            <ComboBoxItem Content="2"/>
+                            <ComboBoxItem Content="3"/>
+                            <ComboBoxItem Content="4"/>
+                        </ComboBox>
+                        <Button Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Content="设置" Width="160" Template="{DynamicResource ButtonDefault}" VerticalAlignment="Center"/>
                     </Grid>
                 </GroupBox>
             </Grid>

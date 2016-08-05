@@ -31,7 +31,13 @@ namespace Spectra
         public static string dbPath = Environment.CurrentDirectory + "\\DataBase\\db.sqlite";   //数据库文件地址
         public static string dbConString = "Data Source=" + dbPath;                             //数据库连接字符串        
         public static string str_pathWork = Environment.CurrentDirectory + "\\Work";
+
     }
+
+
+    public enum WinFunc {Image,Curve,Cube,Map};
+    public enum GridMode {One,Two,Three,Four};
+
 
     public class ScreenParams
     {

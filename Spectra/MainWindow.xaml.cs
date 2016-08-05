@@ -6,12 +6,16 @@ using System.IO;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 
 namespace Spectra
 {
     /// <summary>
     /// MainWindow.xaml 的交互逻辑
     /// </summary>
+
+
+
     public partial class MainWindow : Window
     {
         /*构造函数+系统初始化*/
@@ -207,29 +211,15 @@ namespace Spectra
         private void button_Display_Click(object sender, RoutedEventArgs e)
         {
             DataTable dt = DataQuery.QueryResult;
-            App.global_Win_Map.Show();
-            App.global_Win_Map.DrawRectangle(new Point((double)DataQuery.QueryResult.Rows[0].ItemArray[3], (double)DataQuery.QueryResult.Rows[0].ItemArray[4]), new Point((double)DataQuery.QueryResult.Rows[DataQuery.QueryResult.Rows.Count - 1].ItemArray[3], (double)DataQuery.QueryResult.Rows[DataQuery.QueryResult.Rows.Count - 1].ItemArray[4]));
-            //App.global_Win_ImageShow.Refresh(dt);
-            //App.global_Win_ImageShow.Show();
-            //App.global_Win_3DCube.Show();
-            // App.global_Win_3DCube.Refresh(dt);
-            //App.global_Win_SpecImg.Show();
-            //App.global_Win_SpecImg.Refresh(80,0);
-
-            App.global_Win_SpecImg.Show();
-            App.global_Win_SpecImg.DisplayMode = SpecImgWindow.GridMode.Two;
-            App.global_Win_SpecImg.u[0].Refresh(20,ColorRenderMode.Grayscale);
-            App.global_Win_SpecImg.u[1].Refresh(0,ColorRenderMode.TrueColor);
-
-            App.global_Win_3D.Show();
-            App.global_Win_3D._3DViewer.Refresh();
-
-            App.global_Win_Curve.Show();
-            App.global_Win_Curve.DisplayMode = SpecCurvWindow.GridMode.Two;
+            //App.global_Win_Map.DrawRectangle(new Point((double)DataQuery.QueryResult.Rows[0].ItemArray[3], (double)DataQuery.QueryResult.Rows[0].ItemArray[4]), new Point((double)DataQuery.QueryResult.Rows[DataQuery.QueryResult.Rows.Count - 1].ItemArray[3], (double)DataQuery.QueryResult.Rows[DataQuery.QueryResult.Rows.Count - 1].ItemArray[4]));
+            foreach (MultiFuncWindow w in App.global_Windows)
+            {
+                w.Show();
+                w.Refresh(0, WinFunc.Image);
+                w.Refresh(1, WinFunc.Curve);
+            }
 
 
-            //App.global_Win_SpecImg.grid.ColumnDefinitions[0].Width = new GridLength(1, GridUnitType.Star);
-            //App.global_Win_SpecImg.grid.ColumnDefinitions[1].Width = new GridLength(1,GridUnitType.Star);
         }
         /*设置图像谱段按钮*/
         private void button_SetImage_Click(object sender, RoutedEventArgs e)
@@ -254,6 +244,20 @@ namespace Spectra
         {
             DataQuery.QueryResult.Clear();
             dataGrid_Result.ItemsSource = null;
+        }
+
+        private void button_SetScreen_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (MultiFuncWindow w in App.global_Windows)
+            {
+                w.DisplayMode = (GridMode)(Combo_ScreenCnt.SelectedIndex);
+                w.Refresh(Combo_ScreenIndex.SelectedIndex,(WinFunc)Combo_ScreenType.SelectedIndex);
+            }
+        }
+
+        private void button_SetBand_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

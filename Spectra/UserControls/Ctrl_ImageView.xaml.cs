@@ -160,7 +160,15 @@ namespace Spectra
             Col.Text = $"{Math.Floor(p.X * ImgW)}";
             Row.Text = $"{Math.Floor(p.Y * ImgH)}";
             Band.Text = $"{SpecNum}";
-            App.global_Win_Curve.u[this.ScreenIndex].Draw(p);
+
+            foreach (MultiFuncWindow w in App.global_Windows)
+            {
+                foreach (UserControl u in w.UserControls)
+                {
+                    if (u is Ctrl_SpecCurv)
+                        ((Ctrl_SpecCurv)u).Draw(p);
+                }
+            }
             IMG1.MouseDown += IMG1_MouseDown;
 
         }
