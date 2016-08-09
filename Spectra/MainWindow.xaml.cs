@@ -101,7 +101,8 @@ namespace Spectra
         private async void b_Start_Import_Click(object sender, RoutedEventArgs e)
         {
             if (FileInfo.isDecomp)
-                if (System.Windows.MessageBox.Show("该文件已解压,是否要重新解压并覆盖?", "提示", MessageBoxButton.OKCancel, MessageBoxImage.Information) == MessageBoxResult.Cancel) return;
+                if (System.Windows.MessageBox.Show("该文件已解压,是否要重新解压并覆盖?", "提示", MessageBoxButton.OKCancel, MessageBoxImage.Information) == MessageBoxResult.Cancel)
+                    return;
             System.Windows.Controls.Button b = sender as System.Windows.Controls.Button;
             IProgress<double> IProgress_Prog = new Progress<double>((ProgressValue) => { prog_Import.Value = ProgressValue * this.prog_Import.Maximum; });
             IProgress<string> IProgress_List = new Progress<string>((ProgressString) => { this.tb_Console.Text = ProgressString + "\n"+ this.tb_Console.Text; });
@@ -110,6 +111,8 @@ namespace Spectra
             this.b_Open_Import.IsEnabled = false;
             string result = await DataProc.Import_5(IProgress_Prog, IProgress_List, cancelImport.Token);
             System.Windows.MessageBox.Show(result);
+            SQLiteFunc.ExcuteSQL("update decFileDetails set 解压时间='?',解压后文件路径='?' where 文件路径='?'",DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),Variables.str_pathWork,FileInfo.srcFilePathName);
+            SQLiteFunc.ExcuteSQL("update FileDetails set 是否已解压='是' where 文件路径='?';",FileInfo.srcFilePathName);
             this.b_Start_Import.IsEnabled = false;
             this.b_Abort_Import.IsEnabled = false;
             this.b_Open_Import.IsEnabled = true;
@@ -166,6 +169,7 @@ namespace Spectra
                 this.dataGrid_Result.ItemsSource = dt.DefaultView;
                 DataQuery.QueryResult = dt;
                 ImageInfo.GetImgInfo(dt);       /*存储图像信息*/
+                SetImgInfo();
             }
             catch (Exception E)
             {
@@ -205,44 +209,85 @@ namespace Spectra
         }
         #endregion
 
-        #region 图像显示
+        #region 图像提取
         /*显示图像按钮*/
         private void button_Display_Click(object sender, RoutedEventArgs e)
         {
-            DataTable dt = DataQuery.QueryResult;
+            //DataTable dt = DataQuery.QueryResult;
             App.global_Win_Map = new MapWindow();
             App.global_Win_Map.Show();
             App.global_Win_Map.DrawRectangle(new Point((double)DataQuery.QueryResult.Rows[0].ItemArray[3], (double)DataQuery.QueryResult.Rows[0].ItemArray[4]), new Point((double)DataQuery.QueryResult.Rows[DataQuery.QueryResult.Rows.Count - 1].ItemArray[3], (double)DataQuery.QueryResult.Rows[DataQuery.QueryResult.Rows.Count - 1].ItemArray[4]));
             initMultiFuncWindows();
         }
-        /*设置图像谱段按钮*/
-        private void button_SetImage_Click(object sender, RoutedEventArgs e)
-        {
-            long ScreenCnt;
-            int SelectedScreen;
-            int band;
-            long.TryParse(tb_ScreenCnt.Text, out ScreenCnt);
-            int.TryParse(tb_ScreenIndex.Text, out SelectedScreen);
-            int.TryParse(tb_SpecIndex.Text, out band);
-            SelectedScreen -= 1;
-            ScreenCnt -= 1;
-            App.global_Win_SpecImg.DisplayMode = (SpecImgWindow.GridMode)ScreenCnt;
-            App.global_Win_Curve.DisplayMode = (SpecCurvWindow.GridMode)ScreenCnt;
-            App.global_Win_SpecImg.u[SelectedScreen].Refresh(band,ColorRenderMode.Grayscale);
-        }
-        #endregion
-        
+        /*清除datagrid*/
         private void button_Clear_Result_Click(object sender, RoutedEventArgs e)
         {
             DataQuery.QueryResult.Clear();
             dataGrid_Result.ItemsSource = null;
         }
+        #endregion
+
+        #region 图像设置
+        /*更新窗体显示*/
+        public void SetImgInfo()
+        {
+            txtImgMinFrm.Text = ImageInfo.minFrm.ToString();
+            txtImgMaxFrm.Text = ImageInfo.maxFrm.ToString();
+            txtImgStartTime.Text = ImageInfo.startTime.ToString();
+            txtImgEndTime.Text = ImageInfo.endTime.ToString();
+            txtImgWidth.Text = ImageInfo.imgWidth.ToString();
+            txtMapStartLon.Text = ImageInfo.startCoord.Lon.ToString();
+            txtMapStartLat.Text = ImageInfo.startCoord.Lat.ToString();
+            txtMapEndLon.Text = ImageInfo.endCoord.Lon.ToString();
+            txtMapEndLat.Text = ImageInfo.endCoord.Lat.ToString();
+        }
+        /*设置图像谱段*/
+        private void button_SetImage_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                Ctrl_ImageView c = new Ctrl_ImageView();
+                c = (Ctrl_ImageView)(((MultiFuncWindow)(App.global_Windows[Convert.ToUInt16(txtImgWinID.Text)-1])).UserControls[Convert.ToUInt16(txtImgSubID.Text)-1]);
+                c.Refresh(Convert.ToUInt16(txtImgSpeIdxR.Text), (ColorRenderMode)(cmbImgMode.SelectedIndex));
+            }
+            catch (Exception)
+            {
+                System.Windows.MessageBox.Show("请选择正确的窗体进行设置！","提示",MessageBoxButton.OK,MessageBoxImage.Information);
+            }
+        }
+        /*选择图像模式*/
+        private void cmbImgMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (txtImgSpeIdxB == null)
+                return;
+            if (cmbImgMode.SelectedIndex == 1)
+            {
+                lblImgSpeR.Content = "谱段R值:";
+                lblImgSpeG.Visibility = Visibility.Visible;
+                lblImgSpeB.Visibility = Visibility.Visible;
+                txtImgSpeIdxG.Visibility = Visibility.Visible;
+                txtImgSpeIdxB.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                lblImgSpeR.Content = "谱段值:";
+                lblImgSpeG.Visibility = Visibility.Collapsed;
+                lblImgSpeB.Visibility = Visibility.Collapsed;
+                txtImgSpeIdxG.Visibility = Visibility.Collapsed;
+                txtImgSpeIdxB.Visibility = Visibility.Collapsed;
+            }
+        }
+        #endregion
+
+        #region 组合模式
         /*设置窗口属性*/
         private void button_MixSetWinPro_Click(object sender, RoutedEventArgs e)
         {
             MultiFuncWindow w = new MultiFuncWindow();
             w = (MultiFuncWindow)App.global_Windows[Convert.ToUInt16(cmbMixWinID1.SelectedIndex)];
             w.DisplayMode = (GridMode)(cmbMixSubWinCnt.SelectedIndex);
+            if (!w.isShow)
+                w.ScreenShow();
         }
         /*设置窗体类型*/
         private void button_MixSetWinType_Click(object sender, RoutedEventArgs e)
@@ -250,7 +295,10 @@ namespace Spectra
             MultiFuncWindow w = new MultiFuncWindow();
             w = (MultiFuncWindow)App.global_Windows[Convert.ToUInt16(cmbMixWinID2.SelectedIndex)];
             w.Refresh(Convert.ToUInt16(cmbMixSubWinID.SelectedIndex),(WinFunc)(cmbMixSubWinType.SelectedIndex));
+            if (!w.isShow)
+                w.ScreenShow();
         }
+        #endregion
 
         #region 默认显示方式
         /*初始化显示窗体*/
@@ -274,7 +322,8 @@ namespace Spectra
             }
             foreach (DataRow dr in WinShowInfo.dtWinShowInfo.Rows)
             {
-                w[Convert.ToUInt16(dr[0]) - 1].ScreenShow(Screen.AllScreens,0);
+                if(!w[Convert.ToUInt16(dr[0]) - 1].isShow)
+                    w[Convert.ToUInt16(dr[0]) - 1].ScreenShow(Screen.AllScreens,0, Convert.ToUInt16(dr[0]));
                 w[Convert.ToUInt16(dr[0]) - 1].Refresh(Convert.ToUInt16(dr[4])-1,(WinFunc)Convert.ToUInt16(dr[6]));
             }
         }

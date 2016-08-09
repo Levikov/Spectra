@@ -54,7 +54,7 @@ namespace Spectra
         {
             this.Busy.isBusy = true;
             
-            Bitmap bmp = await DataProc.GetBmp(band,cMode);
+            Bitmap bmp = await DataProc.GetBmp(160 - band + 1, cMode);
             MemoryStream ms = new MemoryStream();
             bmp.Save(ms, System.Drawing.Imaging.ImageFormat.Bmp);
             ImgW = bmp.Width;

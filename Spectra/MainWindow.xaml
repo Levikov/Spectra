@@ -220,12 +220,12 @@
                         <ImageBrush ImageSource="image/ICON/1.ico"/>
                     </RadioButton.Background>
                 </RadioButton>
-                <RadioButton x:Name="btnLeftB2" Content="光谱图像" Template="{DynamicResource ButtonIcon2nd}" Margin="0" Height="70" VerticalAlignment="Top">
+                <RadioButton x:Name="btnLeftB2" Content="图像设置" Template="{DynamicResource ButtonIcon2nd}" Margin="0" Height="70" VerticalAlignment="Top" IsChecked="True">
                     <RadioButton.Background>
                         <ImageBrush ImageSource="image/ICON/2.ico"/>
                     </RadioButton.Background>
                 </RadioButton>
-                <RadioButton x:Name="btnLeftB3" Content="混合模式" Template="{DynamicResource ButtonIcon2nd}" Margin="0" Height="70" VerticalAlignment="Top" IsChecked="True">
+                <RadioButton x:Name="btnLeftB3" Content="组合模式" Template="{DynamicResource ButtonIcon2nd}" Margin="0" Height="70" VerticalAlignment="Top">
                     <RadioButton.Background>
                         <ImageBrush ImageSource="image/ICON/3.ico"/>
                     </RadioButton.Background>
@@ -235,7 +235,7 @@
                         <ImageBrush ImageSource="image/ICON/4.ico"/>
                     </RadioButton.Background>
                 </RadioButton>
-                <RadioButton x:Name="btnLeftB5" Content="3D 地球" Template="{DynamicResource ButtonIcon2nd}" Margin="0" Height="70" VerticalAlignment="Top">
+                <RadioButton x:Name="btnLeftB5" Content="3D 地球" Template="{DynamicResource ButtonIcon2nd}" Margin="0" Height="70" VerticalAlignment="Top" Visibility="Collapsed">
                     <RadioButton.Background>
                         <ImageBrush ImageSource="image/ICON/5.ico"/>
                     </RadioButton.Background>
@@ -389,7 +389,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*"/>
                     <ColumnDefinition Width="20*"/>
-                    <ColumnDefinition Width="350"/>
+                    <ColumnDefinition Width="450"/>
                     <ColumnDefinition Width="1*"/>
                 </Grid.ColumnDefinitions>
                 <GroupBox Grid.Row="1" Grid.Column="1" Margin="0" FontSize="26" Header="图像信息">
@@ -409,39 +409,53 @@
                             <ColumnDefinition Width="1*"/>
                         </Grid.ColumnDefinitions>
                         <Label Grid.Row="0" Grid.Column="1" Content="帧号范围:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
-                        <TextBox Grid.Row="0" Grid.Column="2" Margin="20,0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
+                        <TextBox x:Name="txtImgMinFrm" Grid.Row="0" Grid.Column="2" Margin="10,0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
                         <Label Grid.Row="0" Grid.Column="3" Content="—" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
-                        <TextBox Grid.Row="0" Grid.Column="4" Margin="20,0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
+                        <TextBox x:Name="txtImgMaxFrm" Grid.Row="0" Grid.Column="4" Margin="10,0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
                         <Label Grid.Row="1" Grid.Column="1" Content="时间范围:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
-                        <TextBox Grid.Row="1" Grid.Column="2" Margin="20,0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
+                        <TextBox x:Name="txtImgStartTime" Grid.Row="1" Grid.Column="2" Margin="10,0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
                         <Label Grid.Row="1" Grid.Column="3" Content="—" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
-                        <TextBox Grid.Row="1" Grid.Column="4" Margin="20,0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
+                        <TextBox x:Name="txtImgEndTime" Grid.Row="1" Grid.Column="4" Margin="10,0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
                         <Label Grid.Row="0" Grid.Column="5" Content="像宽:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
-                        <TextBox Grid.Row="0" Grid.Column="6" Text="2048" Margin="20,0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
+                        <TextBox x:Name="txtImgWidth" Grid.Row="0" Grid.Column="6" Text="2048" Margin="20,0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
                         <Label Grid.Row="1" Grid.Column="5" Content="像高:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
                         <TextBox Grid.Row="1" Grid.Column="6" Text="2048" Margin="20,0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
                     </Grid>
                 </GroupBox>
                 <Image Grid.Row="3" Grid.Column="1" Source="image/Image_BackGround.jpg"/>
-                <GroupBox Grid.Row="1" Grid.Column="2" Grid.RowSpan="3" Margin="20,0,0,0" FontSize="26" Header="图像信息">
+                <GroupBox Grid.Row="1" Grid.Column="2" Grid.RowSpan="3" Margin="10,0,0,0" FontSize="26" Header="图像信息">
                     <Grid>
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="1*" MaxHeight="120"/>
-                            <RowDefinition Height="1*" MaxHeight="120"/>
-                            <RowDefinition Height="1*" MaxHeight="120"/>
-                            <RowDefinition Height="1*" MaxHeight="120"/>
+                            <RowDefinition Height="1*" MaxHeight="100"/>
+                            <RowDefinition Height="1*" MaxHeight="100"/>
+                            <RowDefinition Height="1*" MaxHeight="100"/>
+                            <RowDefinition Height="1*" MaxHeight="100"/>
+                            <RowDefinition Height="1*" MaxHeight="100"/>
+                            <RowDefinition Height="1*" MaxHeight="100"/>
+                            <RowDefinition Height="1*" MaxHeight="100"/>
+                            <RowDefinition Height="1*"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="110"/>
+                            <ColumnDefinition Width="150"/>
                             <ColumnDefinition Width="1*"/>
                         </Grid.ColumnDefinitions>
-                        <Label Grid.Row="0" Grid.Column="0" Content="分屏数:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
-                        <TextBox x:Name="tb_ScreenCnt" Grid.Row="0" Grid.Column="1" Text="2" Margin="5,0" VerticalAlignment="Center"></TextBox>
-                        <Label Grid.Row="1" Grid.Column="0" Content="设置屏:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
-                        <TextBox x:Name="tb_ScreenIndex" Grid.Row="1" Grid.Column="1" Text="1" Margin="5,0" VerticalAlignment="Center"></TextBox>
-                        <Label Grid.Row="2" Grid.Column="0" Content="谱段值:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
-                        <TextBox x:Name="tb_SpecIndex" Grid.Row="2" Grid.Column="1" Text="80" Margin="5,0" VerticalAlignment="Center"></TextBox>
-                        <Button x:Name="button_SetImage" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Content="设置" Width="160" Template="{DynamicResource ButtonDefault}" VerticalAlignment="Center" Click="button_SetImage_Click"/>
+                        <Label Grid.Row="0" Grid.Column="0" Content="窗口编号:" VerticalAlignment="Center" HorizontalAlignment="Right"></Label>
+                        <TextBox x:Name="txtImgWinID" Grid.Row="0" Grid.Column="1" Text="1" Margin="5,0" VerticalAlignment="Center"></TextBox>
+                        <Label Grid.Row="1" Grid.Column="0" Content="子窗体编号:" VerticalAlignment="Center" HorizontalAlignment="Right"></Label>
+                        <TextBox x:Name="txtImgSubID" Grid.Row="1" Grid.Column="1" Text="1" Margin="5,0" VerticalAlignment="Center"></TextBox>
+                        <Label Grid.Row="2" Grid.Column="0" Content="图像模式:" VerticalAlignment="Center" HorizontalAlignment="Right"></Label>
+                        <ComboBox x:Name="cmbImgMode" Grid.Row="2" Grid.Column="1" Text="1" Margin="5,0" VerticalAlignment="Center" SelectedIndex="0" SelectionChanged="cmbImgMode_SelectionChanged" HorizontalContentAlignment="Center" >
+                            <ComboBoxItem Content="灰度图像"/>
+                            <ComboBoxItem Content="伪彩图像"/>
+                            <ComboBoxItem Content="单色图像"/>
+                        </ComboBox>
+                        <Label x:Name="lblImgSpeR" Grid.Row="3" Grid.Column="0" Content="谱段值:" VerticalAlignment="Center" HorizontalAlignment="Right"></Label>
+                        <TextBox x:Name="txtImgSpeIdxR" Grid.Row="3" Grid.Column="1" Text="120" Margin="5,0" VerticalAlignment="Center"></TextBox>
+                        <Label x:Name="lblImgSpeG" Grid.Row="4" Grid.Column="0" Content="谱段G值:" VerticalAlignment="Center" HorizontalAlignment="Right" Visibility="Collapsed"></Label>
+                        <TextBox x:Name="txtImgSpeIdxG" Grid.Row="4" Grid.Column="1" Text="120" Margin="5,0" VerticalAlignment="Center" Visibility="Collapsed"></TextBox>
+                        <Label x:Name="lblImgSpeB" Grid.Row="5" Grid.Column="0" Content="谱段B值:" VerticalAlignment="Center" HorizontalAlignment="Right" Visibility="Collapsed"></Label>
+                        <TextBox x:Name="txtImgSpeIdxB" Grid.Row="5" Grid.Column="1" Text="120" Margin="5,0" VerticalAlignment="Center" Visibility="Collapsed"></TextBox>
+                        <Button x:Name="button_SetImage" Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Content="设置" Width="160" Template="{DynamicResource ButtonDefault}" VerticalAlignment="Center" Click="button_SetImage_Click"/>
                     </Grid>
                 </GroupBox>
             </Grid>
@@ -647,13 +661,13 @@
                             <ColumnDefinition Width="1*"/>
                         </Grid.ColumnDefinitions>
                         <Label Grid.Row="0" Grid.Column="1" Content="经度范围:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
-                        <TextBox Grid.Row="0" Grid.Column="2" Margin="20,0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
+                        <TextBox x:Name="txtMapStartLon" Grid.Row="0" Grid.Column="2" Margin="20,0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
                         <Label Grid.Row="0" Grid.Column="3" Content="—" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
-                        <TextBox Grid.Row="0" Grid.Column="4" Margin="20,0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
+                        <TextBox x:Name="txtMapEndLon" Grid.Row="0" Grid.Column="4" Margin="20,0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
                         <Label Grid.Row="1" Grid.Column="1" Content="纬度范围:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
-                        <TextBox Grid.Row="1" Grid.Column="2" Margin="20,0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
+                        <TextBox x:Name="txtMapStartLat" Grid.Row="1" Grid.Column="2" Margin="20,0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
                         <Label Grid.Row="1" Grid.Column="3" Content="—" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
-                        <TextBox Grid.Row="1" Grid.Column="4" Margin="20,0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
+                        <TextBox x:Name="txtMapEndLat" Grid.Row="1" Grid.Column="4" Margin="20,0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
                     </Grid>
                 </GroupBox>
                 <GroupBox Grid.Row="3" Grid.Column="1" Margin="0" FontSize="26" Header="地图操作">
@@ -672,7 +686,23 @@
                             <ColumnDefinition Width="1*"/>
                         </Grid.ColumnDefinitions>
                         <Label Grid.Row="0" Grid.Column="1" Content="地图级别:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
-                        <TextBox Grid.Row="0" Grid.Column="2" Margin="20,0" VerticalAlignment="Center"></TextBox>
+                        <ComboBox Grid.Row="0" Grid.Column="2" Margin="20,0" VerticalAlignment="Center" SelectedIndex="0" HorizontalContentAlignment="Center">
+                            <ComboBoxItem Content="1"/>
+                            <ComboBoxItem Content="2"/>
+                            <ComboBoxItem Content="3"/>
+                            <ComboBoxItem Content="4"/>
+                            <ComboBoxItem Content="5"/>
+                            <ComboBoxItem Content="6"/>
+                            <ComboBoxItem Content="7"/>
+                            <ComboBoxItem Content="8"/>
+                            <ComboBoxItem Content="9"/>
+                            <ComboBoxItem Content="10"/>
+                            <ComboBoxItem Content="11"/>
+                            <ComboBoxItem Content="12"/>
+                            <ComboBoxItem Content="13"/>
+                            <ComboBoxItem Content="14"/>
+                            <ComboBoxItem Content="15"/>
+                        </ComboBox>
                         <Label Grid.Row="1" Grid.Column="1" Content="经   度:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
                         <TextBox Grid.Row="1" Grid.Column="2" Margin="20,0" VerticalAlignment="Center" IsReadOnly="{Binding ElementName=cb_UserCoord,Path=IsChecked}"></TextBox>
                         <Label Grid.Row="2" Grid.Column="1" Content="纬   度:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
@@ -729,17 +759,17 @@
             </Grid.ColumnDefinitions>
             <GridSplitter Margin="0,50" Width="1" Background="{StaticResource ButtonBack}"/>
             <StackPanel>
-                <RadioButton x:Name="btnLeftC1" Content="优选案例" Template="{DynamicResource ButtonIcon2nd}" Margin="0,50,0,0" Height="70" VerticalAlignment="Top">
+                <RadioButton x:Name="btnLeftC1" Content="优选案例" Template="{DynamicResource ButtonIcon2nd}" Margin="0,50,0,0" Height="70" VerticalAlignment="Top" IsChecked="True">
                     <RadioButton.Background>
                         <ImageBrush ImageSource="image/ICON/1.ico"/>
                     </RadioButton.Background>
                 </RadioButton>
-                <RadioButton x:Name="btnLeftC2" Content="不知写啥" Template="{DynamicResource ButtonIcon2nd}" Margin="0,0,0,0" Height="70" VerticalAlignment="Top">
+                <RadioButton x:Name="btnLeftC2" Content="轨道姿态" Template="{DynamicResource ButtonIcon2nd}" Margin="0,0,0,0" Height="70" VerticalAlignment="Top">
                     <RadioButton.Background>
                         <ImageBrush ImageSource="image/ICON/2.ico"/>
                     </RadioButton.Background>
                 </RadioButton>
-                <RadioButton x:Name="btnLeftC3" Content="随便起名" Template="{DynamicResource ButtonIcon2nd}" Margin="0,0,0,0" Height="70" VerticalAlignment="Top" IsChecked="True">
+                <RadioButton x:Name="btnLeftC3" Content="载荷动画" Template="{DynamicResource ButtonIcon2nd}" Margin="0,0,0,0" Height="70" VerticalAlignment="Top">
                     <RadioButton.Background>
                         <ImageBrush ImageSource="image/ICON/5.ico"/>
                     </RadioButton.Background>

@@ -21,6 +21,7 @@ namespace Spectra
     public partial class MultiFuncWindow : Window
     {
         int WinIndex;
+        public bool isShow = false;
         private GridMode _DisplayMode;
         public GridMode DisplayMode
         {
@@ -78,7 +79,7 @@ namespace Spectra
             {
                 case Spectra.WinFunc.Image:
                     UserControls[SubGridInedex] = new Ctrl_ImageView();
-                    ((Ctrl_ImageView)(UserControls[SubGridInedex])).Refresh(20, ColorRenderMode.Grayscale);
+                    ((Ctrl_ImageView)(UserControls[SubGridInedex])).Refresh(120, ColorRenderMode.Grayscale);
                     break;
                 case Spectra.WinFunc.Curve:
                     UserControls[SubGridInedex] = new Ctrl_SpecCurv();
@@ -95,7 +96,14 @@ namespace Spectra
             SubGrid[SubGridInedex].Children.Add(UserControls[SubGridInedex]);
         }
 
-        public void ScreenShow(Screen[] s, int id)
+        public void ScreenShow()
+        {
+            this.Show();
+            this.isShow = true;
+        }
+
+        /*显示器对象 显示器编号   窗口编号*/
+        public void ScreenShow(Screen[] s, int id,int winID)
         {
             //this.WindowState = WindowState.Maximized;
             //this.WindowStyle = WindowStyle.None;
@@ -108,7 +116,17 @@ namespace Spectra
             //System.Drawing.Rectangle r2 = s[0].WorkingArea;
             //this.Top = r2.Top;
             //this.Left = r2.Left;
+
+            this.Title = "展示窗口" + winID.ToString();
             this.Show();
+            this.isShow = true;
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            this.Hide();
+            e.Cancel = true;
+            this.isShow = false;
         }
     }
 }

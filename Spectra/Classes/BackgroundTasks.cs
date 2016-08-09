@@ -182,31 +182,25 @@ namespace Spectra
                                 case ColorRenderMode.Grayscale:
                                     {
                                         buf_rgb[512 * 3 * (k - 1) + 3 * l + 2] = buf_rgb[512 * 3 * (k - 1) + 3 * l + 1] = buf_rgb[512 * 3 * (k - 1) + 3 * l + 0] = (byte)(Math.Floor((double)(readU16_PIC(temp, l * 2)) / 4096 * 256));
-                                    } break;
+                                    }
+                                    break;
                                 case ColorRenderMode.ArtColor:
-                                    Spectra2RGB.HsvToRgb(300 * ((double)v / 160), 1, ((double)(readU16_PIC(temp, l * 2)) / 4096), out buf_rgb[512 * 3 * (k - 1) + 3 * l + 2], out buf_rgb[512 * 3 * (k - 1) + 3 * l + 1], out buf_rgb[512 * 3 * (k - 1) + 3 * l + 0]); break;
+                                    Spectra2RGB.HsvToRgb(300 * ((double)v / 160), 1, ((double)(readU16_PIC(temp, l * 2)) / 4096), out buf_rgb[512 * 3 * (k - 1) + 3 * l + 2], out buf_rgb[512 * 3 * (k - 1) + 3 * l + 1], out buf_rgb[512 * 3 * (k - 1) + 3 * l + 0]);
+                                    break;
                                 case ColorRenderMode.TrueColor:
                                     {
                                         double R = (double)(readU16_PIC(temp_R, l * 2)) / 4096 * 256;
                                         double G = (double)(readU16_PIC(temp_G, l * 2)) / 4096 * 256;
                                         double B = (double)(readU16_PIC(temp_B, l * 2)) / 4096 * 256;
 
-
-
                                         buf_rgb[512 * 3 * (k - 1) + 3 * l + 2]= (byte)(Math.Floor(R));
                                         buf_rgb[512 * 3 * (k - 1) + 3 * l + 1] = (byte)(Math.Floor(G));
                                         buf_rgb[512 * 3 * (k - 1) + 3 * l + 0] = (byte)(Math.Floor(B));
                                     }
-
                                     break;
                                 default:
                                     break;
                             }
-                            
-                               
-                           
-                           // buf_rgb[512 * 4 * (k - 1) + 4 * l + 3] = 255;
-
                         });
                         fs.Close();
                     });
@@ -217,6 +211,7 @@ namespace Spectra
                 return bmpTop;
             });
         }
+
         public static Task<Bitmap[]> GetBmp3D()
         {
             return Task.Run(async () =>

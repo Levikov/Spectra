@@ -33,23 +33,18 @@ namespace Spectra
         public int yChart1st = 0;
         public LineAndMarker<MarkerPointsGraph> lm = new LineAndMarker<MarkerPointsGraph>();
         ObservableDataSource<System.Windows.Point> dtsChart1st = new ObservableDataSource<System.Windows.Point>();
+
         public void initChart()
         {
-
             //chart1st.AddLineGraph(dtsChart1st, Colors.DeepSkyBlue, 2, "Sin");
             lm = chart1st.AddLineGraph(dtsChart1st,
             new System.Windows.Media.Pen(System.Windows.Media.Brushes.Yellow, 3),
             new CirclePointMarker { Size = 3.0, Fill = System.Windows.Media.Brushes.Yellow },
             new PenDescription());
-
-
-
         }
 
         internal async void Draw(System.Windows.Point p)
         {
-
-
             System.Windows.Point[] points = await SpecProc.GetSpecCurv(p);
             dtsChart1st = new ObservableDataSource<System.Windows.Point>();
             foreach (System.Windows.Point point in points)
@@ -59,10 +54,7 @@ namespace Spectra
             chart1st.Children.Remove(lm.LineGraph);
             chart1st.Children.Remove(lm.MarkerGraph);
             initChart();
-
-
             chart1st.Viewport.Visible = new Rect(new System.Windows.Point(400,4096), new System.Windows.Point(1020, 0));
-            
         }
     }
 }

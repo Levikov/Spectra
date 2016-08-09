@@ -4,6 +4,8 @@ using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Threading;
+using System.Windows;
+using System.Windows.Controls;
 
 namespace Spectra
 {
@@ -20,6 +22,7 @@ namespace Spectra
         public static long sizeUpkFile;             /*解包后文件大小*/
         public static bool isUnpack = false;        /*是否已解包*/
         public static bool isDecomp = false;        /*是否已解压*/
+        public static bool decFilePath;             /*解压后文件路径*/
     }
 
     public static class Variables
@@ -83,7 +86,7 @@ namespace Spectra
         public static DataTable dtWinShowInfo;          //默认显示方式的列表
     }
 
-    public class ImageInfo
+    public class ImageInfo : DependencyObject
     {
         public static int minFrm;
         public static int maxFrm;
