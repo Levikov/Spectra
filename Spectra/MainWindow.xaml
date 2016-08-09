@@ -465,11 +465,11 @@
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*"/>
-                    <ColumnDefinition Width="350"/>
-                    <ColumnDefinition Width="20*"/>
+                    <ColumnDefinition Width="11.5*"/>
+                    <ColumnDefinition Width="11.5*"/>
                     <ColumnDefinition Width="1*"/>
                 </Grid.ColumnDefinitions>
-                <GroupBox Grid.Row="1" Grid.Column="1" Grid.RowSpan="3" Margin="10,0" FontSize="26" Header="窗口设置">
+                <GroupBox Grid.Row="1" Grid.Column="1" Grid.RowSpan="3" Margin="0,0,20,0" FontSize="26" Header="窗口属性设置">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="1*" MaxHeight="120"/>
@@ -479,41 +479,71 @@
                             <RowDefinition Height="1*" MaxHeight="120"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="110"/>
+                            <ColumnDefinition Width="170"/>
                             <ColumnDefinition Width="1*"/>
                         </Grid.ColumnDefinitions>
-                        <Label Grid.Row="0" Grid.Column="0" Content="窗口数:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
-                        <ComboBox x:Name="Combo_FormCnt" Grid.Row="0" Grid.Column="1" Text="1" Margin="5,0" VerticalAlignment="Center" SelectedIndex="0" >
-                            <ComboBoxItem Content="1"/>
-                            <ComboBoxItem Content="2"/>
-                            <ComboBoxItem Content="3" Visibility="Collapsed"/>
-                            <ComboBoxItem Content="4"/>
-                        </ComboBox>
-                        <Label Grid.Row="1" Grid.Column="0" Content="分屏数:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
-                        <ComboBox x:Name="Combo_ScreenCnt" Grid.Row="1" Grid.Column="1" Text="2" Margin="5,0" VerticalAlignment="Center" SelectedIndex="0" >
-                            <ComboBoxItem Content="1"/>
-                            <ComboBoxItem Content="2"/>
-                            <ComboBoxItem Content="3" Visibility="Collapsed"/>
-                            <ComboBoxItem Content="4"/>
-                        </ComboBox>
-                        <Label Grid.Row="2" Grid.Column="0" Content="设置屏:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
-                        <ComboBox x:Name="Combo_ScreenIndex" Grid.Row="2" Grid.Column="1" Text="1" Margin="5,0" VerticalAlignment="Center" SelectedIndex="0">
+                        <Label Grid.Row="0" Grid.Column="0" Content="窗口编号:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
+                        <ComboBox x:Name="cmbMixWinID1" Grid.Row="0" Grid.Column="1" Margin="10,0" VerticalAlignment="Center" SelectedIndex="0" HorizontalContentAlignment="Center" >
                             <ComboBoxItem Content="1"/>
                             <ComboBoxItem Content="2"/>
                             <ComboBoxItem Content="3"/>
                             <ComboBoxItem Content="4"/>
                         </ComboBox>
-                        <Label Grid.Row="3" Grid.Column="0" Content="屏类型:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
-                        <ComboBox x:Name="Combo_ScreenType" Grid.Row="3" Grid.Column="1" Text="80" Margin="5,0" VerticalAlignment="Center" SelectedIndex="0">
-                            <ComboBoxItem x:Name="ComboItem_Image" Content="图像"/>
-                            <ComboBoxItem x:Name="ComboItem_Curve"  Content="曲线"/>
-                            <ComboBoxItem x:Name="ComboItem_Cube" Content="立方体"/>
-                            <ComboBoxItem x:Name="ComboItem_Map"  Content="地图"/>
+                        <Label Grid.Row="1" Grid.Column="0" Content="显示器编号:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
+                        <ComboBox x:Name="cmbMixScreenID" Grid.Row="1" Grid.Column="1" Text="1" Margin="10,0" VerticalAlignment="Center" SelectedIndex="0" HorizontalContentAlignment="Center">
+                            <ComboBoxItem Content="1"/>
+                            <ComboBoxItem Content="2"/>
+                            <ComboBoxItem Content="3"/>
+                            <ComboBoxItem Content="4"/>
                         </ComboBox>
-                        <Button x:Name="button_SetScreen" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Content="设置" Width="160" Template="{DynamicResource ButtonDefault}" VerticalAlignment="Center" Click="button_SetScreen_Click"/>
+                        <Label Grid.Row="2" Grid.Column="0" Content="子窗口数量:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
+                        <ComboBox x:Name="cmbMixSubWinCnt" Grid.Row="2" Grid.Column="1" Text="2" Margin="10,0" VerticalAlignment="Center" SelectedIndex="0" HorizontalContentAlignment="Center" >
+                            <ComboBoxItem Content="1"/>
+                            <ComboBoxItem Content="2"/>
+                            <ComboBoxItem Content="3" Visibility="Collapsed"/>
+                            <ComboBoxItem Content="4"/>
+                        </ComboBox>
+                        <Button x:Name="button_MixSetWinPro" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Content="设置" Width="160" Template="{DynamicResource ButtonDefault}" VerticalAlignment="Center" Click="button_MixSetWinPro_Click"/>
                     </Grid>
                 </GroupBox>
-                <GroupBox Grid.Row="1" Grid.Column="2" Grid.RowSpan="3" Margin="10,0" FontSize="26" Header="图像设置" Visibility="{Binding IsSelected, Converter={StaticResource BooleanToVisibilityConverter}, ElementName=ComboItem_Image}">
+                <GroupBox Grid.Row="1" Grid.Column="2" Grid.RowSpan="3" Margin="20,0,0,0" FontSize="26" Header="窗口类型设置">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="1*" MaxHeight="120"/>
+                            <RowDefinition Height="1*" MaxHeight="120"/>
+                            <RowDefinition Height="1*" MaxHeight="120"/>
+                            <RowDefinition Height="1*" MaxHeight="120"/>
+                            <RowDefinition Height="1*" MaxHeight="120"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="170"/>
+                            <ColumnDefinition Width="1*"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Row="0" Grid.Column="0" Content="窗口编号:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
+                        <ComboBox x:Name="cmbMixWinID2" Grid.Row="0" Grid.Column="1" Margin="10,0" VerticalAlignment="Center" SelectedIndex="0" HorizontalContentAlignment="Center" >
+                            <ComboBoxItem Content="1"/>
+                            <ComboBoxItem Content="2"/>
+                            <ComboBoxItem Content="3"/>
+                            <ComboBoxItem Content="4"/>
+                        </ComboBox>
+                        <Label Grid.Row="1" Grid.Column="0" Content="子窗体编号:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
+                        <ComboBox x:Name="cmbMixSubWinID" Grid.Row="1" Grid.Column="1" Text="1" Margin="10,0" VerticalAlignment="Center" SelectedIndex="0" HorizontalContentAlignment="Center">
+                            <ComboBoxItem Content="1"/>
+                            <ComboBoxItem Content="2"/>
+                            <ComboBoxItem Content="3"/>
+                            <ComboBoxItem Content="4"/>
+                        </ComboBox>
+                        <Label Grid.Row="2" Grid.Column="0" Content="子窗体类型:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
+                        <ComboBox x:Name="cmbMixSubWinType" Grid.Row="2" Grid.Column="1" Text="80" Margin="10,0" VerticalAlignment="Center" SelectedIndex="0" HorizontalContentAlignment="Center">
+                            <ComboBoxItem Content="图像"/>
+                            <ComboBoxItem Content="曲线"/>
+                            <ComboBoxItem Content="立方体"/>
+                            <ComboBoxItem Content="地图"/>
+                        </ComboBox>
+                        <Button x:Name="button_MixSetWinType" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Content="设置" Width="160" Template="{DynamicResource ButtonDefault}" VerticalAlignment="Center" Click="button_MixSetWinType_Click"/>
+                    </Grid>
+                </GroupBox>
+                <!--<GroupBox Grid.Row="1" Grid.Column="2" Grid.RowSpan="3" Margin="10,0" FontSize="26" Header="图像设置" Visibility="{Binding IsSelected, Converter={StaticResource BooleanToVisibilityConverter}, ElementName=ComboItem_Image}">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="1*" MaxHeight="120"/>
@@ -576,7 +606,7 @@
                         </ComboBox>
                         <Button Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Content="设置" Width="160" Template="{DynamicResource ButtonDefault}" VerticalAlignment="Center"/>
                     </Grid>
-                </GroupBox>
+                </GroupBox>-->
             </Grid>
             <Grid x:Name="gridLeftB4" Grid.Column="2">
                 <!--触发Grid的显示与隐藏-->
@@ -733,12 +763,12 @@
             </Grid.ColumnDefinitions>
             <GridSplitter Margin="0,50" Width="1" Background="{StaticResource ButtonBack}"/>
             <StackPanel>
-                <RadioButton x:Name="btnLeftD1" Content="显屏设置" Template="{DynamicResource ButtonIcon2nd}" Margin="0,50,0,0" Height="70" VerticalAlignment="Top">
+                <RadioButton x:Name="btnLeftD1" Content="显屏设置" Template="{DynamicResource ButtonIcon2nd}" Margin="0,50,0,0" Height="70" VerticalAlignment="Top" IsChecked="True">
                     <RadioButton.Background>
                         <ImageBrush ImageSource="image/ICON/1.ico"/>
                     </RadioButton.Background>
                 </RadioButton>
-                <RadioButton x:Name="btnLeftD2" Content="数据设置" Template="{DynamicResource ButtonIcon2nd}" Margin="0,0,0,0" Height="70" VerticalAlignment="Top" IsChecked="True">
+                <RadioButton x:Name="btnLeftD2" Content="数据设置" Template="{DynamicResource ButtonIcon2nd}" Margin="0,0,0,0" Height="70" VerticalAlignment="Top">
                     <RadioButton.Background>
                         <ImageBrush ImageSource="image/ICON/2.ico"/>
                     </RadioButton.Background>
@@ -762,44 +792,88 @@
                 </Grid.Resources>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="40"/>
+                    <RowDefinition Height="1*" MaxHeight="300"/>
                     <RowDefinition Height="1*"/>
                     <RowDefinition Height="50"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*"/>
-                    <ColumnDefinition Width="11*"/>
-                    <ColumnDefinition Width="12*"/>
+                    <ColumnDefinition Width="23*"/>
                     <ColumnDefinition Width="1*"/>
                 </Grid.ColumnDefinitions>
-                <GroupBox Grid.Row="1" Grid.Column="1" Margin="0,0,20,0" Header="默认启动方式">
-                    <DataGrid x:Name="dataGrid_Screen" Margin="5" LoadingRow="LoadingRowHeader">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header ="模块名称" Binding="{Binding 操作时间}" Width="1*"/>
-                            <DataGridTextColumn Header ="显示屏编号" Binding="{Binding 操作内容}" Width="1*"/>
-                        </DataGrid.Columns>
-                    </DataGrid>
-                </GroupBox>
-                <GroupBox Grid.Row="1" Grid.Column="2" Margin="20,0,0,0" Header="默认值设置">
-                    <Grid Margin="10">
+                <GroupBox Grid.Row="1" Grid.Column="1" Margin="0" Header="默认显示设置" Loaded="GroupBox_Loaded">
+                    <Grid Margin="0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="1*"/>
+                            <ColumnDefinition Width="170"/>
+                            <ColumnDefinition Width="5*"/>
+                            <ColumnDefinition Width="5*"/>
                             <ColumnDefinition Width="170"/>
                             <ColumnDefinition Width="10*"/>
                             <ColumnDefinition Width="1*"/>
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="30"/>
-                            <RowDefinition Height="1*" MinHeight="60" MaxHeight="120"/>
-                            <RowDefinition Height="1*" MinHeight="60" MaxHeight="120"/>
-                            <RowDefinition Height="1*" MinHeight="60" MaxHeight="120"/>
+                            <RowDefinition Height="1*"/>
+                            <RowDefinition Height="10*" MinHeight="40" MaxHeight="60"/>
+                            <RowDefinition Height="10*" MinHeight="40" MaxHeight="60"/>
+                            <RowDefinition Height="10*" MinHeight="40" MaxHeight="60"/>
+                            <RowDefinition Height="10*" MinHeight="40" MaxHeight="60"/>
                             <RowDefinition Height="1*"/>
                         </Grid.RowDefinitions>
-                        <Label Content="模块名称：" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center"></Label>
-                        <Label Content="显示屏编号：" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center"></Label>
-                        <Button Content="设置" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2" Template="{DynamicResource ButtonDefault}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="160"></Button>
-                        <TextBox Grid.Column="2" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Center" Margin="30,0"/>
-                        <TextBox Grid.Column="2" Grid.Row="2" TextWrapping="Wrap" VerticalAlignment="Center" Margin="30,0"/>
+                        <Label Content="窗口数量：" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center"></Label>
+                        <ComboBox x:Name="cmbScreenWindowsCnt" Grid.Column="2" Grid.Row="1" VerticalAlignment="Center" Margin="10,0" SelectedIndex="0" HorizontalContentAlignment="Center">
+                            <ComboBoxItem Content="1"/>
+                            <ComboBoxItem Content="2"/>
+                            <ComboBoxItem Content="3"/>
+                            <ComboBoxItem Content="4"/>
+                            <ComboBoxItem Content="5"/>
+                            <ComboBoxItem Content="6"/>
+                            <ComboBoxItem Content="7"/>
+                            <ComboBoxItem Content="8"/>
+                        </ComboBox>
+                        <Button x:Name="btnScreenWinCnt" Content="设置" Grid.Row="1" Grid.Column="3" Template="{DynamicResource ButtonDefault}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="100" Click="button_btnScreenWinCnt_Click"></Button>
+                        <Label Content="窗口编号：" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center"></Label>
+                        <ComboBox x:Name="cmbScreenWinID1" Grid.Column="2" Grid.Row="2" VerticalAlignment="Center" Margin="10,0" HorizontalContentAlignment="Center"/>
+                        <Label Content="显示器编号：" Grid.Row="3" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center"></Label>
+                        <ComboBox x:Name="cmbScreenSID" Grid.Row="3" Grid.Column="2" VerticalAlignment="Center" Margin="10,0" HorizontalContentAlignment="Center"/>
+                        <Label Content="子窗体数量：" Grid.Row="4" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center"></Label>
+                        <ComboBox x:Name="cmbSubWinCnt" Grid.Row="4" Grid.Column="2" VerticalAlignment="Center" Margin="10,0" HorizontalContentAlignment="Center" SelectedIndex="0">
+                            <ComboBoxItem Content="1"/>
+                            <ComboBoxItem Content="2"/>
+                            <ComboBoxItem Content="3" Visibility="Collapsed"/>
+                            <ComboBoxItem Content="4"/>
+                        </ComboBox>
+                        <Button x:Name="btnScreenWinPro" Content="设置" Grid.Row="2" Grid.Column="3" Grid.RowSpan="3" Template="{DynamicResource ButtonDefault}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="100" Click="button_btnScreenWinPro_Click"/>
+                        <Label Content="窗口编号：" Grid.Row="1" Grid.Column="4" HorizontalAlignment="Center" VerticalAlignment="Center"></Label>
+                        <ComboBox x:Name="cmbScreenWinID2" Grid.Column="5" Grid.Row="1" VerticalAlignment="Center" Margin="10,0" HorizontalContentAlignment="Center"/>
+                        <Label Content="子窗体编号：" Grid.Row="2" Grid.Column="4" HorizontalAlignment="Center" VerticalAlignment="Center"></Label>
+                        <ComboBox x:Name="cmbScreenSubID" Grid.Column="5" Grid.Row="2" VerticalAlignment="Center" Margin="10,0" HorizontalContentAlignment="Center" SelectedIndex="0">
+                            <ComboBoxItem Content="1"/>
+                            <ComboBoxItem Content="2"/>
+                            <ComboBoxItem Content="3"/>
+                            <ComboBoxItem Content="4"/>
+                        </ComboBox>
+                        <Label Content="窗体类型：" Grid.Row="3" Grid.Column="4" HorizontalAlignment="Center" VerticalAlignment="Center"></Label>
+                        <ComboBox x:Name="cmbScreenWinType" Grid.Column="5" Grid.Row="3" VerticalAlignment="Center" Margin="10,0" HorizontalContentAlignment="Center" SelectedIndex="0">
+                            <ComboBoxItem Content="图像"/>
+                            <ComboBoxItem Content="曲线"/>
+                            <ComboBoxItem Content="立方体"/>
+                            <ComboBoxItem Content="地图"/>
+                        </ComboBox>
+                        <Button x:Name="btnScreenWinType" Content="设置" Grid.Row="4" Grid.Column="4" Grid.ColumnSpan="2" Template="{DynamicResource ButtonDefault}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="160" Click="button_btnScreenWinType_Click"/>
                     </Grid>
+                </GroupBox>
+                <GroupBox Grid.Row="2" Grid.Column="1" Margin="0" Header="默认启动方式">
+                    <DataGrid x:Name="dataGrid_Screen" Margin="5" LoadingRow="LoadingRowHeader">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header ="窗口编号" Binding="{Binding 窗口编号}" Width="1*"/>
+                            <DataGridTextColumn Header ="窗口数量" Binding="{Binding 窗口数量}" Width="1*"/>
+                            <DataGridTextColumn Header ="显示器编号" Binding="{Binding 显示器编号}" Width="1*"/>
+                            <DataGridTextColumn Header ="子窗体数量" Binding="{Binding 子窗体数量}" Width="1*"/>
+                            <DataGridTextColumn Header ="子窗体编号" Binding="{Binding 子窗体编号}" Width="1*"/>
+                            <DataGridTextColumn Header ="窗体类型" Binding="{Binding 窗体类型}" Width="1*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
                 </GroupBox>
             </Grid>
             <Grid x:Name="gridLeftD2" Grid.Column="1">

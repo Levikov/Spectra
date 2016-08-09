@@ -77,6 +77,12 @@ namespace Spectra
         }
     }
 
+    public class WinShowInfo
+    {
+        public static int WindowsCnt = 0;               //显示的窗体个数
+        public static DataTable dtWinShowInfo;          //默认显示方式的列表
+    }
+
     public class ImageInfo
     {
         public static int minFrm;

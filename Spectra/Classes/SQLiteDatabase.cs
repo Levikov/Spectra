@@ -230,6 +230,7 @@ namespace Spectra
                 SQLiteDataAdapter adapter = new SQLiteDataAdapter(cmmd);
                 DataTable data = new DataTable();
                 adapter.Fill(data);
+                conn.Close();
                 return data;
             }
             catch (Exception e)
@@ -261,6 +262,7 @@ namespace Spectra
                     cmmd.CommandText = sql;
                 }
                 cmmd.ExecuteNonQuery();
+                conn.Close();
             }
             catch (Exception e)
             {

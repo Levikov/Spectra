@@ -14,13 +14,11 @@ namespace Spectra
     /// </summary>
     public partial class App : Application
     {
-
         public static _3DWindow global_Win_3D;
         public static SpecImgWindow global_Win_SpecImg;
         public static MapWindow global_Win_Map;
         public static SpecCurvWindow global_Win_Curve;
         public static List<Window> global_Windows = new List<Window>();
-
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {
@@ -32,9 +30,6 @@ namespace Spectra
             //    if (s.WorkingArea.Width == 3840) Variables.Screen_Locations[1] = s.WorkingArea;
             //}
             #endregion
-
-            global_Windows.Add(new MultiFuncWindow());
-            
         }
     }
 }

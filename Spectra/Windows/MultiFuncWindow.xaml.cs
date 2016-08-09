@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
+using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -58,7 +59,7 @@ namespace Spectra
             }
         }
         public WinFunc[] WinFunc = new WinFunc[4];
-        public UserControl[] UserControls = new UserControl[4];
+        public System.Windows.Controls.UserControl[] UserControls = new System.Windows.Controls.UserControl[4];
         public Grid[] SubGrid;
 
         public MultiFuncWindow()
@@ -67,6 +68,7 @@ namespace Spectra
             SubGrid = new Grid[4] { SubGrid_1, SubGrid_2, SubGrid_3, SubGrid_4 };
             DisplayMode = GridMode.Two;
         }
+
         public void Refresh(int SubGridInedex, WinFunc setWinFunc)
         {
             SubGrid[SubGridInedex].Children.Clear();
@@ -91,6 +93,22 @@ namespace Spectra
                     break;
             }
             SubGrid[SubGridInedex].Children.Add(UserControls[SubGridInedex]);
+        }
+
+        public void ScreenShow(Screen[] s, int id)
+        {
+            //this.WindowState = WindowState.Maximized;
+            //this.WindowStyle = WindowStyle.None;
+            //this.Left = 1920;
+            //this.Top = 0;
+            //this.Width = 1024;
+            //this.Height = 768;
+            //this.Show();
+
+            //System.Drawing.Rectangle r2 = s[0].WorkingArea;
+            //this.Top = r2.Top;
+            //this.Left = r2.Left;
+            this.Show();
         }
     }
 }
