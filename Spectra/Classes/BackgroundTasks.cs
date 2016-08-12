@@ -185,7 +185,7 @@ namespace Spectra
                                     }
                                     break;
                                 case ColorRenderMode.ArtColor:
-                                    Spectra2RGB.HsvToRgb(300 * ((double)v / 160), 1, ((double)(readU16_PIC(temp, l * 2)) / 4096), out buf_rgb[512 * 3 * (k - 1) + 3 * l + 2], out buf_rgb[512 * 3 * (k - 1) + 3 * l + 1], out buf_rgb[512 * 3 * (k - 1) + 3 * l + 0]);
+                                    Spectra2RGB.HsvToRgb(300 * ((double)v / 160), ((double)(readU16_PIC(temp, l * 2)) / 4096),1 , out buf_rgb[512 * 3 * (k - 1) + 3 * l + 2], out buf_rgb[512 * 3 * (k - 1) + 3 * l + 1], out buf_rgb[512 * 3 * (k - 1) + 3 * l + 0]);
                                     break;
                                 case ColorRenderMode.TrueColor:
                                     {
