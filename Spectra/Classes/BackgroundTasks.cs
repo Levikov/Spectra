@@ -148,14 +148,10 @@ namespace Spectra
         #endregion
 
         #region Bitmap Operations
-
-
         public static Task<Bitmap> GetBmp(int v,ColorRenderMode cMode)
         { 
             return Task.Run(() =>
             {
-                Bitmap bmpTop = new Bitmap(2048, DataQuery.QueryResult.Rows.Count, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-                BitmapData bmpData = bmpTop.LockBits(new System.Drawing.Rectangle(0, 0, 2048, DataQuery.QueryResult.Rows.Count), System.Drawing.Imaging.ImageLockMode.WriteOnly, bmpTop.PixelFormat);
                 byte[] buf_full = new byte[2048 * DataQuery.QueryResult.Rows.Count * 3];
                 Parallel.For(0, DataQuery.QueryResult.Rows.Count, (i) => {
                     byte[] buf_rgb = new byte[2048 * 3];
@@ -206,6 +202,23 @@ namespace Spectra
                     });
                     Array.Copy(buf_rgb, 0, buf_full, 3 * 2048 * i, 3 * 2048);
                 });
+                /*旋转90°*/
+                /*byte[] buf_90 = new byte[DataQuery.QueryResult.Rows.Count * 2048 * 3];
+                Parallel.For(0, 2048, wid =>
+                {
+                    Parallel.For(0, DataQuery.QueryResult.Rows.Count, hei =>
+                    {
+                        buf_90[wid * DataQuery.QueryResult.Rows.Count * 3 + hei * 3] = buf_full[hei * 2048 * 3 + wid * 3];
+                        buf_90[wid * DataQuery.QueryResult.Rows.Count * 3 + hei * 3 + 1] = buf_full[hei * 2048 * 3 + wid * 3];
+                        buf_90[wid * DataQuery.QueryResult.Rows.Count * 3 + hei * 3 + 2] = buf_full[hei * 2048 * 3 + wid * 3];
+                    });
+                });
+                Array.Copy(buf_90, buf_full, DataQuery.QueryResult.Rows.Count * 2048 * 3);
+                Bitmap bmpTop = new Bitmap(DataQuery.QueryResult.Rows.Count, 2048, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+                BitmapData bmpData = bmpTop.LockBits(new System.Drawing.Rectangle(0, 0, DataQuery.QueryResult.Rows.Count, 2048), System.Drawing.Imaging.ImageLockMode.WriteOnly, bmpTop.PixelFormat);*/
+
+                Bitmap bmpTop = new Bitmap(2048, DataQuery.QueryResult.Rows.Count, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+                BitmapData bmpData = bmpTop.LockBits(new System.Drawing.Rectangle(0, 0, 2048, DataQuery.QueryResult.Rows.Count), System.Drawing.Imaging.ImageLockMode.WriteOnly, bmpTop.PixelFormat);
                 Marshal.Copy(buf_full, 0, bmpData.Scan0, 2048 * DataQuery.QueryResult.Rows.Count * 3);
                 bmpTop.UnlockBits(bmpData);
                 return bmpTop;

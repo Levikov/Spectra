@@ -4,6 +4,7 @@ using System.Data;
 using System.Data.SQLite;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -421,5 +422,85 @@ namespace Spectra
             getDefaultShow();
         }
         #endregion
+
+        /*获取异常信息*/
+        private void btnAbnGet_Click(object sender, RoutedEventArgs e)
+        {
+            for(int i=1;i<=160;i++)
+                GetImgBuf(i);
+        }
+
+
+        public void GetImgBuf(int v)
+        {
+            byte[] buf_full = new byte[2048 * ImageInfo.imgWidth * 2];
+            Parallel.For(0, ImageInfo.imgWidth, (i) =>
+            {
+                byte[] buf_rgb = new byte[2048 * 2];
+                Parallel.For(1, 5, k =>
+                {
+                    FileStream fs = new FileStream($"{Variables.str_pathWork}\\{(long)(DataQuery.QueryResult.Rows[i].ItemArray[14])}_{(long)(DataQuery.QueryResult.Rows[i].ItemArray[0])}_{k}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
+
+                    byte[] temp = new byte[512 * 2];
+                    fs.Seek(v * 512 * 2, SeekOrigin.Begin);
+                    fs.Read(temp, 0, 1024);
+                    Array.Copy(temp, 0, buf_rgb, 2 * 512 * (k - 1), 2 * 512);
+                    fs.Close();
+                });
+                Array.Copy(buf_rgb, 0, buf_full, 2 * 2048 * i, 2 * 2048);
+            });
+
+            //byte[] buf_rgb = new byte[2048 * 2];
+            //for (int i = 0; i < ImageInfo.imgWidth; i++)
+            //{
+            //    for (int k = 1; k < 5; k++)
+            //    {
+            //        FileStream fs = new FileStream($"{Variables.str_pathWork}\\{(long)(DataQuery.QueryResult.Rows[i].ItemArray[14])}_{(long)(DataQuery.QueryResult.Rows[i].ItemArray[0])}_{k}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
+
+            //        byte[] temp = new byte[512 * 2];
+            //        fs.Seek(v * 512 * 2, SeekOrigin.Begin);
+            //        fs.Read(temp, 0, 1024);
+            //        Array.Copy(temp, 0, buf_rgb, 2 * 512 * (k - 1), 2 * 512);
+            //        fs.Close();
+            //    }
+            //    Array.Copy(buf_rgb, 0, buf_full, 2 * 2048 * i, 2 * 2048);
+            //}
+
+            //高低位取反
+            //for (int i = 0; i < 2048 * ImageInfo.imgWidth; i++)
+            //{
+            //    byte t = buf_full[i * 2];
+            //    buf_full[i * 2] = buf_full[i * 2 + 1];
+            //    buf_full[i * 2 + 1] = t;
+            //}
+            FileStream fTest = new FileStream("E:\\Test\\"+ v.ToString() +".raw", FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read);
+            fTest.Write(buf_full, 0, 2048 * ImageInfo.imgWidth * 2);
+            fTest.Close();
+
+            //显示8位图
+            //for (int i = 0; i < 2048 * ImageInfo.imgWidth; i++)
+            //{
+            //    buf_full[i] = buf_full[i * 2 + 1];
+            //}
+            //fTest = new FileStream("E:\\1_8.raw", FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read);
+            //fTest.Write(buf_full, 0, 2048 * ImageInfo.imgWidth);
+            //fTest.Close();
+        }
+
+        private void btnMapUpdate_Click(object sender, RoutedEventArgs e)
+        {
+            string[] line = File.ReadAllLines(@"E:\Map\Amap.html");
+            switch (cmbMapType.SelectedIndex)
+            {
+                case 0:
+                    File.WriteAllText(@"E:\Map\Amap.html", File.ReadAllText(@"E:\Map\Amap.html").Replace(line[94], $"	  var strURL = \"D:/Amap/roadmap/\" + zoom + \"/\" + tile_x+ \"/\" + tile_y + \".png\";"));
+                    break;
+                case 1:
+                    File.WriteAllText(@"E:\Map\Amap.html", File.ReadAllText(@"E:\Map\Amap.html").Replace(line[94], $"	  var strURL = \"D:/Gmap/satellite/\" + zoom + \"/\" + tile_x+ \"/\" + tile_y + \".png\";"));
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 }

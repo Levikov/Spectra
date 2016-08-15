@@ -34,7 +34,6 @@ namespace Spectra
         public static string dbPath = Environment.CurrentDirectory + "\\DataBase\\db.sqlite";   //数据库文件地址
         public static string dbConString = "Data Source=" + dbPath;                             //数据库连接字符串        
         public static string str_pathWork = Environment.CurrentDirectory + "\\Work";
-
     }
 
 
@@ -98,7 +97,9 @@ namespace Spectra
         public static Coord endCoord = new Coord(0, 0);
 
         public static int imgWidth;
-        public static int imgHeight = 160;
+        public static int imgHeight = 2048;
+
+        public static byte[] imgAbnDetect;
 
         public ImageInfo()  { }
 

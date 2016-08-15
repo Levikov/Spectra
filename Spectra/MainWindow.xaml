@@ -29,12 +29,12 @@
                 <Button x:Name="btnMin" Content="—" Template="{DynamicResource ButtonMinMax}" Click="btnMin_Click"/>
             </StackPanel>
             <DockPanel Margin="0,40,0,0" MinHeight="50">
-                <RadioButton x:Name="btnTopA" Content="数据管理" Template="{DynamicResource ButtonIcon1st}" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch" Margin="20,0,0,0">
+                <RadioButton x:Name="btnTopA" Content="数据管理" Template="{DynamicResource ButtonIcon1st}" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch" Margin="20,0,0,0" IsChecked="True">
                     <RadioButton.Background>
                         <ImageBrush ImageSource="image/ICON/1.ico" Stretch="Uniform"/>
                     </RadioButton.Background>
                 </RadioButton>
-                <RadioButton x:Name="btnTopB" Content="光谱分析" Template="{DynamicResource ButtonIcon1st}" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch" Margin="20,0,0,0" IsChecked="True">
+                <RadioButton x:Name="btnTopB" Content="光谱分析" Template="{DynamicResource ButtonIcon1st}" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch" Margin="20,0,0,0">
                     <RadioButton.Background>
                         <ImageBrush ImageSource="image/ICON/2.ico" Stretch="Uniform"/>
                     </RadioButton.Background>
@@ -78,7 +78,7 @@
                         <ImageBrush ImageSource="image/ICON/1.ico"/>
                     </RadioButton.Background>
                 </RadioButton>
-                <RadioButton x:Name="btnLeftA2" Content="数据传输" Template="{DynamicResource ButtonIcon2nd}" Margin="0,0,0,0" Height="70" VerticalAlignment="Top">
+                <RadioButton x:Name="btnLeftA2" Content="数据传输" Template="{DynamicResource ButtonIcon2nd}" Margin="0,0,0,0" Height="70" VerticalAlignment="Top" Visibility="Collapsed">
                     <RadioButton.Background>
                         <ImageBrush ImageSource="image/ICON/2.ico"/>
                     </RadioButton.Background>
@@ -215,12 +215,12 @@
             </Grid.ColumnDefinitions>
             <GridSplitter x:Name="splitB" Grid.RowSpan="1" Margin="0,50" Width="1" Background="{StaticResource ButtonBack}"/>
             <StackPanel>
-                <RadioButton x:Name="btnLeftB1" Content="图像提取" Template="{DynamicResource ButtonIcon2nd}" Margin="0,50,0,0" Height="70" VerticalAlignment="Top">
+                <RadioButton x:Name="btnLeftB1" Content="图像提取" Template="{DynamicResource ButtonIcon2nd}" Margin="0,50,0,0" Height="70" VerticalAlignment="Top" IsChecked="True">
                     <RadioButton.Background>
                         <ImageBrush ImageSource="image/ICON/1.ico"/>
                     </RadioButton.Background>
                 </RadioButton>
-                <RadioButton x:Name="btnLeftB2" Content="图像设置" Template="{DynamicResource ButtonIcon2nd}" Margin="0" Height="70" VerticalAlignment="Top" IsChecked="True">
+                <RadioButton x:Name="btnLeftB2" Content="图像设置" Template="{DynamicResource ButtonIcon2nd}" Margin="0" Height="70" VerticalAlignment="Top">
                     <RadioButton.Background>
                         <ImageBrush ImageSource="image/ICON/2.ico"/>
                     </RadioButton.Background>
@@ -673,10 +673,11 @@
                 <GroupBox Grid.Row="3" Grid.Column="1" Margin="0" FontSize="26" Header="地图操作">
                     <Grid>
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="100*" MaxHeight="100"/>
-                            <RowDefinition Height="100*" MaxHeight="100"/>
-                            <RowDefinition Height="100*" MaxHeight="100"/>
-                            <RowDefinition Height="100*" MaxHeight="100"/>
+                            <RowDefinition Height="10*" MaxHeight="100"/>
+                            <RowDefinition Height="10*" MaxHeight="100"/>
+                            <RowDefinition Height="10*" MaxHeight="100"/>
+                            <RowDefinition Height="10*" MaxHeight="100"/>
+                            <RowDefinition Height="10*" MaxHeight="100"/>
                             <RowDefinition Height="1*"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
@@ -685,8 +686,13 @@
                             <ColumnDefinition Width="20*"/>
                             <ColumnDefinition Width="1*"/>
                         </Grid.ColumnDefinitions>
-                        <Label Grid.Row="0" Grid.Column="1" Content="地图级别:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
-                        <ComboBox Grid.Row="0" Grid.Column="2" Margin="20,0" VerticalAlignment="Center" SelectedIndex="0" HorizontalContentAlignment="Center">
+                        <Label Grid.Row="0" Grid.Column="1" Content="地图类型:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
+                        <ComboBox x:Name="cmbMapType" Grid.Row="0" Grid.Column="2" Margin="20,0" VerticalAlignment="Center" SelectedIndex="0" HorizontalContentAlignment="Center">
+                            <ComboBoxItem Content="道路图"/>
+                            <ComboBoxItem Content="卫星图"/>
+                        </ComboBox>
+                        <Label Grid.Row="1" Grid.Column="1" Content="地图级别:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
+                        <ComboBox Grid.Row="1" Grid.Column="2" Margin="20,0" VerticalAlignment="Center" SelectedIndex="0" HorizontalContentAlignment="Center">
                             <ComboBoxItem Content="1"/>
                             <ComboBoxItem Content="2"/>
                             <ComboBoxItem Content="3"/>
@@ -703,11 +709,11 @@
                             <ComboBoxItem Content="14"/>
                             <ComboBoxItem Content="15"/>
                         </ComboBox>
-                        <Label Grid.Row="1" Grid.Column="1" Content="经   度:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
-                        <TextBox Grid.Row="1" Grid.Column="2" Margin="20,0" VerticalAlignment="Center" IsReadOnly="{Binding ElementName=cb_UserCoord,Path=IsChecked}"></TextBox>
-                        <Label Grid.Row="2" Grid.Column="1" Content="纬   度:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
+                        <Label Grid.Row="2" Grid.Column="1" Content="经   度:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
                         <TextBox Grid.Row="2" Grid.Column="2" Margin="20,0" VerticalAlignment="Center" IsReadOnly="{Binding ElementName=cb_UserCoord,Path=IsChecked}"></TextBox>
-                        <Button Content="更新地图" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2" Template="{DynamicResource ButtonDefault}" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" Width="160"/>
+                        <Label Grid.Row="3" Grid.Column="1" Content="纬   度:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
+                        <TextBox Grid.Row="3" Grid.Column="2" Margin="20,0" VerticalAlignment="Center" IsReadOnly="{Binding ElementName=cb_UserCoord,Path=IsChecked}"></TextBox>
+                        <Button x:Name="btnMapUpdate" Content="更新地图" Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" Template="{DynamicResource ButtonDefault}" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" Width="160" Click="btnMapUpdate_Click"/>
                     </Grid>
                 </GroupBox>
                 <GroupBox Grid.Row="3" Grid.Column="2" Margin="20,0,0,0" FontSize="26">
@@ -759,7 +765,7 @@
             </Grid.ColumnDefinitions>
             <GridSplitter Margin="0,50" Width="1" Background="{StaticResource ButtonBack}"/>
             <StackPanel>
-                <RadioButton x:Name="btnLeftC1" Content="优选案例" Template="{DynamicResource ButtonIcon2nd}" Margin="0,50,0,0" Height="70" VerticalAlignment="Top" IsChecked="True">
+                <RadioButton x:Name="btnLeftC1" Content="异常检测" Template="{DynamicResource ButtonIcon2nd}" Margin="0,50,0,0" Height="70" VerticalAlignment="Top" IsChecked="True">
                     <RadioButton.Background>
                         <ImageBrush ImageSource="image/ICON/1.ico"/>
                     </RadioButton.Background>
@@ -775,6 +781,63 @@
                     </RadioButton.Background>
                 </RadioButton>
             </StackPanel>
+            <Grid x:Name="gridLeftC1" Grid.Column="2">
+                <!--触发Grid的显示与隐藏-->
+                <Grid.Resources>
+                    <Style TargetType="{x:Type Grid}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsChecked, ElementName=btnLeftC1}" Value="False">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Resources>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="240"/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="8*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="8*"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+                <GroupBox Grid.Row="0" Grid.Column="1" Header="检测参数" Margin="0,40,0,5" FontSize="24">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="1*"/>
+                            <RowDefinition Height="1*"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="130"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Row="0" Grid.Column="0" Content="背景灰度:" VerticalAlignment="Center" Margin="5"/>
+                        <TextBox x:Name="txtAbnBack" Grid.Row="0" Grid.Column="1" Margin="20" Text="100" Height="40" TextWrapping="Wrap" VerticalAlignment="Center" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+                        <Label Grid.Row="1" Grid.Column="0" Content="噪声灰度:" VerticalAlignment="Center" Margin="5"/>
+                        <TextBox x:Name="txtAbnNoise" Grid.Row="1" Grid.Column="1" Margin="20" Text="200" Height="40" TextWrapping="Wrap" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+                    </Grid>
+                </GroupBox>
+                <Grid Grid.Row="0" Grid.Column="3">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="50"/>
+                        <RowDefinition Height="1*"/>
+                        <RowDefinition Height="1*"/>
+                        <RowDefinition Height="1*"/>
+                    </Grid.RowDefinitions>
+                    <Button x:Name="btnAbnGet" Grid.Row="2" Content="异常检测" Width="160" Template="{DynamicResource ButtonDefault}" Margin="0" VerticalAlignment="Center" Click="btnAbnGet_Click"/>
+                </Grid>
+                <GroupBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="4" Margin="0,0,0,50" Header="检测结果">
+                    <DataGrid Margin="5"  LoadingRow="LoadingRowHeader">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header ="谱段" Binding="{Binding FrameId}" Width="1*"/>
+                            <DataGridTextColumn Header ="行号" Binding="{Binding Satellite}" Width="1*"/>
+                            <DataGridTextColumn Header="列号" Binding="{Binding GST}" Width="1*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </GroupBox>
+            </Grid>
         </Grid>
         <Grid x:Name="gridTopD" Margin="1" Grid.Row="2">
             <!--触发Grid的显示与隐藏-->
