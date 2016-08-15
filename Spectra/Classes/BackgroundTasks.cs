@@ -139,6 +139,22 @@ namespace Spectra
                     }
                 }
                 sqlExcute.EndInsert();
+                sqlExcute.cnn.Open();
+
+                
+
+                long height = (long)sqlExcute.ExecuteScalar($"SELECT COUNT(*) FROM AuxData WHERE ImportId={import_id}");
+                byte[] buff_all = new byte[2048 * 160 * height];
+                FileStream[] fs_split_out = new FileStream[160];
+
+                Parallel.For(0, 160, i => {
+                   fs_split_out[i] = new FileStream($"{Variables.str_pathWork}\\{import_id}_{i}.raw", FileMode.Create, FileAccess.Write);
+                });
+                Parallel.For(0, 160, i => {
+                    fs_split_out[i].Close();
+                });
+
+
 
                 return "成功！";
             });
