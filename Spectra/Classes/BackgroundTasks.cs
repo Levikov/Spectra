@@ -21,13 +21,8 @@ namespace Spectra
         public static Task<string> Import_5(IProgress<double> Prog, IProgress<string> List, CancellationToken cancel)
         {
             return Task.Run(()=> {
-
-
                 SQLiteDatabase sqlExcute = new SQLiteDatabase(Variables.dbPath);
-
                 long  import_id = (long)(sqlExcute.ExecuteScalar("SELECT ID from Import_History ORDER BY id DESC"))+1;
-
-
                 sqlExcute.BeginInsert();
                 sqlExcute.ExecuteNonQuery($"INSERT INTO Import_History (FileName) VALUES(@filename);", new List<SQLiteParameter>() {new SQLiteParameter("filename", FileInfo.srcFilePathName) });
                 double d_progress = 0;
@@ -140,26 +135,42 @@ namespace Spectra
                 sqlExcute.EndInsert();
                 sqlExcute.cnn.Open();
 
-                
-
                 long height = (long)sqlExcute.ExecuteScalar($"SELECT COUNT(*) FROM AuxData WHERE ImportId={import_id}");
-                byte[] buff_all = new byte[2048 * 160 * height];
+                long Frm_Start = (long)sqlExcute.ExecuteScalar($"SELECT FrameId FROM AuxData WHERE ImportId={import_id} ORDER BY FrameId ASC");
+                byte[] buff_all = new byte[2048 * 160 * height*2];
                 FileStream[] fs_split_out = new FileStream[160];
-
                 Parallel.For(0, 160, i => {
                    fs_split_out[i] = new FileStream($"{Variables.str_pathWork}\\{import_id}_{i}.raw", FileMode.Create, FileAccess.Write);
                 });
+                Parallel.For(0, height, i =>
+                {
+                    Parallel.For(0, 4, j => 
+                    {
+                        try
+                        {
+                            byte[] buf_file_chanel = new byte[512 * 160 * 2];
+                            FileStream fs_file = new FileStream($"{Variables.str_pathWork}\\{import_id}_{Frm_Start + i}_{j + 1}.raw", FileMode.Open, FileAccess.Read,FileShare.Read);
+                            fs_file.Read(buf_file_chanel, 0, 512 * 160 * 2);
+                            Parallel.For(0, 160, k =>
+                            {
+                                Array.Copy(buf_file_chanel,k*512*2,buff_all,k*2048*height*2+i*2048*2+j*512*2,512*2);
+
+                            });
+                        }
+                        catch
+                        {
+
+                        }
+                    });
+                });
                 Parallel.For(0, 160, i => {
+                    fs_split_out[i].Write(buff_all,i*2048*(int)height*2,2048*(int)height*2);
                     fs_split_out[i].Close();
                 });
-
-
-
                 return "成功！";
             });
 
         }
-
         #endregion
 
         #region Bitmap Operations
@@ -168,45 +179,30 @@ namespace Spectra
             return Task.Run(() =>
             {
                 byte[] buf_full = new byte[2048 * DataQuery.QueryResult.Rows.Count * 3];
-                Parallel.For(0, DataQuery.QueryResult.Rows.Count, (i) => {
-                    byte[] buf_rgb = new byte[2048 * 3];
-                    Parallel.For(1, 5, k => {
-                        FileStream fs = new FileStream($"{Variables.str_pathWork}\\{(long)(DataQuery.QueryResult.Rows[i].ItemArray[14])}_{(long)(DataQuery.QueryResult.Rows[i].ItemArray[0])}_{k}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
-                        
-                        byte[] temp = new byte[512 * 2];
-                        byte[] temp_R = new byte[512 * 2];
-                        byte[] temp_G = new byte[512 * 2];
-                        byte[] temp_B = new byte[512 * 2];
-                        fs.Seek(v * 512 * 2, SeekOrigin.Begin);
-                        fs.Read(temp, 0, 1024);
-                        fs.Seek(120 * 512 * 2, SeekOrigin.Begin);
-                        fs.Read(temp_R, 0, 1024);
-                        fs.Seek(82 * 512 * 2, SeekOrigin.Begin);
-                        fs.Read(temp_G, 0, 1024);
-                        fs.Seek(21 * 512 * 2, SeekOrigin.Begin);
-                        fs.Read(temp_B, 0, 1024);
-
-                        Parallel.For(0, 512, l =>
+                byte[] buf_band = new byte[2048 * DataQuery.QueryResult.Rows.Count*2];
+                FileStream fs = new FileStream($"{Variables.str_pathWork}\\{DataQuery.QueryResult.Rows[0].ItemArray[14]}_{v}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
+                fs.Read(buf_band, 0, 2048 * DataQuery.QueryResult.Rows.Count * 2);
+                        Parallel.For(0, 2048*DataQuery.QueryResult.Rows.Count, i =>
                         {
                             switch (cMode)
                             {
                                 case ColorRenderMode.Grayscale:
                                     {
-                                        buf_rgb[512 * 3 * (k - 1) + 3 * l + 2] = buf_rgb[512 * 3 * (k - 1) + 3 * l + 1] = buf_rgb[512 * 3 * (k - 1) + 3 * l + 0] = (byte)(Math.Floor((double)(readU16_PIC(temp, l * 2)) / 4096 * 256));
+                                        buf_full[3*i] = buf_full[3*i + 1] = buf_full[3*i+2] = (byte)(Math.Floor((double)(readU16_PIC(buf_band, 2*i)) / 4096 * 256));
                                     }
                                     break;
                                 case ColorRenderMode.ArtColor:
-                                    Spectra2RGB.HsvToRgb(300 * ((double)v / 160), ((double)(readU16_PIC(temp, l * 2)) / 4096),1 , out buf_rgb[512 * 3 * (k - 1) + 3 * l + 2], out buf_rgb[512 * 3 * (k - 1) + 3 * l + 1], out buf_rgb[512 * 3 * (k - 1) + 3 * l + 0]);
+                                    Spectra2RGB.HsvToRgb(300 * ((double)v / 160), ((double)(readU16_PIC(buf_band, i * 2)) / 4096),1 , out buf_full[3*i + 2], out buf_full[3*i + 1], out buf_full[3*i + 0]);
                                     break;
                                 case ColorRenderMode.TrueColor:
                                     {
-                                        double R = (double)(readU16_PIC(temp_R, l * 2)) / 4096 * 256;
-                                        double G = (double)(readU16_PIC(temp_G, l * 2)) / 4096 * 256;
-                                        double B = (double)(readU16_PIC(temp_B, l * 2)) / 4096 * 256;
+                                        double R = (double)(readU16_PIC(buf_band, i * 2)) / 4096 * 256;
+                                        double G = (double)(readU16_PIC(buf_band, i * 2)) / 4096 * 256;
+                                        double B = (double)(readU16_PIC(buf_band, i * 2)) / 4096 * 256;
 
-                                        buf_rgb[512 * 3 * (k - 1) + 3 * l + 2]= (byte)(Math.Floor(R));
-                                        buf_rgb[512 * 3 * (k - 1) + 3 * l + 1] = (byte)(Math.Floor(G));
-                                        buf_rgb[512 * 3 * (k - 1) + 3 * l + 0] = (byte)(Math.Floor(B));
+                                        buf_full[3*i+2]= (byte)(Math.Floor(R));
+                                        buf_full[3*i+1] = (byte)(Math.Floor(G));
+                                        buf_full[3*i+ 0] = (byte)(Math.Floor(B));
                                     }
                                     break;
                                 default:
@@ -214,9 +210,6 @@ namespace Spectra
                             }
                         });
                         fs.Close();
-                    });
-                    Array.Copy(buf_rgb, 0, buf_full, 3 * 2048 * i, 3 * 2048);
-                });
                 /*旋转90°*/
                 /*byte[] buf_90 = new byte[DataQuery.QueryResult.Rows.Count * 2048 * 3];
                 Parallel.For(0, 2048, wid =>
@@ -880,7 +873,6 @@ namespace Spectra
     #region Spectrum Operations
     public class SpecProc
     {
-
         public static Task<System.Windows.Point[]> GetSpecCurv(System.Windows.Point p)
         {
             return Task.Run(() =>
@@ -900,12 +892,8 @@ namespace Spectra
                     result[i - 5] = new System.Windows.Point(spec_nm[i], DataProc.readU16_PIC(buf, i * 1024 + 2 * col));
 
                 });
-
-
                 return result;
-
             });
-
         }
     }
 
