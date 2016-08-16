@@ -387,13 +387,13 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="50"/>
                     <RowDefinition Height="1*"/>
-                    <RowDefinition Height="20"/>
+                    <RowDefinition Height="10"/>
                     <RowDefinition Height="1*"/>
                     <RowDefinition Height="50"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*"/>
-                    <ColumnDefinition Width="10*"/>
+                    <ColumnDefinition Width="350"/>
                     <ColumnDefinition Width="10"/>
                     <ColumnDefinition Width="10*"/>
                     <ColumnDefinition Width="1*"/>
@@ -486,34 +486,60 @@
                              Background="{x:Null}" TextWrapping="Wrap" IsReadOnly="True" FontSize="20" VerticalScrollBarVisibility="Auto" HorizontalContentAlignment="Left" VerticalContentAlignment="Top" />
                 </Grid>
 
-                <GroupBox Grid.Row="3" Grid.Column="1" Margin="0" FontSize="26" Header="图像信息">
+                <Rectangle Grid.Row="3" Grid.Column="1" Stroke="{StaticResource WindowBorder}" StrokeThickness="1"/>
+                <GroupBox Grid.Row="3" Grid.Column="1" Margin="0" FontSize="22" Header="图像信息" BorderThickness="0,1,0,0">
                     <Grid>
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="1*"/>
-                            <RowDefinition Height="1*"/>
+                            <RowDefinition MinHeight="40" MaxHeight="60"/>
+                            <RowDefinition Height="10*"/>
                         </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="1*"/>
-                            <ColumnDefinition Width="130"/>
-                            <ColumnDefinition Width="10*"/>
-                            <ColumnDefinition Width="40"/>
-                            <ColumnDefinition Width="10*"/>
-                            <ColumnDefinition Width="80"/>
-                            <ColumnDefinition Width="100"/>
-                            <ColumnDefinition Width="1*"/>
-                        </Grid.ColumnDefinitions>
-                        <Label Grid.Row="0" Grid.Column="1" Content="帧号范围:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
-                        <TextBox x:Name="txtImgMinFrm" Grid.Row="0" Grid.Column="2" Margin="0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
-                        <Label Grid.Row="0" Grid.Column="3" Content="—" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
-                        <TextBox x:Name="txtImgMaxFrm" Grid.Row="0" Grid.Column="4" Margin="0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
-                        <Label Grid.Row="1" Grid.Column="1" Content="时间范围:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
-                        <TextBox x:Name="txtImgStartTime" Grid.Row="1" Grid.Column="2" Margin="0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
-                        <Label Grid.Row="1" Grid.Column="3" Content="—" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
-                        <TextBox x:Name="txtImgEndTime" Grid.Row="1" Grid.Column="4" Margin="0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
-                        <Label Grid.Row="0" Grid.Column="5" Content="像宽:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
-                        <TextBox x:Name="txtImgWidth" Grid.Row="0" Grid.Column="6" Text="2048" Margin="0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
-                        <Label Grid.Row="1" Grid.Column="5" Content="像高:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
-                        <TextBox Grid.Row="1" Grid.Column="6" Text="2048" Margin="0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
+                        <Grid Grid.Row="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="80"/>
+                                <ColumnDefinition Width="5*"/>
+                                <ColumnDefinition Width="80"/>
+                                <ColumnDefinition Width="5*"/>
+                                <ColumnDefinition Width="10"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.Column="1" Content="像宽:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
+                            <TextBox Grid.Column="2" x:Name="txtImgWidth" Text="2048" Margin="0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
+                            <Label Grid.Column="3" Content="像高:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
+                            <TextBox Grid.Column="4" Text="2048" Margin="0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
+                        </Grid>
+                        <Grid Grid.Row="1">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="1*" MinHeight="40" MaxHeight="80"/>
+                                <RowDefinition Height="1*" MinHeight="40" MaxHeight="80"/>
+                                <RowDefinition Height="1*" MinHeight="40" MaxHeight="80"/>
+                                <RowDefinition Height="1*" MinHeight="40" MaxHeight="80"/>
+                                <RowDefinition Height="1*"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="10*"/>
+                                <ColumnDefinition Width="40"/>
+                                <ColumnDefinition Width="10*"/>
+                                <ColumnDefinition Width="10"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.Row="0" Grid.Column="1" Content="帧号范围:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
+                            <TextBox x:Name="txtImgMinFrm" Grid.Row="0" Grid.Column="2" Margin="0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
+                            <Label Grid.Row="0" Grid.Column="3" Content="—" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
+                            <TextBox x:Name="txtImgMaxFrm" Grid.Row="0" Grid.Column="4" Margin="0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
+                            <Label Grid.Row="1" Grid.Column="1" Content="时间范围:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
+                            <TextBox x:Name="txtImgStartTime" Grid.Row="1" Grid.Column="2" Margin="0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
+                            <Label Grid.Row="1" Grid.Column="3" Content="—" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
+                            <TextBox x:Name="txtImgEndTime" Grid.Row="1" Grid.Column="4" Margin="0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
+                            <Label Grid.Row="2" Grid.Column="1" Content="经度范围:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
+                            <TextBox x:Name="txtMapStartLon" Grid.Row="2" Grid.Column="2" Margin="20,0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
+                            <Label Grid.Row="2" Grid.Column="3" Content="—" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
+                            <TextBox x:Name="txtMapEndLon" Grid.Row="2" Grid.Column="4" Margin="20,0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
+                            <Label Grid.Row="3" Grid.Column="1" Content="纬度范围:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
+                            <TextBox x:Name="txtMapStartLat" Grid.Row="3" Grid.Column="2" Margin="20,0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
+                            <Label Grid.Row="3" Grid.Column="3" Content="—" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
+                            <TextBox x:Name="txtMapEndLat" Grid.Row="3" Grid.Column="4" Margin="20,0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
+                        </Grid>
                     </Grid>
                 </GroupBox>
                 <GroupBox Grid.Row="3" Grid.Column="3" Margin="10,0,0,0" FontSize="26" Header="图像信息">
@@ -753,14 +779,6 @@
                             <ColumnDefinition Width="10*"/>
                             <ColumnDefinition Width="1*"/>
                         </Grid.ColumnDefinitions>
-                        <Label Grid.Row="0" Grid.Column="1" Content="经度范围:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
-                        <TextBox x:Name="txtMapStartLon" Grid.Row="0" Grid.Column="2" Margin="20,0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
-                        <Label Grid.Row="0" Grid.Column="3" Content="—" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
-                        <TextBox x:Name="txtMapEndLon" Grid.Row="0" Grid.Column="4" Margin="20,0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
-                        <Label Grid.Row="1" Grid.Column="1" Content="纬度范围:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
-                        <TextBox x:Name="txtMapStartLat" Grid.Row="1" Grid.Column="2" Margin="20,0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
-                        <Label Grid.Row="1" Grid.Column="3" Content="—" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
-                        <TextBox x:Name="txtMapEndLat" Grid.Row="1" Grid.Column="4" Margin="20,0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
                     </Grid>
                 </GroupBox>
                 <GroupBox Grid.Row="3" Grid.Column="1" Margin="0" FontSize="26" Header="地图操作">
