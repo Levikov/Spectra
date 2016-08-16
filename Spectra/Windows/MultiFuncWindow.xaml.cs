@@ -103,7 +103,7 @@ namespace Spectra
         }
 
         /*显示器对象 显示器编号   窗口编号*/
-        public void ScreenShow(Screen[] s, int id,int winID)
+        public void ScreenShow(Screen[] s, int id,string strT)
         {
             //this.WindowState = WindowState.Maximized;
             //this.WindowStyle = WindowStyle.None;
@@ -117,7 +117,7 @@ namespace Spectra
             //this.Top = r2.Top;
             //this.Left = r2.Left;
 
-            this.Title = "展示窗口" + winID.ToString();
+            this.Title = strT;
             this.Show();
             this.isShow = true;
         }

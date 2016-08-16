@@ -14,10 +14,10 @@ namespace Spectra
     /// </summary>
     public partial class App : Application
     {
-        public static _3DWindow global_Win_3D;
-        public static SpecImgWindow global_Win_SpecImg;
+        public static MultiFuncWindow global_Win_3D;
+        public static MultiFuncWindow global_Win_SpecImg;
         public static MapWindow global_Win_Map;
-        public static SpecCurvWindow global_Win_Curve;
+        public static MultiFuncWindow global_Win_ImgCompare;
         public static List<Window> global_Windows = new List<Window>();
 
         private void Application_Startup(object sender, StartupEventArgs e)
