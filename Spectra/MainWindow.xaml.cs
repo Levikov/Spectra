@@ -228,78 +228,22 @@ namespace Spectra
         }
         #endregion
 
-        #region 图像设置
-        /*更新窗体显示*/
+        #region 图像信息
+        /*显示图像信息*/
         public void SetImgInfo()
         {
-            txtImgMinFrm.Text = ImageInfo.minFrm.ToString();
-            txtImgMaxFrm.Text = ImageInfo.maxFrm.ToString();
-            txtImgStartTime.Text = ImageInfo.startTime.ToString();
-            txtImgEndTime.Text = ImageInfo.endTime.ToString();
-            txtImgWidth.Text = ImageInfo.imgWidth.ToString();
-            txtMapStartLon.Text = ImageInfo.startCoord.Lon.ToString();
-            txtMapStartLat.Text = ImageInfo.startCoord.Lat.ToString();
-            txtMapEndLon.Text = ImageInfo.endCoord.Lon.ToString();
-            txtMapEndLat.Text = ImageInfo.endCoord.Lat.ToString();
-        }
-        /*设置图像谱段*/
-        private void button_SetImage_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                Ctrl_ImageView c = new Ctrl_ImageView();
-                c = (Ctrl_ImageView)(((MultiFuncWindow)(App.global_Windows[Convert.ToUInt16(txtImgWinID.Text)-1])).UserControls[Convert.ToUInt16(txtImgSubID.Text)-1]);
-                c.Refresh(Convert.ToUInt16(txtImgSpeIdxR.Text), (ColorRenderMode)(cmbImgMode.SelectedIndex));
-            }
-            catch (Exception)
-            {
-                System.Windows.MessageBox.Show("请选择正确的窗体进行设置！","提示",MessageBoxButton.OK,MessageBoxImage.Information);
-            }
-        }
-        /*选择图像模式*/
-        private void cmbImgMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (txtImgSpeIdxB == null)
-                return;
-            if (cmbImgMode.SelectedIndex == 1)
-            {
-                lblImgSpeR.Content = "谱段R值:";
-                lblImgSpeG.Visibility = Visibility.Visible;
-                lblImgSpeB.Visibility = Visibility.Visible;
-                txtImgSpeIdxG.Visibility = Visibility.Visible;
-                txtImgSpeIdxB.Visibility = Visibility.Visible;
-            }
-            else
-            {
-                lblImgSpeR.Content = "谱段值:";
-                lblImgSpeG.Visibility = Visibility.Collapsed;
-                lblImgSpeB.Visibility = Visibility.Collapsed;
-                txtImgSpeIdxG.Visibility = Visibility.Collapsed;
-                txtImgSpeIdxB.Visibility = Visibility.Collapsed;
-            }
+            lblImgMinFrm.Content = ImageInfo.minFrm.ToString();
+            lblImgMaxFrm.Content = ImageInfo.maxFrm.ToString();
+            lblImgStartTime.Content = ImageInfo.startTime.ToString();
+            lblImgEndTime.Content = ImageInfo.endTime.ToString();
+            lblImgWidth.Content = ImageInfo.imgWidth.ToString();
+            lblStartLon.Content = ImageInfo.startCoord.Lon.ToString("F2");
+            lblStartLat.Content = ImageInfo.startCoord.Lat.ToString("F2");
+            lblEndLon.Content = ImageInfo.endCoord.Lon.ToString("F2");
+            lblEndLat.Content = ImageInfo.endCoord.Lat.ToString("F2");
         }
         #endregion
-
-        #region 组合模式
-        /*设置窗口属性*/
-        private void button_MixSetWinPro_Click(object sender, RoutedEventArgs e)
-        {
-            MultiFuncWindow w = new MultiFuncWindow();
-            w = (MultiFuncWindow)App.global_Windows[Convert.ToUInt16(cmbMixWinID1.SelectedIndex)];
-            w.DisplayMode = (GridMode)(cmbMixSubWinCnt.SelectedIndex);
-            if (!w.isShow)
-                w.ScreenShow();
-        }
-        /*设置窗体类型*/
-        private void button_MixSetWinType_Click(object sender, RoutedEventArgs e)
-        {
-            MultiFuncWindow w = new MultiFuncWindow();
-            w = (MultiFuncWindow)App.global_Windows[Convert.ToUInt16(cmbMixWinID2.SelectedIndex)];
-            w.Refresh(Convert.ToUInt16(cmbMixSubWinID.SelectedIndex),(WinFunc)(cmbMixSubWinType.SelectedIndex));
-            if (!w.isShow)
-                w.ScreenShow();
-        }
-        #endregion
+        
 
         #region 默认显示方式
         /*初始化显示窗体*/
@@ -549,14 +493,14 @@ namespace Spectra
         {
             try
             {
-                if (rdb1sub.IsChecked == true)
+                if (ckb1sub.IsChecked == true)
                     ((Ctrl_ImageView)(App.global_Win_ImgCompare.UserControls[0])).Refresh(Convert.ToUInt16(txtCompareR.Text),ColorRenderMode.Grayscale);
-                if (rdb2sub.IsChecked == true)
-                    ((Ctrl_ImageView)(App.global_Win_ImgCompare.UserControls[1])).Refresh(Convert.ToUInt16(txtCompareGray.Text), ColorRenderMode.Grayscale);
-                if (rdb3sub.IsChecked == true)
-                    ((Ctrl_ImageView)(App.global_Win_ImgCompare.UserControls[2])).Refresh(Convert.ToUInt16(txtCompareGray.Text), ColorRenderMode.Grayscale);
-                if (rdb4sub.IsChecked == true)
-                    ((Ctrl_ImageView)(App.global_Win_ImgCompare.UserControls[3])).Refresh(Convert.ToUInt16(txtCompareGray.Text), ColorRenderMode.Grayscale);
+                if (ckb2sub.IsChecked == true)
+                    ((Ctrl_ImageView)(App.global_Win_ImgCompare.UserControls[1])).Refresh(Convert.ToUInt16(txtCompareGray2.Text), ColorRenderMode.Grayscale);
+                if (ckb3sub.IsChecked == true)
+                    ((Ctrl_ImageView)(App.global_Win_ImgCompare.UserControls[2])).Refresh(Convert.ToUInt16(txtCompareGray3.Text), ColorRenderMode.Grayscale);
+                if (ckb4sub.IsChecked == true)
+                    ((Ctrl_ImageView)(App.global_Win_ImgCompare.UserControls[3])).Refresh(Convert.ToUInt16(txtCompareGray4.Text), ColorRenderMode.Grayscale);
             }
             catch (Exception)
             {
