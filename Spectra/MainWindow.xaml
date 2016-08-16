@@ -15,7 +15,7 @@
     </Window.Background>
     <Grid>
         <Grid.Background>
-            <ImageBrush ImageSource="image/Image_BackGround.jpg" Stretch="UniformToFill" Opacity="0.1"/>
+            <ImageBrush ImageSource="image/Image_BackGround.jpg" Stretch="UniformToFill" Opacity="0.3"/>
         </Grid.Background>
         <Grid.RowDefinitions>
             <RowDefinition Height="200"/>
@@ -29,12 +29,12 @@
                 <Button x:Name="btnMin" Content="—" Template="{DynamicResource ButtonMinMax}" Click="btnMin_Click"/>
             </StackPanel>
             <DockPanel Margin="0,40,0,0" MinHeight="50">
-                <RadioButton x:Name="btnTopA" Content="数据管理" Template="{DynamicResource ButtonIcon1st}" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch" Margin="20,0,0,0" IsChecked="True">
+                <RadioButton x:Name="btnTopA" Content="数据管理" Template="{DynamicResource ButtonIcon1st}" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch" Margin="20,0,0,0">
                     <RadioButton.Background>
                         <ImageBrush ImageSource="image/ICON/1.ico" Stretch="Uniform"/>
                     </RadioButton.Background>
                 </RadioButton>
-                <RadioButton x:Name="btnTopB" Content="光谱分析" Template="{DynamicResource ButtonIcon1st}" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch" Margin="20,0,0,0">
+                <RadioButton x:Name="btnTopB" Content="光谱分析" Template="{DynamicResource ButtonIcon1st}" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch" Margin="20,0,0,0" IsChecked="True">
                     <RadioButton.Background>
                         <ImageBrush ImageSource="image/ICON/2.ico" Stretch="Uniform"/>
                     </RadioButton.Background>
@@ -78,7 +78,7 @@
                         <ImageBrush ImageSource="image/ICON/1.ico"/>
                     </RadioButton.Background>
                 </RadioButton>
-                <RadioButton x:Name="btnLeftA2" Content="数据传输" Template="{DynamicResource ButtonIcon2nd}" Margin="0,0,0,0" Height="70" VerticalAlignment="Top" Visibility="Collapsed">
+                <RadioButton x:Name="btnLeftA2" Content="数据存储" Template="{DynamicResource ButtonIcon2nd}" Margin="0,0,0,0" Height="70" VerticalAlignment="Top">
                     <RadioButton.Background>
                         <ImageBrush ImageSource="image/ICON/2.ico"/>
                     </RadioButton.Background>
@@ -86,6 +86,11 @@
                 <RadioButton x:Name="btnLeftA3" Content="文件检索" Template="{DynamicResource ButtonIcon2nd}" Margin="0,0,0,0" Height="70" VerticalAlignment="Top">
                     <RadioButton.Background>
                         <ImageBrush ImageSource="image/ICON/5.ico"/>
+                    </RadioButton.Background>
+                </RadioButton>
+                <RadioButton x:Name="btnLeftA4" Content="数据传输" Template="{DynamicResource ButtonIcon2nd}" Margin="0,0,0,0" Height="70" VerticalAlignment="Top" IsChecked="True">
+                    <RadioButton.Background>
+                        <ImageBrush ImageSource="image/ICON/4.ico"/>
                     </RadioButton.Background>
                 </RadioButton>
             </StackPanel>
@@ -215,12 +220,12 @@
             </Grid.ColumnDefinitions>
             <GridSplitter x:Name="splitB" Grid.RowSpan="1" Margin="0,50" Width="1" Background="{StaticResource ButtonBack}"/>
             <StackPanel>
-                <RadioButton x:Name="btnLeftB1" Content="图像提取" Template="{DynamicResource ButtonIcon2nd}" Margin="0,50,0,0" Height="70" VerticalAlignment="Top" IsChecked="True">
+                <RadioButton x:Name="btnLeftB1" Content="数据检索" Template="{DynamicResource ButtonIcon2nd}" Margin="0,50,0,0" Height="70" VerticalAlignment="Top">
                     <RadioButton.Background>
                         <ImageBrush ImageSource="image/ICON/1.ico"/>
                     </RadioButton.Background>
                 </RadioButton>
-                <RadioButton x:Name="btnLeftB2" Content="图像设置" Template="{DynamicResource ButtonIcon2nd}" Margin="0" Height="70" VerticalAlignment="Top">
+                <RadioButton x:Name="btnLeftB2" Content="光谱显示" Template="{DynamicResource ButtonIcon2nd}" Margin="0" Height="70" VerticalAlignment="Top" IsChecked="True">
                     <RadioButton.Background>
                         <ImageBrush ImageSource="image/ICON/2.ico"/>
                     </RadioButton.Background>
@@ -235,7 +240,7 @@
                         <ImageBrush ImageSource="image/ICON/4.ico"/>
                     </RadioButton.Background>
                 </RadioButton>
-                <RadioButton x:Name="btnLeftB5" Content="3D 地球" Template="{DynamicResource ButtonIcon2nd}" Margin="0" Height="70" VerticalAlignment="Top" Visibility="Collapsed">
+                <RadioButton x:Name="btnLeftB5" Content="3D 地球" Template="{DynamicResource ButtonIcon2nd}" Margin="0" Height="70" VerticalAlignment="Top">
                     <RadioButton.Background>
                         <ImageBrush ImageSource="image/ICON/5.ico"/>
                     </RadioButton.Background>
@@ -380,19 +385,108 @@
                     </Style>
                 </Grid.Resources>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="40"/>
-                    <RowDefinition Height="160"/>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="1*"/>
                     <RowDefinition Height="20"/>
-                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="1*"/>
                     <RowDefinition Height="50"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*"/>
-                    <ColumnDefinition Width="20*"/>
-                    <ColumnDefinition Width="450"/>
+                    <ColumnDefinition Width="10*"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="10*"/>
                     <ColumnDefinition Width="1*"/>
                 </Grid.ColumnDefinitions>
-                <GroupBox Grid.Row="1" Grid.Column="1" Margin="0" FontSize="26" Header="图像信息">
+
+                <Grid Grid.Row="1" Grid.Column="1" Margin="0">
+                    <Rectangle Stroke="{StaticResource WindowBorder}" StrokeThickness="1"/>
+                    <Button x:Name="btnShowSpeImg" Content="显示光谱图像" Width="250" Template="{DynamicResource ButtonDefault}" Margin="0,20,0,0" Click="btnShowSpeImg_Click" VerticalAlignment="Top"/>
+                    <Button x:Name="btnShow3D" Content="光谱立方体显示" Width="250" Template="{DynamicResource ButtonDefault}" Margin="0" Click="btnShow3D_Click" VerticalAlignment="Center"/>
+                    <Button x:Name="btnShowImgCompare" Content="典型谱段图像对比" Width="250" Template="{DynamicResource ButtonDefault}" Margin="0,0,0,20" Click="btnShowImgCompare_Click" VerticalAlignment="Bottom"/>
+                </Grid>
+                <Grid Grid.Row="1" Grid.Column="3" Margin="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="1*"/>
+                        <RowDefinition Height="60"/>
+                        <RowDefinition Height="60"/>
+                        <RowDefinition Height="10*"/>
+                        <RowDefinition Height="1*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="20*"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+                    <Rectangle Grid.ColumnSpan="3" Grid.RowSpan="5" Stroke="{StaticResource WindowBorder}" StrokeThickness="1"/>
+                    <Grid Grid.Row="1" Grid.Column="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*"/>
+                            <ColumnDefinition Width="1*"/>
+                            <ColumnDefinition Width="1*"/>
+                            <ColumnDefinition Width="1*"/>
+                        </Grid.ColumnDefinitions>
+                        <RadioButton x:Name="rdb1sub" Content="1伪彩图" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="26" VerticalContentAlignment="Center" IsChecked="True"/>
+                        <RadioButton x:Name="rdb2sub" Content="2灰度图" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="26" VerticalContentAlignment="Center"/>
+                        <RadioButton x:Name="rdb3sub" Content="3灰度图" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="26" VerticalContentAlignment="Center"/>
+                        <RadioButton x:Name="rdb4sub" Content="4灰度图" Grid.Column="3" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="26" VerticalContentAlignment="Center"/>
+                    </Grid>
+                    <Grid Grid.Row="2" Grid.Column="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="3*"/>
+                            <ColumnDefinition Width="1*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid>
+                            <Grid.Resources>
+                                <Style TargetType="{x:Type Grid}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsChecked, ElementName=rdb1sub}" Value="False">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Grid.Resources>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="35"/>
+                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="35"/>
+                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="35"/>
+                                <ColumnDefinition Width="1*"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Content="R:" Grid.Column="0" FontSize="24" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            <TextBox x:Name="txtCompareR" Text="120" Grid.Column="1" FontSize="24" Margin="5,0" VerticalAlignment="Center" />
+                            <Label Content="G:" Grid.Column="2" FontSize="24" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            <TextBox x:Name="txtCompareG" Text="80" Grid.Column="3" FontSize="24" Margin="5,0" VerticalAlignment="Center" />
+                            <Label Content="B:" Grid.Column="4" FontSize="24" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            <TextBox x:Name="txtCompareB" Text="40" Grid.Column="5" FontSize="24" Margin="5,0" VerticalAlignment="Center" />
+                        </Grid>
+                        <Grid>
+                            <Grid.Resources>
+                                <Style TargetType="{x:Type Grid}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsChecked, ElementName=rdb1sub}" Value="True">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Grid.Resources>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="90"/>
+                                <ColumnDefinition Width="120"/>
+                                <ColumnDefinition Width="1*"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.Column="1" Content="谱段:" FontSize="26" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <TextBox x:Name="txtCompareGray" Grid.Column="2" Text="120" FontSize="26" VerticalAlignment="Center"/>
+                        </Grid>
+                        <Button x:Name="btnCompareSet" Grid.Column="1" Content="设置" MinWidth="100" MaxWidth="150" Height="40" Template="{DynamicResource ButtonDefault}" Margin="5,0" Click="btnCompareSet_Click" VerticalAlignment="Center"/>
+                    </Grid>
+                    <TextBox Text="紫外        波长：200~400nm&#x000A;紫           波长：400~450nm&#x000A;蓝           波长：450~480nm&#x000A;绿蓝        波长：480~490nm&#x000A;蓝绿        波长：490~500nm&#x000A;绿           波长：500~560nm&#x000A;黄绿        波长：560~580nm&#x000A;黄           波长：580~610nm&#x000A;橙           波长：610~650nm&#x000A;红           波长：650~760nm&#x000A;近红外     波长：760~1500nm" Grid.Row="3" Grid.Column="1" Margin="0" Height="Auto"
+                             Background="{x:Null}" TextWrapping="Wrap" IsReadOnly="True" FontSize="20" VerticalScrollBarVisibility="Auto" HorizontalContentAlignment="Left" VerticalContentAlignment="Top" />
+                </Grid>
+
+                <GroupBox Grid.Row="3" Grid.Column="1" Margin="0" FontSize="26" Header="图像信息">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="1*"/>
@@ -405,34 +499,33 @@
                             <ColumnDefinition Width="40"/>
                             <ColumnDefinition Width="10*"/>
                             <ColumnDefinition Width="80"/>
-                            <ColumnDefinition Width="160"/>
+                            <ColumnDefinition Width="100"/>
                             <ColumnDefinition Width="1*"/>
                         </Grid.ColumnDefinitions>
                         <Label Grid.Row="0" Grid.Column="1" Content="帧号范围:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
-                        <TextBox x:Name="txtImgMinFrm" Grid.Row="0" Grid.Column="2" Margin="10,0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
+                        <TextBox x:Name="txtImgMinFrm" Grid.Row="0" Grid.Column="2" Margin="0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
                         <Label Grid.Row="0" Grid.Column="3" Content="—" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
-                        <TextBox x:Name="txtImgMaxFrm" Grid.Row="0" Grid.Column="4" Margin="10,0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
+                        <TextBox x:Name="txtImgMaxFrm" Grid.Row="0" Grid.Column="4" Margin="0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
                         <Label Grid.Row="1" Grid.Column="1" Content="时间范围:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
-                        <TextBox x:Name="txtImgStartTime" Grid.Row="1" Grid.Column="2" Margin="10,0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
+                        <TextBox x:Name="txtImgStartTime" Grid.Row="1" Grid.Column="2" Margin="0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
                         <Label Grid.Row="1" Grid.Column="3" Content="—" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
-                        <TextBox x:Name="txtImgEndTime" Grid.Row="1" Grid.Column="4" Margin="10,0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
+                        <TextBox x:Name="txtImgEndTime" Grid.Row="1" Grid.Column="4" Margin="0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
                         <Label Grid.Row="0" Grid.Column="5" Content="像宽:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
-                        <TextBox x:Name="txtImgWidth" Grid.Row="0" Grid.Column="6" Text="2048" Margin="20,0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
+                        <TextBox x:Name="txtImgWidth" Grid.Row="0" Grid.Column="6" Text="2048" Margin="0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
                         <Label Grid.Row="1" Grid.Column="5" Content="像高:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
-                        <TextBox Grid.Row="1" Grid.Column="6" Text="2048" Margin="20,0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
+                        <TextBox Grid.Row="1" Grid.Column="6" Text="2048" Margin="0" VerticalAlignment="Center" IsReadOnly="True"></TextBox>
                     </Grid>
                 </GroupBox>
-                <Image Grid.Row="3" Grid.Column="1" Source="image/Image_BackGround.jpg"/>
-                <GroupBox Grid.Row="1" Grid.Column="2" Grid.RowSpan="3" Margin="10,0,0,0" FontSize="26" Header="图像信息">
+                <GroupBox Grid.Row="3" Grid.Column="3" Margin="10,0,0,0" FontSize="26" Header="图像信息">
                     <Grid>
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="1*" MaxHeight="100"/>
-                            <RowDefinition Height="1*" MaxHeight="100"/>
-                            <RowDefinition Height="1*" MaxHeight="100"/>
-                            <RowDefinition Height="1*" MaxHeight="100"/>
-                            <RowDefinition Height="1*" MaxHeight="100"/>
-                            <RowDefinition Height="1*" MaxHeight="100"/>
-                            <RowDefinition Height="1*" MaxHeight="100"/>
+                            <RowDefinition Height="1*" MinHeight="40" MaxHeight="100"/>
+                            <RowDefinition Height="1*" MinHeight="40" MaxHeight="100"/>
+                            <RowDefinition Height="1*" MinHeight="40" MaxHeight="100"/>
+                            <RowDefinition Height="1*" MinHeight="40" MaxHeight="100"/>
+                            <RowDefinition Height="1*" MinHeight="40" MaxHeight="100"/>
+                            <RowDefinition Height="1*" MinHeight="40" MaxHeight="100"/>
+                            <RowDefinition Height="1*" MinHeight="40" MaxHeight="100"/>
                             <RowDefinition Height="1*"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
@@ -770,12 +863,12 @@
                         <ImageBrush ImageSource="image/ICON/1.ico"/>
                     </RadioButton.Background>
                 </RadioButton>
-                <RadioButton x:Name="btnLeftC2" Content="轨道姿态" Template="{DynamicResource ButtonIcon2nd}" Margin="0,0,0,0" Height="70" VerticalAlignment="Top">
+                <RadioButton x:Name="btnLeftC2" Content="应用示范" Template="{DynamicResource ButtonIcon2nd}" Margin="0,0,0,0" Height="70" VerticalAlignment="Top">
                     <RadioButton.Background>
                         <ImageBrush ImageSource="image/ICON/2.ico"/>
                     </RadioButton.Background>
                 </RadioButton>
-                <RadioButton x:Name="btnLeftC3" Content="载荷动画" Template="{DynamicResource ButtonIcon2nd}" Margin="0,0,0,0" Height="70" VerticalAlignment="Top">
+                <RadioButton x:Name="btnLeftC3" Content="3D演示" Template="{DynamicResource ButtonIcon2nd}" Margin="0,0,0,0" Height="70" VerticalAlignment="Top">
                     <RadioButton.Background>
                         <ImageBrush ImageSource="image/ICON/5.ico"/>
                     </RadioButton.Background>

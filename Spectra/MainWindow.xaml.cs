@@ -324,7 +324,7 @@ namespace Spectra
             foreach (DataRow dr in WinShowInfo.dtWinShowInfo.Rows)
             {
                 if(!w[Convert.ToUInt16(dr[0]) - 1].isShow)
-                    w[Convert.ToUInt16(dr[0]) - 1].ScreenShow(Screen.AllScreens,0, Convert.ToUInt16(dr[0]));
+                    w[Convert.ToUInt16(dr[0]) - 1].ScreenShow(Screen.AllScreens,0, Convert.ToUInt16(dr[0]).ToString());
                 w[Convert.ToUInt16(dr[0]) - 1].Refresh(Convert.ToUInt16(dr[4])-1,(WinFunc)Convert.ToUInt16(dr[6]));
             }
         }
@@ -496,11 +496,73 @@ namespace Spectra
                     File.WriteAllText(@"E:\Map\Amap.html", File.ReadAllText(@"E:\Map\Amap.html").Replace(line[94], $"	  var strURL = \"D:/Amap/roadmap/\" + zoom + \"/\" + tile_x+ \"/\" + tile_y + \".png\";"));
                     break;
                 case 1:
-                    File.WriteAllText(@"E:\Map\Amap.html", File.ReadAllText(@"E:\Map\Amap.html").Replace(line[94], $"	  var strURL = \"D:/Gmap/satellite/\" + zoom + \"/\" + tile_x+ \"/\" + tile_y + \".png\";"));
+                    File.WriteAllText(@"E:\Map\Amap.html", File.ReadAllText(@"E:\Map\Amap.html").Replace(line[94], $"	  var strURL = \"D:/Gmap/satellite/\" + zoom + \"/\" + tile_x+ \"/\" + tile_y + \".jpg\";"));
                     break;
                 default:
                     break;
             }
+            App.global_Win_Map.webMap.Refresh();
         }
+
+        #region 光谱显示
+        /*显示单张图像*/
+        private void btnShowSpeImg_Click(object sender, RoutedEventArgs e)
+        {
+            if (App.global_Win_SpecImg == null)
+            {
+                App.global_Win_SpecImg = new MultiFuncWindow();
+                App.global_Win_SpecImg.DisplayMode = GridMode.One;
+            }
+            if(!App.global_Win_SpecImg.isShow)
+                App.global_Win_SpecImg.ScreenShow(Screen.AllScreens,0, "光谱图像");
+            App.global_Win_SpecImg.Refresh(0,WinFunc.Image);
+        }
+        /*显示光谱立方体*/
+        private void btnShow3D_Click(object sender, RoutedEventArgs e)
+        {
+            if (App.global_Win_3D == null)
+            {
+                App.global_Win_3D = new MultiFuncWindow();
+                App.global_Win_3D.DisplayMode = GridMode.One;
+            }
+            if (!App.global_Win_3D.isShow)
+                App.global_Win_3D.ScreenShow(Screen.AllScreens, 0, "光谱立方体");
+            App.global_Win_3D.Refresh(0, WinFunc.Cube);
+        }
+        /*显示典型谱段对比*/
+        private void btnShowImgCompare_Click(object sender, RoutedEventArgs e)
+        {
+            if (App.global_Win_ImgCompare == null)
+            {
+                App.global_Win_ImgCompare = new MultiFuncWindow();
+                App.global_Win_ImgCompare.DisplayMode = GridMode.Four;
+            }
+            if (!App.global_Win_ImgCompare.isShow)
+                App.global_Win_ImgCompare.ScreenShow(Screen.AllScreens, 0, "典型谱段图像对比");
+            App.global_Win_ImgCompare.Refresh(0, WinFunc.Image);
+            App.global_Win_ImgCompare.Refresh(1, WinFunc.Image);
+            App.global_Win_ImgCompare.Refresh(2, WinFunc.Image);
+            App.global_Win_ImgCompare.Refresh(3, WinFunc.Image);
+        }
+        /*设置对比图像谱段*/
+        private void btnCompareSet_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (rdb1sub.IsChecked == true)
+                    ((Ctrl_ImageView)(App.global_Win_ImgCompare.UserControls[0])).Refresh(Convert.ToUInt16(txtCompareR.Text),ColorRenderMode.Grayscale);
+                if (rdb2sub.IsChecked == true)
+                    ((Ctrl_ImageView)(App.global_Win_ImgCompare.UserControls[1])).Refresh(Convert.ToUInt16(txtCompareGray.Text), ColorRenderMode.Grayscale);
+                if (rdb3sub.IsChecked == true)
+                    ((Ctrl_ImageView)(App.global_Win_ImgCompare.UserControls[2])).Refresh(Convert.ToUInt16(txtCompareGray.Text), ColorRenderMode.Grayscale);
+                if (rdb4sub.IsChecked == true)
+                    ((Ctrl_ImageView)(App.global_Win_ImgCompare.UserControls[3])).Refresh(Convert.ToUInt16(txtCompareGray.Text), ColorRenderMode.Grayscale);
+            }
+            catch (Exception)
+            {
+                System.Windows.MessageBox.Show("窗体未初始化！", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+        #endregion
     }
 }

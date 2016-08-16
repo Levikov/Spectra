@@ -28,10 +28,7 @@ namespace Spectra
                 double d_progress = 0;
                 string cmdline = "";
                 cmdline = "开始分包...";
-                FileStream fs_chanel = new FileStream(FileInfo.srcFilePathName, FileMode.Open, FileAccess.Read, FileShare.Read);
                 byte[] buf_row1 = new byte[288];
-                
-
                 Parallel.For(0,4,i=>
                 {
                     FileStream fs_split = new FileStream(FileInfo.srcFilePathName, FileMode.Open, FileAccess.Read, FileShare.Read);
@@ -102,6 +99,8 @@ namespace Spectra
                     fs_out.Close();
 
                 });
+
+                FileStream fs_chanel = new FileStream(FileInfo.srcFilePathName, FileMode.Open, FileAccess.Read, FileShare.Read);
 
                 while (fs_chanel.Position < fs_chanel.Length)
                 {
@@ -521,6 +520,8 @@ namespace Spectra
                 {
                     isInSql = true;
                     errEnd = srcFile.Position - 1024;
+                    if (bufPack[12] == 0xAA && bufPack[13] == 0xAA && bufPack[14] == 0xAA && bufPack[15] == 0xAA)
+                        continue;
                     outFile.Write(bufPack, 12, 884);
                     outFile.Flush();
                 }
