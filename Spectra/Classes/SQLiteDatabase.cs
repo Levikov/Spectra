@@ -9,7 +9,7 @@ namespace Spectra
     public class SQLiteDatabase
     {
         String dbConnection;
-        SQLiteConnection cnn;
+        public SQLiteConnection cnn;
         SQLiteTransaction trans;
 
         #region ctor
