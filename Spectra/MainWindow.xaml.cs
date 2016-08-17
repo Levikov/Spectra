@@ -614,7 +614,7 @@ namespace Spectra
             }
             else
             {
-                SQLiteFunc.ExcuteSQL("update Apply_Model set 窗口数量=?,起始时间='?',结束时间='?',起始经度=?,结束经度=?,起始纬度=?,结束纬度=?,备注='?' where 名称='?'", cmbModelWinCnt.SelectedIndex + 1, ModelShowInfo.Time_Start.ToString("yyyy-MM-dd HH:mm:ss"), ModelShowInfo.Time_End.ToString("yyyy-MM-dd HH:mm:ss"), 0, 0, 0, 0, txtModelRemark.Text, txtModelName.Text);
+                SQLiteFunc.ExcuteSQL("update Apply_Model set 窗口数量=?,起始时间='?',结束时间='?',起始经度=?,结束经度=?,起始纬度=?,结束纬度=?,备注='?' where 名称='?'", cmbModelWinCnt.SelectedIndex + 1, ModelShowInfo.Time_Start.ToString("yyyy-MM-dd HH:mm:ss"), ModelShowInfo.Time_End.ToString("yyyy-MM-dd HH:mm:ss"), ModelShowInfo.Coord_TL.Lon, ModelShowInfo.Coord_TL.Lat, ModelShowInfo.Coord_DR.Lon, ModelShowInfo.Coord_DR.Lat, txtModelRemark.Text, txtModelName.Text);
                 if(cmbModelWinCnt.SelectedIndex + 1 > Convert.ToUInt16(dtModel.Rows[0][1]))
                     for (int i = Convert.ToUInt16(dtModel.Rows[0][1]); i < cmbModelWinCnt.SelectedIndex + 1; i++)
                         SQLiteFunc.ExcuteSQL("insert into Apply_ModelR (名称,窗口编号,显示器编号,子窗体数量,子窗体编号,窗体类型,窗体类型编号) values ('?',?,?,?,?,'?',?)", txtModelName.Text, i + 1, 1, 1, 1, "图像", 0);
