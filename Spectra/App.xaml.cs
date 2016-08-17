@@ -19,6 +19,7 @@ namespace Spectra
         public static MapWindow global_Win_Map;
         public static MultiFuncWindow global_Win_ImgCompare;
         public static List<Window> global_Windows = new List<Window>();
+        public static List<Window> global_ApplyModel = new List<Window>();
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {
