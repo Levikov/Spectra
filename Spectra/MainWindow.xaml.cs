@@ -531,7 +531,7 @@ namespace Spectra
                 ModelShowInfo.dtWinShowInfo = SQLiteFunc.SelectDTSQL("SELECT * from Apply_ModelR where 名称='" + sel.Row[0] + "' order by 窗口编号,子窗体编号");
                 txtModelName.Text = sel.Row[0].ToString();
                 cmbModelWinCnt.SelectedIndex = Convert.ToUInt16(sel.Row[1]) - 1;
-                txtModelRemark.Text = sel.Row[2].ToString();
+                txtModelRemark.Text = sel.Row[8].ToString();
                 dataGrid_ApplyModelR.ItemsSource = ModelShowInfo.dtWinShowInfo.DefaultView;
                 dataGrid_ApplyModelR.SelectedIndex = 0;
                 cmbModelSID.SelectedIndex = Convert.ToUInt16(ModelShowInfo.dtWinShowInfo.Rows[0][2]) - 1;
@@ -552,12 +552,6 @@ namespace Spectra
                 cmbModelWinID2.SelectedIndex = Convert.ToUInt16(sel.Row[1]) - 1;
                 cmbModelSubID.SelectedIndex = Convert.ToUInt16(sel.Row[4]) - 1;
                 cmbModelSubType.SelectedIndex = Convert.ToUInt16(sel.Row[6]);
-            }
-            else
-            {
-                cmbModelWinID2.SelectedIndex = 1;
-                cmbModelSubID.SelectedIndex = 1;
-                cmbModelSubType.SelectedIndex = 1;
             }
         }
         /*选择窗口数量后触发事件*/
