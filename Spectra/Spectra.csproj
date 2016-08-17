@@ -326,6 +326,7 @@
     <Content Include="DLL\FreeImageNET.dll" />
     <Content Include="DLL\System.Data.SQLite.dll" />
     <Content Include="DLL\WFTools3D.dll" />
+    <Resource Include="image\未完成工作.txt" />
     <Resource Include="image\20160815-交付要求.txt" />
   </ItemGroup>
   <ItemGroup>

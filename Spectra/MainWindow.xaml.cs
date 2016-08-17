@@ -30,6 +30,14 @@ namespace Spectra
         }
 
         #region 界面控制
+        /*窗体加载时显示默认值*/
+        private void GroupBox_Loaded(object sender, RoutedEventArgs e)
+        {
+            getDefaultShow();
+            getApplyModel();
+            setWindowID(WinShowInfo.WindowsCnt);
+            setScreenID(Screen.AllScreens.Length);
+        }
         /*拖动界面*/
         private void WindowMain_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
@@ -243,7 +251,6 @@ namespace Spectra
             lblEndLat.Content = ImageInfo.endCoord.Lat.ToString("F2");
         }
         #endregion
-        
 
         #region 默认显示方式
         /*初始化显示窗体*/
@@ -272,13 +279,6 @@ namespace Spectra
                 w[Convert.ToUInt16(dr[0]) - 1].Refresh(Convert.ToUInt16(dr[4])-1,(WinFunc)Convert.ToUInt16(dr[6]));
             }
         }
-        /*窗体加载时显示默认值*/
-        private void GroupBox_Loaded(object sender, RoutedEventArgs e)
-        {
-            getDefaultShow();
-            setWindowID(WinShowInfo.WindowsCnt);
-            setScreenID(Screen.AllScreens.Length);
-        }
         /*设置窗口编号有哪些值可选*/
         private void setWindowID(int cnt)
         {
@@ -295,9 +295,14 @@ namespace Spectra
         private void setScreenID(int cnt)
         {
             cmbScreenSID.Items.Clear();
+            cmbModelSID.Items.Clear();
             for (int i = 0; i < cnt; i++)
+            {
                 cmbScreenSID.Items.Add(i + 1);
+                cmbModelSID.Items.Add(i + 1);
+            }
             cmbScreenSID.SelectedIndex = 0;
+            cmbModelSID.SelectedIndex = 0;
         }
         /*获取数据库内容*/
         private void getDefaultShow()
@@ -307,6 +312,13 @@ namespace Spectra
             if (WinShowInfo.dtWinShowInfo.Rows.Count != 0)
                 WinShowInfo.WindowsCnt = Convert.ToUInt16(WinShowInfo.dtWinShowInfo.Rows[0][1]);
             cmbScreenWindowsCnt.SelectedIndex = WinShowInfo.WindowsCnt - 1;
+        }
+        /*获得已有的应用样式*/
+        private void getApplyModel()
+        {
+            ModelShowInfo.dtModelList = SQLiteFunc.SelectDTSQL("select * from Apply_Model order by 名称");
+            dataGrid_ApplyModel.ItemsSource = ModelShowInfo.dtModelList.DefaultView;
+            dataGrid_ApplyModel.SelectedIndex = 0;
         }
         /*设置窗口数量*/
         private void button_btnScreenWinCnt_Click(object sender, RoutedEventArgs e)
@@ -373,8 +385,7 @@ namespace Spectra
             for(int i=1;i<=160;i++)
                 GetImgBuf(i);
         }
-
-
+        
         public void GetImgBuf(int v)
         {
             byte[] buf_full = new byte[2048 * ImageInfo.imgWidth * 2];
@@ -505,6 +516,165 @@ namespace Spectra
             catch (Exception)
             {
                 System.Windows.MessageBox.Show("窗体未初始化！", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+        #endregion
+
+        #region 应用样式
+        /*选中datagrid的应用样式*/
+        private void dataGrid_ApplyModel_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var sel = (DataRowView)dataGrid_ApplyModel.SelectedItem;
+            if (sel != null)
+            {
+                ModelShowInfo.WindowsCnt = Convert.ToUInt16(sel.Row[1]);
+                ModelShowInfo.dtWinShowInfo = SQLiteFunc.SelectDTSQL("SELECT * from Apply_ModelR where 名称='" + sel.Row[0] + "' order by 窗口编号,子窗体编号");
+                txtModelName.Text = sel.Row[0].ToString();
+                cmbModelWinCnt.SelectedIndex = Convert.ToUInt16(sel.Row[1]) - 1;
+                txtModelRemark.Text = sel.Row[2].ToString();
+                dataGrid_ApplyModelR.ItemsSource = ModelShowInfo.dtWinShowInfo.DefaultView;
+                dataGrid_ApplyModelR.SelectedIndex = 0;
+                cmbModelSID.SelectedIndex = Convert.ToUInt16(ModelShowInfo.dtWinShowInfo.Rows[0][2]) - 1;
+                cmbModelSubCnt.SelectedIndex = Convert.ToUInt16(ModelShowInfo.dtWinShowInfo.Rows[0][3]) - 1;
+            }
+            else
+            {
+                ModelShowInfo.WindowsCnt = 0;
+                ModelShowInfo.dtWinShowInfo = null;
+                dataGrid_ApplyModelR.ItemsSource = null;
+            }
+        }
+        private void dataGrid_ApplyModelR_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var sel = (DataRowView)dataGrid_ApplyModelR.SelectedItem;
+            if (sel != null)
+            {
+                cmbModelWinID2.SelectedIndex = Convert.ToUInt16(sel.Row[1]) - 1;
+                cmbModelSubID.SelectedIndex = Convert.ToUInt16(sel.Row[4]) - 1;
+                cmbModelSubType.SelectedIndex = Convert.ToUInt16(sel.Row[6]);
+            }
+            else
+            {
+                cmbModelWinID2.SelectedIndex = 1;
+                cmbModelSubID.SelectedIndex = 1;
+                cmbModelSubType.SelectedIndex = 1;
+            }
+        }
+        /*选择窗口数量后触发事件*/
+        private void cmbModelWinCnt_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (cmbModelWinID1 == null)
+                return;
+            cmbModelWinID1.Items.Clear();
+            for (int i = 0; i < cmbModelWinCnt.SelectedIndex + 1; i++)
+                cmbModelWinID1.Items.Add(i + 1);
+            cmbModelWinID1.SelectedIndex = 0;
+            cmbModelWinID2.Items.Clear();
+            for (int i = 0; i < cmbModelWinCnt.SelectedIndex + 1; i++)
+                cmbModelWinID2.Items.Add(i + 1);
+            cmbModelWinID2.SelectedIndex = 0;
+        }
+        /*选择子窗体数量后触发事件*/
+        private void cmbModelSubCnt_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (cmbModelSubID == null)
+                return;
+            cmbModelSubID.Items.Clear();
+            for (int i = 0; i < cmbModelSubCnt.SelectedIndex + 1; i++)
+                cmbModelSubID.Items.Add(i + 1);
+            cmbModelSubID.SelectedIndex = 0;
+        }
+        /*设置名称、窗口数量、备注*/
+        private void btnModelSet1_Click(object sender, RoutedEventArgs e)
+        {
+            string sql = "select * from Apply_Model where 名称='" + txtModelName.Text + "'";
+            DataTable dtModel = SQLiteFunc.SelectDTSQL(sql);
+            if (dtModel.Rows.Count == 0)
+            {
+                SQLiteFunc.ExcuteSQL("insert into Apply_Model (名称,窗口数量,备注) values ('?',?,'?')", txtModelName.Text, cmbModelWinCnt.SelectedIndex + 1, txtModelRemark.Text);
+                for (int i = 0; i < cmbModelWinCnt.SelectedIndex + 1; i++)
+                    SQLiteFunc.ExcuteSQL("insert into Apply_ModelR (名称,窗口编号,显示器编号,子窗体数量,子窗体编号,窗体类型,窗体类型编号) values ('?',?,?,?,?,'?',?)", txtModelName.Text, i + 1, 1, 1, 1, "图像", 0);
+                getApplyModel();
+                dataGrid_ApplyModel.SelectedIndex = dataGrid_ApplyModel.Items.Count - 1;
+            }
+            else
+            {
+                SQLiteFunc.ExcuteSQL("update Apply_Model set 窗口数量=?,备注='?' where 名称='?'", cmbModelWinCnt.SelectedIndex + 1, txtModelRemark.Text, txtModelName.Text);
+                if(cmbModelWinCnt.SelectedIndex + 1 > Convert.ToUInt16(dtModel.Rows[0][1]))
+                    for (int i = Convert.ToUInt16(dtModel.Rows[0][1]); i < cmbModelWinCnt.SelectedIndex + 1; i++)
+                        SQLiteFunc.ExcuteSQL("insert into Apply_ModelR (名称,窗口编号,显示器编号,子窗体数量,子窗体编号,窗体类型,窗体类型编号) values ('?',?,?,?,?,'?',?)", txtModelName.Text, i + 1, 1, 1, 1, "图像", 0);
+                else if (cmbModelWinCnt.SelectedIndex + 1 < Convert.ToUInt16(dtModel.Rows[0][1]))
+                    for (int i = cmbModelWinCnt.SelectedIndex+1; i < Convert.ToUInt16(dtModel.Rows[0][1]); i++)
+                        SQLiteFunc.ExcuteSQL("delete from Apply_ModelR where 名称='?' and 窗口编号=?;", txtModelName.Text, i+1);
+                sql = "select * from Apply_ModelR where 名称='" + txtModelName.Text + "'";
+                dataGrid_ApplyModelR.ItemsSource = SQLiteFunc.SelectDTSQL(sql).DefaultView;
+            }
+        }
+
+        private void btnModelSet2_Click(object sender, RoutedEventArgs e)
+        {
+            string sql = "select * from Apply_ModelR where 名称='" + txtModelName.Text + "' order by 窗口编号,子窗体编号";
+            DataTable dtModel = SQLiteFunc.SelectDTSQL(sql);
+            if (dtModel.Rows.Count == 0)
+            {
+                System.Windows.MessageBox.Show("不存在该样式!", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+            if (Convert.ToUInt16(dtModel.Rows[0][3]) < cmbModelSubCnt.SelectedIndex+1)
+            { 
+                for (int i = Convert.ToUInt16(dtModel.Rows[0][3]); i < cmbModelSubCnt.SelectedIndex + 1; i++)
+                    SQLiteFunc.ExcuteSQL("insert into Apply_ModelR (名称,窗口编号,显示器编号,子窗体数量,子窗体编号,窗体类型,窗体类型编号) values ('?',?,?,?,?,'?',?)", txtModelName.Text, cmbModelWinID1.SelectedIndex+1, 1, 1, i + 1, "图像", 0);
+            }
+            else if (Convert.ToUInt16(dtModel.Rows[0][3]) > cmbModelSubCnt.SelectedIndex + 1)
+            {
+                for (int i = cmbModelSubCnt.SelectedIndex+1; i <= Convert.ToUInt16(dtModel.Rows[0][3]) ; i++)
+                    SQLiteFunc.ExcuteSQL("delete from Apply_ModelR where 名称='?' and 子窗体编号=?;", txtModelName.Text, i + 1);
+            }
+            SQLiteFunc.ExcuteSQL("update Apply_ModelR set 子窗体数量=?,显示器编号=? where 名称='?' and 窗口编号=?", cmbModelSubCnt.SelectedIndex + 1,cmbModelSID.SelectedIndex+1, txtModelName.Text,cmbModelWinID1.SelectedIndex+1);
+            sql = "select * from Apply_ModelR where 名称='" + txtModelName.Text + "' order by 窗口编号,子窗体编号";
+            dataGrid_ApplyModelR.ItemsSource = SQLiteFunc.SelectDTSQL(sql).DefaultView;
+        }
+
+        private void btnModelSet3_Click(object sender, RoutedEventArgs e)
+        {
+            SQLiteFunc.ExcuteSQL("update Apply_ModelR set 窗体类型='?',窗体类型编号=? where 窗口编号=? and 子窗体编号=?", cmbModelSubType.Text, cmbModelSubType.SelectedIndex,cmbModelWinID2.SelectedIndex+1, cmbModelSubID.SelectedIndex+1);
+            string sql = "select * from Apply_ModelR where 名称='" + txtModelName.Text + "' order by 窗口编号,子窗体编号";
+            dataGrid_ApplyModelR.ItemsSource = SQLiteFunc.SelectDTSQL(sql).DefaultView;
+        }
+        /*删除应用样式*/
+        private void btnModelDel_Click(object sender, RoutedEventArgs e)
+        {
+            if (System.Windows.MessageBox.Show("确认删除该应用样式?", "提示", MessageBoxButton.OKCancel, MessageBoxImage.Information) == MessageBoxResult.Cancel)
+                return;
+            SQLiteFunc.ExcuteSQL("delete from Apply_Model where 名称='?'", txtModelName.Text);
+            SQLiteFunc.ExcuteSQL("delete from Apply_ModelR where 名称='?'", txtModelName.Text);
+            getApplyModel();
+        }
+        /*显示样式*/
+        private void btnModelShow_Click(object sender, RoutedEventArgs e)
+        {
+            App.global_ApplyModel.Clear();
+            for (int i = 0; i < ModelShowInfo.WindowsCnt; i++)
+                App.global_ApplyModel.Add(new MultiFuncWindow());
+            int[] subCnt = new int[ModelShowInfo.WindowsCnt];
+            subCnt[0] = Convert.ToUInt16(ModelShowInfo.dtWinShowInfo.Rows[0][3]);
+            int p = subCnt[0];
+            for (int i = 1; i < ModelShowInfo.WindowsCnt; i++)
+            {
+                subCnt[i] = Convert.ToUInt16(ModelShowInfo.dtWinShowInfo.Rows[p][3]);
+                p += subCnt[i];
+            }
+            MultiFuncWindow[] w = new MultiFuncWindow[ModelShowInfo.WindowsCnt];
+            for (int i = 0; i < ModelShowInfo.WindowsCnt; i++)
+            {
+                w[i] = (MultiFuncWindow)App.global_ApplyModel[i];
+                w[i].DisplayMode = (GridMode)(subCnt[i] - 1);
+            }
+            foreach (DataRow dr in ModelShowInfo.dtWinShowInfo.Rows)
+            {
+                if (!w[Convert.ToUInt16(dr[1]) - 1].isShow)
+                    w[Convert.ToUInt16(dr[1]) - 1].ScreenShow(Screen.AllScreens, 0, Convert.ToUInt16(dr[1]).ToString());
+                w[Convert.ToUInt16(dr[1]) - 1].Refresh(Convert.ToUInt16(dr[4]) - 1, (WinFunc)Convert.ToUInt16(dr[6]));
             }
         }
         #endregion
