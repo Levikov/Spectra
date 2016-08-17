@@ -175,7 +175,8 @@ namespace Spectra
             try
             {
                 DataTable dt = await DataProc.QueryResult((bool)cb_byTime.IsChecked, (bool)this.cb_byCoord.IsChecked, (bool)this.cb_byFrmCnt.IsChecked, start_time, end_time, start_FrmCnt, end_FrmCnt, Coord_TL, Coord_DR);
-                this.dataGrid_Result.ItemsSource = dt.DefaultView;
+                dataGrid_Result.ItemsSource = dt.DefaultView;
+                dataGrid_SatePose.ItemsSource = dt.DefaultView;
                 DataQuery.QueryResult = dt;
                 ImageInfo.GetImgInfo(dt);       /*存储图像信息*/
                 SetImgInfo();
@@ -671,6 +672,7 @@ namespace Spectra
             {
                 DataTable dt = await DataProc.QueryResult(ModelShowInfo.Time_Start != ModelShowInfo.Time_End, ModelShowInfo.Coord_TL.Lon != ModelShowInfo.Coord_DR.Lon && ModelShowInfo.Coord_TL.Lat != ModelShowInfo.Coord_DR.Lat, false, ModelShowInfo.Time_Start, ModelShowInfo.Time_End, 0, 0, ModelShowInfo.Coord_TL, ModelShowInfo.Coord_DR);
                 dataGrid_Result.ItemsSource = dt.DefaultView;
+                dataGrid_SatePose.ItemsSource = dt.DefaultView;
                 DataQuery.QueryResult = dt;
                 ImageInfo.GetImgInfo(dt);       /*存储图像信息*/
                 SetImgInfo();
