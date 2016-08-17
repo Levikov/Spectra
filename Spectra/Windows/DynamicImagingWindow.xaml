@@ -1,0 +1,27 @@
+﻿<Window x:Class="Spectra.DynamicImagingWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Spectra"
+        mc:Ignorable="d"
+        Title="DynamicImagingWindow" Height="720" Width="1280" Background="Black">
+    <Grid x:Name="grid_Image" Width="auto" Height="auto">
+        <Grid.Resources>
+            <TransformGroup x:Key="Imageview">
+                <ScaleTransform x:Name="ScaleTrans"/>
+                <TranslateTransform x:Name="TransTrans"/>
+            </TransformGroup>
+        </Grid.Resources>
+        <Rectangle Stroke="White" StrokeThickness="1"/>
+        <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Disabled" Background="{x:Null}"   Cursor="Cross"
+                  Margin="5" Focusable="False" x:Name="BackFrame">
+            <ContentControl   
+                             MouseLeftButtonUp="IMG1_MouseLeftButtonUp"
+                             MouseMove="IMG1_MouseMove"
+                             MouseWheel="IMG1_MouseWheel" MouseLeftButtonDown="IMG1_MouseLeftButtonDown" >
+                <Image Name="IMG1" RenderTransform="{StaticResource Imageview}" RenderOptions.BitmapScalingMode="NearestNeighbor" MouseDown="IMG1_MouseDown" StretchDirection="DownOnly"/>
+            </ContentControl>
+        </ScrollViewer>
+    </Grid>
+</Window>
