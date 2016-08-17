@@ -137,36 +137,38 @@ namespace Spectra
 
                 long height = (long)sqlExcute.ExecuteScalar($"SELECT COUNT(*) FROM AuxData WHERE ImportId={import_id}");
                 long Frm_Start = (long)sqlExcute.ExecuteScalar($"SELECT FrameId FROM AuxData WHERE ImportId={import_id} ORDER BY FrameId ASC");
-                byte[] buff_all = new byte[2048 * 160 * height*2];
                 FileStream[] fs_split_out = new FileStream[160];
                 Parallel.For(0, 160, i => {
                    fs_split_out[i] = new FileStream($"{Variables.str_pathWork}\\{import_id}_{i}.raw", FileMode.Create, FileAccess.Write);
                 });
-                Parallel.For(0, height, i =>
-                {
-                    Parallel.For(0, 4, j => 
-                    {
-                        try
-                        {
-                            byte[] buf_file_chanel = new byte[512 * 160 * 2];
-                            FileStream fs_file = new FileStream($"{Variables.str_pathWork}\\{import_id}_{Frm_Start + i}_{j + 1}.raw", FileMode.Open, FileAccess.Read,FileShare.Read);
-                            fs_file.Read(buf_file_chanel, 0, 512 * 160 * 2);
-                            Parallel.For(0, 160, k =>
-                            {
-                                Array.Copy(buf_file_chanel,k*512*2,buff_all,k*2048*height*2+i*2048*2+j*512*2,512*2);
 
-                            });
-                        }
-                        catch
-                        {
 
-                        }
-                    });
-                });
-                Parallel.For(0, 160, i => {
-                    fs_split_out[i].Write(buff_all,i*2048*(int)height*2,2048*(int)height*2);
-                    fs_split_out[i].Close();
-                });
+                Parallel.For(0, 160, k =>
+                 {
+                     byte[] buff_all = new byte[2048 * height * 2];
+                     Parallel.For(0, height, i =>
+                     {
+                         Parallel.For(0, 4, j =>
+                         {
+                             try
+                             {
+                                 byte[] buf_file_chanel = new byte[512 * 160 * 2];
+                                 FileStream fs_file = new FileStream($"{Variables.str_pathWork}\\{import_id}_{Frm_Start + i}_{j + 1}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
+                                 fs_file.Read(buf_file_chanel, 0, 512 * 160 * 2);
+                                 Array.Copy(buf_file_chanel, k * 512 * 2, buff_all, i * 2048 * 2 + j * 512 * 2, 512 * 2);
+                                 fs_file.Close();
+                             }
+                             catch { }
+
+                         });
+                     });
+                     fs_split_out[k].Write(buff_all, 0, 2048 * (int)height * 2);
+                     fs_split_out[k].Close();
+                     Prog.Report((double)k / 160);
+                     List.Report($"正在分割通道{k}/159");
+
+                 });
+                
                 return "成功！";
             });
 
