@@ -721,10 +721,10 @@
                         </ComboBox>
                         <Label Content="备注：" Grid.Row="3" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center"></Label>
                         <TextBox x:Name="txtModelRemark" Grid.Row="3" Grid.Column="2" Margin="10,0" VerticalAlignment="Center" Height="34"></TextBox>
-                        <Button x:Name="btnModelSet1" Content="设置" Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" Template="{DynamicResource ButtonDefault}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="120" Click="btnModelSet1_Click"></Button>
+                        <Button x:Name="btnModelSet1" Content="设置" Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="3" Template="{DynamicResource ButtonDefault}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="120" Click="btnModelSet1_Click"></Button>
                         <Grid Grid.Row="1" Grid.Column="3" Grid.RowSpan="3">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="70"/>
+                                <ColumnDefinition Width="65"/>
                                 <ColumnDefinition Width="1*"/>
                                 <ColumnDefinition Width="30"/>
                                 <ColumnDefinition Width="1*"/>
@@ -737,15 +737,15 @@
                             <Label Grid.Row="0" Content="时间:" VerticalAlignment="Center" HorizontalAlignment="Right"/>
                             <Label Grid.Row="1" Content="经度:" VerticalAlignment="Center" HorizontalAlignment="Right"/>
                             <Label Grid.Row="2" Content="纬度:" VerticalAlignment="Center" HorizontalAlignment="Right"/>
-                            <TextBox Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Height="34"/>
-                            <TextBox Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Height="34"/>
-                            <TextBox Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" Height="34"/>
-                            <Label Grid.Row="0" Grid.Column="2" Content="—" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                            <Label Grid.Row="1" Grid.Column="2" Content="—" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                            <Label Grid.Row="2" Grid.Column="2" Content="—" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                            <TextBox Grid.Row="0" Grid.Column="3" VerticalAlignment="Center" Height="34"/>
-                            <TextBox Grid.Row="1" Grid.Column="3" VerticalAlignment="Center" Height="34"/>
-                            <TextBox Grid.Row="2" Grid.Column="3" VerticalAlignment="Center" Height="34"/>
+                            <TextBox x:Name="txtModelStartTime" Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Height="34"/>
+                            <TextBox x:Name="txtModelEndTime" Grid.Row="0" Grid.Column="3" VerticalAlignment="Center" Height="34"/>
+                            <TextBox x:Name="txtModelStartLon" Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Height="34"/>
+                            <TextBox x:Name="txtModelEndLon" Grid.Row="1" Grid.Column="3" VerticalAlignment="Center" Height="34"/>
+                            <TextBox x:Name="txtModelStartLat" Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" Height="34"/>
+                            <TextBox x:Name="txtModelEndLat" Grid.Row="2" Grid.Column="3" VerticalAlignment="Center" Height="34"/>
+                            <Label Grid.Row="0" Grid.Column="2" Content="—" VerticalAlignment="Center" HorizontalAlignment="Center" HorizontalContentAlignment="Center"/>
+                            <Label Grid.Row="1" Grid.Column="2" Content="—" VerticalAlignment="Center" HorizontalAlignment="Center" HorizontalContentAlignment="Center"/>
+                            <Label Grid.Row="2" Grid.Column="2" Content="—" VerticalAlignment="Center" HorizontalAlignment="Center" HorizontalContentAlignment="Center"/>
                         </Grid>
                         <Label Content="窗口编号:" Grid.Row="1" Grid.Column="4" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                         <ComboBox x:Name="cmbModelWinID1" Grid.Column="5" Grid.Row="1" VerticalAlignment="Center" Margin="10,0" HorizontalContentAlignment="Center" SelectedIndex="0">

@@ -89,6 +89,10 @@ namespace Spectra
         public static int WindowsCnt = 0;               //应用样式的窗口数量
         public static DataTable dtModelList;            //应用样式列表
         public static DataTable dtWinShowInfo;          //应用样式细则
+        public static DateTime Time_Start = DateTime.Now;
+        public static DateTime Time_End = DateTime.Now;
+        public static Coord Coord_TL = new Coord(0, 0); //左上角坐标
+        public static Coord Coord_DR = new Coord(0, 0); //右下角坐标
     }
 
     public class ImageInfo : DependencyObject

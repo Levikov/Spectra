@@ -529,9 +529,23 @@ namespace Spectra
             {
                 ModelShowInfo.WindowsCnt = Convert.ToUInt16(sel.Row[1]);
                 ModelShowInfo.dtWinShowInfo = SQLiteFunc.SelectDTSQL("SELECT * from Apply_ModelR where 名称='" + sel.Row[0] + "' order by 窗口编号,子窗体编号");
-                txtModelName.Text = sel.Row[0].ToString();
-                cmbModelWinCnt.SelectedIndex = Convert.ToUInt16(sel.Row[1]) - 1;
-                txtModelRemark.Text = sel.Row[8].ToString();
+                txtModelName.Text = sel.Row[0].ToString();                                                                          /*名称*/
+                cmbModelWinCnt.SelectedIndex = Convert.ToUInt16(sel.Row[1]) - 1;                                                    /*窗口数量*/
+                txtModelStartTime.Text = (sel.Row[2].ToString() == "") ? "" : Convert.ToDateTime(sel.Row[2]).ToString();            /*起始时间*/
+                txtModelEndTime.Text = (sel.Row[3].ToString() == "") ? "" : Convert.ToDateTime(sel.Row[3]).ToString();              /*结束时间*/
+                txtModelStartLon.Text = (sel.Row[4].ToString() == "") ? "" : sel.Row[4].ToString();                                 /*起始经度*/
+                txtModelEndLon.Text = (sel.Row[5].ToString() == "") ? "" : sel.Row[5].ToString();                                   /*结束经度*/
+                txtModelStartLat.Text = (sel.Row[6].ToString() == "") ? "" : sel.Row[6].ToString();                                 /*起始纬度*/
+                txtModelEndLat.Text = (sel.Row[7].ToString() == "") ? "" : sel.Row[7].ToString();                                   /*结束纬度*/
+                txtModelRemark.Text = sel.Row[8].ToString();                                                                        /*备注*/
+
+                ModelShowInfo.Time_Start = Convert.ToDateTime(txtModelStartTime.Text);
+                ModelShowInfo.Time_End = Convert.ToDateTime(txtModelEndTime.Text);
+                ModelShowInfo.Coord_TL.Lon = Convert.ToDouble(txtModelStartLon.Text);
+                ModelShowInfo.Coord_TL.Lat = Convert.ToDouble(txtModelStartLat.Text);
+                ModelShowInfo.Coord_DR.Lon = Convert.ToDouble(txtModelEndLon.Text);
+                ModelShowInfo.Coord_DR.Lat = Convert.ToDouble(txtModelEndLat.Text);
+
                 dataGrid_ApplyModelR.ItemsSource = ModelShowInfo.dtWinShowInfo.DefaultView;
                 dataGrid_ApplyModelR.SelectedIndex = 0;
                 cmbModelSID.SelectedIndex = Convert.ToUInt16(ModelShowInfo.dtWinShowInfo.Rows[0][2]) - 1;
@@ -578,14 +592,20 @@ namespace Spectra
                 cmbModelSubID.Items.Add(i + 1);
             cmbModelSubID.SelectedIndex = 0;
         }
-        /*设置名称、窗口数量、备注*/
+        /*1设置名称、窗口数量、备注*/
         private void btnModelSet1_Click(object sender, RoutedEventArgs e)
         {
+            ModelShowInfo.Time_Start = Convert.ToDateTime(txtModelStartTime.Text);
+            ModelShowInfo.Time_End = Convert.ToDateTime(txtModelEndTime.Text);
+            ModelShowInfo.Coord_TL.Lon = Convert.ToDouble(txtModelStartLon.Text);
+            ModelShowInfo.Coord_TL.Lat = Convert.ToDouble(txtModelStartLat.Text);
+            ModelShowInfo.Coord_DR.Lon = Convert.ToDouble(txtModelEndLon.Text);
+            ModelShowInfo.Coord_DR.Lat = Convert.ToDouble(txtModelEndLat.Text);
             string sql = "select * from Apply_Model where 名称='" + txtModelName.Text + "'";
             DataTable dtModel = SQLiteFunc.SelectDTSQL(sql);
             if (dtModel.Rows.Count == 0)
             {
-                SQLiteFunc.ExcuteSQL("insert into Apply_Model (名称,窗口数量,备注) values ('?',?,'?')", txtModelName.Text, cmbModelWinCnt.SelectedIndex + 1, txtModelRemark.Text);
+                SQLiteFunc.ExcuteSQL("insert into Apply_Model (名称,窗口数量,起始时间,结束时间,起始经度,结束经度,起始纬度,结束纬度,备注) values ('?',?,'?','?',?,?,?,?,'?')", txtModelName.Text, cmbModelWinCnt.SelectedIndex + 1, ModelShowInfo.Time_Start.ToString("yyyy-MM-dd HH:mm:ss"), ModelShowInfo.Time_End.ToString("yyyy-MM-dd HH:mm:ss"), 0, 0, 0, 0, txtModelRemark.Text);
                 for (int i = 0; i < cmbModelWinCnt.SelectedIndex + 1; i++)
                     SQLiteFunc.ExcuteSQL("insert into Apply_ModelR (名称,窗口编号,显示器编号,子窗体数量,子窗体编号,窗体类型,窗体类型编号) values ('?',?,?,?,?,'?',?)", txtModelName.Text, i + 1, 1, 1, 1, "图像", 0);
                 getApplyModel();
@@ -593,7 +613,7 @@ namespace Spectra
             }
             else
             {
-                SQLiteFunc.ExcuteSQL("update Apply_Model set 窗口数量=?,备注='?' where 名称='?'", cmbModelWinCnt.SelectedIndex + 1, txtModelRemark.Text, txtModelName.Text);
+                SQLiteFunc.ExcuteSQL("update Apply_Model set 窗口数量=?,起始时间='?',结束时间='?',起始经度=?,结束经度=?,起始纬度=?,结束纬度=?,备注='?' where 名称='?'", cmbModelWinCnt.SelectedIndex + 1, ModelShowInfo.Time_Start.ToString("yyyy-MM-dd HH:mm:ss"), ModelShowInfo.Time_End.ToString("yyyy-MM-dd HH:mm:ss"), 0, 0, 0, 0, txtModelRemark.Text, txtModelName.Text);
                 if(cmbModelWinCnt.SelectedIndex + 1 > Convert.ToUInt16(dtModel.Rows[0][1]))
                     for (int i = Convert.ToUInt16(dtModel.Rows[0][1]); i < cmbModelWinCnt.SelectedIndex + 1; i++)
                         SQLiteFunc.ExcuteSQL("insert into Apply_ModelR (名称,窗口编号,显示器编号,子窗体数量,子窗体编号,窗体类型,窗体类型编号) values ('?',?,?,?,?,'?',?)", txtModelName.Text, i + 1, 1, 1, 1, "图像", 0);
@@ -604,7 +624,7 @@ namespace Spectra
                 dataGrid_ApplyModelR.ItemsSource = SQLiteFunc.SelectDTSQL(sql).DefaultView;
             }
         }
-
+        /*2设置子窗体数*/
         private void btnModelSet2_Click(object sender, RoutedEventArgs e)
         {
             string sql = "select * from Apply_ModelR where 名称='" + txtModelName.Text + "' order by 窗口编号,子窗体编号";
@@ -628,7 +648,7 @@ namespace Spectra
             sql = "select * from Apply_ModelR where 名称='" + txtModelName.Text + "' order by 窗口编号,子窗体编号";
             dataGrid_ApplyModelR.ItemsSource = SQLiteFunc.SelectDTSQL(sql).DefaultView;
         }
-
+        /*3设置窗体类型*/
         private void btnModelSet3_Click(object sender, RoutedEventArgs e)
         {
             SQLiteFunc.ExcuteSQL("update Apply_ModelR set 窗体类型='?',窗体类型编号=? where 窗口编号=? and 子窗体编号=?", cmbModelSubType.Text, cmbModelSubType.SelectedIndex,cmbModelWinID2.SelectedIndex+1, cmbModelSubID.SelectedIndex+1);
@@ -645,8 +665,22 @@ namespace Spectra
             getApplyModel();
         }
         /*显示样式*/
-        private void btnModelShow_Click(object sender, RoutedEventArgs e)
+        private async void btnModelShow_Click(object sender, RoutedEventArgs e)
         {
+            try
+            {
+                DataTable dt = await DataProc.QueryResult(ModelShowInfo.Time_Start != ModelShowInfo.Time_End, ModelShowInfo.Coord_TL.Lon != ModelShowInfo.Coord_DR.Lon && ModelShowInfo.Coord_TL.Lat != ModelShowInfo.Coord_DR.Lat, false, ModelShowInfo.Time_Start, ModelShowInfo.Time_End, 0, 0, ModelShowInfo.Coord_TL, ModelShowInfo.Coord_DR);
+                dataGrid_Result.ItemsSource = dt.DefaultView;
+                DataQuery.QueryResult = dt;
+                ImageInfo.GetImgInfo(dt);       /*存储图像信息*/
+                SetImgInfo();
+            }
+            catch (Exception E)
+            {
+                System.Windows.MessageBox.Show("无数据!","提示",MessageBoxButton.OK,MessageBoxImage.Information);
+                return;
+            }
+
             App.global_ApplyModel.Clear();
             for (int i = 0; i < ModelShowInfo.WindowsCnt; i++)
                 App.global_ApplyModel.Add(new MultiFuncWindow());
