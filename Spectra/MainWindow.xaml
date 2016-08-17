@@ -590,12 +590,12 @@
             </Grid.ColumnDefinitions>
             <GridSplitter Margin="0,50" Width="1" Background="{StaticResource ButtonBack}"/>
             <StackPanel>
-                <RadioButton x:Name="btnLeftC1" Content="异常检测" Template="{DynamicResource ButtonIcon2nd}" Margin="0,50,0,0" Height="70" VerticalAlignment="Top">
+                <RadioButton x:Name="btnLeftC1" Content="异常检测" Template="{DynamicResource ButtonIcon2nd}" Margin="0,50,0,0" Height="70" VerticalAlignment="Top" IsChecked="True">
                     <RadioButton.Background>
                         <ImageBrush ImageSource="image/ICON/1.ico"/>
                     </RadioButton.Background>
                 </RadioButton>
-                <RadioButton x:Name="btnLeftC2" Content="应用示范" Template="{DynamicResource ButtonIcon2nd}" Margin="0,0,0,0" Height="70" VerticalAlignment="Top" IsChecked="True">
+                <RadioButton x:Name="btnLeftC2" Content="应用示范" Template="{DynamicResource ButtonIcon2nd}" Margin="0,0,0,0" Height="70" VerticalAlignment="Top">
                     <RadioButton.Background>
                         <ImageBrush ImageSource="image/ICON/2.ico"/>
                     </RadioButton.Background>
@@ -623,42 +623,30 @@
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*"/>
-                    <ColumnDefinition Width="8*"/>
-                    <ColumnDefinition Width="1*"/>
-                    <ColumnDefinition Width="8*"/>
+                    <ColumnDefinition Width="23*"/>
                     <ColumnDefinition Width="1*"/>
                 </Grid.ColumnDefinitions>
                 <GroupBox Grid.Row="0" Grid.Column="1" Header="检测参数" Margin="0,40,0,5" FontSize="24">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="1*"/>
-                            <RowDefinition Height="1*"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="130"/>
                             <ColumnDefinition/>
+                            <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
-                        <Label Grid.Row="0" Grid.Column="0" Content="背景灰度:" VerticalAlignment="Center" Margin="5"/>
-                        <TextBox x:Name="txtAbnBack" Grid.Row="0" Grid.Column="1" Margin="20" Text="100" Height="40" TextWrapping="Wrap" VerticalAlignment="Center" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
-                        <Label Grid.Row="1" Grid.Column="0" Content="噪声灰度:" VerticalAlignment="Center" Margin="5"/>
+                        <Label Content="噪声灰度:" VerticalAlignment="Center" Margin="5"/>
                         <TextBox x:Name="txtAbnNoise" Grid.Row="1" Grid.Column="1" Margin="20" Text="200" Height="40" TextWrapping="Wrap" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+                        <Button x:Name="btnAbnGet" Grid.Column="2" Content="异常检测" Width="160" Template="{DynamicResource ButtonDefault}" Margin="0" VerticalAlignment="Center" Click="btnAbnGet_Click"/>
                     </Grid>
                 </GroupBox>
-                <Grid Grid.Row="0" Grid.Column="3">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="50"/>
-                        <RowDefinition Height="1*"/>
-                        <RowDefinition Height="1*"/>
-                        <RowDefinition Height="1*"/>
-                    </Grid.RowDefinitions>
-                    <Button x:Name="btnAbnGet" Grid.Row="2" Content="异常检测" Width="160" Template="{DynamicResource ButtonDefault}" Margin="0" VerticalAlignment="Center" Click="btnAbnGet_Click"/>
-                </Grid>
                 <GroupBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="4" Margin="0,0,0,50" Header="检测结果">
-                    <DataGrid Margin="5"  LoadingRow="LoadingRowHeader">
+                    <DataGrid x:Name="dataGrid_DetectAbnormal" Margin="5"  LoadingRow="LoadingRowHeader">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header ="谱段" Binding="{Binding FrameId}" Width="1*"/>
-                            <DataGridTextColumn Header ="行号" Binding="{Binding Satellite}" Width="1*"/>
-                            <DataGridTextColumn Header="列号" Binding="{Binding GST}" Width="1*"/>
+                            <DataGridTextColumn Header ="谱段号" Binding="{Binding 谱段号}" Width="1*"/>
+                            <DataGridTextColumn Header ="片号" Binding="{Binding 片号}" Width="1*"/>
+                            <DataGridTextColumn Header="片尺寸" Binding="{Binding 片尺寸}" Width="1*"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </GroupBox>

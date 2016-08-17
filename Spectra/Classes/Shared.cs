@@ -22,7 +22,7 @@ namespace Spectra
         public static long sizeUpkFile;             /*解包后文件大小*/
         public static bool isUnpack = false;        /*是否已解包*/
         public static bool isDecomp = false;        /*是否已解压*/
-        public static bool decFilePath;             /*解压后文件路径*/
+        public static string decFilePath;           /*解压后文件路径*/
     }
 
     public static class Variables
@@ -97,6 +97,9 @@ namespace Spectra
 
     public class ImageInfo : DependencyObject
     {
+        public static long import_id = 0;
+        public static int noise_value = 0;
+
         public static int minFrm;
         public static int maxFrm;
         public static double startSec;

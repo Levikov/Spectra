@@ -23,6 +23,7 @@ namespace Spectra
             return Task.Run(()=> {
                 SQLiteDatabase sqlExcute = new SQLiteDatabase(Variables.dbPath);
                 long  import_id = (long)(sqlExcute.ExecuteScalar("SELECT ID from Import_History ORDER BY id DESC"))+1;
+                ImageInfo.import_id = import_id;
                 sqlExcute.BeginInsert();
                 sqlExcute.ExecuteNonQuery($"INSERT INTO Import_History (FileName) VALUES(@filename);", new List<SQLiteParameter>() {new SQLiteParameter("filename", FileInfo.srcFilePathName) });
                 double d_progress = 0;
@@ -376,6 +377,7 @@ namespace Spectra
                 SQLiteCommand cmmd = new SQLiteCommand("", conn);
                 cmmd.CommandText = "SELECT ID from Import_History ORDER BY id DESC";
                 long import_id = (long)(cmmd.ExecuteScalar());
+                ImageInfo.import_id = import_id;
 
                 string command = $"SELECT * FROM AuxData WHERE Chanel=1 AND ImportId={import_id}";
                 if ((bool)isChecked2)
@@ -489,18 +491,25 @@ namespace Spectra
                     strReport = DateTime.Now.ToString("HH:mm:ss") + "\n文件";
                     if ((string)fileDetail.Rows[0][3] == "是") FileInfo.isUnpack = true; else FileInfo.isUnpack = false;
                     if ((string)fileDetail.Rows[0][4] == "是") FileInfo.isDecomp = true; else FileInfo.isDecomp = false;
-                    if (FileInfo.isDecomp) strReport += "已解压,"; else strReport += "未解压,";
-                    if (FileInfo.isUnpack) strReport += "已解包"; else strReport += "未解包";
+                    if (FileInfo.isUnpack) strReport += "已解包,"; else strReport += "未解包,";
+                    if (FileInfo.isDecomp) strReport += "已解压"; else strReport += "未解压";
                     IProg_Cmd.Report(strReport);
-                    if(!FileInfo.isUnpack)   srcFileSolve(filePath,IProg_Bar);
-                    strReport = DateTime.Now.ToString("HH:mm:ss") + "\n文件已解包,未解压";
-                    IProg_Cmd.Report(strReport);
+                    if (!FileInfo.isUnpack)
+                    {
+                        srcFileSolve(filePath, IProg_Bar);
+                        strReport = DateTime.Now.ToString("HH:mm:ss") + "\n文件已解包,未解压";
+                        IProg_Cmd.Report(strReport);
+                    }
                 }
                 FileInfo.isUnpack = true;
                 //显示错误信息
                 IProg_DataView.Report(SQLiteFunc.SelectDTSQL("select * from FileErrors where 文件路径='" + filePath + "'").DefaultView);
                 //将解包后的文件作为全局变量
                 FileInfo.upkFilePathName = SQLiteFunc.SelectDTSQL("SELECT * from decFileDetails where 文件路径='" + filePath + "'").Rows[0][3].ToString();
+                FileInfo.decFilePath = SQLiteFunc.SelectDTSQL("SELECT * from decFileDetails where 文件路径='" + filePath + "'").Rows[0][5].ToString();
+                //临时加的，得到导入编号
+                SQLiteDatabase sqlExcute = new SQLiteDatabase(Variables.dbPath);
+                ImageInfo.import_id = (long)(sqlExcute.ExecuteScalar("SELECT ID from Import_History ORDER BY id DESC"));
                 return 1;
             });
             

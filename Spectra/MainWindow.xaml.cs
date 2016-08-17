@@ -383,64 +383,74 @@ namespace Spectra
         /*获取异常信息*/
         private void btnAbnGet_Click(object sender, RoutedEventArgs e)
         {
-            for(int i=1;i<=160;i++)
-                GetImgBuf(i);
+            ImageInfo.noise_value = Convert.ToUInt16(txtAbnNoise.Text);
+
+
+            for (int i = 0; i < 160; i++)
+            //Parallel.For(0, 160, i =>
+            {
+                if (ImageDetect(i) < 0)
+                    return;
+            }
+            DataTable dt = SQLiteFunc.SelectDTSQL("select * from Detect_Abnormal");
+            dataGrid_DetectAbnormal.ItemsSource = dt.DefaultView;
+            System.Windows.MessageBox.Show("完成");
         }
         
-        public void GetImgBuf(int v)
+        public int ImageDetect(int v)
         {
-            byte[] buf_full = new byte[2048 * ImageInfo.imgWidth * 2];
-            Parallel.For(0, ImageInfo.imgWidth, (i) =>
+            FileStream fTest;
+            try
             {
-                byte[] buf_rgb = new byte[2048 * 2];
-                Parallel.For(1, 5, k =>
+                 fTest = new FileStream($"{FileInfo.decFilePath}\\{ImageInfo.import_id}_{v}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
+            }
+            catch
+            {
+                System.Windows.MessageBox.Show("文件不存在!");
+                return -1;
+            }
+
+            /*分割大小*/
+            int subWid = 100;
+            int subLen = 2048 * subWid * 2;
+            int subLast = (int)(fTest.Length % subLen);
+            ImageInfo.imgWidth = (int)fTest.Length / 2048 / 2;   /*像宽*/
+            int subCnt = (int)Math.Ceiling(ImageInfo.imgWidth / (double)subWid); /*以subWid为单位分割图像*/
+            byte[] buf_full = new byte[subLen];
+
+            SQLiteConnection conn = new SQLiteConnection(Variables.dbConString);
+            conn.Open();
+
+            Parallel.For(0, subCnt - 1, i =>
+            //for (int i = 0; i < subCnt - 1; i++)
+            {
+                fTest.Read(buf_full, 0, subLen);
+                for (int j = 0; j < subLen;)
                 {
-                    FileStream fs = new FileStream($"{Variables.str_pathWork}\\{(long)(DataQuery.QueryResult.Rows[i].ItemArray[14])}_{(long)(DataQuery.QueryResult.Rows[i].ItemArray[0])}_{k}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
-
-                    byte[] temp = new byte[512 * 2];
-                    fs.Seek(v * 512 * 2, SeekOrigin.Begin);
-                    fs.Read(temp, 0, 1024);
-                    Array.Copy(temp, 0, buf_rgb, 2 * 512 * (k - 1), 2 * 512);
-                    fs.Close();
-                });
-                Array.Copy(buf_rgb, 0, buf_full, 2 * 2048 * i, 2 * 2048);
+                    if (buf_full[j++] + buf_full[j++] * 256 > ImageInfo.noise_value)
+                    {
+                        SQLiteCommand cmmd = new SQLiteCommand("", conn);
+                        cmmd.CommandText = $"insert into Detect_Abnormal (谱段号,片号,片尺寸) values ({v},{i},{subWid})";
+                        cmmd.ExecuteNonQuery();
+                        break;
+                    }
+                }
             });
-
-            //byte[] buf_rgb = new byte[2048 * 2];
-            //for (int i = 0; i < ImageInfo.imgWidth; i++)
-            //{
-            //    for (int k = 1; k < 5; k++)
-            //    {
-            //        FileStream fs = new FileStream($"{Variables.str_pathWork}\\{(long)(DataQuery.QueryResult.Rows[i].ItemArray[14])}_{(long)(DataQuery.QueryResult.Rows[i].ItemArray[0])}_{k}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
-
-            //        byte[] temp = new byte[512 * 2];
-            //        fs.Seek(v * 512 * 2, SeekOrigin.Begin);
-            //        fs.Read(temp, 0, 1024);
-            //        Array.Copy(temp, 0, buf_rgb, 2 * 512 * (k - 1), 2 * 512);
-            //        fs.Close();
-            //    }
-            //    Array.Copy(buf_rgb, 0, buf_full, 2 * 2048 * i, 2 * 2048);
-            //}
-
-            //高低位取反
-            //for (int i = 0; i < 2048 * ImageInfo.imgWidth; i++)
-            //{
-            //    byte t = buf_full[i * 2];
-            //    buf_full[i * 2] = buf_full[i * 2 + 1];
-            //    buf_full[i * 2 + 1] = t;
-            //}
-            FileStream fTest = new FileStream("E:\\Test\\"+ v.ToString() +".raw", FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read);
-            fTest.Write(buf_full, 0, 2048 * ImageInfo.imgWidth * 2);
+            fTest.Read(buf_full, 0, subLast);
+            for (int j = 0; j < subLast;)
+            {
+                if (buf_full[j++] + buf_full[j++] * 256 > ImageInfo.noise_value)
+                {
+                    SQLiteCommand cmmd = new SQLiteCommand("", conn);
+                    cmmd.CommandText = $"insert into Detect_Abnormal (谱段号,片号,片尺寸) values ({v},{subCnt},{subWid})";
+                    cmmd.ExecuteNonQuery();
+                    break;
+                }
+            }
             fTest.Close();
+            conn.Close();
 
-            //显示8位图
-            //for (int i = 0; i < 2048 * ImageInfo.imgWidth; i++)
-            //{
-            //    buf_full[i] = buf_full[i * 2 + 1];
-            //}
-            //fTest = new FileStream("E:\\1_8.raw", FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read);
-            //fTest.Write(buf_full, 0, 2048 * ImageInfo.imgWidth);
-            //fTest.Close();
+            return 160;
         }
 
         private void btnMapUpdate_Click(object sender, RoutedEventArgs e)
