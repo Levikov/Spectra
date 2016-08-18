@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -21,20 +24,45 @@ namespace Spectra
     /// </summary>
     public partial class DynamicImagingWindow : Window
     {
-        public DynamicImagingWindow()
-        {
-            InitializeComponent();
-        }
+
 
         /// <summary>
         /// 图片名称
         /// </summary>
         public int ScreenIndex;
+        public Timer t;
         public enum DisplayContent { Single, Pick, Sync };
+
+        TimerCallback tc;
         public int SpecNum;
         public int[] RgbSpec = new int[3];
         public int ImgW;
         public int ImgH;
+        public static byte[] img_buffer;
+        IProgress<Bitmap> prog;
+        public DynamicImagingWindow()
+        {
+            InitializeComponent();
+            img_buffer = new byte[3 * 600 * 2048];
+            prog = new Progress<Bitmap>(b => { this.Refresh(b); });
+            tc = new TimerCallback(timercall);
+            t = new Timer(tc, prog, 10, Timeout.Infinite);
+            t.Change(0, 100);
+            
+        }
+
+
+
+        void timercall(object o)
+        {
+            IProgress<Bitmap> bb = o as IProgress<Bitmap>;
+            Bitmap bmp = new Bitmap(2048, 600, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+            BitmapData bmpdata = bmp.LockBits(new System.Drawing.Rectangle(0, 0, 2048, 600), System.Drawing.Imaging.ImageLockMode.WriteOnly, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+            Marshal.Copy(img_buffer, 0, bmpdata.Scan0, 3 * 2048 * 600);
+            bmp.UnlockBits(bmpdata);
+            bb.Report(bmp);
+
+        }
 
         public DynamicImagingWindow(string title, Bitmap bmp)
         {
@@ -56,6 +84,20 @@ namespace Spectra
             bmpSource.EndInit();
             this.IMG1.Source = bmpSource;
             SpecNum = band;
+
+
+        }
+
+        public void Refresh(Bitmap bmp)
+        {
+
+            MemoryStream ms = new MemoryStream();
+            bmp.Save(ms, System.Drawing.Imaging.ImageFormat.Bmp);
+            BitmapImage bmpSource = new BitmapImage();
+            bmpSource.BeginInit();
+            bmpSource.StreamSource = ms;
+            bmpSource.EndInit();
+            this.IMG1.Source = bmpSource;
 
 
         }
@@ -101,6 +143,14 @@ namespace Spectra
                 return;
             if (mouseDown)
                 Domousemove(img, e);
+        }
+
+        internal void Update(byte[] buf_Dynamic, ushort frameCount, byte chanel)
+        {
+            Parallel.For(0, 512, i => 
+            {
+                img_buffer[(frameCount - 34152) * 2048 * 3 + (chanel - 1) * 3 * 512 + i * 3 + 2] = img_buffer[(frameCount - 34152) * 2048 * 3 + (chanel - 1) * 3 * 512 + i * 3 + 1] = img_buffer[(frameCount - 34152) * 2048 * 3 + (chanel - 1) * 3 * 512 + i * 3 + 0] = (byte)(Math.Floor(((double)DataProc.readU16_PIC(buf_Dynamic, i * 2)/4096*256)));
+            });
         }
 
         private void IMG1_MouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)

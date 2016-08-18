@@ -14,6 +14,7 @@ namespace Spectra
     /// </summary>
     public partial class App : Application
     {
+        public static DynamicImagingWindow global_Win_Dynamic;
         public static MultiFuncWindow global_Win_3D;
         public static MultiFuncWindow global_Win_SpecImg;
         public static MapWindow global_Win_Map;
