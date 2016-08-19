@@ -147,9 +147,10 @@ namespace Spectra
 
         internal void Update(byte[] buf_Dynamic, ushort frameCount, byte chanel)
         {
-            Parallel.For(0, 512, i => 
+            Parallel.For(0, 512, i =>
             {
-                img_buffer[(frameCount - 34152) * 2048 * 3 + (chanel - 1) * 3 * 512 + i * 3 + 2] = img_buffer[(frameCount - 34152) * 2048 * 3 + (chanel - 1) * 3 * 512 + i * 3 + 1] = img_buffer[(frameCount - 34152) * 2048 * 3 + (chanel - 1) * 3 * 512 + i * 3 + 0] = (byte)(Math.Floor(((double)DataProc.readU16_PIC(buf_Dynamic, i * 2)/4096*256)));
+                //img_buffer[(frameCount - 34152) * 2048 * 3 + (chanel - 1) * 3 * 512 + i * 3 + 2] = img_buffer[(frameCount - 34152) * 2048 * 3 + (chanel - 1) * 3 * 512 + i * 3 + 1] = img_buffer[(frameCount - 34152) * 2048 * 3 + (chanel - 1) * 3 * 512 + i * 3 + 0] = (byte)(Math.Floor(((double)DataProc.readU16_PIC(buf_Dynamic, i * 2) / 4096 * 256)));
+                img_buffer[(frameCount - 34150) * 2048 * 3 + (chanel - 1) * 3 * 512 + i * 3 + 2] = img_buffer[(frameCount - 34150) * 2048 * 3 + (chanel - 1) * 3 * 512 + i * 3 + 1] = img_buffer[(frameCount - 34150) * 2048 * 3 + (chanel - 1) * 3 * 512 + i * 3 + 0] = (byte)(Math.Floor(((double)DataProc.readU16_PIC(buf_Dynamic, i * 2) / 4096 * 256)));
             });
         }
 
