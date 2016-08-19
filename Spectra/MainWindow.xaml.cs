@@ -386,18 +386,36 @@ namespace Spectra
         /*获取异常信息*/
         private void btnAbnGet_Click(object sender, RoutedEventArgs e)
         {
-            ImageInfo.noise_value = Convert.ToUInt16(txtAbnNoise.Text);
-
-
-            for (int i = 0; i < 160; i++)
-            //Parallel.For(0, 160, i =>
+            try
             {
-                if (ImageDetect(i) < 0)
-                    return;
+                ImageInfo.noise_value = Convert.ToUInt16(txtAbnNoise.Text);
             }
-            DataTable dt = SQLiteFunc.SelectDTSQL("select * from Detect_Abnormal");
-            dataGrid_DetectAbnormal.ItemsSource = dt.DefaultView;
-            System.Windows.MessageBox.Show("完成");
+            catch
+            {
+                System.Windows.MessageBox.Show("请输入噪声灰度!","警告",MessageBoxButton.OK,MessageBoxImage.Warning);
+                return;
+            }
+            SQLiteFunc.ExcuteSQL("delete from Detect_Abnormal");
+            int re = 0;
+
+            new Thread(() =>
+            {
+                for (int i = 0; i < 160; i++)
+                {
+                    re = ImageDetect(i);
+                    if (re < 0)
+                    {
+                        System.Windows.MessageBox.Show("文件不存在!");
+                        return;
+                    }
+                    Dispatcher.Invoke(new Action(() =>
+                    {
+                        pgbAbnDetect.Value = i / (double)159;
+                        dataGrid_DetectAbnormal.ItemsSource = SQLiteFunc.SelectDTSQL("select * from Detect_Abnormal").DefaultView;
+                    }));
+                }
+                System.Windows.MessageBox.Show("完成!", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+            }).Start();
         }
         
         public int ImageDetect(int v)
@@ -409,7 +427,6 @@ namespace Spectra
             }
             catch
             {
-                System.Windows.MessageBox.Show("文件不存在!");
                 return -1;
             }
 
@@ -419,14 +436,14 @@ namespace Spectra
             int subLast = (int)(fTest.Length % subLen);
             ImageInfo.imgWidth = (int)fTest.Length / 2048 / 2;   /*像宽*/
             int subCnt = (int)Math.Ceiling(ImageInfo.imgWidth / (double)subWid); /*以subWid为单位分割图像*/
-            byte[] buf_full = new byte[subLen];
 
             SQLiteConnection conn = new SQLiteConnection(Variables.dbConString);
             conn.Open();
 
-            Parallel.For(0, subCnt - 1, i =>
-            //for (int i = 0; i < subCnt - 1; i++)
+            //Parallel.For(0, subCnt - 1, i =>
+            for (int i = 0; i < subCnt - 1; i++)
             {
+                byte[] buf_full = new byte[subLen];
                 fTest.Read(buf_full, 0, subLen);
                 for (int j = 0; j < subLen;)
                 {
@@ -438,11 +455,12 @@ namespace Spectra
                         break;
                     }
                 }
-            });
-            fTest.Read(buf_full, 0, subLast);
+            }
+            byte[] buf_last = new byte[subLen];
+            fTest.Read(buf_last, 0, subLast);
             for (int j = 0; j < subLast;)
             {
-                if (buf_full[j++] + buf_full[j++] * 256 > ImageInfo.noise_value)
+                if (buf_last[j++] + buf_last[j++] * 256 > ImageInfo.noise_value)
                 {
                     SQLiteCommand cmmd = new SQLiteCommand("", conn);
                     cmmd.CommandText = $"insert into Detect_Abnormal (谱段号,片号,片尺寸) values ({v},{subCnt},{subWid})";
