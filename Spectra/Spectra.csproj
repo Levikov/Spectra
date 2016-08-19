@@ -110,6 +110,9 @@
     <Compile Include="Windows\3DWindow.xaml.cs">
       <DependentUpon>3DWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Windows\DynamicImagingWindow.xaml.cs">
+      <DependentUpon>DynamicImagingWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Windows\MapWindow.xaml.cs">
       <DependentUpon>MapWindow.xaml</DependentUpon>
     </Compile>
@@ -216,6 +219,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Windows\3DWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\DynamicImagingWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

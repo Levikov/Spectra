@@ -118,8 +118,11 @@ namespace Spectra
             this.b_Abort_Import.IsEnabled = true;
             this.b_Start_Import.IsEnabled = false;
             this.b_Open_Import.IsEnabled = false;
+            App.global_Win_Dynamic = new DynamicImagingWindow();
+            App.global_Win_Dynamic.Show();
             string result = await DataProc.Import_5(IProgress_Prog, IProgress_List, cancelImport.Token);
             System.Windows.MessageBox.Show(result);
+            App.global_Win_Dynamic.Close();
             SQLiteFunc.ExcuteSQL("update decFileDetails set 解压时间='?',解压后文件路径='?' where 文件路径='?'",DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),Variables.str_pathWork,FileInfo.srcFilePathName);
             SQLiteFunc.ExcuteSQL("update FileDetails set 是否已解压='是' where 文件路径='?';",FileInfo.srcFilePathName);
             this.b_Start_Import.IsEnabled = false;
