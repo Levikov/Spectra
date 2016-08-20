@@ -33,8 +33,7 @@ namespace Spectra
         public int[] RgbSpec=new int[3];
         public int ImgW;
         public int ImgH;
-
-
+        
         public Ctrl_ImageView()
         {
             InitializeComponent();
@@ -67,8 +66,6 @@ namespace Spectra
             SpecNum = band;
             Band.Text = $"{SpecNum}";
             this.Busy.isBusy = false;
-
-            
         }
 
         public Ctrl_ImageView(Bitmap bmp)
@@ -81,8 +78,8 @@ namespace Spectra
             bmpSource.StreamSource = ms;
             bmpSource.EndInit();
             this.IMG1.Source = bmpSource;
-
         }
+
         private bool mouseDown;
         private System.Windows.Point mouseXY;
 
@@ -121,7 +118,7 @@ namespace Spectra
                 return;
             var point = e.GetPosition(img);
             var group = IMG1.FindResource("Imageview") as TransformGroup;
-            var delta = e.Delta * 0.001;
+            var delta = e.Delta * 0.01;
             DowheelZoom(group, point, delta);
         }
 
@@ -170,7 +167,6 @@ namespace Spectra
                 }
             }
             IMG1.MouseDown += IMG1_MouseDown;
-
         }
 
 

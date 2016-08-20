@@ -487,6 +487,7 @@ namespace Spectra
                 catch (Exception ex)
                 {
                     System.Windows.MessageBox.Show("导出失败：" + ex.Message);
+                    return;
                 }
                 System.Windows.MessageBox.Show("导出成功");
             }
