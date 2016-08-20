@@ -110,8 +110,11 @@
     <Compile Include="Windows\3DWindow.xaml.cs">
       <DependentUpon>3DWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Windows\DynamicImagingWindow.xaml.cs">
-      <DependentUpon>DynamicImagingWindow.xaml</DependentUpon>
+    <Compile Include="Windows\DynamicImagingWindow_Win32.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Windows\DynamicImagingWindow_Win32.Designer.cs">
+      <DependentUpon>DynamicImagingWindow_Win32.cs</DependentUpon>
     </Compile>
     <Compile Include="Windows\MapWindow.xaml.cs">
       <DependentUpon>MapWindow.xaml</DependentUpon>
@@ -222,10 +225,6 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Windows\DynamicImagingWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="Windows\MapWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -260,6 +259,9 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Windows\DynamicImagingWindow_Win32.resx">
+      <DependentUpon>DynamicImagingWindow_Win32.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="DataBase\db.sqlite">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

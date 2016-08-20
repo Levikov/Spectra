@@ -118,7 +118,7 @@ namespace Spectra
             this.b_Abort_Import.IsEnabled = true;
             this.b_Start_Import.IsEnabled = false;
             this.b_Open_Import.IsEnabled = false;
-            App.global_Win_Dynamic = new DynamicImagingWindow();
+            App.global_Win_Dynamic = new DynamicImagingWindow_Win32();
             App.global_Win_Dynamic.Show();
             string result = await DataProc.Import_5(IProgress_Prog, IProgress_List, cancelImport.Token);
             System.Windows.MessageBox.Show(result);

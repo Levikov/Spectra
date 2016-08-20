@@ -103,7 +103,7 @@ namespace Spectra
                     fs_out.Close();
 
                 });
-                App.global_Win_Dynamic.t.Change(10, Timeout.Infinite);
+                App.global_Win_Dynamic.StopTimer();
 
                 FileStream fs_chanel = new FileStream(FileInfo.srcFilePathName, FileMode.Open, FileAccess.Read, FileShare.Read);
 
