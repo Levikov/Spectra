@@ -640,7 +640,8 @@
                         <Label Content="噪声灰度:" VerticalAlignment="Center" Margin="5"/>
                         <TextBox x:Name="txtAbnNoise" Grid.Column="1" Margin="20" Height="40" TextWrapping="Wrap" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
                         <Button x:Name="btnAbnGet" Grid.Column="2" Content="异常检测" Width="160" Template="{DynamicResource ButtonDefault}" Margin="0" VerticalAlignment="Center" Click="btnAbnGet_Click"/>
-                        <ProgressBar x:Name="pgbAbnDetect" Grid.Row="1" Grid.Column="1" Height="30" Margin="20,0" Maximum="1" SmallChange="0.01"/>
+                        <Button x:Name="btnAbnExport" Grid.Row="1" Grid.Column="2" Content="导出文件" Width="160" Template="{DynamicResource ButtonDefault}" Margin="0" VerticalAlignment="Center" Click="btnAbnExport_Click"/>
+                        <ProgressBar x:Name="pgbDetectAbnormal" Grid.Row="1" Grid.Column="1" Height="30" Margin="20,0" Maximum="1" SmallChange="0.01"/>
                     </Grid>
                 </GroupBox>
                 <GroupBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="4" Margin="0,0,0,50" Header="检测结果">

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SQLite;
 using System.Drawing;
 using System.IO;
 using System.Threading;
@@ -112,8 +113,6 @@ namespace Spectra
         public static int imgWidth;
         public static int imgHeight = 2048;
 
-        public static byte[] imgAbnDetect;
-
         public ImageInfo()  { }
 
         public static void GetImgInfo(DataTable dt)
@@ -131,6 +130,69 @@ namespace Spectra
             DateTime T0 = new DateTime(1970, 1, 1, 0, 0, 0);
             startTime = T0.AddSeconds(startSec);
             endTime = T0.AddSeconds(endSec);
+        }
+
+        /// <summary>
+        /// 图像检测异常
+        /// </summary>
+        /// <param name="v">谱段号</param>
+        /// <param name="subWid">片宽</param>
+        /// <returns>
+        /// -1:表示打开文件出错
+        /// </returns>
+        public static int ImgDetectAbnormal(int v,int subWid)
+        {
+            FileStream fTest;
+            try
+            {
+                fTest = new FileStream($"{FileInfo.decFilePath}\\{ImageInfo.import_id}_{v}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
+            }
+            catch
+            {
+                return -1;
+            }
+
+            /*分割大小*/
+            int subLen = 2048 * subWid * 2;
+            int subLast = (int)(fTest.Length % subLen);
+            ImageInfo.imgWidth = (int)fTest.Length / 2048 / 2;   /*像宽*/
+            int subCnt = (int)Math.Ceiling(ImageInfo.imgWidth / (double)subWid); /*以subWid为单位分割图像*/
+
+            SQLiteConnection conn = new SQLiteConnection(Variables.dbConString);
+            conn.Open();
+            
+            for (int i = 0; i < subCnt - 1; i++)
+            {
+                byte[] buf_full = new byte[subLen];
+                fTest.Read(buf_full, 0, subLen);
+                for (int j = 0; j < subLen;)
+                {
+                    if (buf_full[j++] + buf_full[j++] * 256 > ImageInfo.noise_value)
+                    {
+                        SQLiteCommand cmmd = new SQLiteCommand("", conn);
+                        cmmd.CommandText = $"insert into Detect_Abnormal (谱段号,片号,片尺寸) values ({v},{i},{subWid})";
+                        cmmd.ExecuteNonQuery();
+                        break;
+                    }
+                }
+            }
+
+            byte[] buf_last = new byte[subLen];
+            fTest.Read(buf_last, 0, subLast);
+            for (int j = 0; j < subLast;)
+            {
+                if (buf_last[j++] + buf_last[j++] * 256 > ImageInfo.noise_value)
+                {
+                    SQLiteCommand cmmd = new SQLiteCommand("", conn);
+                    cmmd.CommandText = $"insert into Detect_Abnormal (谱段号,片号,片尺寸) values ({v},{subCnt},{subWid})";
+                    cmmd.ExecuteNonQuery();
+                    break;
+                }
+            }
+            fTest.Close();
+            conn.Close();
+
+            return 160;
         }
     }
 }
