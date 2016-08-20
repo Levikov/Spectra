@@ -61,7 +61,7 @@ namespace Spectra
                                         byte[] buf_Dynamic = new byte[512 * 2];
                                         Marshal.Copy(FreeImage.GetBits(fibmp), buf_JP2, 0, 512 * 160 * 2);
                                         Array.Copy(buf_JP2, 40 * 512 * 2, buf_Dynamic, 0, 1024);
-                                        App.global_Win_Dynamic.Update(buf_Dynamic,adr_last.FrameCount,adr_last.Chanel);
+                                        //App.global_Win_Dynamic.Update(buf_Dynamic,adr_last.FrameCount,adr_last.Chanel);
                                         FreeImage.Unload(fibmp);
                                         FileStream fs_out_raw = new FileStream($"{Variables.str_pathWork}\\{import_id}_{adr_last.FrameCount}_{adr_last.Chanel}.raw", FileMode.Create);
                                         fs_out_raw.Write(buf_JP2, 0, 512 * 160 * 2);
@@ -103,7 +103,7 @@ namespace Spectra
                     fs_out.Close();
 
                 });
-                App.global_Win_Dynamic.StopTimer();
+                //App.global_Win_Dynamic.StopTimer();
 
                 FileStream fs_chanel = new FileStream(FileInfo.srcFilePathName, FileMode.Open, FileAccess.Read, FileShare.Read);
 
@@ -173,7 +173,7 @@ namespace Spectra
                      List.Report($"正在分割通道{k}/159");
 
                  });
-                
+
                 return "成功！";
             });
 
