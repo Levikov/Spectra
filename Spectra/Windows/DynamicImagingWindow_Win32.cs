@@ -58,9 +58,16 @@ namespace Spectra
                 
             });
             Marshal.Copy(buffer_temp,0, test_data.Scan0+(frameCount%1000)*2048*3+512*(chanel-1)*3, 1536);
-            if (frameCount % 1000 == 999&&chanel==4)
+            if (frameCount % 1000 == 999)
             {
-                Marshal.Copy(buffer_img, 0, test_data.Scan0, 3 * 2048 * 1000);
+                Parallel.For(0, 1536, a => {
+                    buffer_temp[a] = 0;
+                });
+
+                Parallel.For(0, 1000, r =>
+                {
+                    Marshal.Copy(buffer_temp, 0, test_data.Scan0+r*2048*3+((chanel - 1) * 512*3), 3 * 512);
+                });
             }
         }
     }

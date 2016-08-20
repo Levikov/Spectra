@@ -108,7 +108,19 @@ namespace Spectra
             if (img == null)
                 return;
             if (mouseDown)
+            {
                 Domousemove(img, e);
+            }
+            else
+            {
+                System.Windows.Point p = Mouse.GetPosition(e.Source as FrameworkElement);
+                p.X = (p.X / IMG1.ActualWidth);
+                p.Y = (p.Y / IMG1.ActualHeight);
+                tb_3DCoord.Text = $"({Math.Floor(p.X * ImgW)},{Math.Floor(p.Y * ImgH)},{SpecNum})";
+                Col.Text = $"{Math.Floor(p.X * ImgW)}";
+                Row.Text = $"{Math.Floor(p.Y * ImgH)}";
+                Band.Text = $"{SpecNum}";
+            }
         }
 
         private void IMG1_MouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)
@@ -148,7 +160,6 @@ namespace Spectra
 
         private void IMG1_MouseDown(object sender, MouseButtonEventArgs e)
         {
-
             IMG1.MouseDown -= IMG1_MouseDown;
             System.Windows.Point p = Mouse.GetPosition(e.Source as FrameworkElement);
             p.X = (p.X/IMG1.ActualWidth);
