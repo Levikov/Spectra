@@ -12,12 +12,6 @@ using System.Windows.Forms;
 
 namespace Spectra
 {
-    /// <summary>
-    /// MainWindow.xaml 的交互逻辑
-    /// </summary>
-
-
-
     public partial class MainWindow : Window
     {
         /*构造函数+系统初始化*/
@@ -382,115 +376,7 @@ namespace Spectra
             getDefaultShow();
         }
         #endregion
-
-        /*获取异常信息*/
-        private void btnAbnGet_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                ImageInfo.noise_value = Convert.ToUInt16(txtAbnNoise.Text);
-            }
-            catch
-            {
-                System.Windows.MessageBox.Show("请输入噪声灰度!","警告",MessageBoxButton.OK,MessageBoxImage.Warning);
-                return;
-            }
-            SQLiteFunc.ExcuteSQL("delete from Detect_Abnormal");
-            int re = 0;
-
-            new Thread(() =>
-            {
-                for (int i = 0; i < 160; i++)
-                {
-                    re = ImageDetect(i);
-                    if (re < 0)
-                    {
-                        System.Windows.MessageBox.Show("文件不存在!");
-                        return;
-                    }
-                    Dispatcher.Invoke(new Action(() =>
-                    {
-                        pgbAbnDetect.Value = i / (double)159;
-                        dataGrid_DetectAbnormal.ItemsSource = SQLiteFunc.SelectDTSQL("select * from Detect_Abnormal").DefaultView;
-                    }));
-                }
-                System.Windows.MessageBox.Show("完成!", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
-            }).Start();
-        }
         
-        public int ImageDetect(int v)
-        {
-            FileStream fTest;
-            try
-            {
-                 fTest = new FileStream($"{FileInfo.decFilePath}\\{ImageInfo.import_id}_{v}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
-            }
-            catch
-            {
-                return -1;
-            }
-
-            /*分割大小*/
-            int subWid = 100;
-            int subLen = 2048 * subWid * 2;
-            int subLast = (int)(fTest.Length % subLen);
-            ImageInfo.imgWidth = (int)fTest.Length / 2048 / 2;   /*像宽*/
-            int subCnt = (int)Math.Ceiling(ImageInfo.imgWidth / (double)subWid); /*以subWid为单位分割图像*/
-
-            SQLiteConnection conn = new SQLiteConnection(Variables.dbConString);
-            conn.Open();
-
-            //Parallel.For(0, subCnt - 1, i =>
-            for (int i = 0; i < subCnt - 1; i++)
-            {
-                byte[] buf_full = new byte[subLen];
-                fTest.Read(buf_full, 0, subLen);
-                for (int j = 0; j < subLen;)
-                {
-                    if (buf_full[j++] + buf_full[j++] * 256 > ImageInfo.noise_value)
-                    {
-                        SQLiteCommand cmmd = new SQLiteCommand("", conn);
-                        cmmd.CommandText = $"insert into Detect_Abnormal (谱段号,片号,片尺寸) values ({v},{i},{subWid})";
-                        cmmd.ExecuteNonQuery();
-                        break;
-                    }
-                }
-            }
-            byte[] buf_last = new byte[subLen];
-            fTest.Read(buf_last, 0, subLast);
-            for (int j = 0; j < subLast;)
-            {
-                if (buf_last[j++] + buf_last[j++] * 256 > ImageInfo.noise_value)
-                {
-                    SQLiteCommand cmmd = new SQLiteCommand("", conn);
-                    cmmd.CommandText = $"insert into Detect_Abnormal (谱段号,片号,片尺寸) values ({v},{subCnt},{subWid})";
-                    cmmd.ExecuteNonQuery();
-                    break;
-                }
-            }
-            fTest.Close();
-            conn.Close();
-
-            return 160;
-        }
-
-        private void btnMapUpdate_Click(object sender, RoutedEventArgs e)
-        {
-            string[] line = File.ReadAllLines(@"E:\Map\Amap.html");
-            switch (cmbMapType.SelectedIndex)
-            {
-                case 0:
-                    File.WriteAllText(@"E:\Map\Amap.html", File.ReadAllText(@"E:\Map\Amap.html").Replace(line[94], $"	  var strURL = \"D:/Amap/roadmap/\" + zoom + \"/\" + tile_x+ \"/\" + tile_y + \".png\";"));
-                    break;
-                case 1:
-                    File.WriteAllText(@"E:\Map\Amap.html", File.ReadAllText(@"E:\Map\Amap.html").Replace(line[94], $"	  var strURL = \"D:/Gmap/satellite/\" + zoom + \"/\" + tile_x+ \"/\" + tile_y + \".jpg\";"));
-                    break;
-                default:
-                    break;
-            }
-            App.global_Win_Map.webMap.Refresh();
-        }
-
         #region 光谱显示
         /*显示单张图像*/
         private void btnShowSpeImg_Click(object sender, RoutedEventArgs e)
@@ -548,6 +434,61 @@ namespace Spectra
             catch (Exception)
             {
                 System.Windows.MessageBox.Show("窗体未初始化！", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+        #endregion
+
+        #region 异常检测
+        /*获取异常信息*/
+        private void btnAbnGet_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                ImageInfo.noise_value = Convert.ToUInt16(txtAbnNoise.Text);
+            }
+            catch
+            {
+                System.Windows.MessageBox.Show("请输入噪声灰度!","警告",MessageBoxButton.OK,MessageBoxImage.Warning);
+                return;
+            }
+            SQLiteFunc.ExcuteSQL("delete from Detect_Abnormal");
+
+            new Thread(() =>
+            {
+                for (int i = 0; i < 160; i++)
+                {
+                    if (ImageInfo.ImgDetectAbnormal(i,100) < 0)
+                    {
+                        System.Windows.MessageBox.Show("文件不存在!");
+                        return;
+                    }
+                    Dispatcher.Invoke(new Action(() =>
+                    {
+                        pgbDetectAbnormal.Value = i / (double)159;
+                        dataGrid_DetectAbnormal.ItemsSource = SQLiteFunc.SelectDTSQL("select * from Detect_Abnormal").DefaultView;
+                    }));
+                }
+                System.Windows.MessageBox.Show("完成!", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+            }).Start();
+        }
+        /*将DataGrid导出为Excel*/
+        private void btnAbnExport_Click(object sender, RoutedEventArgs e)
+        {
+            Microsoft.Win32.SaveFileDialog saveFileDialog = new Microsoft.Win32.SaveFileDialog();
+            saveFileDialog.FileName = "123";
+            saveFileDialog.Filter = "Excel (*.XLS)|*.xls";
+            if ((bool)(saveFileDialog.ShowDialog()))
+            {
+                try
+                {
+                    ExcelHelper _excelHelper = new ExcelHelper();
+                    _excelHelper.SaveToExcel(saveFileDialog.FileName, ((DataView)dataGrid_DetectAbnormal.ItemsSource).Table);
+                }
+                catch (Exception ex)
+                {
+                    System.Windows.MessageBox.Show("导出失败：" + ex.Message);
+                }
+                System.Windows.MessageBox.Show("导出成功");
             }
         }
         #endregion
@@ -739,5 +680,22 @@ namespace Spectra
             }
         }
         #endregion
+
+        private void btnMapUpdate_Click(object sender, RoutedEventArgs e)
+        {
+            string[] line = File.ReadAllLines(@"E:\Map\Amap.html");
+            switch (cmbMapType.SelectedIndex)
+            {
+                case 0:
+                    File.WriteAllText(@"E:\Map\Amap.html", File.ReadAllText(@"E:\Map\Amap.html").Replace(line[94], $"	  var strURL = \"D:/Amap/roadmap/\" + zoom + \"/\" + tile_x+ \"/\" + tile_y + \".png\";"));
+                    break;
+                case 1:
+                    File.WriteAllText(@"E:\Map\Amap.html", File.ReadAllText(@"E:\Map\Amap.html").Replace(line[94], $"	  var strURL = \"D:/Gmap/satellite/\" + zoom + \"/\" + tile_x+ \"/\" + tile_y + \".jpg\";"));
+                    break;
+                default:
+                    break;
+            }
+            App.global_Win_Map.webMap.Refresh();
+        }
     }
 }
