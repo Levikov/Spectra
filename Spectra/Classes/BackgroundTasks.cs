@@ -8,6 +8,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -474,15 +475,25 @@ namespace Spectra
             {
                 string strReport = "";
                 string fileName = filePath.Substring(filePath.LastIndexOf("\\") + 1);
-                DataTable fileDetail = SQLiteFunc.SelectDTSQL("SELECT * from FileDetails where 文件路径='" + filePath + "'");
+                //检查MD5
+                byte[] md5code = new byte[16];
+                using (var md5=MD5.Create())
+                {
+                    using (var stream = File.OpenRead(filePath))
+                    {
+                       md5code = md5.ComputeHash(stream);
+                    }
+                }
+                string md5string = BitConverter.ToString(md5code);
+                DataTable fileDetail = SQLiteFunc.SelectDTSQL($"SELECT * from FileDetails where MD5='{md5string}'");
                 if (fileDetail.Rows.Count == 0)
                 {
                     FileInfo.isUnpack = false;
                     FileInfo.isDecomp = false;
-                    SQLiteFunc.ExcuteSQL("insert into FileDetails (文件名,文件路径,文件大小,是否已解包,是否已解压) values ('?','?','?','?','?')",
-                        fileName, filePath, 100, "否", "否");
-                    SQLiteFunc.ExcuteSQL("insert into decFileDetails (文件名,文件路径) values ('?','?')",
-                        fileName, filePath);
+                    SQLiteFunc.ExcuteSQL("insert into FileDetails (文件名,文件路径,文件大小,是否已解包,是否已解压,MD5) values ('?','?','?','?','?','?')",
+                        fileName, filePath, 100, "否", "否",md5string);
+                    SQLiteFunc.ExcuteSQL("insert into decFileDetails (文件名,文件路径,MD5) values ('?','?','?')",
+                        fileName, filePath,md5string);
                     strReport = DateTime.Now.ToString("HH:mm:ss") + "\n文件第一次导入,未解包,未解压";
                     IProg_Cmd.Report(strReport);
                     srcFileSolve(filePath,IProg_Bar);
@@ -507,10 +518,10 @@ namespace Spectra
                 }
                 FileInfo.isUnpack = true;
                 //显示错误信息
-                IProg_DataView.Report(SQLiteFunc.SelectDTSQL("select * from FileErrors where 文件路径='" + filePath + "'").DefaultView);
+                IProg_DataView.Report(SQLiteFunc.SelectDTSQL("select * from FileErrors where MD5='" + md5string + "'").DefaultView);
                 //将解包后的文件作为全局变量
-                FileInfo.upkFilePathName = SQLiteFunc.SelectDTSQL("SELECT * from decFileDetails where 文件路径='" + filePath + "'").Rows[0][3].ToString();
-                FileInfo.decFilePath = SQLiteFunc.SelectDTSQL("SELECT * from decFileDetails where 文件路径='" + filePath + "'").Rows[0][5].ToString();
+                FileInfo.upkFilePathName = SQLiteFunc.SelectDTSQL("SELECT * from decFileDetails where MD5='" + md5string + "'").Rows[0][3].ToString();
+                FileInfo.decFilePath = SQLiteFunc.SelectDTSQL("SELECT * from decFileDetails where MD5='" + md5string + "'").Rows[0][5].ToString();
                 //临时加的，得到导入编号
                 SQLiteDatabase sqlExcute = new SQLiteDatabase(Variables.dbPath);
                 ImageInfo.import_id = (long)(sqlExcute.ExecuteScalar("SELECT ID from Import_History ORDER BY id DESC"));
