@@ -243,3 +243,7 @@ ModelManifest.xml
 
 # FAKE - F# Make
 .fake/
+/Spectra/DLL/DataOperation.lib
+/Spectra/DLL/DataOperation.ipdb
+/Spectra/DLL/DataOperation.iobj
+/Spectra/DLL/DataOperation.exp

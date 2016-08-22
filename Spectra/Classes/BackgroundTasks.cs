@@ -18,6 +18,8 @@ namespace Spectra
     public class DataProc
     {
         #region File Operations
+        [DllImport("DataOperation.dll", EntryPoint = "Split_Chanel")]
+        static extern void Split_Chanel(string path,int start,int end,int import_id);
 
         public static Task<string> Import_5(IProgress<double> Prog, IProgress<string> List, CancellationToken cancel)
         {
@@ -151,37 +153,9 @@ namespace Spectra
 
                 long height = (long)sqlExcute.ExecuteScalar($"SELECT COUNT(*) FROM AuxData WHERE ImportId={import_id}");
                 long Frm_Start = (long)sqlExcute.ExecuteScalar($"SELECT FrameId FROM AuxData WHERE ImportId={import_id} ORDER BY FrameId ASC");
-                FileStream[] fs_split_out = new FileStream[160];
-                Parallel.For(0, 160, i => {
-                   fs_split_out[i] = new FileStream($"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\result\\{import_id}_{i}.raw", FileMode.Create, FileAccess.Write);
-                });
+                DataProc.Split_Chanel($"",(int)Frm_Start,(int)(Frm_Start+height-1),(int)import_id);
 
 
-                Parallel.For(0, 160, k =>
-                 {
-                     byte[] buff_all = new byte[2048 * height * 2];
-                     Parallel.For(0, height, i =>
-                     {
-                         Parallel.For(0, 4, j =>
-                         {
-                             try
-                             {
-                                 byte[] buf_file_chanel = new byte[512 * 160 * 2];
-                                 FileStream fs_file = new FileStream($"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\raw\\{import_id}_{Frm_Start + i}_{j + 1}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
-                                 fs_file.Read(buf_file_chanel, 0, 512 * 160 * 2);
-                                 Array.Copy(buf_file_chanel, k * 512 * 2, buff_all, i * 2048 * 2 + j * 512 * 2, 512 * 2);
-                                 fs_file.Close();
-                             }
-                             catch { }
-
-                         });
-                     });
-                     fs_split_out[k].Write(buff_all, 0, 2048 * (int)height * 2);
-                     fs_split_out[k].Close();
-                     Prog.Report((double)k / 160);
-                     List.Report($"正在分割通道{k}/159");
-
-                 });
 
                 return "成功！";
             });
