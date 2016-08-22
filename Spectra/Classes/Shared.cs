@@ -24,6 +24,7 @@ namespace Spectra
         public static bool isUnpack = false;        /*是否已解包*/
         public static bool isDecomp = false;        /*是否已解压*/
         public static string decFilePath;           /*解压后文件路径*/
+        public static string md5;                   /*文件的MD5值*/
     }
 
     public static class Variables

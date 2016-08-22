@@ -31,6 +31,14 @@ namespace Spectra
                 string cmdline = "";
                 cmdline = "开始分包...";
                 byte[] buf_row1 = new byte[288];
+
+                if (!Directory.Exists($"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}"))
+                {
+                    Directory.CreateDirectory($"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\raw");
+                    Directory.CreateDirectory($"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\jp2");
+                    Directory.CreateDirectory($"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\result");
+                }
+
                 Parallel.For(0,4,i=>
                 {
                     FileStream fs_split = new FileStream(FileInfo.srcFilePathName, FileMode.Open, FileAccess.Read, FileShare.Read);
@@ -55,7 +63,7 @@ namespace Spectra
                                 cmdline = $"解压中..\n帧号：{adr_last.FrameCount}\n";
                                 try
                                 {
-                                    FIBITMAP fibmp = FreeImage.LoadEx($"{Variables.str_pathWork}\\{import_id}_{adr_last.FrameCount}_{adr_last.Chanel}.jp2");
+                                    FIBITMAP fibmp = FreeImage.LoadEx($"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\jp2\\{import_id}_{adr_last.FrameCount}_{adr_last.Chanel}.jp2");
                                     if (!fibmp.IsNull)
                                     {
                                         byte[] buf_JP2 = new byte[512 * 160 * 2];
@@ -64,7 +72,7 @@ namespace Spectra
                                         Array.Copy(buf_JP2, 40 * 512 * 2, buf_Dynamic, 0, 1024);
                                         //App.global_Win_Dynamic.Update(buf_Dynamic,adr_last.FrameCount,adr_last.Chanel);
                                         FreeImage.Unload(fibmp);
-                                        FileStream fs_out_raw = new FileStream($"{Variables.str_pathWork}\\{import_id}_{adr_last.FrameCount}_{adr_last.Chanel}.raw", FileMode.Create);
+                                        FileStream fs_out_raw = new FileStream($"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\raw\\{import_id}_{adr_last.FrameCount}_{adr_last.Chanel}.raw", FileMode.Create);
                                         fs_out_raw.Write(buf_JP2, 0, 512 * 160 * 2);
                                         fs_out_raw.Close();
                                         cmdline += "解压成功！";
@@ -86,7 +94,7 @@ namespace Spectra
                                     List.Report(cmdline);
                                 }
                                 
-                                fs_out = new FileStream($"{Variables.str_pathWork}\\{adr.ImportId}_{adr.FrameCount}_{adr.Chanel}.jp2", FileMode.Append, FileAccess.Write, FileShare.Write);
+                                fs_out = new FileStream($"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\jp2\\{adr.ImportId}_{adr.FrameCount}_{adr.Chanel}.jp2", FileMode.Append, FileAccess.Write, FileShare.Write);
                                 adr_last = adr;
                             }
                                 
@@ -125,7 +133,7 @@ namespace Spectra
                         Parallel.For(1, 5, i =>
                         {
 
-                            if (File.Exists($"{Variables.str_pathWork}\\{import_id}_{adr.FrameCount}_{i}.raw")) flag = flag & true;
+                            if (File.Exists($"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\raw\\{import_id}_{adr.FrameCount}_{i}.raw")) flag = flag & true;
                             else flag = flag & false;
 
                         });
@@ -145,7 +153,7 @@ namespace Spectra
                 long Frm_Start = (long)sqlExcute.ExecuteScalar($"SELECT FrameId FROM AuxData WHERE ImportId={import_id} ORDER BY FrameId ASC");
                 FileStream[] fs_split_out = new FileStream[160];
                 Parallel.For(0, 160, i => {
-                   fs_split_out[i] = new FileStream($"{Variables.str_pathWork}\\{import_id}_{i}.raw", FileMode.Create, FileAccess.Write);
+                   fs_split_out[i] = new FileStream($"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\result\\{import_id}_{i}.raw", FileMode.Create, FileAccess.Write);
                 });
 
 
@@ -159,7 +167,7 @@ namespace Spectra
                              try
                              {
                                  byte[] buf_file_chanel = new byte[512 * 160 * 2];
-                                 FileStream fs_file = new FileStream($"{Variables.str_pathWork}\\{import_id}_{Frm_Start + i}_{j + 1}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
+                                 FileStream fs_file = new FileStream($"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\raw\\{import_id}_{Frm_Start + i}_{j + 1}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
                                  fs_file.Read(buf_file_chanel, 0, 512 * 160 * 2);
                                  Array.Copy(buf_file_chanel, k * 512 * 2, buff_all, i * 2048 * 2 + j * 512 * 2, 512 * 2);
                                  fs_file.Close();
@@ -476,27 +484,27 @@ namespace Spectra
                 string strReport = "";
                 string fileName = filePath.Substring(filePath.LastIndexOf("\\") + 1);
                 //检查MD5
-                byte[] md5code = new byte[16];
+                string md5str;
                 using (var md5=MD5.Create())
                 {
                     using (var stream = File.OpenRead(filePath))
                     {
-                       md5code = md5.ComputeHash(stream);
+                       md5str =BitConverter.ToString(md5.ComputeHash(stream));
                     }
                 }
-                string md5string = BitConverter.ToString(md5code);
-                DataTable fileDetail = SQLiteFunc.SelectDTSQL($"SELECT * from FileDetails where MD5='{md5string}'");
+                FileInfo.md5 = md5str;
+                DataTable fileDetail = SQLiteFunc.SelectDTSQL($"SELECT * from FileDetails where MD5='{md5str}'");
                 if (fileDetail.Rows.Count == 0)
                 {
                     FileInfo.isUnpack = false;
                     FileInfo.isDecomp = false;
                     SQLiteFunc.ExcuteSQL("insert into FileDetails (文件名,文件路径,文件大小,是否已解包,是否已解压,MD5) values ('?','?','?','?','?','?')",
-                        fileName, filePath, 100, "否", "否",md5string);
+                        fileName, filePath, 100, "否", "否",md5str);
                     SQLiteFunc.ExcuteSQL("insert into decFileDetails (文件名,文件路径,MD5) values ('?','?','?')",
-                        fileName, filePath,md5string);
+                        fileName, filePath,md5str);
                     strReport = DateTime.Now.ToString("HH:mm:ss") + "\n文件第一次导入,未解包,未解压";
                     IProg_Cmd.Report(strReport);
-                    srcFileSolve(filePath,IProg_Bar);
+                    srcFileSolve(filePath,md5str,IProg_Bar);
                     FileInfo.isUnpack = true;
                     strReport = DateTime.Now.ToString("HH:mm:ss") + "\n文件已解包,未解压";
                     IProg_Cmd.Report(strReport);
@@ -511,17 +519,17 @@ namespace Spectra
                     IProg_Cmd.Report(strReport);
                     if (!FileInfo.isUnpack)
                     {
-                        srcFileSolve(filePath, IProg_Bar);
+                        srcFileSolve(filePath,md5str, IProg_Bar);
                         strReport = DateTime.Now.ToString("HH:mm:ss") + "\n文件已解包,未解压";
                         IProg_Cmd.Report(strReport);
                     }
                 }
                 FileInfo.isUnpack = true;
                 //显示错误信息
-                IProg_DataView.Report(SQLiteFunc.SelectDTSQL("select * from FileErrors where MD5='" + md5string + "'").DefaultView);
+                IProg_DataView.Report(SQLiteFunc.SelectDTSQL("select * from FileErrors where MD5='" + md5str + "'").DefaultView);
                 //将解包后的文件作为全局变量
-                FileInfo.upkFilePathName = SQLiteFunc.SelectDTSQL("SELECT * from decFileDetails where MD5='" + md5string + "'").Rows[0][3].ToString();
-                FileInfo.decFilePath = SQLiteFunc.SelectDTSQL("SELECT * from decFileDetails where MD5='" + md5string + "'").Rows[0][5].ToString();
+                FileInfo.upkFilePathName = SQLiteFunc.SelectDTSQL("SELECT * from decFileDetails where MD5='" + md5str + "'").Rows[0][3].ToString();
+                FileInfo.decFilePath = SQLiteFunc.SelectDTSQL("SELECT * from decFileDetails where MD5='" + md5str + "'").Rows[0][5].ToString();
                 //临时加的，得到导入编号
                 SQLiteDatabase sqlExcute = new SQLiteDatabase(Variables.dbPath);
                 ImageInfo.import_id = (long)(sqlExcute.ExecuteScalar("SELECT ID from Import_History ORDER BY id DESC"));
@@ -530,9 +538,9 @@ namespace Spectra
             
         }
         /*解包-从原始数据以1024B为单元解包*/
-        public static void srcFileSolve(string filePath,IProgress<double>IProg_Bar)
+        public static void srcFileSolve(string filePath,string md5str,IProgress<double>IProg_Bar)
         {
-            string outPath = Environment.CurrentDirectory + "\\srcFiles" + filePath.Substring(0, filePath.LastIndexOf('.')).Substring(filePath.LastIndexOf('\\')) + "-src.dat";
+            string outPath = $"{Environment.CurrentDirectory}\\srcFiles\\{md5str}.dat";
             FileStream srcFile = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
             FileStream outFile = new FileStream(outPath, FileMode.Create, FileAccess.Write, FileShare.Read);
             byte[] bufPack = new byte[1024];
@@ -555,7 +563,7 @@ namespace Spectra
                 {
                     if (isInSql && isHaveErr)
                     {
-                        SQLiteFunc.insertFileErrors(filePath, errStart, "解包帧头错误");
+                        SQLiteFunc.insertFileErrors(filePath,md5str, errStart, "解包帧头错误");
                         isHaveErr = false;
                         isInSql = false;
                     }
@@ -572,15 +580,15 @@ namespace Spectra
             IProg_Bar.Report(1);
             if (isHaveErr)
             {
-                SQLiteFunc.insertFileErrors(filePath, errStart, "解包帧头错误");
+                SQLiteFunc.insertFileErrors(filePath,md5str, errStart, "解包帧头错误");
                 isInSql = false;
             }
             //关闭文件
             srcFile.Close();
             outFile.Close();
             //标记解包完成
-            SQLiteFunc.ExcuteSQL("update decFileDetails set 解包时间='" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "',解包后文件路径='" + outPath + "' where 文件路径='" + filePath + "'");
-            SQLiteFunc.ExcuteSQL("update FileDetails set 是否已解包='是' where 文件路径='" + filePath + "'");
+            SQLiteFunc.ExcuteSQL("update decFileDetails set 解包时间='" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "',解包后文件路径='" + outPath + "' where MD5='" + md5str + "'");
+            SQLiteFunc.ExcuteSQL("update FileDetails set 是否已解包='是' where MD5='" + md5str + "'");
         }
         #endregion
     }

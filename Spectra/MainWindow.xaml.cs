@@ -115,10 +115,10 @@ namespace Spectra
             //App.global_Win_Dynamic = new DynamicImagingWindow_Win32();
             //App.global_Win_Dynamic.Show();
             string result = await DataProc.Import_5(IProgress_Prog, IProgress_List, cancelImport.Token);
-            System.Windows.MessageBox.Show(result);
+            IProgress_List.Report("操作成功！");
             //App.global_Win_Dynamic.Close();
-            SQLiteFunc.ExcuteSQL("update decFileDetails set 解压时间='?',解压后文件路径='?' where 文件路径='?'",DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),Variables.str_pathWork,FileInfo.srcFilePathName);
-            SQLiteFunc.ExcuteSQL("update FileDetails set 是否已解压='是' where 文件路径='?';",FileInfo.srcFilePathName);
+            SQLiteFunc.ExcuteSQL("update decFileDetails set 解压时间='?',解压后文件路径='?' where MD5='?'",DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),Variables.str_pathWork,FileInfo.md5);
+            SQLiteFunc.ExcuteSQL("update FileDetails set 是否已解压='是' where MD5='?';",FileInfo.md5);
             this.b_Start_Import.IsEnabled = false;
             this.b_Abort_Import.IsEnabled = false;
             this.b_Open_Import.IsEnabled = true;
@@ -151,10 +151,18 @@ namespace Spectra
             if (sel != null)
             {
                 if (System.Windows.MessageBox.Show("确认删除该文件的记录?", "提示", MessageBoxButton.OKCancel, MessageBoxImage.Warning) == MessageBoxResult.Cancel) return;
-                SQLiteFunc.ExcuteSQL("delete from FileDetails where 文件路径='" + sel.Row[1] + "'");
-                SQLiteFunc.ExcuteSQL("delete from decFileDetails where 文件路径='" + sel.Row[1] + "'");
-                SQLiteFunc.ExcuteSQL("delete from FileErrors where 文件路径='" + sel.Row[1] + "'");
-                dataGrid_srcFile.ItemsSource = SQLiteFunc.SelectDTSQL("SELECT * from FileDetails").DefaultView;
+                else
+                {
+                    SQLiteFunc.ExcuteSQL("delete from FileDetails where MD5='" + sel.Row[5] + "'");
+                    SQLiteFunc.ExcuteSQL("delete from decFileDetails where MD5='" + sel.Row[5] + "'");
+                    SQLiteFunc.ExcuteSQL("delete from FileErrors where MD5='" + sel.Row[5] + "'");
+                    dataGrid_srcFile.ItemsSource = SQLiteFunc.SelectDTSQL("SELECT * from FileDetails").DefaultView;
+                }
+                if (System.Windows.MessageBox.Show("是否同时删除缓存文件?", "提示", MessageBoxButton.OKCancel, MessageBoxImage.Warning) == MessageBoxResult.OK)
+                {
+                    Directory.Delete($"{Environment.CurrentDirectory}\\decFiles\\{sel.Row[5]}",true);
+                }
+                
             }
         }
         #endregion
