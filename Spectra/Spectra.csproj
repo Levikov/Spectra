@@ -117,6 +117,9 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Classes\ExcelHelper.cs" />
+    <Compile Include="Test3D.xaml.cs">
+      <DependentUpon>Test3D.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UserControls\Ctrl_3DView.xaml.cs">
       <DependentUpon>Ctrl_3DView.xaml</DependentUpon>
     </Compile>
@@ -223,6 +226,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="StyleTextBox\TextBoxDefault.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Test3D.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
