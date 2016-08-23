@@ -18,8 +18,10 @@ namespace Spectra
     public class DataProc
     {
         #region File Operations
-        [DllImport("DataOperation.dll", EntryPoint = "Split_Chanel")]
-        static extern void Split_Chanel(string path,int start,int end,int import_id);
+        [DllImport("DLL\\DataOperation.dll", EntryPoint = "Split_Chanel")]
+        static extern void Split_Chanel(string path,string outpath,int start,int end,int import_id);
+        [DllImport("DLL\\DataOperation.dll", EntryPoint = "GetCurrentPosition")]
+        static extern double GetCurrentPosition();
 
         public static Task<string> Import_5(IProgress<double> Prog, IProgress<string> List, CancellationToken cancel)
         {
@@ -123,10 +125,6 @@ namespace Spectra
                     fs_chanel.Read(buf_row1, 0, 288);
                     ROW checkrow = new ROW(buf_row1, import_id);
                     checkrow.InsertError(fs_chanel.Position, sqlExcute);
-
-
-
-
                     if ((buf_row1[4] == 0x08) && (buf_row1[5] == 0x01))
                     {
                         AuxDataRow adr = new AuxDataRow(buf_row1, import_id);
@@ -153,10 +151,12 @@ namespace Spectra
 
                 long height = (long)sqlExcute.ExecuteScalar($"SELECT COUNT(*) FROM AuxData WHERE ImportId={import_id}");
                 long Frm_Start = (long)sqlExcute.ExecuteScalar($"SELECT FrameId FROM AuxData WHERE ImportId={import_id} ORDER BY FrameId ASC");
-                DataProc.Split_Chanel($"",(int)Frm_Start,(int)(Frm_Start+height-1),(int)import_id);
-
-
-
+                DataProc.Split_Chanel($"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\raw\\", $"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\result\\", (int)Frm_Start,(int)(Frm_Start+height-1),(int)import_id);
+                Timer t = new Timer((o) => 
+                {
+                    IProgress<double> a = o as IProgress<double>;
+                    a.Report(GetCurrentPosition());
+                }, Prog, 0,10);
                 return "成功！";
             });
 
