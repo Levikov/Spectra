@@ -146,7 +146,7 @@ namespace Spectra
             FileStream fTest;
             try
             {
-                fTest = new FileStream($"{FileInfo.decFilePath}\\{ImageInfo.import_id}_{v}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
+                fTest = new FileStream($"{FileInfo.decFilePath}{v}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
             }
             catch
             {

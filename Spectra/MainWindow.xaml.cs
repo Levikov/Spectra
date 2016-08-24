@@ -22,7 +22,6 @@ namespace Spectra
             sds = new SelectedDatesCollection(calendarFile);
             calendarFile.SelectedDates.AddRange((DateTime.Now.Date).AddDays(-100), (DateTime.Now.Date).AddDays(-1));
         }
-
         #region 界面控制
         /*窗体加载时显示默认值*/
         private void GroupBox_Loaded(object sender, RoutedEventArgs e)
@@ -103,26 +102,33 @@ namespace Spectra
         /*点击导入*/
         private async void b_Start_Import_Click(object sender, RoutedEventArgs e)
         {
-            if (FileInfo.isDecomp)
-                if (System.Windows.MessageBox.Show("该文件已解压,是否要重新解压并覆盖?", "提示", MessageBoxButton.OKCancel, MessageBoxImage.Information) == MessageBoxResult.Cancel)
-                    return;
-            System.Windows.Controls.Button b = sender as System.Windows.Controls.Button;
-            IProgress<double> IProgress_Prog = new Progress<double>((ProgressValue) => { prog_Import.Value = ProgressValue * this.prog_Import.Maximum; });
-            IProgress<string> IProgress_List = new Progress<string>((ProgressString) => { this.tb_Console.Text = ProgressString + "\n"+ this.tb_Console.Text; });
-            this.b_Abort_Import.IsEnabled = true;
-            this.b_Start_Import.IsEnabled = false;
-            this.b_Open_Import.IsEnabled = false;
-            //App.global_Win_Dynamic = new DynamicImagingWindow_Win32();
-            //App.global_Win_Dynamic.Show();
-            string result = await DataProc.Import_5(IProgress_Prog, IProgress_List, cancelImport.Token);
-            IProgress_List.Report("操作成功！");
-            //App.global_Win_Dynamic.Close();
-            SQLiteFunc.ExcuteSQL("update decFileDetails set 解压时间='?',解压后文件路径='?' where MD5='?'",DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),Variables.str_pathWork,FileInfo.md5);
-            SQLiteFunc.ExcuteSQL("update FileDetails set 是否已解压='是' where MD5='?';",FileInfo.md5);
-            this.b_Start_Import.IsEnabled = false;
-            this.b_Abort_Import.IsEnabled = false;
-            this.b_Open_Import.IsEnabled = true;
-            this.prog_Import.Value = 0;
+            try
+            {
+                if (FileInfo.isDecomp)
+                    if (System.Windows.MessageBox.Show("该文件已解压,是否要重新解压并覆盖?", "提示", MessageBoxButton.OKCancel, MessageBoxImage.Information) == MessageBoxResult.Cancel)
+                        return;
+                System.Windows.Controls.Button b = sender as System.Windows.Controls.Button;
+                IProgress<double> IProgress_Prog = new Progress<double>((ProgressValue) => { prog_Import.Value = ProgressValue * this.prog_Import.Maximum; });
+                IProgress<string> IProgress_List = new Progress<string>((ProgressString) => { this.tb_Console.Text = ProgressString + "\n" + this.tb_Console.Text; });
+                this.b_Abort_Import.IsEnabled = true;
+                this.b_Start_Import.IsEnabled = false;
+                this.b_Open_Import.IsEnabled = false;
+                //App.global_Win_Dynamic = new DynamicImagingWindow_Win32();
+                //App.global_Win_Dynamic.Show();
+                string result = await DataProc.Import_5(IProgress_Prog, IProgress_List, cancelImport.Token);
+                IProgress_List.Report("操作成功！");
+                //App.global_Win_Dynamic.Close();
+                SQLiteFunc.ExcuteSQL("update decFileDetails set 解压时间='?',解压后文件路径='?' where MD5='?'", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), $"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\result\\", FileInfo.md5);
+                SQLiteFunc.ExcuteSQL("update FileDetails set 是否已解压='是' where MD5='?';", FileInfo.md5);
+                this.b_Start_Import.IsEnabled = false;
+                this.b_Abort_Import.IsEnabled = false;
+                this.b_Open_Import.IsEnabled = true;
+                this.prog_Import.Value = 0;
+            }
+            catch (Exception ee)
+            {
+                System.Windows.MessageBox.Show(ee.Message);
+            }
         }
 
         private void b_Abort_Import_Click(object sender, RoutedEventArgs e)
@@ -142,7 +148,7 @@ namespace Spectra
         {
             var sel = (DataRowView)dataGrid_srcFile.SelectedItem;
             if(sel != null)
-                dataGrid_decFile.ItemsSource = SQLiteFunc.SelectDTSQL("SELECT * from decFileDetails where 文件路径='" + sel.Row[1] + "'").DefaultView;
+                dataGrid_decFile.ItemsSource = SQLiteFunc.SelectDTSQL("SELECT * from decFileDetails where MD5='" + sel.Row[5] + "'").DefaultView;
         }
         /*删除文件记录*/
         private void btnDelRecord_Click(object sender, RoutedEventArgs e)

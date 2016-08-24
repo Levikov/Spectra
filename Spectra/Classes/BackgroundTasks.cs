@@ -455,58 +455,65 @@ namespace Spectra
         {
             return Task.Run(()=> 
             {
-                string strReport = "";
-                string fileName = filePath.Substring(filePath.LastIndexOf("\\") + 1);
-                //检查MD5
-                string md5str;
-                using (var md5=MD5.Create())
+                try
                 {
-                    using (var stream = File.OpenRead(filePath))
+                    string strReport = "";
+                    string fileName = filePath.Substring(filePath.LastIndexOf("\\") + 1);
+                    //检查MD5
+                    string md5str;
+                    using (var md5 = MD5.Create())
                     {
-                       md5str =BitConverter.ToString(md5.ComputeHash(stream));
+                        using (var stream = File.OpenRead(filePath))
+                        {
+                            md5str = BitConverter.ToString(md5.ComputeHash(stream));
+                        }
                     }
-                }
-                FileInfo.md5 = md5str;
-                DataTable fileDetail = SQLiteFunc.SelectDTSQL($"SELECT * from FileDetails where MD5='{md5str}'");
-                if (fileDetail.Rows.Count == 0)
-                {
-                    FileInfo.isUnpack = false;
-                    FileInfo.isDecomp = false;
-                    SQLiteFunc.ExcuteSQL("insert into FileDetails (文件名,文件路径,文件大小,是否已解包,是否已解压,MD5) values ('?','?','?','?','?','?')",
-                        fileName, filePath, 100, "否", "否",md5str);
-                    SQLiteFunc.ExcuteSQL("insert into decFileDetails (文件名,文件路径,MD5) values ('?','?','?')",
-                        fileName, filePath,md5str);
-                    strReport = DateTime.Now.ToString("HH:mm:ss") + "\n文件第一次导入,未解包,未解压";
-                    IProg_Cmd.Report(strReport);
-                    srcFileSolve(filePath,md5str,IProg_Bar);
-                    FileInfo.isUnpack = true;
-                    strReport = DateTime.Now.ToString("HH:mm:ss") + "\n文件已解包,未解压";
-                    IProg_Cmd.Report(strReport);
-                }
-                else
-                {
-                    strReport = DateTime.Now.ToString("HH:mm:ss") + "\n文件";
-                    if ((string)fileDetail.Rows[0][3] == "是") FileInfo.isUnpack = true; else FileInfo.isUnpack = false;
-                    if ((string)fileDetail.Rows[0][4] == "是") FileInfo.isDecomp = true; else FileInfo.isDecomp = false;
-                    if (FileInfo.isUnpack) strReport += "已解包,"; else strReport += "未解包,";
-                    if (FileInfo.isDecomp) strReport += "已解压"; else strReport += "未解压";
-                    IProg_Cmd.Report(strReport);
-                    if (!FileInfo.isUnpack)
+                    FileInfo.md5 = md5str;
+                    DataTable fileDetail = SQLiteFunc.SelectDTSQL($"SELECT * from FileDetails where MD5='{md5str}'");
+                    if (fileDetail.Rows.Count == 0)
                     {
-                        srcFileSolve(filePath,md5str, IProg_Bar);
+                        FileInfo.isUnpack = false;
+                        FileInfo.isDecomp = false;
+                        SQLiteFunc.ExcuteSQL("insert into FileDetails (文件名,文件路径,文件大小,是否已解包,是否已解压,MD5) values ('?','?','?','?','?','?')",
+                            fileName, filePath, 100, "否", "否", md5str);
+                        SQLiteFunc.ExcuteSQL("insert into decFileDetails (文件名,文件路径,解压后文件路径,MD5) values ('?','?','?','?')",
+                            fileName, filePath,$"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\result\\" , md5str);
+                        strReport = DateTime.Now.ToString("HH:mm:ss") + "\n文件第一次导入,未解包,未解压";
+                        IProg_Cmd.Report(strReport);
+                        srcFileSolve(filePath, md5str, IProg_Bar);
+                        FileInfo.isUnpack = true;
                         strReport = DateTime.Now.ToString("HH:mm:ss") + "\n文件已解包,未解压";
                         IProg_Cmd.Report(strReport);
                     }
+                    else
+                    {
+                        strReport = DateTime.Now.ToString("HH:mm:ss") + "\n文件";
+                        if ((string)fileDetail.Rows[0][3] == "是") FileInfo.isUnpack = true; else FileInfo.isUnpack = false;
+                        if ((string)fileDetail.Rows[0][4] == "是") FileInfo.isDecomp = true; else FileInfo.isDecomp = false;
+                        if (FileInfo.isUnpack) strReport += "已解包,"; else strReport += "未解包,";
+                        if (FileInfo.isDecomp) strReport += "已解压"; else strReport += "未解压";
+                        IProg_Cmd.Report(strReport);
+                        if (!FileInfo.isUnpack)
+                        {
+                            srcFileSolve(filePath, md5str, IProg_Bar);
+                            strReport = DateTime.Now.ToString("HH:mm:ss") + "\n文件已解包,未解压";
+                            IProg_Cmd.Report(strReport);
+                        }
+                    }
+                    FileInfo.isUnpack = true;
+                    //显示错误信息
+                    IProg_DataView.Report(SQLiteFunc.SelectDTSQL("select * from FileErrors where MD5='" + md5str + "'").DefaultView);
+                    //将解包后的文件作为全局变量
+                    FileInfo.upkFilePathName = SQLiteFunc.SelectDTSQL("SELECT * from decFileDetails where MD5='" + md5str + "'").Rows[0][3].ToString();
+                    FileInfo.decFilePath = SQLiteFunc.SelectDTSQL("SELECT * from decFileDetails where MD5='" + md5str + "'").Rows[0][5].ToString();
+                    //临时加的，得到导入编号
+                    SQLiteDatabase sqlExcute = new SQLiteDatabase(Variables.dbPath);
+                    ImageInfo.import_id = (long)(sqlExcute.ExecuteScalar("SELECT ID from Import_History ORDER BY id DESC"));
                 }
-                FileInfo.isUnpack = true;
-                //显示错误信息
-                IProg_DataView.Report(SQLiteFunc.SelectDTSQL("select * from FileErrors where MD5='" + md5str + "'").DefaultView);
-                //将解包后的文件作为全局变量
-                FileInfo.upkFilePathName = SQLiteFunc.SelectDTSQL("SELECT * from decFileDetails where MD5='" + md5str + "'").Rows[0][3].ToString();
-                FileInfo.decFilePath = SQLiteFunc.SelectDTSQL("SELECT * from decFileDetails where MD5='" + md5str + "'").Rows[0][5].ToString();
-                //临时加的，得到导入编号
-                SQLiteDatabase sqlExcute = new SQLiteDatabase(Variables.dbPath);
-                ImageInfo.import_id = (long)(sqlExcute.ExecuteScalar("SELECT ID from Import_History ORDER BY id DESC"));
+                catch (Exception e)
+                {
+                    throw e;
+                }
                 return 1;
             });
             
