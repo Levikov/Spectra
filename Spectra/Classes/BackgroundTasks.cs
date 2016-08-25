@@ -22,15 +22,22 @@ namespace Spectra
         static extern void Split_Chanel(string path,string outpath,int start,int end,int import_id);
         [DllImport("DLL\\DataOperation.dll", EntryPoint = "GetCurrentPosition")]
         static extern double GetCurrentPosition();
+        [DllImport("kernel32.dll", SetLastError = true)]
+        public static extern IntPtr LoadLibrary(string lpFileName);
+        [DllImport("kernel32.dll", CharSet = CharSet.Ansi, ExactSpelling = true)]
+        public static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
 
         public static Task<string> Import_5(IProgress<double> Prog, IProgress<string> List, CancellationToken cancel)
         {
             return Task.Run(()=> {
+
+                IntPtr hModule = LoadLibrary("DLL\\DataOperation.dll");
+                IntPtr hVariable = GetProcAddress(hModule, "progress");
                 SQLiteDatabase sqlExcute = new SQLiteDatabase(Variables.dbPath);
                 long  import_id = (long)(sqlExcute.ExecuteScalar("SELECT ID from Import_History ORDER BY id DESC"))+1;
                 ImageInfo.import_id = import_id;
                 sqlExcute.BeginInsert();
-                sqlExcute.ExecuteNonQuery($"INSERT INTO Import_History (FileName) VALUES(@filename);", new List<SQLiteParameter>() {new SQLiteParameter("filename", FileInfo.srcFilePathName) });
+                sqlExcute.ExecuteNonQuery($"INSERT INTO Import_History (FileName,MD5) VALUES(@filename,@md5);", new List<SQLiteParameter>() {new SQLiteParameter("filename", FileInfo.srcFilePathName) ,new SQLiteParameter("md5",FileInfo.md5)});
                 double d_progress = 0;
                 string cmdline = "";
                 cmdline = "开始分包...";
@@ -151,12 +158,13 @@ namespace Spectra
 
                 long height = (long)sqlExcute.ExecuteScalar($"SELECT COUNT(*) FROM AuxData WHERE ImportId={import_id}");
                 long Frm_Start = (long)sqlExcute.ExecuteScalar($"SELECT FrameId FROM AuxData WHERE ImportId={import_id} ORDER BY FrameId ASC");
-                DataProc.Split_Chanel($"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\raw\\", $"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\result\\", (int)Frm_Start,(int)(Frm_Start+height-1),(int)import_id);
-                Timer t = new Timer((o) => 
+                Timer t = new Timer((o) =>
                 {
                     IProgress<double> a = o as IProgress<double>;
                     a.Report(GetCurrentPosition());
-                }, Prog, 0,10);
+                }, Prog, 0, 10);
+                DataProc.Split_Chanel($"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\raw\\", $"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\result\\", (int)Frm_Start,(int)(Frm_Start+height-1),(int)import_id);
+                
                 return "成功！";
             });
 
