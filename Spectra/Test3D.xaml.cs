@@ -21,13 +21,24 @@ namespace Spectra
     public partial class Test3D : Window
     {
         double imheight = 60;
-        ModelVisual3D mv3d;
         public Test3D()
         {
             InitializeComponent();
-            mv3d =Resources["ModelVisual3D"] as ModelVisual3D;
+            GeometryModel3D gm3d_Top =Resources["Top"] as GeometryModel3D;
+            GeometryModel3D gm3d_Bottom = Resources["Bottom"] as GeometryModel3D;
+            ModelVisual3D mv3d = new ModelVisual3D();
+            Model3DGroup m3dg = new Model3DGroup();
+            m3dg.Children.Add(gm3d_Top);
+            m3dg.Children.Add(gm3d_Bottom);
+            mv3d.Content = m3dg;
             scene.Viewport.Children.Add(mv3d);
-           
+            double scalar = 0.1;
+            scene.Camera.Position = new Point3D(scalar * 2048, scalar * imheight, scalar * 2048);
+            scene.Camera.LookDirection = new Vector3D(-2048, -imheight, -2048);
+            scene.Camera.UpDirection = Math3D.UnitY;
+            scene.Camera.FieldOfView = 60;
+            scene.Camera.Speed = 0;
+
         }
         void SetCamera(Point3D Position,Vector3D LookDirection)
         {
@@ -40,14 +51,6 @@ namespace Spectra
 
         void Refresh(double height)
         {
-            foreach (object o in mv3d.Children)
-            {
-                if (o is Geometry3D)
-                {
-                    Geometry3D g = o as Geometry3D;
-                    
-                }
-            }
 
         }
     }
