@@ -1,0 +1,1 @@
+copy DLL\*.dll bin\x64\Debug\*.dll

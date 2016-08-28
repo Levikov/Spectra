@@ -187,6 +187,7 @@
                             <DataGridTextColumn Header ="文件路径" Binding="{Binding 文件路径}" Width="auto"/>
                             <DataGridTextColumn Header ="是否已解包" Binding="{Binding 是否已解包}" Width="150"/>
                             <DataGridTextColumn Header ="是否已解压" Binding="{Binding 是否已解压}" Width="150"/>
+                            <DataGridTextColumn Header ="MD5" Binding="{Binding MD5}" Width="auto"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </GroupBox>

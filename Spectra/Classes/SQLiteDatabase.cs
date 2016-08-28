@@ -270,11 +270,11 @@ namespace Spectra
             }
         }
         /*插入错误信息*/
-        public static void insertFileErrors(string filePath, long errorPosi, string errorType)
+        public static void insertFileErrors(string filePath,string md5str, long errorPosi, string errorType)
         {
             string fileName = filePath.Substring(filePath.LastIndexOf('\\') + 1);
-            if (SelectDTSQL("SELECT * from FileErrors where 文件路径='" + filePath + "' and 错误位置=" + errorPosi.ToString() + " and 错误类型='" + errorType + "'").Rows.Count == 0)
-                ExcuteSQL("insert into FileErrors (文件路径,文件名,错误位置,错误类型) values ('?','?','?','?')", filePath, fileName, errorPosi, errorType);
+            if (SelectDTSQL("SELECT * from FileErrors where MD5='" + md5str + "' and 错误位置=" + errorPosi.ToString() + " and 错误类型='" + errorType + "'").Rows.Count == 0)
+                ExcuteSQL("insert into FileErrors (文件路径,文件名,错误位置,错误类型,MD5) values ('?','?','?','?','?')", filePath, fileName, errorPosi, errorType,md5str);
         }
         #endregion
     }

@@ -24,6 +24,7 @@ namespace Spectra
         public static bool isUnpack = false;        /*是否已解包*/
         public static bool isDecomp = false;        /*是否已解压*/
         public static string decFilePath;           /*解压后文件路径*/
+        public static string md5;                   /*文件的MD5值*/
     }
 
     public static class Variables
@@ -145,7 +146,7 @@ namespace Spectra
             FileStream fTest;
             try
             {
-                fTest = new FileStream($"{FileInfo.decFilePath}\\{ImageInfo.import_id}_{v}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
+                fTest = new FileStream($"{FileInfo.decFilePath}{v}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
             }
             catch
             {
