@@ -156,8 +156,6 @@ namespace Spectra
             }
         }
 
-
-
         public bool ExecuteNonQuery(string sql, IList<SQLiteParameter> cmdparams)
         {
             bool successState = false;

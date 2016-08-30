@@ -79,7 +79,7 @@ namespace Spectra
 
         #region 数据解包
         /*点击打开文件*/
-        private void b_Open_Click(object sender, RoutedEventArgs e)
+        private void btnOpenFile_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -136,27 +136,30 @@ namespace Spectra
                 if (FileInfo.isDecomp)
                     if (System.Windows.MessageBox.Show("该文件已解压,是否要重新解压并覆盖?", "提示", MessageBoxButton.OKCancel, MessageBoxImage.Information) == MessageBoxResult.Cancel)
                         return;
-                System.Windows.Controls.Button b = sender as System.Windows.Controls.Button;
-                IProgress<double> IProgress_Prog = new Progress<double>((ProgressValue) => { prog_Import.Value = ProgressValue * this.prog_Import.Maximum; });
-                IProgress<string> IProgress_List = new Progress<string>((ProgressString) => { this.tb_Console.Text = ProgressString + "\n" + this.tb_Console.Text; });
-                this.b_Abort_Import.IsEnabled = true;
-                this.btnDecFile.IsEnabled = false;
-                this.b_Open_Import.IsEnabled = false;
+                
+                b_Abort_Import.IsEnabled = true;
+                btnOpenFile.IsEnabled = false;
+                btnDecFile.IsEnabled = false;
                 btnSelectFile.IsEnabled = false;
                 btnDelRecord.IsEnabled = false;
+
+                IProgress<double> IProgress_Prog = new Progress<double>((ProgressValue) => { prog_Import.Value = ProgressValue * this.prog_Import.Maximum; });
+                IProgress<string> IProgress_List = new Progress<string>((ProgressString) => { this.tb_Console.Text = ProgressString + "\n" + this.tb_Console.Text; });
                 //App.global_Win_Dynamic = new DynamicImagingWindow_Win32();
                 //App.global_Win_Dynamic.Show();
-                string result = await DataProc.Import_5(IProgress_Prog, IProgress_List, cancelImport.Token);
+                await DataProc.Import_5(IProgress_Prog, IProgress_List, cancelImport.Token);
                 IProgress_List.Report(DateTime.Now.ToString("HH:mm:ss") + " 操作成功！");
                 //App.global_Win_Dynamic.Close();
-                SQLiteFunc.ExcuteSQL("update FileDetails_dec set 解压时间='?',解压后文件路径='?' where MD5='?'", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), $"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\result\\", FileInfo.md5);
+
+                SQLiteFunc.ExcuteSQL("update FileDetails_dec set 解压时间='?',解压后文件路径='?',帧数='?',起始时间='?',结束时间='?',起始经纬='?',结束经纬='?' where MD5='?'",
+                    DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), $"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\result\\",FileInfo.frmSum,FileInfo.startTime.ToString("yyyy-MM-dd HH:mm:ss"), FileInfo.endTime.ToString("yyyy-MM-dd HH:mm:ss"), FileInfo.startCoord.convertToString(),FileInfo.endCoord.convertToString(), FileInfo.md5);
                 SQLiteFunc.ExcuteSQL("update FileDetails set 是否已解压='是' where MD5='?';", FileInfo.md5);
-                this.btnDecFile.IsEnabled = true;
-                this.b_Abort_Import.IsEnabled = false;
-                this.b_Open_Import.IsEnabled = true;
+
+                b_Abort_Import.IsEnabled = false;
+                btnOpenFile.IsEnabled = true;
+                btnDecFile.IsEnabled = true;
                 btnSelectFile.IsEnabled = true;
                 btnDelRecord.IsEnabled = true;
-                this.prog_Import.Value = 0;
             }
             catch (Exception ex)
             {
@@ -208,6 +211,11 @@ namespace Spectra
             var sel = (DataRowView)dataGrid_srcFile.SelectedItem;
             if(sel != null)
                 dataGrid_decFile.ItemsSource = SQLiteFunc.SelectDTSQL("SELECT * from FileDetails_dec where MD5='" + sel.Row[5] + "'").DefaultView;
+        }
+        /*查找所有文件*/
+        private void btnGetAllRecord_Click(object sender, RoutedEventArgs e)
+        {
+            dataGrid_srcFile.ItemsSource = SQLiteFunc.SelectDTSQL("SELECT * from FileDetails").DefaultView;
         }
         /*删除文件记录*/
         private void btnDelRecord_Click(object sender, RoutedEventArgs e)

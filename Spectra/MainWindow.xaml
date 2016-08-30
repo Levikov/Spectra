@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:System="clr-namespace:System;assembly=mscorlib" mc:Ignorable="d" x:Name="WindowMain" x:Class="Spectra.MainWindow"
         Title="光谱微纳卫星数据分析系统" Height="768" Width="1366" MinHeight="430" MinWidth="800"
-        WindowStartupLocation="CenterScreen" MouseLeftButtonDown="WindowMain_MouseLeftButtonDown" WindowStyle="None" Icon="image/ICON/14.ico">
+        WindowStartupLocation="CenterScreen" MouseLeftButtonDown="WindowMain_MouseLeftButtonDown" Icon="image/ICON/14.ico">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
     </Window.Resources>
@@ -119,7 +119,7 @@
                         <Grid Height="100">
                             <Label Content="文件路径:" Margin="30,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left"></Label>
                             <TextBox Name="tb_Path" TextWrapping="Wrap" Margin="140,0,200,0" IsReadOnly="True"/>
-                            <Button x:Name="b_Open_Import" Margin="0,32,30,32" Content="打开" Template="{DynamicResource ButtonDefault}" Click="b_Open_Click" Width="160" HorizontalAlignment="Right"/>
+                            <Button x:Name="btnOpenFile" Margin="0,32,30,32" Content="打开" Template="{DynamicResource ButtonDefault}" Click="btnOpenFile_Click" Width="160" HorizontalAlignment="Right"/>
                         </Grid>
                         <ProgressBar x:Name="prog_Import" Height="36" Margin="30,0" BorderBrush="{StaticResource ButtonBack}"/>
                         <DockPanel Margin="10,0" LastChildFill="False" Height="60" HorizontalAlignment="Center">
@@ -146,7 +146,51 @@
                     </Grid>
                 </GroupBox>
             </Grid>
-            <Grid x:Name="gridLeftA2" Grid.Column="0"/>
+            <Grid x:Name="gridLeftA2" Grid.Column="2">
+                <!--触发Grid的显示与隐藏-->
+                <Grid.Resources>
+                    <Style TargetType="{x:Type Grid}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsChecked, ElementName=btnLeftA2}" Value="False">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Resources>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="40"/>
+                    <RowDefinition Height="300"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="50"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="50"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="340" MaxWidth="340"/>
+                </Grid.ColumnDefinitions>
+                <GroupBox Grid.Row="1" Grid.Column="1" Header="存储图像" FontSize="20">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="60"/>
+                            <RowDefinition Height="60"/>
+                            <RowDefinition Height="60"/>
+                            <RowDefinition Height="1*"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="1*"/>
+                            <ColumnDefinition Width="1*"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Row="0" Grid.Column="0" Content="文件存储名称:" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <TextBox Grid.Row="0" Grid.Column="1"/>
+                        <Label Grid.Row="1" Grid.Column="0" Content="文件存储路径:" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <TextBox Grid.Row="1" Grid.Column="1" IsReadOnly="True"/>
+                        <Button Grid.Row="1" Grid.Column="2" Content="选择存储路径" Template="{DynamicResource ButtonDefault}" Width="160" />
+                        <ProgressBar Grid.Row="2" Grid.Column="1" Height="36" BorderBrush="{StaticResource ButtonBack}"/>
+                        <Button Grid.Row="2" Grid.Column="2" Content="开始存储" Template="{DynamicResource ButtonDefault}" Width="160" />
+                    </Grid>
+                </GroupBox>
+            </Grid>
             <Grid x:Name="gridLeftA3" Grid.Column="2">
                 <!--触发Grid的显示与隐藏-->
                 <Grid.Resources>
@@ -236,7 +280,11 @@
                             </Grid.ColumnDefinitions>
                             <Label Content="文件全称:" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                             <TextBox Grid.Row="0" Grid.Column="1" x:Name="textSelectFile" Margin="10,0" Height="34" VerticalContentAlignment="Center" HorizontalContentAlignment="Left" TextChanged="textSelectFile_TextChanged"/>
-                            <Button Grid.Row="1" Grid.Column="1" x:Name="btnDelRecord" Content="删除记录" Template="{DynamicResource ButtonDefault}" Width="160" Click="btnDelRecord_Click"/>
+
+                            <StackPanel Margin="0" Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center">
+                                <Button x:Name="btnGetAllRecord" Content="查找所有" Template="{DynamicResource ButtonDefault}" Width="120" Click="btnGetAllRecord_Click"/>
+                                <Button x:Name="btnDelRecord" Content="删除记录" Template="{DynamicResource ButtonDefault}" Width="120" Click="btnDelRecord_Click" Margin="40,0,0,0"/>
+                            </StackPanel>
                         </Grid>
                     </GroupBox>                    
                 </Grid>
@@ -1115,7 +1163,7 @@
                 </StackPanel>
             </Grid>
         </Grid>
-        <StatusBar Grid.Row="2" Height="40" Margin="0" VerticalAlignment="Bottom" FontSize="18" Background="{x:Null}">
+        <StatusBar Grid.Row="2" Height="34" Margin="0" VerticalAlignment="Bottom" FontSize="14" Background="{x:Null}">
             <StackPanel Orientation="Horizontal">
                 <Label Content="像宽:"/>
                 <Label x:Name="lblImgWidth" Content="null"/>

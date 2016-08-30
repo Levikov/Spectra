@@ -2,11 +2,11 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:local="clr-namespace:Spectra.StyleButton">
     <ControlTemplate x:Key="ButtonIcon2nd" TargetType="RadioButton">
-        <Grid x:Name="grid">
+        <Grid x:Name="grid"  Height="50">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*"/>
-                <ColumnDefinition Width="70"/>
-                <ColumnDefinition Width="130"/>
+                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="120"/>
                 <ColumnDefinition Width="1*"/>
             </Grid.ColumnDefinitions>
             <Grid Grid.Column="1">
@@ -14,7 +14,7 @@
                 <Label x:Name="icon" Background="{TemplateBinding Background}" Margin="0"/>
             </Grid>
             <Grid Grid.Column="2">
-                <Label x:Name="label" Content="{TemplateBinding Content}" FontSize="30" FontFamily="YouYuan" HorizontalAlignment="Center" VerticalAlignment="Center" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
+                <Label x:Name="label" Content="{TemplateBinding Content}" FontSize="24" FontFamily="YouYuan" HorizontalAlignment="Center" VerticalAlignment="Center" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
             </Grid>
         </Grid>
         <ControlTemplate.Resources>
@@ -22,9 +22,9 @@
                 <!--故事板-->
                 <DoubleAnimationUsingKeyFrames BeginTime="00:00:00" Storyboard.TargetName="label" Storyboard.TargetProperty="FontSize">
                     <!--开始时间、应用对象、应用属性-->
-                    <SplineDoubleKeyFrame KeyTime="00:00:00.00" Value="32"/>
+                    <SplineDoubleKeyFrame KeyTime="00:00:00.00" Value="26"/>
                     <!--发生时间、值-->
-                    <SplineDoubleKeyFrame KeyTime="00:00:00.10" Value="30"/>
+                    <SplineDoubleKeyFrame KeyTime="00:00:00.10" Value="24"/>
                     <!--发生时间、值-->
                 </DoubleAnimationUsingKeyFrames>
             </Storyboard>
@@ -32,9 +32,9 @@
                 <!--故事板-->
                 <DoubleAnimationUsingKeyFrames BeginTime="00:00:00" Storyboard.TargetName="icon" Storyboard.TargetProperty="Width">
                     <!--开始时间、应用对象、应用属性-->
-                    <SplineDoubleKeyFrame KeyTime="00:00:00.00" Value="69"/>
+                    <SplineDoubleKeyFrame KeyTime="00:00:00.00" Value="49"/>
                     <!--发生时间、值-->
-                    <SplineDoubleKeyFrame KeyTime="00:00:00.50" Value="70"/>
+                    <SplineDoubleKeyFrame KeyTime="00:00:00.50" Value="50"/>
                     <!--发生时间、值-->
                 </DoubleAnimationUsingKeyFrames>
             </Storyboard>

@@ -97,9 +97,9 @@ namespace Spectra
             this.Lon = Convert.ToDouble(s[1]);
         }
 
-        public string convertToString(Coord coord)
+        public string convertToString()
         {
-            return $"({coord.Lat},{coord.Lon})";
+            return $"({Lat},{Lon})";
         }
     }
 
