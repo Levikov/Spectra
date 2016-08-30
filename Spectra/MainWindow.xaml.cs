@@ -19,8 +19,8 @@ namespace Spectra
         public MainWindow()
         {
             InitializeComponent();
-            sds = new SelectedDatesCollection(calendarFile);
-            calendarFile.SelectedDates.AddRange((DateTime.Now.Date).AddDays(-100), (DateTime.Now.Date).AddDays(-1));
+            //sds = new SelectedDatesCollection(calendarFile);
+            //calendarFile.SelectedDates.AddRange((DateTime.Now.Date).AddDays(-100), (DateTime.Now.Date).AddDays(-1));
         }
         #region 界面控制
         /*窗体加载时显示默认值*/
@@ -79,19 +79,48 @@ namespace Spectra
 
         #region 数据解包
         /*点击打开文件*/
-        private async void b_Open_Click(object sender, RoutedEventArgs e)
+        private void b_Open_Click(object sender, RoutedEventArgs e)
         {
-            Microsoft.Win32.OpenFileDialog openFile = new Microsoft.Win32.OpenFileDialog();
-            openFile.Filter = "All Files(*.*)|*.*";
-            if ((bool)openFile.ShowDialog())
+            try
             {
+                Microsoft.Win32.OpenFileDialog openFile = new Microsoft.Win32.OpenFileDialog();
+                openFile.Filter = "All Files(*.*)|*.*";
+                if ((bool)openFile.ShowDialog())
+                {
+                    FileInfo.srcFilePathName = openFile.FileName;                                                                   //文件路径名称
+                    FileInfo.srcFileName = FileInfo.srcFilePathName.Substring(FileInfo.srcFilePathName.LastIndexOf('\\') + 1);      //文件名称
+                    tb_Console.Text = DataProc.checkFileState();                                                                    //检查文件状态
+                    /*窗体控件*/
+                    dataGrid_Errors.ItemsSource = SQLiteFunc.SelectDTSQL("select * from FileErrors where MD5='" + FileInfo.md5 + "'").DefaultView;  //显示错误信息
+                    tb_Path.Text = FileInfo.srcFilePathName;
+                    txtCurrentFile.Text = FileInfo.srcFileName;
+                    prog_Import.Value = 0;
+                    btnUnpFile.IsEnabled = true;
+                    btnDecFile.IsEnabled = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(ex.ToString());
+            }
+        }
+        /*点击解包*/
+        private async void btnUnpFile_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (FileInfo.isUnpack)
+                    if (System.Windows.MessageBox.Show("该文件已解包,是否要重新解包并覆盖?", "提示", MessageBoxButton.OKCancel, MessageBoxImage.Information) == MessageBoxResult.Cancel)
+                        return;
+
                 IProgress<DataView> IProg_DataView = new Progress<DataView>((Prog_DataView) => { dataGrid_Errors.ItemsSource = Prog_DataView; });
                 IProgress<double> IProgress_Prog = new Progress<double>((ProgressValue) => { prog_Import.Value = ProgressValue * this.prog_Import.Maximum; });
                 IProgress<string> IProgress_List = new Progress<string>((ProgressString) => { this.tb_Console.Text = ProgressString + "\n" + this.tb_Console.Text; });
-                FileInfo.srcFilePathName = openFile.FileName;
-                this.tb_Path.Text = openFile.FileName;
-                int i=await DataProc.GetFileDetail(FileInfo.srcFilePathName,IProg_DataView,IProgress_Prog,IProgress_List);
-                this.b_Start_Import.IsEnabled = true;
+                await DataProc.unpackFile(IProg_DataView,IProgress_Prog,IProgress_List);
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(ex.ToString());
             }
         }
         #endregion
@@ -99,8 +128,8 @@ namespace Spectra
         #region 数据解压
         /*用于放弃操作*/
         private CancellationTokenSource cancelImport = new CancellationTokenSource();
-        /*点击导入*/
-        private async void b_Start_Import_Click(object sender, RoutedEventArgs e)
+        /*点击解压*/
+        private async void btnDecFile_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -111,23 +140,27 @@ namespace Spectra
                 IProgress<double> IProgress_Prog = new Progress<double>((ProgressValue) => { prog_Import.Value = ProgressValue * this.prog_Import.Maximum; });
                 IProgress<string> IProgress_List = new Progress<string>((ProgressString) => { this.tb_Console.Text = ProgressString + "\n" + this.tb_Console.Text; });
                 this.b_Abort_Import.IsEnabled = true;
-                this.b_Start_Import.IsEnabled = false;
+                this.btnDecFile.IsEnabled = false;
                 this.b_Open_Import.IsEnabled = false;
+                btnSelectFile.IsEnabled = false;
+                btnDelRecord.IsEnabled = false;
                 //App.global_Win_Dynamic = new DynamicImagingWindow_Win32();
                 //App.global_Win_Dynamic.Show();
                 string result = await DataProc.Import_5(IProgress_Prog, IProgress_List, cancelImport.Token);
-                IProgress_List.Report("操作成功！");
+                IProgress_List.Report(DateTime.Now.ToString("HH:mm:ss") + " 操作成功！");
                 //App.global_Win_Dynamic.Close();
-                SQLiteFunc.ExcuteSQL("update decFileDetails set 解压时间='?',解压后文件路径='?' where MD5='?'", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), $"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\result\\", FileInfo.md5);
+                SQLiteFunc.ExcuteSQL("update FileDetails_dec set 解压时间='?',解压后文件路径='?' where MD5='?'", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), $"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\result\\", FileInfo.md5);
                 SQLiteFunc.ExcuteSQL("update FileDetails set 是否已解压='是' where MD5='?';", FileInfo.md5);
-                this.b_Start_Import.IsEnabled = false;
+                this.btnDecFile.IsEnabled = true;
                 this.b_Abort_Import.IsEnabled = false;
                 this.b_Open_Import.IsEnabled = true;
+                btnSelectFile.IsEnabled = true;
+                btnDelRecord.IsEnabled = true;
                 this.prog_Import.Value = 0;
             }
-            catch (Exception ee)
+            catch (Exception ex)
             {
-                System.Windows.MessageBox.Show(ee.Message);
+                System.Windows.MessageBox.Show(ex.Message);
             }
         }
 
@@ -138,6 +171,32 @@ namespace Spectra
         #endregion
 
         #region 文件检索
+        /*选定文件*/
+        private void btnSelectFile_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var sel = (DataRowView)dataGrid_srcFile.SelectedItem;
+                if (sel != null)
+                {
+                    FileInfo.srcFileName = (string)sel.Row[0];
+                    FileInfo.srcFilePathName = (string)sel.Row[1];
+                    FileInfo.srcFileLength = Convert.ToInt64(sel.Row[2]);
+                    FileInfo.isUnpack = ((string)sel.Row[3]=="是");
+                    FileInfo.isDecomp = ((string)sel.Row[4] == "是");
+                    FileInfo.md5 = (string)sel.Row[5];
+                    txtCurrentFile.Text = FileInfo.srcFileName;
+                }
+                else
+                {
+                    System.Windows.MessageBox.Show("请先选中条目");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(ex.Message);
+            }
+        }
         /*查找文件*/
         private void textSelectFile_TextChanged(object sender, TextChangedEventArgs e)
         {
@@ -148,27 +207,34 @@ namespace Spectra
         {
             var sel = (DataRowView)dataGrid_srcFile.SelectedItem;
             if(sel != null)
-                dataGrid_decFile.ItemsSource = SQLiteFunc.SelectDTSQL("SELECT * from decFileDetails where MD5='" + sel.Row[5] + "'").DefaultView;
+                dataGrid_decFile.ItemsSource = SQLiteFunc.SelectDTSQL("SELECT * from FileDetails_dec where MD5='" + sel.Row[5] + "'").DefaultView;
         }
         /*删除文件记录*/
         private void btnDelRecord_Click(object sender, RoutedEventArgs e)
         {
-            var sel = (DataRowView)dataGrid_srcFile.SelectedItem;
-            if (sel != null)
+            try
             {
-                if (System.Windows.MessageBox.Show("确认删除该文件的记录?", "提示", MessageBoxButton.OKCancel, MessageBoxImage.Warning) == MessageBoxResult.Cancel) return;
-                else
+                var sel = (DataRowView)dataGrid_srcFile.SelectedItem;
+                if (sel != null)
                 {
-                    SQLiteFunc.ExcuteSQL("delete from FileDetails where MD5='" + sel.Row[5] + "'");
-                    SQLiteFunc.ExcuteSQL("delete from decFileDetails where MD5='" + sel.Row[5] + "'");
-                    SQLiteFunc.ExcuteSQL("delete from FileErrors where MD5='" + sel.Row[5] + "'");
-                    dataGrid_srcFile.ItemsSource = SQLiteFunc.SelectDTSQL("SELECT * from FileDetails").DefaultView;
+                    if (System.Windows.MessageBox.Show("确认删除该文件的记录?", "提示", MessageBoxButton.OKCancel, MessageBoxImage.Warning) == MessageBoxResult.Cancel) return;
+                    else
+                    {
+                        SQLiteFunc.ExcuteSQL("delete from FileDetails where MD5='" + sel.Row[5] + "'");
+                        SQLiteFunc.ExcuteSQL("delete from FileDetails_dec where MD5='" + sel.Row[5] + "'");
+                        SQLiteFunc.ExcuteSQL("delete from FileErrors where MD5='" + sel.Row[5] + "'");
+                        dataGrid_srcFile.ItemsSource = SQLiteFunc.SelectDTSQL("SELECT * from FileDetails").DefaultView;
+                    }
+                    if (System.Windows.MessageBox.Show("是否同时删除缓存文件?", "提示", MessageBoxButton.OKCancel, MessageBoxImage.Warning) == MessageBoxResult.OK)
+                    {
+                        if (Directory.Exists($"{Environment.CurrentDirectory}\\decFiles\\{sel.Row[5]}"))
+                            Directory.Delete($"{Environment.CurrentDirectory}\\decFiles\\{sel.Row[5]}", true);
+                    }
                 }
-                if (System.Windows.MessageBox.Show("是否同时删除缓存文件?", "提示", MessageBoxButton.OKCancel, MessageBoxImage.Warning) == MessageBoxResult.OK)
-                {
-                    Directory.Delete($"{Environment.CurrentDirectory}\\decFiles\\{sel.Row[5]}",true);
-                }
-                
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(ex.Message);
             }
         }
         #endregion

@@ -17,14 +17,23 @@ namespace Spectra
 
     public static class FileInfo
     {
-        public static string srcFilePathName;       /*源文件全称*/
-        public static long sizeSrcFile;             /*源文件大小*/
-        public static string upkFilePathName;       /*解包后文件全称*/
-        public static long sizeUpkFile;             /*解包后文件大小*/
+        public static string md5;                   /*文件的MD5值*/
+
+        public static string srcFilePathName;       /*源文件路径全称*/
+        public static string srcFileName;           /*源文件名称*/
+        public static long srcFileLength;           /*源文件大小*/
+
         public static bool isUnpack = false;        /*是否已解包*/
         public static bool isDecomp = false;        /*是否已解压*/
-        public static string decFilePath;           /*解压后文件路径*/
-        public static string md5;                   /*文件的MD5值*/
+
+        public static string upkFilePathName;       /*解包后文件路径全称*/
+        public static string decFilePathName;       /*解压后文件路径全称*/
+
+        public static long frmSum;                  /*帧总数*/
+        public static DateTime startTime;
+        public static DateTime endTime;
+        public static Coord startCoord = new Coord(0, 0);
+        public static Coord endCoord = new Coord(0, 0);
     }
 
     public static class Variables
@@ -78,6 +87,19 @@ namespace Spectra
         {
             this.Lat = v1;
             this.Lon = v2;
+        }
+
+        public void convertToCoord(string str)
+        {
+            str = str.Substring(1, str.Length - 2);
+            string[] s = str.Split(',');
+            this.Lat = Convert.ToDouble(s[0]);
+            this.Lon = Convert.ToDouble(s[1]);
+        }
+
+        public string convertToString(Coord coord)
+        {
+            return $"({coord.Lat},{coord.Lon})";
         }
     }
 
@@ -146,7 +168,7 @@ namespace Spectra
             FileStream fTest;
             try
             {
-                fTest = new FileStream($"{FileInfo.decFilePath}{v}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
+                fTest = new FileStream($"{FileInfo.decFilePathName}{v}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
             }
             catch
             {
