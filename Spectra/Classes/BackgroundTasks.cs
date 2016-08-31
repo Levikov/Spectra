@@ -174,7 +174,8 @@ namespace Spectra
                 //如果输出路径不存在，则创建
                 if (!Directory.Exists($"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}"))
                 {
-                    Directory.CreateDirectory($"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\raw");
+                    Directory.CreateDirectory($"{Environment.CurrentDirectory}\\channelFiles");                                     //存储每个通道解压后的文件
+                    Directory.CreateDirectory($"{Environment.CurrentDirectory}\\showFiles");                                        //存储要显示的文件（即检索结果）
                     Directory.CreateDirectory($"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\jp2");
                     Directory.CreateDirectory($"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\result");
                 }
@@ -184,76 +185,76 @@ namespace Spectra
 
                 //分包并解压
                 Parallel.For(0, 4, i =>
-                  {
-                      FileStream fs_split = new FileStream(FileInfo.srcFilePathName, FileMode.Open, FileAccess.Read, FileShare.Read);     //打开源文件
+                {
+                    FileStream fs_split = new FileStream(FileInfo.srcFilePathName, FileMode.Open, FileAccess.Read, FileShare.Read);  //打开源文件
                     FileStream fs_out = new FileStream($"test_{i}", FileMode.Create);
-                      AuxDataRow adr_last = new AuxDataRow(new byte[PACK_LEN], 0);                                                             //最近一包的行结构，新建时为0
-                    byte[] buf_split = new byte[PACK_LEN];                                                                                   //一包数据
+                    AuxDataRow adr_last = new AuxDataRow(new byte[PACK_LEN], 0);                                                     //最近一包的行结构，新建时为0
+                    byte[] buf_split = new byte[PACK_LEN];                                                                           //一包数据
                     while (fs_split.Position < fs_split.Length)
-                      {
-                          fs_split.Read(buf_split, 0, PACK_LEN);
-                          int sum = 0;
-                          ROW checkrow = new ROW(buf_split, import_id);
-                          if (checkrow.isValid() != 1)                                                                                    //判断数据格式及校验和是否正确
+                    {
+                        fs_split.Read(buf_split, 0, PACK_LEN);
+                        int sum = 0;
+                        ROW checkrow = new ROW(buf_split, import_id);
+                        if (checkrow.isValid() != 1)                                                                                    //判断数据格式及校验和是否正确
                         {
-                              cmdline = $"{DateTime.Now.ToString("HH:mm:ss")} 位置:{fs_split.Position} 错误代号:{checkrow.isValid()}";
-                              continue;
-                          }
-
-                          if (buf_split[5] != i + 1)                                                                                      //只对该通道处理
+                            cmdline = $"{DateTime.Now.ToString("HH:mm:ss")} 位置:{fs_split.Position} 错误代号:{checkrow.isValid()}";
                             continue;
-                          if (buf_split[4] == 0x0A)                                                                                       //若是有效数据
+                        }
+
+                        if (buf_split[5] != i + 1)                                                                                      //只对该通道处理
+                            continue;
+                        if (buf_split[4] == 0x0A)                                                                                       //若是有效数据
                         {
-                              RealDataRow rdr = new RealDataRow(buf_split, import_id);
-                              if (rdr.FrameCount == adr_last.FrameCount)                                                                  //帧号正确则写文件
+                            RealDataRow rdr = new RealDataRow(buf_split, import_id);
+                            if (rdr.FrameCount == adr_last.FrameCount)                                                                  //帧号正确则写文件
                             {
-                                  rdr.Insert(fs_out);
-                              }
-                          }
-                          else if (buf_split[4] == 0x08)                                                                                  //若是辅助数据
+                                rdr.Insert(fs_out);
+                            }
+                        }
+                        else if (buf_split[4] == 0x08)                                                                                  //若是辅助数据
                         {
-                              AuxDataRow adr = new AuxDataRow(buf_split, import_id);                                                      //最新一包的行结构
+                            AuxDataRow adr = new AuxDataRow(buf_split, import_id);                                                      //最新一包的行结构
                             if (adr.FrameCount != adr_last.FrameCount)
-                              {
-                                  fs_out.Close();
-                                  sum++;
-                                  if (i == 0) cmdline = $"{DateTime.Now.ToString("HH:mm:ss")} 帧号:{adr_last.FrameCount} ";
-                                  try
-                                  {
-                                      FIBITMAP fibmp = FreeImage.LoadEx($"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\jp2\\{import_id}_{adr_last.FrameCount}_{adr_last.Chanel}.jp2");
-                                      if (!fibmp.IsNull)
-                                      {
-                                          byte[] buf_JP2 = new byte[512 * 160 * 2];
-                                          byte[] buf_Dynamic = new byte[512 * 2];
-                                          Marshal.Copy(FreeImage.GetBits(fibmp), buf_JP2, 0, 512 * 160 * 2);
-                                          Array.Copy(buf_JP2, 40 * 512 * 2, buf_Dynamic, 0, 1024);
+                            {
+                                fs_out.Close();
+                                sum++;
+                                if (i == 0) cmdline = $"{DateTime.Now.ToString("HH:mm:ss")} 帧号:{adr_last.FrameCount} ";
+                                try
+                                {
+                                    FIBITMAP fibmp = FreeImage.LoadEx($"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\jp2\\{adr_last.CapTimeS.ToString("D10")}_{adr_last.CapTimeUS.ToString("D10")}_{adr_last.Chanel}.jp2");
+                                    if (!fibmp.IsNull)
+                                    {
+                                        byte[] buf_JP2 = new byte[512 * 160 * 2];
+                                        byte[] buf_Dynamic = new byte[512 * 2];
+                                        Marshal.Copy(FreeImage.GetBits(fibmp), buf_JP2, 0, 512 * 160 * 2);
+                                        Array.Copy(buf_JP2, 40 * 512 * 2, buf_Dynamic, 0, 1024);
                                         //App.global_Win_Dynamic.Update(buf_Dynamic,adr_last.FrameCount,adr_last.Chanel);
                                         FreeImage.Unload(fibmp);
-                                          FileStream fs_out_raw = new FileStream($"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\raw\\{import_id}_{adr_last.FrameCount}_{adr_last.Chanel}.raw", FileMode.Create);
-                                          fs_out_raw.Write(buf_JP2, 0, 512 * 160 * 2);
-                                          fs_out_raw.Close();
-                                          if (i == 0) cmdline += "解压成功！";
-                                      }
-                                      else
-                                      {
-                                          cmdline += $"通道{i}解压失败";
-                                      }
-                                  }
-                                  catch { }
+                                        FileStream fs_out_raw = new FileStream($"{Environment.CurrentDirectory}\\channelFiles\\{adr_last.CapTimeS.ToString("D10")}_{adr_last.CapTimeUS.ToString("D10")}_{adr_last.Chanel}.raw", FileMode.Create);
+                                        fs_out_raw.Write(buf_JP2, 0, 512 * 160 * 2);
+                                        fs_out_raw.Close();
+                                        if (i == 0) cmdline += "解压成功！";
+                                    }
+                                    else
+                                    {
+                                        cmdline += $"通道{i}解压失败";
+                                    }
+                                }
+                                catch { }
                                 //更新界面
                                 if (i == 0)
-                                  {
-                                      Prog.Report((double)fs_split.Position / (double)fs_split.Length);
-                                      List.Report(cmdline);
-                                  }
+                                {
+                                    Prog.Report((double)fs_split.Position / (double)fs_split.Length);
+                                    List.Report(cmdline);
+                                }
                                 //新建.jp2文件
-                                fs_out = new FileStream($"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\jp2\\{adr.ImportId}_{adr.FrameCount}_{adr.Chanel}.jp2", FileMode.Create, FileAccess.Write, FileShare.Write);
-                                  adr_last = adr;
-                              }
-                          }
-                      }
-                      fs_out.Close();
-                  });
+                                fs_out = new FileStream($"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\jp2\\{adr.CapTimeS.ToString("D10")}_{adr.CapTimeUS.ToString("D10")}_{adr.Chanel}.jp2", FileMode.Create, FileAccess.Write, FileShare.Write);
+                                adr_last = adr;
+                            }
+                        }
+                    }
+                    fs_out.Close();
+                });
 
                 //App.global_Win_Dynamic.StopTimer();
 
@@ -274,7 +275,7 @@ namespace Spectra
 
                         Parallel.For(1, 5, i =>
                         {
-                            if (File.Exists($"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\raw\\{import_id}_{adr.FrameCount}_{i}.raw")) flag = flag & true;
+                            if (File.Exists($"{Environment.CurrentDirectory}\\channelFiles\\{adr.CapTimeS.ToString("D10")}_{adr.CapTimeUS.ToString("D10")}_{adr.Chanel}.raw")) flag = flag & true;
                             else flag = flag & false;
                         });
                         if (flag)
@@ -293,7 +294,7 @@ namespace Spectra
 
                 //更新文件信息
                 FileInfo.frmSum = (long)sqlExcute.ExecuteScalar($"SELECT COUNT(*) FROM AuxData WHERE MD5='{FileInfo.md5}'");                                    //帧总数
-                DateTime T0 = new DateTime(1970, 1, 1, 0, 0, 0);
+                DateTime T0 = new DateTime(2010, 12, 1, 12, 0, 0);
                 FileInfo.startTime = T0.AddSeconds((double)sqlExcute.ExecuteScalar($"SELECT GST FROM AuxData WHERE MD5='{FileInfo.md5}' ORDER BY FrameId ASC"));//起始时间
                 FileInfo.endTime = T0.AddSeconds((double)sqlExcute.ExecuteScalar($"SELECT GST FROM AuxData WHERE MD5='{FileInfo.md5}' ORDER BY FrameId DESC")); //结束时间
                 double lat = (double)sqlExcute.ExecuteScalar($"SELECT Lat FROM AuxData WHERE MD5='{FileInfo.md5}' ORDER BY FrameId ASC");
@@ -562,7 +563,7 @@ namespace Spectra
                 {
                     DateTime selectedStartDate = start_time;
                     DateTime selectedEndDate = end_time;
-                    DateTime T0 = new DateTime(1970, 1, 1, 0, 0, 0);
+                    DateTime T0 = new DateTime(2010, 12, 1, 12, 0, 0);
                     TimeSpan ts_Start = selectedStartDate.Subtract(T0);
                     TimeSpan ts_End = selectedEndDate.Subtract(T0);
                     command += " AND GST>" + (ts_Start.TotalSeconds.ToString()) + " AND GST<" + ts_End.TotalSeconds.ToString();
@@ -637,6 +638,8 @@ namespace Spectra
 
     public class ROW
     {
+        public UInt32 CapTimeS;     //捕获时间（时间码秒值）
+        public UInt32 CapTimeUS;    //捕获时间（时间码微秒值）
         public UInt16 FrameCount;
         public UInt16 PackCount;
         public byte Chanel;
@@ -644,6 +647,8 @@ namespace Spectra
         public byte[] buf_Row;
         public ROW(byte[] ROW, long id)
         {
+            CapTimeS = DataProc.readU32(ROW, 17);
+            CapTimeUS = DataProc.readU32(ROW, 104);
             FrameCount = DataProc.readU16(ROW, 6);
             PackCount = DataProc.readU16(ROW, 8);
             Chanel = DataProc.readU8(ROW, 5);
@@ -762,6 +767,7 @@ namespace Spectra
     public class AuxDataRow : ROW
     {
         protected double GST;
+        protected long GST_US;
         protected double Lat;
         protected double Lon;
         protected double X;
@@ -775,14 +781,14 @@ namespace Spectra
         protected double Oz;
         public AuxDataRow(byte[] ROW, long id) : base(ROW, id)
         {
-
             X = 7000 * Math.Cos(Math.PI * ((double)(FrameCount % 360) / 180));//readLength(32);
             Y = 7000 * Math.Sin(Math.PI * ((double)(FrameCount % 360) / 180));//readLength(36);
             Z = 0;//readLength(40);
             Vx = 7.546 * Math.Cos(Math.PI * ((double)(FrameCount % 360) / 180) + Math.PI / 2);//readLength(44);
             Vy = 7.546 * Math.Sin(Math.PI * ((double)(FrameCount % 360) / 180) + Math.PI / 2);//readLength();
             Vz = 0;//0;//
-            GST = DateTime.Now.Subtract(new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds;//OrbitCalc.CalGST(new POSE_TIME(DateTime.Now));
+            GST = DataProc.readU32(ROW, 17);
+            GST_US = DataProc.readU32(ROW, 104);
             double[] latlon = new double[2];
             latlon = OrbitCalc.CalEarthLonLat(new double[3] { X, Y, Z }, GST);
             Lat = latlon[1] * 180 / Math.PI;
@@ -792,44 +798,9 @@ namespace Spectra
             Oz = 0;
         }
 
-        internal void Insert()
-        {
-            SQLiteDatabase sqlExcute = new SQLiteDatabase(Variables.dbPath);
-            try
-            {
-                var sql = "insert into AuxData values(@FrameId,@SatelliteId,@GST,@Lat,@Lon,@X,@Y,@Z,@Vx,@Vy,@Vz,@Ox,@Oy,@Oz,@ImportId,@Chanel,@MD5);";
-                var cmdparams = new List<SQLiteParameter>()
-                {
-                    new SQLiteParameter("FrameId", FrameCount),
-                    new SQLiteParameter("SatelliteId","MicroSat"),
-                    new SQLiteParameter("GST",GST),
-                    new SQLiteParameter("Lat",Lat),
-                    new SQLiteParameter("Lon",Lon),
-                    new SQLiteParameter("X",X),
-                    new SQLiteParameter("Y",Y),
-                    new SQLiteParameter("Z",Z),
-                    new SQLiteParameter("Vx",Vx),
-                    new SQLiteParameter("Vy",Vy),
-                    new SQLiteParameter("Vz",Vz),
-                    new SQLiteParameter("Ox",Ox),
-                    new SQLiteParameter("Oy",Oy),
-                    new SQLiteParameter("Oz",Oz),
-                    new SQLiteParameter("ImportId",ImportId),
-                    new SQLiteParameter("Chanel",Chanel),
-                    new SQLiteParameter("MD5",FileInfo.md5)
-                };
-                sqlExcute.ExecuteNonQuery(sql, cmdparams);
-            }
-            catch (Exception e)
-            {
-                //Do any logging operation here if necessary
-                throw e;
-            }
-        }
-
         public void Insert(SQLiteDatabase sqlExcute)
         {
-            var sql = "insert into AuxData values(@FrameId,@SatelliteId,@GST,@Lat,@Lon,@X,@Y,@Z,@Vx,@Vy,@Vz,@Ox,@Oy,@Oz,@ImportId,@Chanel,@MD5);";
+            var sql = "insert into AuxData values(@FrameId,@SatelliteId,@GST,@Lat,@Lon,@X,@Y,@Z,@Vx,@Vy,@Vz,@Ox,@Oy,@Oz,@ImportId,@Chanel,@MD5,@GST_US);";
             var cmdparams = new List<SQLiteParameter>()
                 {
                     new SQLiteParameter("FrameId", FrameCount),
@@ -848,7 +819,8 @@ namespace Spectra
                     new SQLiteParameter("Oz",Oz),
                     new SQLiteParameter("ImportId",ImportId),
                     new SQLiteParameter("Chanel",Chanel),
-                    new SQLiteParameter("MD5",FileInfo.md5)
+                    new SQLiteParameter("MD5",FileInfo.md5),
+                    new SQLiteParameter("GST_US",GST_US)
                 };
 
             try
