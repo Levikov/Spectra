@@ -261,12 +261,26 @@ namespace Spectra
                 dataGrid_Result.ItemsSource = dt.DefaultView;
                 dataGrid_SatePose.ItemsSource = dt.DefaultView;
                 DataQuery.QueryResult = dt;
-                ImageInfo.GetImgInfo(dt);       /*存储图像信息*/
+                ImageInfo.dtImgInfo = dt;
+                ImageInfo.GetImgInfo();       /*存储图像信息*/
                 SetImgInfo();
             }
             catch (Exception E)
             {
                 System.Windows.MessageBox.Show(E.Message);
+            }
+        }
+        /*点击生成图像*/
+        private void btnMakeImage_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                ImageInfo.MakeImage();
+                System.Windows.MessageBox.Show("OK");
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(ex.ToString());
             }
         }
         /*选择时间条件*/
@@ -628,7 +642,8 @@ namespace Spectra
                 dataGrid_Result.ItemsSource = dt.DefaultView;
                 dataGrid_SatePose.ItemsSource = dt.DefaultView;
                 DataQuery.QueryResult = dt;
-                ImageInfo.GetImgInfo(dt);       /*存储图像信息*/
+                ImageInfo.dtImgInfo = dt;
+                ImageInfo.GetImgInfo();       /*存储图像信息*/
                 SetImgInfo();
                 initWindows(ModelShowInfo.WindowsCnt, ModelShowInfo.dtWinShowInfo,ModelShowInfo.md5);
             }

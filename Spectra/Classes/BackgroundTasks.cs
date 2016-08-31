@@ -313,7 +313,7 @@ namespace Spectra
                         });
                 string[] strGST = new string[dtGST.Rows.Count];
                 for (int i = 0; i < dtGST.Rows.Count; i++)
-                    strGST[i] = $"{dtGST.Rows[i][0]}_{dtGST.Rows[i][1]}";
+                    strGST[i] = $"{(Convert.ToUInt32(dtGST.Rows[i][0])).ToString("D10")}_{(Convert.ToUInt32(dtGST.Rows[i][1])).ToString("D10")}_";
 
 
                 //512拼2048*N图
@@ -337,7 +337,7 @@ namespace Spectra
             {
                 byte[] buf_full = new byte[2048 * DataQuery.QueryResult.Rows.Count * 3];
                 byte[] buf_band = new byte[2048 * DataQuery.QueryResult.Rows.Count*2];
-                FileStream fs = new FileStream($"{Environment.CurrentDirectory}\\decFiles\\{md5}\\result\\{v}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
+                FileStream fs = new FileStream($"{Environment.CurrentDirectory}\\showFiles\\{v}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
                 fs.Read(buf_band, 0, 2048 * DataQuery.QueryResult.Rows.Count * 2);
                         Parallel.For(0, 2048*DataQuery.QueryResult.Rows.Count, i =>
                         {
@@ -565,7 +565,11 @@ namespace Spectra
                 conn.Open();
                 SQLiteCommand cmmd = new SQLiteCommand("", conn);
 
-                string command = $"SELECT * FROM AuxData WHERE Chanel=1 AND MD5='{md5}'";
+                string command;
+                if(md5!=null)
+                    command = $"SELECT * FROM AuxData WHERE Chanel=1 AND MD5='{md5}'";
+                else
+                    command = $"SELECT * FROM AuxData WHERE Chanel=1";
                 if ((bool)isChecked2)
                 {
                     command += " AND Lat>" + (coord_DR.Lat.ToString()) + " AND Lat<" + coord_TL.Lat.ToString() + " AND Lon>" + (coord_TL.Lon.ToString()) + " AND Lon<" + coord_DR.Lon.ToString();
@@ -583,8 +587,7 @@ namespace Spectra
                 {
                     command += " AND FrameId>" + start_FrmCnt.ToString() + " AND FrameId<" + end_FrmCnt.ToString();
                 }
-
-                //command = command.Substring(0, command.LastIndexOf("AND"));
+                
                 SQLiteDatabase db = new SQLiteDatabase(Variables.dbPath);
                 return db.GetDataTable(command);
             });

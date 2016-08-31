@@ -4,6 +4,7 @@ using System.Data;
 using System.Data.SQLite;
 using System.Drawing;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
@@ -122,8 +123,14 @@ namespace Spectra
 
     public class ImageInfo : DependencyObject
     {
+        [DllImport("DLL\\DataOperation.dll", EntryPoint = "Split_Chanel")]
+        static extern void Split_Chanel(string path, string outpath, int sum, string[] file);
+
         public static long import_id = 0;
         public static int noise_value = 0;
+
+        public static DataTable dtImgInfo;
+        public static string[] strFileName;
 
         public static int minFrm;
         public static int maxFrm;
@@ -139,21 +146,28 @@ namespace Spectra
 
         public ImageInfo()  { }
 
-        public static void GetImgInfo(DataTable dt)
+        public static void GetImgInfo()
         {
-            minFrm = Convert.ToInt32(dt.Compute("min(FrameId)", ""));
-            maxFrm = Convert.ToInt32(dt.Compute("max(FrameId)", ""));
-            imgWidth = maxFrm - minFrm + 1;
+            minFrm = Convert.ToInt32(dtImgInfo.Compute("min(FrameId)", ""));
+            maxFrm = Convert.ToInt32(dtImgInfo.Compute("max(FrameId)", ""));
+            imgWidth = dtImgInfo.Rows.Count;
 
-            startSec = Convert.ToDouble(dt.Compute("min(GST)", ""));
-            endSec = Convert.ToDouble(dt.Compute("max(GST)", ""));
-            startCoord.Lat = Convert.ToDouble(dt.Compute("min(Lat)", ""));
-            startCoord.Lon = Convert.ToDouble(dt.Compute("min(Lon)", ""));
-            endCoord.Lat = Convert.ToDouble(dt.Compute("max(Lat)", ""));
-            endCoord.Lon = Convert.ToDouble(dt.Compute("max(Lon)", ""));
-            DateTime T0 = new DateTime(1970, 1, 1, 0, 0, 0);
+            startSec = Convert.ToDouble(dtImgInfo.Compute("min(GST)", ""));
+            endSec = Convert.ToDouble(dtImgInfo.Compute("max(GST)", ""));
+            startCoord.Lat = Convert.ToDouble(dtImgInfo.Compute("min(Lat)", ""));
+            startCoord.Lon = Convert.ToDouble(dtImgInfo.Compute("min(Lon)", ""));
+            endCoord.Lat = Convert.ToDouble(dtImgInfo.Compute("max(Lat)", ""));
+            endCoord.Lon = Convert.ToDouble(dtImgInfo.Compute("max(Lon)", ""));
+            DateTime T0 = new DateTime(2010, 12, 1, 12, 0, 0);
             startTime = T0.AddSeconds(startSec);
             endTime = T0.AddSeconds(endSec);
+        }
+        public static void MakeImage()
+        {
+            strFileName = new string[imgWidth];
+            for (int i = 0; i < imgWidth; i++)
+                strFileName[i] = $"{(Convert.ToUInt32(dtImgInfo.Rows[i][2])).ToString("D10")}_{(Convert.ToUInt32(dtImgInfo.Rows[i][17])).ToString("D10")}_";
+            Split_Chanel($"{Environment.CurrentDirectory}\\channelFiles\\", $"{Environment.CurrentDirectory}\\showFiles\\", imgWidth, strFileName);
         }
 
         /// <summary>
