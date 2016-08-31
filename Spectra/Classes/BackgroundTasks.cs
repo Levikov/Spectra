@@ -153,7 +153,8 @@ namespace Spectra
 
         #region 解压
         [DllImport("DLL\\DataOperation.dll", EntryPoint = "Split_Chanel")]
-        static extern void Split_Chanel(string path,string outpath,int start,int end,int import_id);
+        //static extern void Split_Chanel(string path, string outpath, int start, int end, int import_id);
+        static extern void Split_Chanel(string path, string outpath, int sum, string[] file);
         [DllImport("DLL\\DataOperation.dll", EntryPoint = "GetCurrentPosition")]
         static extern double GetCurrentPosition();
         [DllImport("kernel32.dll", SetLastError = true)]
@@ -304,14 +305,24 @@ namespace Spectra
                 lon = (double)sqlExcute.ExecuteScalar($"SELECT Lon FROM AuxData WHERE MD5='{FileInfo.md5}' ORDER BY FrameId DESC");
                 FileInfo.endCoord.convertToCoord($"({lat},{lon})");                                                                                             //结束经纬
                 long Frm_Start = (long)sqlExcute.ExecuteScalar($"SELECT FrameId FROM AuxData WHERE MD5='{FileInfo.md5}' ORDER BY FrameId ASC");                 //帧起始
-                
+
+                DataTable dtGST = sqlExcute.GetDataTable("select GST,GST_US from AuxData where md5=@MD5 order by GST,GST_US",
+                    new List<SQLiteParameter>()
+                        {
+                            new SQLiteParameter("MD5",FileInfo.md5)
+                        });
+                string[] strGST = new string[dtGST.Rows.Count];
+                for (int i = 0; i < dtGST.Rows.Count; i++)
+                    strGST[i] = $"{dtGST.Rows[i][0]}_{dtGST.Rows[i][1]}";
+
+
                 //512拼2048*N图
                 Timer t = new Timer((o) =>
                 {
                     IProgress<double> a = o as IProgress<double>;
                     a.Report(GetCurrentPosition());
                 }, Prog, 0, 10);
-                DataProc.Split_Chanel($"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\raw\\", $"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\result\\", (int)Frm_Start,(int)(Frm_Start+ FileInfo.frmSum - 1),(int)import_id);
+                DataProc.Split_Chanel($"{Environment.CurrentDirectory}\\channelFiles\\", $"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\result\\", dtGST.Rows.Count, strGST);
                 
                 return "成功！";
             });

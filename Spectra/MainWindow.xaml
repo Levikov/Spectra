@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:System="clr-namespace:System;assembly=mscorlib" mc:Ignorable="d" x:Name="WindowMain" x:Class="Spectra.MainWindow"
         Title="光谱微纳卫星数据分析系统" Height="768" Width="1366" MinHeight="430" MinWidth="800"
-        WindowStartupLocation="CenterScreen" MouseLeftButtonDown="WindowMain_MouseLeftButtonDown" Icon="image/ICON/14.ico">
+        WindowStartupLocation="CenterScreen" MouseLeftButtonDown="WindowMain_MouseLeftButtonDown" Icon="image/ICON/14.ico" WindowState="Maximized">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
     </Window.Resources>

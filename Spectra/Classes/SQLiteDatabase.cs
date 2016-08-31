@@ -79,23 +79,13 @@ namespace Spectra
         public DataTable GetDataTable(string sql, IList<SQLiteParameter> cmdparams)
         {
             DataTable dt = new DataTable();
-            try
-            {
-                SQLiteConnection cnn = new SQLiteConnection(dbConnection);
-                cnn.Open();
-                SQLiteCommand mycommand = new SQLiteCommand("", cnn);
-                mycommand.CommandText = sql;
-                mycommand.Parameters.AddRange(cmdparams.ToArray());
-                mycommand.CommandTimeout = 180;
-                SQLiteDataReader reader = mycommand.ExecuteReader();
-                dt.Load(reader);
-                reader.Close();
-                cnn.Close();
-            }
-            catch (Exception e)
-            {
-                throw new Exception(e.Message);
-            }
+            SQLiteCommand mycommand = new SQLiteCommand("", cnn);
+            mycommand.CommandText = sql;
+            mycommand.Parameters.AddRange(cmdparams.ToArray());
+            mycommand.CommandTimeout = 180;
+            SQLiteDataReader reader = mycommand.ExecuteReader();
+            dt.Load(reader);
+            reader.Close();
             return dt;
         }
 

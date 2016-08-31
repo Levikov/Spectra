@@ -6,8 +6,8 @@
         xmlns:local="clr-namespace:Spectra"
         xmlns:Spectra="clr-namespace:Spectra" x:Class="Spectra.MultiFuncWindow"
         mc:Ignorable="d"
-        Title="MultiFuncWindow" Height="900" Width="1600" WindowStartupLocation="CenterScreen" Closing="Window_Closing">
-    <Grid x:Name="MainGrid" Background="Black">
+        Title="MultiFuncWindow" Height="900" Width="1600" WindowStartupLocation="CenterScreen" Closing="Window_Closing" WindowState="Maximized">
+    <Grid x:Name="MainGrid" Background="White">
         <Grid.RowDefinitions>
             <RowDefinition Height="1*"/>
             <RowDefinition Height="1*"/>
