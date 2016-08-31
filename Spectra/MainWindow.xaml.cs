@@ -28,8 +28,6 @@ namespace Spectra
         {
             getDefaultShow();
             getApplyModel();
-            setWindowID(WinShowInfo.WindowsCnt);
-            setScreenID(Screen.AllScreens.Length);
         }
         /*拖动界面*/
         private void WindowMain_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -116,7 +114,7 @@ namespace Spectra
                 IProgress<DataView> IProg_DataView = new Progress<DataView>((Prog_DataView) => { dataGrid_Errors.ItemsSource = Prog_DataView; });
                 IProgress<double> IProgress_Prog = new Progress<double>((ProgressValue) => { prog_Import.Value = ProgressValue * this.prog_Import.Maximum; });
                 IProgress<string> IProgress_List = new Progress<string>((ProgressString) => { this.tb_Console.Text = ProgressString + "\n" + this.tb_Console.Text; });
-                await DataProc.unpackFile(IProg_DataView,IProgress_Prog,IProgress_List);
+                await DataProc.unpackFile(IProg_DataView, IProgress_Prog, IProgress_List);
             }
             catch (Exception ex)
             {
@@ -136,7 +134,7 @@ namespace Spectra
                 if (FileInfo.isDecomp)
                     if (System.Windows.MessageBox.Show("该文件已解压,是否要重新解压并覆盖?", "提示", MessageBoxButton.OKCancel, MessageBoxImage.Information) == MessageBoxResult.Cancel)
                         return;
-                
+
                 b_Abort_Import.IsEnabled = true;
                 btnOpenFile.IsEnabled = false;
                 btnDecFile.IsEnabled = false;
@@ -152,7 +150,7 @@ namespace Spectra
                 //App.global_Win_Dynamic.Close();
 
                 SQLiteFunc.ExcuteSQL("update FileDetails_dec set 解压时间='?',解压后文件路径='?',帧数='?',起始时间='?',结束时间='?',起始经纬='?',结束经纬='?' where MD5='?'",
-                    DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), $"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\result\\",FileInfo.frmSum,FileInfo.startTime.ToString("yyyy-MM-dd HH:mm:ss"), FileInfo.endTime.ToString("yyyy-MM-dd HH:mm:ss"), FileInfo.startCoord.convertToString(),FileInfo.endCoord.convertToString(), FileInfo.md5);
+                    DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), $"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\result\\", FileInfo.frmSum, FileInfo.startTime.ToString("yyyy-MM-dd HH:mm:ss"), FileInfo.endTime.ToString("yyyy-MM-dd HH:mm:ss"), FileInfo.startCoord.convertToString(), FileInfo.endCoord.convertToString(), FileInfo.md5);
                 SQLiteFunc.ExcuteSQL("update FileDetails set 是否已解压='是' where MD5='?';", FileInfo.md5);
 
                 b_Abort_Import.IsEnabled = false;
@@ -185,7 +183,7 @@ namespace Spectra
                     FileInfo.srcFileName = (string)sel.Row[0];
                     FileInfo.srcFilePathName = (string)sel.Row[1];
                     FileInfo.srcFileLength = Convert.ToInt64(sel.Row[2]);
-                    FileInfo.isUnpack = ((string)sel.Row[3]=="是");
+                    FileInfo.isUnpack = ((string)sel.Row[3] == "是");
                     FileInfo.isDecomp = ((string)sel.Row[4] == "是");
                     FileInfo.md5 = (string)sel.Row[5];
                     txtCurrentFile.Text = FileInfo.srcFileName;
@@ -203,13 +201,13 @@ namespace Spectra
         /*查找文件*/
         private void textSelectFile_TextChanged(object sender, TextChangedEventArgs e)
         {
-            dataGrid_srcFile.ItemsSource = SQLiteFunc.SelectDTSQL("SELECT * from FileDetails where 文件路径 like '%"+textSelectFile.Text+"%'").DefaultView;
+            dataGrid_srcFile.ItemsSource = SQLiteFunc.SelectDTSQL("SELECT * from FileDetails where 文件路径 like '%" + textSelectFile.Text + "%'").DefaultView;
         }
         /*选中文件后显示解压情况*/
         private void dataGrid_srcFile_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var sel = (DataRowView)dataGrid_srcFile.SelectedItem;
-            if(sel != null)
+            if (sel != null)
                 dataGrid_decFile.ItemsSource = SQLiteFunc.SelectDTSQL("SELECT * from FileDetails_dec where MD5='" + sel.Row[5] + "'").DefaultView;
         }
         /*查找所有文件*/
@@ -246,7 +244,7 @@ namespace Spectra
             }
         }
         #endregion
-        
+
         #region 图像检索
         public DateTime start_time;                     //起始检索时刻
         public DateTime end_time;                       //终止检索时刻
@@ -308,11 +306,18 @@ namespace Spectra
         /*显示图像按钮*/
         private void button_Display_Click(object sender, RoutedEventArgs e)
         {
-            //DataTable dt = DataQuery.QueryResult;
-            App.global_Win_Map = new MapWindow();
-            App.global_Win_Map.Show();
-            App.global_Win_Map.DrawRectangle(new Point((double)DataQuery.QueryResult.Rows[0].ItemArray[3], (double)DataQuery.QueryResult.Rows[0].ItemArray[4]), new Point((double)DataQuery.QueryResult.Rows[DataQuery.QueryResult.Rows.Count - 1].ItemArray[3], (double)DataQuery.QueryResult.Rows[DataQuery.QueryResult.Rows.Count - 1].ItemArray[4]));
-            initMultiFuncWindows();
+            try
+            {
+                //DataTable dt = DataQuery.QueryResult;
+                App.global_Win_Map = new MapWindow();
+                App.global_Win_Map.Show();
+                App.global_Win_Map.DrawRectangle(new Point((double)DataQuery.QueryResult.Rows[0].ItemArray[3], (double)DataQuery.QueryResult.Rows[0].ItemArray[4]), new Point((double)DataQuery.QueryResult.Rows[DataQuery.QueryResult.Rows.Count - 1].ItemArray[3], (double)DataQuery.QueryResult.Rows[DataQuery.QueryResult.Rows.Count - 1].ItemArray[4]));
+                initDefaultWindows();
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(ex.ToString());
+            }
         }
         /*清除datagrid*/
         private void button_Clear_Result_Click(object sender, RoutedEventArgs e)
@@ -338,133 +343,6 @@ namespace Spectra
         }
         #endregion
 
-        #region 默认显示方式
-        /*初始化显示窗体*/
-        private void initMultiFuncWindows()
-        {
-            for (int i = 0; i < WinShowInfo.WindowsCnt; i++)
-                App.global_Windows.Add(new MultiFuncWindow());
-            int[] subCnt = new int[WinShowInfo.WindowsCnt];
-            subCnt[0] = Convert.ToUInt16(WinShowInfo.dtWinShowInfo.Rows[0][3]);
-            int p = subCnt[0];
-            for (int i = 1; i < WinShowInfo.WindowsCnt; i++)
-            {
-                subCnt[i] = Convert.ToUInt16(WinShowInfo.dtWinShowInfo.Rows[p][3]);
-                p += subCnt[i];
-            }
-            MultiFuncWindow[] w = new MultiFuncWindow[WinShowInfo.WindowsCnt];
-            for (int i = 0; i < WinShowInfo.WindowsCnt; i++)
-            {
-                w[i] = (MultiFuncWindow)App.global_Windows[i];
-                w[i].DisplayMode = (GridMode)(subCnt[i] - 1);
-            }
-            foreach (DataRow dr in WinShowInfo.dtWinShowInfo.Rows)
-            {
-                if(!w[Convert.ToUInt16(dr[0]) - 1].isShow)
-                    w[Convert.ToUInt16(dr[0]) - 1].ScreenShow(Screen.AllScreens,0, Convert.ToUInt16(dr[0]).ToString());
-                w[Convert.ToUInt16(dr[0]) - 1].Refresh(Convert.ToUInt16(dr[4])-1,(WinFunc)Convert.ToUInt16(dr[6]));
-            }
-        }
-        /*设置窗口编号有哪些值可选*/
-        private void setWindowID(int cnt)
-        {
-            cmbScreenWinID1.Items.Clear();
-            for (int i = 0; i < cnt; i++)
-                cmbScreenWinID1.Items.Add(i + 1);
-            cmbScreenWinID1.SelectedIndex = 0;
-            cmbScreenWinID2.Items.Clear();
-            for (int i = 0; i < cnt; i++)
-                cmbScreenWinID2.Items.Add(i + 1);
-            cmbScreenWinID2.SelectedIndex = 0;
-        }
-        /*设置显示器编号有哪些值可选*/
-        private void setScreenID(int cnt)
-        {
-            cmbScreenSID.Items.Clear();
-            cmbModelSID.Items.Clear();
-            for (int i = 0; i < cnt; i++)
-            {
-                cmbScreenSID.Items.Add(i + 1);
-                cmbModelSID.Items.Add(i + 1);
-            }
-            cmbScreenSID.SelectedIndex = 0;
-            cmbModelSID.SelectedIndex = 0;
-        }
-        /*获取数据库内容*/
-        private void getDefaultShow()
-        {
-            WinShowInfo.dtWinShowInfo = SQLiteFunc.SelectDTSQL("select * from WinShowInfo order by 窗口编号,子窗体编号");
-            dataGrid_Screen.ItemsSource = WinShowInfo.dtWinShowInfo.DefaultView;
-            if (WinShowInfo.dtWinShowInfo.Rows.Count != 0)
-                WinShowInfo.WindowsCnt = Convert.ToUInt16(WinShowInfo.dtWinShowInfo.Rows[0][1]);
-            cmbScreenWindowsCnt.SelectedIndex = WinShowInfo.WindowsCnt - 1;
-        }
-        /*获得已有的应用样式*/
-        private void getApplyModel()
-        {
-            ModelShowInfo.dtModelList = SQLiteFunc.SelectDTSQL("select * from Apply_Model order by 名称");
-            dataGrid_ApplyModel.ItemsSource = ModelShowInfo.dtModelList.DefaultView;
-            dataGrid_ApplyModel.SelectedIndex = 0;
-        }
-        /*设置窗口数量*/
-        private void button_btnScreenWinCnt_Click(object sender, RoutedEventArgs e)
-        {
-            if (WinShowInfo.WindowsCnt < cmbScreenWindowsCnt.SelectedIndex + 1)
-            {
-                for (int i = WinShowInfo.WindowsCnt; i < cmbScreenWindowsCnt.SelectedIndex + 1; i++)
-                    SQLiteFunc.ExcuteSQL("insert into WinShowInfo (窗口编号,窗口数量,显示器编号,子窗体数量,子窗体编号,窗体类型,窗体类型编号) values (?,?,?,?,?,?,?)", i + 1, cmbScreenWindowsCnt.SelectedIndex + 1, 1, 1, 1, "'图像'",0);
-            }
-            else if(WinShowInfo.WindowsCnt > cmbScreenWindowsCnt.SelectedIndex + 1)
-            {
-                for (int i = cmbScreenWindowsCnt.SelectedIndex + 1; i < WinShowInfo.WindowsCnt; i++)
-                    SQLiteFunc.ExcuteSQL("delete from WinShowInfo where 窗口编号=?;", i + 1);
-            }
-            SQLiteFunc.ExcuteSQL("update WinShowInfo set 窗口数量=? where 窗口数量!=?;", cmbScreenWindowsCnt.SelectedIndex + 1, cmbScreenWindowsCnt.SelectedIndex + 1);
-            getDefaultShow();
-            setWindowID(WinShowInfo.WindowsCnt);
-        }
-        /*设置窗口属性*/
-        private void button_btnScreenWinPro_Click(object sender, RoutedEventArgs e)
-        {
-            string sql = "select * from WinShowInfo where 窗口编号=" + (cmbScreenWinID1.SelectedIndex + 1);
-            DataTable dtSubWin = SQLiteFunc.SelectDTSQL(sql);
-            if (dtSubWin.Rows.Count < cmbSubWinCnt.SelectedIndex + 1)
-            {
-                for (int i = dtSubWin.Rows.Count; i < cmbSubWinCnt.SelectedIndex + 1; i++)
-                    SQLiteFunc.ExcuteSQL("insert into WinShowInfo (窗口编号,窗口数量,显示器编号,子窗体数量,子窗体编号,窗体类型,窗体类型编号) values (?,?,?,?,?,?,?)", cmbScreenWinID1.SelectedIndex + 1, WinShowInfo.WindowsCnt, 1, cmbSubWinCnt.SelectedIndex + 1, i+1, "'图像'",0);
-            }
-            else if (dtSubWin.Rows.Count > cmbSubWinCnt.SelectedIndex + 1)
-            {
-                for (int i = cmbSubWinCnt.SelectedIndex + 1; i < dtSubWin.Rows.Count; i++)
-                    SQLiteFunc.ExcuteSQL("delete from WinShowInfo where 窗口编号=? and 子窗体编号=?;",cmbScreenWinID1.SelectedIndex + 1, i + 1);
-            }
-            SQLiteFunc.ExcuteSQL("update WinShowInfo set 显示器编号=?,子窗体数量=? where 窗口编号=?;", cmbScreenSID.SelectedIndex+1, cmbSubWinCnt.SelectedIndex+1, cmbScreenWinID1.SelectedIndex + 1);
-            getDefaultShow();
-        }
-        /*设置窗口类型*/
-        private void button_btnScreenWinType_Click(object sender, RoutedEventArgs e)
-        {
-            switch (cmbScreenWinType.SelectedIndex)
-            {
-                case 0:
-                    SQLiteFunc.ExcuteSQL("update WinShowInfo set 窗体类型=?,窗体类型编号=? where 窗口编号=? and 子窗体编号=?;", "'图像'", cmbScreenWinType.SelectedIndex, cmbScreenWinID2.SelectedIndex + 1, cmbScreenSubID.SelectedIndex + 1);
-                    break;
-                case 1:
-                    SQLiteFunc.ExcuteSQL("update WinShowInfo set 窗体类型=?,窗体类型编号=? where 窗口编号=? and 子窗体编号=?;", "'曲线'", cmbScreenWinType.SelectedIndex, cmbScreenWinID2.SelectedIndex + 1, cmbScreenSubID.SelectedIndex + 1);
-                    break;
-                case 2:
-                    SQLiteFunc.ExcuteSQL("update WinShowInfo set 窗体类型=?,窗体类型编号=? where 窗口编号=? and 子窗体编号=?;", "'立方体'", cmbScreenWinType.SelectedIndex, cmbScreenWinID2.SelectedIndex + 1, cmbScreenSubID.SelectedIndex + 1);
-                    break;
-                case 3:
-                    SQLiteFunc.ExcuteSQL("update WinShowInfo set 窗体类型=?,窗体类型编号=? where 窗口编号=? and 子窗体编号=?;", "'地图'", cmbScreenWinType.SelectedIndex, cmbScreenWinID2.SelectedIndex + 1, cmbScreenSubID.SelectedIndex + 1);
-                    break;
-                default:
-                    break;
-            }
-            getDefaultShow();
-        }
-        #endregion
-        
         #region 光谱显示
         /*显示单张图像*/
         private void btnShowSpeImg_Click(object sender, RoutedEventArgs e)
@@ -474,9 +352,9 @@ namespace Spectra
                 App.global_Win_SpecImg = new MultiFuncWindow();
                 App.global_Win_SpecImg.DisplayMode = GridMode.One;
             }
-            if(!App.global_Win_SpecImg.isShow)
-                App.global_Win_SpecImg.ScreenShow(Screen.AllScreens,0, "光谱图像");
-            App.global_Win_SpecImg.Refresh(0,WinFunc.Image);
+            if (!App.global_Win_SpecImg.isShow)
+                App.global_Win_SpecImg.ScreenShow(Screen.AllScreens, 0, "光谱图像");
+            App.global_Win_SpecImg.Refresh(0, WinFunc.Image);
         }
         /*显示光谱立方体*/
         private void btnShow3D_Click(object sender, RoutedEventArgs e)
@@ -511,7 +389,7 @@ namespace Spectra
             try
             {
                 if (ckb1sub.IsChecked == true)
-                    ((Ctrl_ImageView)(App.global_Win_ImgCompare.UserControls[0])).Refresh(Convert.ToUInt16(txtCompareR.Text),ColorRenderMode.Grayscale);
+                    ((Ctrl_ImageView)(App.global_Win_ImgCompare.UserControls[0])).Refresh(Convert.ToUInt16(txtCompareR.Text), ColorRenderMode.Grayscale);
                 if (ckb2sub.IsChecked == true)
                     ((Ctrl_ImageView)(App.global_Win_ImgCompare.UserControls[1])).Refresh(Convert.ToUInt16(txtCompareGray2.Text), ColorRenderMode.Grayscale);
                 if (ckb3sub.IsChecked == true)
@@ -536,7 +414,7 @@ namespace Spectra
             }
             catch
             {
-                System.Windows.MessageBox.Show("请输入噪声灰度!","警告",MessageBoxButton.OK,MessageBoxImage.Warning);
+                System.Windows.MessageBox.Show("请输入噪声灰度!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
             SQLiteFunc.ExcuteSQL("delete from Detect_Abnormal");
@@ -545,7 +423,7 @@ namespace Spectra
             {
                 for (int i = 0; i < 160; i++)
                 {
-                    if (ImageInfo.ImgDetectAbnormal(i,100) < 0)
+                    if (ImageInfo.ImgDetectAbnormal(i, 100) < 0)
                     {
                         System.Windows.MessageBox.Show("文件不存在!");
                         return;
@@ -583,148 +461,162 @@ namespace Spectra
         #endregion
 
         #region 应用样式
+        /*获得已有的应用样式*/
+        private void getApplyModel()
+        {
+            ModelShowInfo.dtModelList = SQLiteFunc.SelectDTSQL("select * from Apply_Model order by 名称");
+            dataGrid_ApplyModel.ItemsSource = ModelShowInfo.dtModelList.DefaultView;
+            dataGrid_ApplyModel.SelectedIndex = 0;
+        }
+        /*获得当前应用样式*/
+        private void getCurApplyModel()
+        {
+            string sql = "select * from Apply_Model where 名称='" + txtModelName.Text + "'";
+            dataGrid_ApplyModel.ItemsSource = SQLiteFunc.SelectDTSQL(sql).DefaultView;
+            dataGrid_ApplyModel.SelectedIndex = 0;
+        }
         /*选中datagrid的应用样式*/
         private void dataGrid_ApplyModel_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var sel = (DataRowView)dataGrid_ApplyModel.SelectedItem;
-            if (sel != null)
+            try
             {
-                ModelShowInfo.WindowsCnt = Convert.ToUInt16(sel.Row[1]);
-                ModelShowInfo.dtWinShowInfo = SQLiteFunc.SelectDTSQL("SELECT * from Apply_ModelR where 名称='" + sel.Row[0] + "' order by 窗口编号,子窗体编号");
-                txtModelName.Text = sel.Row[0].ToString();                                                                          /*名称*/
-                cmbModelWinCnt.SelectedIndex = Convert.ToUInt16(sel.Row[1]) - 1;                                                    /*窗口数量*/
-                txtModelStartTime.Text = (sel.Row[2].ToString() == "") ? "" : Convert.ToDateTime(sel.Row[2]).ToString();            /*起始时间*/
-                txtModelEndTime.Text = (sel.Row[3].ToString() == "") ? "" : Convert.ToDateTime(sel.Row[3]).ToString();              /*结束时间*/
-                txtModelStartLon.Text = (sel.Row[4].ToString() == "") ? "" : sel.Row[4].ToString();                                 /*起始经度*/
-                txtModelEndLon.Text = (sel.Row[5].ToString() == "") ? "" : sel.Row[5].ToString();                                   /*结束经度*/
-                txtModelStartLat.Text = (sel.Row[6].ToString() == "") ? "" : sel.Row[6].ToString();                                 /*起始纬度*/
-                txtModelEndLat.Text = (sel.Row[7].ToString() == "") ? "" : sel.Row[7].ToString();                                   /*结束纬度*/
-                txtModelRemark.Text = sel.Row[8].ToString();                                                                        /*备注*/
+                var sel = (DataRowView)dataGrid_ApplyModel.SelectedItem;
+                if (sel != null)
+                {
+                    ModelShowInfo.WindowsCnt = Convert.ToUInt16(sel.Row[1]);
+                    ModelShowInfo.dtWinShowInfo = SQLiteFunc.SelectDTSQL("SELECT * from Apply_ModelR where 名称='" + sel.Row[0] + "' order by 窗口编号,子窗体编号");
+                    txtModelName.Text = sel.Row[0].ToString();                                                                          /*名称*/
+                    txtModelWinCnt.Text = Convert.ToString(sel.Row[1]);                                                                 /*窗口数量*/
+                    txtModelStartTime.Text = (sel.Row[2].ToString() == "") ? "" : Convert.ToDateTime(sel.Row[2]).ToString();            /*起始时间*/
+                    txtModelEndTime.Text = (sel.Row[3].ToString() == "") ? "" : Convert.ToDateTime(sel.Row[3]).ToString();              /*结束时间*/
+                    txtModelStartLon.Text = (sel.Row[4].ToString() == "") ? "" : sel.Row[4].ToString();                                 /*起始经度*/
+                    txtModelEndLon.Text = (sel.Row[5].ToString() == "") ? "" : sel.Row[5].ToString();                                   /*结束经度*/
+                    txtModelStartLat.Text = (sel.Row[6].ToString() == "") ? "" : sel.Row[6].ToString();                                 /*起始纬度*/
+                    txtModelEndLat.Text = (sel.Row[7].ToString() == "") ? "" : sel.Row[7].ToString();                                   /*结束纬度*/
+                    cbModelImage1.IsChecked = (sel.Row[8].ToString() == "True");                                                        /*图像模式1*/
+                    cbModelImage4.IsChecked = (sel.Row[9].ToString() == "True");                                                        /*图像模式4*/
+                    cbModelMap.IsChecked = (sel.Row[10].ToString() == "True");                                                          /*谷歌地图*/
+                    cbModel3D.IsChecked = (sel.Row[11].ToString() == "True");                                                           /*三维立方体*/
+                    cbModelImageMap.IsChecked = (sel.Row[12].ToString() == "True");                                                     /*图像/地图模式*/
+                    cbModelCurve.IsChecked = (sel.Row[13].ToString() != "False");                                                       /*曲线模式*/
+                    rbModelCurve1.IsChecked = (sel.Row[13].ToString() != "模式4");                                                      /*曲线模式*/
+                    rbModelCurve4.IsChecked = (sel.Row[13].ToString() == "模式4");                                                      /*曲线模式*/
+                    txtModelRemark.Text = sel.Row[14].ToString();                                                                       /*备注*/
 
+                    ModelShowInfo.Time_Start = Convert.ToDateTime(txtModelStartTime.Text);
+                    ModelShowInfo.Time_End = Convert.ToDateTime(txtModelEndTime.Text);
+                    ModelShowInfo.Coord_TL.Lon = Convert.ToDouble(txtModelStartLon.Text);
+                    ModelShowInfo.Coord_TL.Lat = Convert.ToDouble(txtModelStartLat.Text);
+                    ModelShowInfo.Coord_DR.Lon = Convert.ToDouble(txtModelEndLon.Text);
+                    ModelShowInfo.Coord_DR.Lat = Convert.ToDouble(txtModelEndLat.Text);
+                }
+                else
+                {
+                    ModelShowInfo.WindowsCnt = 0;
+                    ModelShowInfo.dtWinShowInfo = null;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(ex.ToString());
+            }
+        }
+        /*设置数据*/
+        private void btnModelSetData_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            { 
                 ModelShowInfo.Time_Start = Convert.ToDateTime(txtModelStartTime.Text);
                 ModelShowInfo.Time_End = Convert.ToDateTime(txtModelEndTime.Text);
                 ModelShowInfo.Coord_TL.Lon = Convert.ToDouble(txtModelStartLon.Text);
                 ModelShowInfo.Coord_TL.Lat = Convert.ToDouble(txtModelStartLat.Text);
                 ModelShowInfo.Coord_DR.Lon = Convert.ToDouble(txtModelEndLon.Text);
                 ModelShowInfo.Coord_DR.Lat = Convert.ToDouble(txtModelEndLat.Text);
-
-                dataGrid_ApplyModelR.ItemsSource = ModelShowInfo.dtWinShowInfo.DefaultView;
-                dataGrid_ApplyModelR.SelectedIndex = 0;
-                cmbModelSID.SelectedIndex = Convert.ToUInt16(ModelShowInfo.dtWinShowInfo.Rows[0][2]) - 1;
-                cmbModelSubCnt.SelectedIndex = Convert.ToUInt16(ModelShowInfo.dtWinShowInfo.Rows[0][3]) - 1;
+                string sql = "select * from Apply_Model where 名称='" + txtModelName.Text + "'";
+                DataTable dtModel = SQLiteFunc.SelectDTSQL(sql);
+                if (dtModel.Rows.Count == 0)
+                {
+                    SQLiteFunc.ExcuteSQL("insert into Apply_Model (名称,起始时间,结束时间,起始经度,结束经度,起始纬度,结束纬度,备注) values ('?','?','?',?,?,?,?,'?')", txtModelName.Text, ModelShowInfo.Time_Start.ToString("yyyy-MM-dd HH:mm:ss"), ModelShowInfo.Time_End.ToString("yyyy-MM-dd HH:mm:ss"), 0, 0, 0, 0, txtModelRemark.Text);
+                }
+                else
+                {
+                    SQLiteFunc.ExcuteSQL("update Apply_Model set 起始时间='?',结束时间='?',起始经度=?,结束经度=?,起始纬度=?,结束纬度=?,备注='?' where 名称='?'", ModelShowInfo.Time_Start.ToString("yyyy-MM-dd HH:mm:ss"), ModelShowInfo.Time_End.ToString("yyyy-MM-dd HH:mm:ss"), ModelShowInfo.Coord_TL.Lon, ModelShowInfo.Coord_TL.Lat, ModelShowInfo.Coord_DR.Lon, ModelShowInfo.Coord_DR.Lat, txtModelRemark.Text, txtModelName.Text);
+                 }
+                getCurApplyModel();
             }
-            else
+            catch (Exception ex)
             {
-                ModelShowInfo.WindowsCnt = 0;
-                ModelShowInfo.dtWinShowInfo = null;
-                dataGrid_ApplyModelR.ItemsSource = null;
+                System.Windows.MessageBox.Show(ex.ToString());
             }
         }
-        private void dataGrid_ApplyModelR_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        /*设置样式*/
+        private void btnModelSetStyle_Click(object sender, RoutedEventArgs e)
         {
-            var sel = (DataRowView)dataGrid_ApplyModelR.SelectedItem;
-            if (sel != null)
-            {
-                cmbModelWinID2.SelectedIndex = Convert.ToUInt16(sel.Row[1]) - 1;
-                cmbModelSubID.SelectedIndex = Convert.ToUInt16(sel.Row[4]) - 1;
-                cmbModelSubType.SelectedIndex = Convert.ToUInt16(sel.Row[6]);
-            }
-        }
-        /*选择窗口数量后触发事件*/
-        private void cmbModelWinCnt_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (cmbModelWinID1 == null)
-                return;
-            cmbModelWinID1.Items.Clear();
-            for (int i = 0; i < cmbModelWinCnt.SelectedIndex + 1; i++)
-                cmbModelWinID1.Items.Add(i + 1);
-            cmbModelWinID1.SelectedIndex = 0;
-            cmbModelWinID2.Items.Clear();
-            for (int i = 0; i < cmbModelWinCnt.SelectedIndex + 1; i++)
-                cmbModelWinID2.Items.Add(i + 1);
-            cmbModelWinID2.SelectedIndex = 0;
-        }
-        /*选择子窗体数量后触发事件*/
-        private void cmbModelSubCnt_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (cmbModelSubID == null)
-                return;
-            cmbModelSubID.Items.Clear();
-            for (int i = 0; i < cmbModelSubCnt.SelectedIndex + 1; i++)
-                cmbModelSubID.Items.Add(i + 1);
-            cmbModelSubID.SelectedIndex = 0;
-        }
-        /*1设置名称、窗口数量、备注*/
-        private void btnModelSet1_Click(object sender, RoutedEventArgs e)
-        {
-            ModelShowInfo.Time_Start = Convert.ToDateTime(txtModelStartTime.Text);
-            ModelShowInfo.Time_End = Convert.ToDateTime(txtModelEndTime.Text);
-            ModelShowInfo.Coord_TL.Lon = Convert.ToDouble(txtModelStartLon.Text);
-            ModelShowInfo.Coord_TL.Lat = Convert.ToDouble(txtModelStartLat.Text);
-            ModelShowInfo.Coord_DR.Lon = Convert.ToDouble(txtModelEndLon.Text);
-            ModelShowInfo.Coord_DR.Lat = Convert.ToDouble(txtModelEndLat.Text);
-            string sql = "select * from Apply_Model where 名称='" + txtModelName.Text + "'";
-            DataTable dtModel = SQLiteFunc.SelectDTSQL(sql);
-            if (dtModel.Rows.Count == 0)
-            {
-                SQLiteFunc.ExcuteSQL("insert into Apply_Model (名称,窗口数量,起始时间,结束时间,起始经度,结束经度,起始纬度,结束纬度,备注) values ('?',?,'?','?',?,?,?,?,'?')", txtModelName.Text, cmbModelWinCnt.SelectedIndex + 1, ModelShowInfo.Time_Start.ToString("yyyy-MM-dd HH:mm:ss"), ModelShowInfo.Time_End.ToString("yyyy-MM-dd HH:mm:ss"), 0, 0, 0, 0, txtModelRemark.Text);
-                for (int i = 0; i < cmbModelWinCnt.SelectedIndex + 1; i++)
-                    SQLiteFunc.ExcuteSQL("insert into Apply_ModelR (名称,窗口编号,显示器编号,子窗体数量,子窗体编号,窗体类型,窗体类型编号) values ('?',?,?,?,?,'?',?)", txtModelName.Text, i + 1, 1, 1, 1, "图像", 0);
-                getApplyModel();
-                dataGrid_ApplyModel.SelectedIndex = dataGrid_ApplyModel.Items.Count - 1;
-            }
-            else
-            {
-                SQLiteFunc.ExcuteSQL("update Apply_Model set 窗口数量=?,起始时间='?',结束时间='?',起始经度=?,结束经度=?,起始纬度=?,结束纬度=?,备注='?' where 名称='?'", cmbModelWinCnt.SelectedIndex + 1, ModelShowInfo.Time_Start.ToString("yyyy-MM-dd HH:mm:ss"), ModelShowInfo.Time_End.ToString("yyyy-MM-dd HH:mm:ss"), ModelShowInfo.Coord_TL.Lon, ModelShowInfo.Coord_TL.Lat, ModelShowInfo.Coord_DR.Lon, ModelShowInfo.Coord_DR.Lat, txtModelRemark.Text, txtModelName.Text);
-                if(cmbModelWinCnt.SelectedIndex + 1 > Convert.ToUInt16(dtModel.Rows[0][1]))
-                    for (int i = Convert.ToUInt16(dtModel.Rows[0][1]); i < cmbModelWinCnt.SelectedIndex + 1; i++)
-                        SQLiteFunc.ExcuteSQL("insert into Apply_ModelR (名称,窗口编号,显示器编号,子窗体数量,子窗体编号,窗体类型,窗体类型编号) values ('?',?,?,?,?,'?',?)", txtModelName.Text, i + 1, 1, 1, 1, "图像", 0);
-                else if (cmbModelWinCnt.SelectedIndex + 1 < Convert.ToUInt16(dtModel.Rows[0][1]))
-                    for (int i = cmbModelWinCnt.SelectedIndex+1; i < Convert.ToUInt16(dtModel.Rows[0][1]); i++)
-                        SQLiteFunc.ExcuteSQL("delete from Apply_ModelR where 名称='?' and 窗口编号=?;", txtModelName.Text, i+1);
-                sql = "select * from Apply_ModelR where 名称='" + txtModelName.Text + "'";
-                dataGrid_ApplyModelR.ItemsSource = SQLiteFunc.SelectDTSQL(sql).DefaultView;
-            }
-        }
-        /*2设置子窗体数*/
-        private void btnModelSet2_Click(object sender, RoutedEventArgs e)
-        {
-            string sql = "select * from Apply_ModelR where 名称='" + txtModelName.Text + "' order by 窗口编号,子窗体编号";
-            DataTable dtModel = SQLiteFunc.SelectDTSQL(sql);
-            if (dtModel.Rows.Count == 0)
-            {
-                System.Windows.MessageBox.Show("不存在该样式!", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
-                return;
-            }
-            if (Convert.ToUInt16(dtModel.Rows[0][3]) < cmbModelSubCnt.SelectedIndex+1)
+            try
             { 
-                for (int i = Convert.ToUInt16(dtModel.Rows[0][3]); i < cmbModelSubCnt.SelectedIndex + 1; i++)
-                    SQLiteFunc.ExcuteSQL("insert into Apply_ModelR (名称,窗口编号,显示器编号,子窗体数量,子窗体编号,窗体类型,窗体类型编号) values ('?',?,?,?,?,'?',?)", txtModelName.Text, cmbModelWinID1.SelectedIndex+1, 1, 1, i + 1, "图像", 0);
+                if (txtModelName.Text == "")
+                {
+                    System.Windows.MessageBox.Show("请输入名称!", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+                //选中项对应变量
+                Int16[] isCheck = new Int16[7];string strCurve = "False";
+                isCheck[0] = Convert.ToInt16(cbModelImage1.IsChecked);
+                isCheck[1] = Convert.ToInt16(cbModelImage4.IsChecked);
+                isCheck[2] = Convert.ToInt16(cbModelMap.IsChecked);
+                isCheck[3] = Convert.ToInt16(cbModel3D.IsChecked);
+                isCheck[4] = Convert.ToInt16(cbModelImageMap.IsChecked);
+                isCheck[5] = Convert.ToInt16(cbModelCurve.IsChecked);
+                isCheck[6] = (Int16)(isCheck[0] + isCheck[1] + isCheck[2] + isCheck[3] + isCheck[4] + isCheck[5]);
+                if (cbModelCurve.IsChecked == true)
+                { 
+                    if(rbModelCurve1.IsChecked == true)
+                        strCurve = "模式1";
+                    else
+                        strCurve = "模式4";
+                }
+
+                string sql = "select * from Apply_Model where 名称='" + txtModelName.Text + "' order by 名称";
+                DataTable dtModel = SQLiteFunc.SelectDTSQL(sql);
+                if (dtModel.Rows.Count == 0)
+                    SQLiteFunc.ExcuteSQL("insert into Apply_Model (名称,窗口数量,图像模式1,图像模式4,谷歌地图,三维立方体,图像地图模式,曲线模式) values ('?',?,?,?,?,'?',?)",
+                        txtModelName.Text, isCheck[6], isCheck[0], isCheck[1], isCheck[2], isCheck[3], isCheck[4], strCurve);
+                else
+                    SQLiteFunc.ExcuteSQL("update Apply_Model set 窗口数量=?,图像模式1=?,图像模式4=?,谷歌地图=?,三维立方体=?,图像地图模式=?,曲线模式='?' where 名称='?'",
+                        isCheck[6], isCheck[0], isCheck[1], isCheck[2], isCheck[3], isCheck[4], strCurve, txtModelName.Text);
+                getCurApplyModel();
             }
-            else if (Convert.ToUInt16(dtModel.Rows[0][3]) > cmbModelSubCnt.SelectedIndex + 1)
+            catch (Exception ex)
             {
-                for (int i = cmbModelSubCnt.SelectedIndex+1; i <= Convert.ToUInt16(dtModel.Rows[0][3]) ; i++)
-                    SQLiteFunc.ExcuteSQL("delete from Apply_ModelR where 名称='?' and 子窗体编号=?;", txtModelName.Text, i + 1);
+                System.Windows.MessageBox.Show(ex.ToString());
             }
-            SQLiteFunc.ExcuteSQL("update Apply_ModelR set 子窗体数量=?,显示器编号=? where 名称='?' and 窗口编号=?", cmbModelSubCnt.SelectedIndex + 1,cmbModelSID.SelectedIndex+1, txtModelName.Text,cmbModelWinID1.SelectedIndex+1);
-            sql = "select * from Apply_ModelR where 名称='" + txtModelName.Text + "' order by 窗口编号,子窗体编号";
-            dataGrid_ApplyModelR.ItemsSource = SQLiteFunc.SelectDTSQL(sql).DefaultView;
-        }
-        /*3设置窗体类型*/
-        private void btnModelSet3_Click(object sender, RoutedEventArgs e)
-        {
-            SQLiteFunc.ExcuteSQL("update Apply_ModelR set 窗体类型='?',窗体类型编号=? where 窗口编号=? and 子窗体编号=?", cmbModelSubType.Text, cmbModelSubType.SelectedIndex,cmbModelWinID2.SelectedIndex+1, cmbModelSubID.SelectedIndex+1);
-            string sql = "select * from Apply_ModelR where 名称='" + txtModelName.Text + "' order by 窗口编号,子窗体编号";
-            dataGrid_ApplyModelR.ItemsSource = SQLiteFunc.SelectDTSQL(sql).DefaultView;
         }
         /*删除应用样式*/
         private void btnModelDel_Click(object sender, RoutedEventArgs e)
         {
-            if (System.Windows.MessageBox.Show("确认删除该应用样式?", "提示", MessageBoxButton.OKCancel, MessageBoxImage.Information) == MessageBoxResult.Cancel)
-                return;
-            SQLiteFunc.ExcuteSQL("delete from Apply_Model where 名称='?'", txtModelName.Text);
-            SQLiteFunc.ExcuteSQL("delete from Apply_ModelR where 名称='?'", txtModelName.Text);
-            getApplyModel();
+            try
+            {
+                if (System.Windows.MessageBox.Show("确认删除该应用样式?", "提示", MessageBoxButton.OKCancel, MessageBoxImage.Information) == MessageBoxResult.Cancel)
+                    return;
+                SQLiteFunc.ExcuteSQL("delete from Apply_Model where 名称='?'", txtModelName.Text);
+                getApplyModel();
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(ex.ToString());
+            }
+        }
+        /*刷新列表*/
+        private void btnModelRefresh_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            { 
+                getApplyModel();
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(ex.ToString());
+            }
         }
         /*显示样式*/
         private async void btnModelShow_Click(object sender, RoutedEventArgs e)
@@ -738,34 +630,183 @@ namespace Spectra
                 ImageInfo.GetImgInfo(dt);       /*存储图像信息*/
                 SetImgInfo();
             }
-            catch (Exception E)
+            catch
             {
-                System.Windows.MessageBox.Show("无数据!","提示",MessageBoxButton.OK,MessageBoxImage.Information);
+                System.Windows.MessageBox.Show("无数据!", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
+            try
+            { 
+                App.global_ApplyModel.Clear();
+                for (int i = 0; i < ModelShowInfo.WindowsCnt; i++)
+                    App.global_ApplyModel.Add(new MultiFuncWindow());
+                int[] subCnt = new int[ModelShowInfo.WindowsCnt];
+                subCnt[0] = Convert.ToUInt16(ModelShowInfo.dtWinShowInfo.Rows[0][3]);
+                int p = subCnt[0];
+                for (int i = 1; i < ModelShowInfo.WindowsCnt; i++)
+                {
+                    subCnt[i] = Convert.ToUInt16(ModelShowInfo.dtWinShowInfo.Rows[p][3]);
+                    p += subCnt[i];
+                }
+                MultiFuncWindow[] w = new MultiFuncWindow[ModelShowInfo.WindowsCnt];
+                for (int i = 0; i < ModelShowInfo.WindowsCnt; i++)
+                {
+                    w[i] = (MultiFuncWindow)App.global_ApplyModel[i];
+                    w[i].DisplayMode = (GridMode)(subCnt[i] - 1);
+                }
+                foreach (DataRow dr in ModelShowInfo.dtWinShowInfo.Rows)
+                {
+                    if (!w[Convert.ToUInt16(dr[1]) - 1].isShow)
+                        w[Convert.ToUInt16(dr[1]) - 1].ScreenShow(Screen.AllScreens, 0, Convert.ToUInt16(dr[1]).ToString());
+                    w[Convert.ToUInt16(dr[1]) - 1].Refresh(Convert.ToUInt16(dr[4]) - 1, (WinFunc)Convert.ToUInt16(dr[6]));
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(ex.ToString());
+            }
+        }
+        #endregion
 
-            App.global_ApplyModel.Clear();
-            for (int i = 0; i < ModelShowInfo.WindowsCnt; i++)
-                App.global_ApplyModel.Add(new MultiFuncWindow());
-            int[] subCnt = new int[ModelShowInfo.WindowsCnt];
-            subCnt[0] = Convert.ToUInt16(ModelShowInfo.dtWinShowInfo.Rows[0][3]);
-            int p = subCnt[0];
-            for (int i = 1; i < ModelShowInfo.WindowsCnt; i++)
+        #region 默认显示方式
+        /*初始化显示窗体*/
+        private void initDefaultWindows()
+        {
+            for (int i = 0; i < WinShowInfo.WindowsCnt; i++)
+                App.global_Windows.Add(new MultiFuncWindow());
+            MultiFuncWindow[] w = new MultiFuncWindow[WinShowInfo.WindowsCnt];
+            int cnt = 0;
+            if (WinShowInfo.dtWinShowInfo.Rows[0][1].ToString() == "True")
             {
-                subCnt[i] = Convert.ToUInt16(ModelShowInfo.dtWinShowInfo.Rows[p][3]);
-                p += subCnt[i];
+                w[cnt] = (MultiFuncWindow)App.global_Windows[cnt];
+                w[cnt].DisplayMode = GridMode.One;
+                if (!w[cnt].isShow)
+                    w[cnt].ScreenShow(Screen.AllScreens, 0, cnt.ToString());
+                w[cnt].Refresh(0, WinFunc.Image);
+                cnt++;
             }
-            MultiFuncWindow[] w = new MultiFuncWindow[ModelShowInfo.WindowsCnt];
-            for (int i = 0; i < ModelShowInfo.WindowsCnt; i++)
+            if (WinShowInfo.dtWinShowInfo.Rows[0][2].ToString() == "True")
             {
-                w[i] = (MultiFuncWindow)App.global_ApplyModel[i];
-                w[i].DisplayMode = (GridMode)(subCnt[i] - 1);
+                w[cnt] = (MultiFuncWindow)App.global_Windows[cnt];
+                w[cnt].DisplayMode = GridMode.Four;
+                if (!w[cnt].isShow)
+                    w[cnt].ScreenShow(Screen.AllScreens, 0, cnt.ToString());
+                w[cnt].Refresh(0, WinFunc.Image);
+                w[cnt].Refresh(1, WinFunc.Image);
+                w[cnt].Refresh(2, WinFunc.Image);
+                w[cnt].Refresh(3, WinFunc.Image);
+                cnt++;
             }
-            foreach (DataRow dr in ModelShowInfo.dtWinShowInfo.Rows)
+            //谷歌地图
+            if (WinShowInfo.dtWinShowInfo.Rows[0][3].ToString() == "True")
             {
-                if (!w[Convert.ToUInt16(dr[1]) - 1].isShow)
-                    w[Convert.ToUInt16(dr[1]) - 1].ScreenShow(Screen.AllScreens, 0, Convert.ToUInt16(dr[1]).ToString());
-                w[Convert.ToUInt16(dr[1]) - 1].Refresh(Convert.ToUInt16(dr[4]) - 1, (WinFunc)Convert.ToUInt16(dr[6]));
+                w[cnt] = (MultiFuncWindow)App.global_Windows[cnt];
+                w[cnt].DisplayMode = GridMode.One;
+                if (!w[cnt].isShow)
+                    w[cnt].ScreenShow(Screen.AllScreens, 0, cnt.ToString());
+                w[cnt].Refresh(0, WinFunc.Image);
+                cnt++;
+            }
+            //三维立方体
+            if (WinShowInfo.dtWinShowInfo.Rows[0][4].ToString() == "True")
+            {
+                w[cnt] = (MultiFuncWindow)App.global_Windows[cnt];
+                w[cnt].DisplayMode = GridMode.One;
+                if (!w[cnt].isShow)
+                    w[cnt].ScreenShow(Screen.AllScreens, 0, cnt.ToString());
+                w[cnt].Refresh(0, WinFunc.Cube);
+                cnt++;
+            }
+            //三维立方体
+            if (WinShowInfo.dtWinShowInfo.Rows[0][5].ToString() == "True")
+            {
+                w[cnt] = (MultiFuncWindow)App.global_Windows[cnt];
+                w[cnt].DisplayMode = GridMode.Two;
+                if (!w[cnt].isShow)
+                    w[cnt].ScreenShow(Screen.AllScreens, 0, cnt.ToString());
+                w[cnt].Refresh(0, WinFunc.Image);
+                w[cnt].Refresh(1, WinFunc.Image);
+                cnt++;
+            }
+            //曲线模式1
+            if (WinShowInfo.dtWinShowInfo.Rows[0][6].ToString() == "模式1")
+            {
+                w[cnt] = (MultiFuncWindow)App.global_Windows[cnt];
+                w[cnt].DisplayMode = GridMode.One;
+                if (!w[cnt].isShow)
+                    w[cnt].ScreenShow(Screen.AllScreens, 0, cnt.ToString());
+                w[cnt].Refresh(0, WinFunc.Curve);
+                cnt++;
+            }
+            //曲线模式4
+            if (WinShowInfo.dtWinShowInfo.Rows[0][6].ToString() == "模式4")
+            {
+                w[cnt] = (MultiFuncWindow)App.global_Windows[cnt];
+                w[cnt].DisplayMode = GridMode.Four;
+                if (!w[cnt].isShow)
+                    w[cnt].ScreenShow(Screen.AllScreens, 0, cnt.ToString());
+                w[cnt].Refresh(0, WinFunc.Curve);
+                w[cnt].Refresh(1, WinFunc.Curve);
+                w[cnt].Refresh(2, WinFunc.Curve);
+                w[cnt].Refresh(3, WinFunc.Curve);
+                cnt++;
+            }
+        }
+        /*设置默认值*/
+        private void btnShowSetStyle_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                //选中项对应变量
+                Int16[] isCheck = new Int16[7]; string strCurve = "False";
+                isCheck[0] = Convert.ToInt16(cbShowImage1.IsChecked);
+                isCheck[1] = Convert.ToInt16(cbShowImage4.IsChecked);
+                isCheck[2] = Convert.ToInt16(cbShowMap.IsChecked);
+                isCheck[3] = Convert.ToInt16(cbShow3D.IsChecked);
+                isCheck[4] = Convert.ToInt16(cbShowImageMap.IsChecked);
+                isCheck[5] = Convert.ToInt16(cbShowCurve.IsChecked);
+                isCheck[6] = (Int16)(isCheck[0] + isCheck[1] + isCheck[2] + isCheck[3] + isCheck[4] + isCheck[5]);
+                if (cbShowCurve.IsChecked == true)
+                {
+                    if (rbShowCurve1.IsChecked == true)
+                        strCurve = "模式1";
+                    else
+                        strCurve = "模式4";
+                }
+                //更新数据库
+                SQLiteFunc.ExcuteSQL("update WinShowInfo set 窗口数量=?,图像模式1=?,图像模式4=?,谷歌地图=?,三维立方体=?,图像地图模式=?,曲线模式='?'",
+                        isCheck[6], isCheck[0], isCheck[1], isCheck[2], isCheck[3], isCheck[4], strCurve);
+                //更新界面
+                getDefaultShow();
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(ex.ToString());
+            }
+        }
+        /*获取默认值*/
+        private void getDefaultShow()
+        {
+            try
+            {
+                WinShowInfo.dtWinShowInfo = SQLiteFunc.SelectDTSQL("select * from WinShowInfo");
+                dataGrid_Screen.ItemsSource = WinShowInfo.dtWinShowInfo.DefaultView;
+                if (WinShowInfo.dtWinShowInfo.Rows.Count > 0)
+                {
+                    WinShowInfo.WindowsCnt = Convert.ToUInt16(WinShowInfo.dtWinShowInfo.Rows[0][0]);
+                    cbShowImage1.IsChecked = (WinShowInfo.dtWinShowInfo.Rows[0][1].ToString() == "True");                        /*图像模式1*/
+                    cbShowImage4.IsChecked = (WinShowInfo.dtWinShowInfo.Rows[0][2].ToString() == "True");                        /*图像模式4*/
+                    cbShowMap.IsChecked = (WinShowInfo.dtWinShowInfo.Rows[0][3].ToString() == "True");                          /*谷歌地图*/
+                    cbShow3D.IsChecked = (WinShowInfo.dtWinShowInfo.Rows[0][4].ToString() == "True");                           /*三维立方体*/
+                    cbShowImageMap.IsChecked = (WinShowInfo.dtWinShowInfo.Rows[0][5].ToString() == "True");                     /*图像/地图模式*/
+                    cbShowCurve.IsChecked = (WinShowInfo.dtWinShowInfo.Rows[0][6].ToString() != "False");                       /*曲线模式*/
+                    rbShowCurve1.IsChecked = (WinShowInfo.dtWinShowInfo.Rows[0][6].ToString() != "模式4");                      /*曲线模式*/
+                    rbShowCurve4.IsChecked = (WinShowInfo.dtWinShowInfo.Rows[0][6].ToString() == "模式4");                      /*曲线模式*/
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(ex.ToString());
             }
         }
         #endregion
