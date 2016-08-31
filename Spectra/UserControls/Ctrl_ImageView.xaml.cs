@@ -49,11 +49,11 @@ namespace Spectra
            // this.IMG1.Source = bmp;
         }
 
-        public async void Refresh(int band,ColorRenderMode cMode)
+        public async void Refresh(int band,ColorRenderMode cMode,string md5)
         {
             this.Busy.isBusy = true;
             
-            Bitmap bmp = await DataProc.GetBmp(160 - band, cMode);
+            Bitmap bmp = await DataProc.GetBmp(160 - band, cMode,md5);
             MemoryStream ms = new MemoryStream();
             bmp.Save(ms, System.Drawing.Imaging.ImageFormat.Bmp);
             ImgW = bmp.Width;

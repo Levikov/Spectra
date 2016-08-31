@@ -182,7 +182,7 @@ namespace Spectra
                 int X = (int)(scene.touchPoint.X * 10) + 1024;
                 int Y = (int)(scene.touchPoint.Y * 10 + imheight / 2);
                 int Z = (int)(scene.touchPoint.Z * 10 / 4 + 80);
-                Bitmap bmp = await DataProc.GetBmp(Z, ColorRenderMode.Grayscale);
+                Bitmap bmp = await DataProc.GetBmp(Z, ColorRenderMode.Grayscale,FileInfo.md5);
                 BitmapImage bmpSource = new BitmapImage();
 
                 bmp.Save($"{Z}.bmp");

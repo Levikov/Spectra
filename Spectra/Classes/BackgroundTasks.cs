@@ -319,13 +319,13 @@ namespace Spectra
         #endregion
 
         #region Bitmap Operations
-        public static Task<Bitmap> GetBmp(int v,ColorRenderMode cMode)
+        public static Task<Bitmap> GetBmp(int v,ColorRenderMode cMode,string md5)
         { 
             return Task.Run(() =>
             {
                 byte[] buf_full = new byte[2048 * DataQuery.QueryResult.Rows.Count * 3];
                 byte[] buf_band = new byte[2048 * DataQuery.QueryResult.Rows.Count*2];
-                FileStream fs = new FileStream($"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\result\\{v}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
+                FileStream fs = new FileStream($"{Environment.CurrentDirectory}\\decFiles\\{md5}\\result\\{v}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
                 fs.Read(buf_band, 0, 2048 * DataQuery.QueryResult.Rows.Count * 2);
                         Parallel.For(0, 2048*DataQuery.QueryResult.Rows.Count, i =>
                         {
@@ -385,8 +385,8 @@ namespace Spectra
 
                 Bitmap[] r = new Bitmap[6];
 
-                r[0] = await GetBmp(0,ColorRenderMode.Grayscale);
-                r[1] = await GetBmp(159,ColorRenderMode.Grayscale);
+                r[0] = await GetBmp(0,ColorRenderMode.Grayscale,FileInfo.md5);
+                r[1] = await GetBmp(159,ColorRenderMode.Grayscale,FileInfo.md5);
                 Thread _tUp = new Thread(new ThreadStart(() => {
                     Bitmap bmpUp = new Bitmap(2048, 160, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
                     BitmapData bmpData = bmpUp.LockBits(new System.Drawing.Rectangle(0, 0, 2048, 160), System.Drawing.Imaging.ImageLockMode.WriteOnly, bmpUp.PixelFormat);
@@ -545,7 +545,7 @@ namespace Spectra
         #endregion
 
         #region 图像检索
-        public static Task<DataTable> QueryResult(bool isChecked1, bool isChecked2, bool isChecked3, DateTime start_time, DateTime end_time, long start_FrmCnt, long end_FrmCnt, Coord coord_TL, Coord coord_DR)
+        public static Task<DataTable> QueryResult(string md5,bool isChecked1, bool isChecked2, bool isChecked3, DateTime start_time, DateTime end_time, long start_FrmCnt, long end_FrmCnt, Coord coord_TL, Coord coord_DR)
         {
             return Task.Run(() =>
             {
@@ -553,7 +553,7 @@ namespace Spectra
                 conn.Open();
                 SQLiteCommand cmmd = new SQLiteCommand("", conn);
 
-                string command = $"SELECT * FROM AuxData WHERE Chanel=1 AND MD5='{FileInfo.md5}'";
+                string command = $"SELECT * FROM AuxData WHERE Chanel=1 AND MD5='{md5}'";
                 if ((bool)isChecked2)
                 {
                     command += " AND Lat>" + (coord_DR.Lat.ToString()) + " AND Lat<" + coord_TL.Lat.ToString() + " AND Lon>" + (coord_TL.Lon.ToString()) + " AND Lon<" + coord_DR.Lon.ToString();

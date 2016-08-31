@@ -117,6 +117,7 @@ namespace Spectra
         public static DateTime Time_End = DateTime.Now;
         public static Coord Coord_TL = new Coord(0, 0); //左上角坐标
         public static Coord Coord_DR = new Coord(0, 0); //右下角坐标
+        public static string md5;
     }
 
     public class ImageInfo : DependencyObject

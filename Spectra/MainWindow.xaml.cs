@@ -257,7 +257,7 @@ namespace Spectra
         {
             try
             {
-                DataTable dt = await DataProc.QueryResult((bool)cb_byTime.IsChecked, (bool)this.cb_byCoord.IsChecked, (bool)this.cb_byFrmCnt.IsChecked, start_time, end_time, start_FrmCnt, end_FrmCnt, Coord_TL, Coord_DR);
+                DataTable dt = await DataProc.QueryResult(FileInfo.md5,(bool)cb_byTime.IsChecked, (bool)this.cb_byCoord.IsChecked, (bool)this.cb_byFrmCnt.IsChecked, start_time, end_time, start_FrmCnt, end_FrmCnt, Coord_TL, Coord_DR);
                 dataGrid_Result.ItemsSource = dt.DefaultView;
                 dataGrid_SatePose.ItemsSource = dt.DefaultView;
                 DataQuery.QueryResult = dt;
@@ -312,7 +312,7 @@ namespace Spectra
                 App.global_Win_Map = new MapWindow();
                 App.global_Win_Map.Show();
                 App.global_Win_Map.DrawRectangle(new Point((double)DataQuery.QueryResult.Rows[0].ItemArray[3], (double)DataQuery.QueryResult.Rows[0].ItemArray[4]), new Point((double)DataQuery.QueryResult.Rows[DataQuery.QueryResult.Rows.Count - 1].ItemArray[3], (double)DataQuery.QueryResult.Rows[DataQuery.QueryResult.Rows.Count - 1].ItemArray[4]));
-                initDefaultWindows();
+                initWindows(WinShowInfo.WindowsCnt,WinShowInfo.dtWinShowInfo,FileInfo.md5);
             }
             catch (Exception ex)
             {
@@ -354,7 +354,7 @@ namespace Spectra
             }
             if (!App.global_Win_SpecImg.isShow)
                 App.global_Win_SpecImg.ScreenShow(Screen.AllScreens, 0, "光谱图像");
-            App.global_Win_SpecImg.Refresh(0, WinFunc.Image);
+            App.global_Win_SpecImg.Refresh(0, WinFunc.Image,FileInfo.md5);
         }
         /*显示光谱立方体*/
         private void btnShow3D_Click(object sender, RoutedEventArgs e)
@@ -366,7 +366,7 @@ namespace Spectra
             }
             if (!App.global_Win_3D.isShow)
                 App.global_Win_3D.ScreenShow(Screen.AllScreens, 0, "光谱立方体");
-            App.global_Win_3D.Refresh(0, WinFunc.Cube);
+            App.global_Win_3D.Refresh(0, WinFunc.Cube, FileInfo.md5);
         }
         /*显示典型谱段对比*/
         private void btnShowImgCompare_Click(object sender, RoutedEventArgs e)
@@ -378,10 +378,10 @@ namespace Spectra
             }
             if (!App.global_Win_ImgCompare.isShow)
                 App.global_Win_ImgCompare.ScreenShow(Screen.AllScreens, 0, "典型谱段图像对比");
-            App.global_Win_ImgCompare.Refresh(0, WinFunc.Image);
-            App.global_Win_ImgCompare.Refresh(1, WinFunc.Image);
-            App.global_Win_ImgCompare.Refresh(2, WinFunc.Image);
-            App.global_Win_ImgCompare.Refresh(3, WinFunc.Image);
+            App.global_Win_ImgCompare.Refresh(0, WinFunc.Image, FileInfo.md5);
+            App.global_Win_ImgCompare.Refresh(1, WinFunc.Image, FileInfo.md5);
+            App.global_Win_ImgCompare.Refresh(2, WinFunc.Image, FileInfo.md5);
+            App.global_Win_ImgCompare.Refresh(3, WinFunc.Image, FileInfo.md5);
         }
         /*设置对比图像谱段*/
         private void btnCompareSet_Click(object sender, RoutedEventArgs e)
@@ -389,13 +389,13 @@ namespace Spectra
             try
             {
                 if (ckb1sub.IsChecked == true)
-                    ((Ctrl_ImageView)(App.global_Win_ImgCompare.UserControls[0])).Refresh(Convert.ToUInt16(txtCompareR.Text), ColorRenderMode.Grayscale);
+                    ((Ctrl_ImageView)(App.global_Win_ImgCompare.UserControls[0])).Refresh(Convert.ToUInt16(txtCompareR.Text), ColorRenderMode.Grayscale,FileInfo.md5);
                 if (ckb2sub.IsChecked == true)
-                    ((Ctrl_ImageView)(App.global_Win_ImgCompare.UserControls[1])).Refresh(Convert.ToUInt16(txtCompareGray2.Text), ColorRenderMode.Grayscale);
+                    ((Ctrl_ImageView)(App.global_Win_ImgCompare.UserControls[1])).Refresh(Convert.ToUInt16(txtCompareGray2.Text), ColorRenderMode.Grayscale, FileInfo.md5);
                 if (ckb3sub.IsChecked == true)
-                    ((Ctrl_ImageView)(App.global_Win_ImgCompare.UserControls[2])).Refresh(Convert.ToUInt16(txtCompareGray3.Text), ColorRenderMode.Grayscale);
+                    ((Ctrl_ImageView)(App.global_Win_ImgCompare.UserControls[2])).Refresh(Convert.ToUInt16(txtCompareGray3.Text), ColorRenderMode.Grayscale, FileInfo.md5);
                 if (ckb4sub.IsChecked == true)
-                    ((Ctrl_ImageView)(App.global_Win_ImgCompare.UserControls[3])).Refresh(Convert.ToUInt16(txtCompareGray4.Text), ColorRenderMode.Grayscale);
+                    ((Ctrl_ImageView)(App.global_Win_ImgCompare.UserControls[3])).Refresh(Convert.ToUInt16(txtCompareGray4.Text), ColorRenderMode.Grayscale, FileInfo.md5);
             }
             catch (Exception)
             {
@@ -484,7 +484,7 @@ namespace Spectra
                 if (sel != null)
                 {
                     ModelShowInfo.WindowsCnt = Convert.ToUInt16(sel.Row[1]);
-                    ModelShowInfo.dtWinShowInfo = SQLiteFunc.SelectDTSQL("SELECT * from Apply_ModelR where 名称='" + sel.Row[0] + "' order by 窗口编号,子窗体编号");
+                    ModelShowInfo.dtWinShowInfo = SQLiteFunc.SelectDTSQL("SELECT 窗口数量,图像模式1,图像模式4,谷歌地图,三维立方体,图像地图模式,曲线模式 from Apply_Model where 名称='" + sel.Row[0] + "'");
                     txtModelName.Text = sel.Row[0].ToString();                                                                          /*名称*/
                     txtModelWinCnt.Text = Convert.ToString(sel.Row[1]);                                                                 /*窗口数量*/
                     txtModelStartTime.Text = (sel.Row[2].ToString() == "") ? "" : Convert.ToDateTime(sel.Row[2]).ToString();            /*起始时间*/
@@ -502,6 +502,7 @@ namespace Spectra
                     rbModelCurve1.IsChecked = (sel.Row[13].ToString() != "模式4");                                                      /*曲线模式*/
                     rbModelCurve4.IsChecked = (sel.Row[13].ToString() == "模式4");                                                      /*曲线模式*/
                     txtModelRemark.Text = sel.Row[14].ToString();                                                                       /*备注*/
+                    ModelShowInfo.md5 = sel.Row[15].ToString();                                                                         /*MD5*/
 
                     ModelShowInfo.Time_Start = Convert.ToDateTime(txtModelStartTime.Text);
                     ModelShowInfo.Time_End = Convert.ToDateTime(txtModelEndTime.Text);
@@ -536,11 +537,11 @@ namespace Spectra
                 DataTable dtModel = SQLiteFunc.SelectDTSQL(sql);
                 if (dtModel.Rows.Count == 0)
                 {
-                    SQLiteFunc.ExcuteSQL("insert into Apply_Model (名称,起始时间,结束时间,起始经度,结束经度,起始纬度,结束纬度,备注) values ('?','?','?',?,?,?,?,'?')", txtModelName.Text, ModelShowInfo.Time_Start.ToString("yyyy-MM-dd HH:mm:ss"), ModelShowInfo.Time_End.ToString("yyyy-MM-dd HH:mm:ss"), 0, 0, 0, 0, txtModelRemark.Text);
+                    SQLiteFunc.ExcuteSQL("insert into Apply_Model (名称,起始时间,结束时间,起始经度,结束经度,起始纬度,结束纬度,备注,MD5) values ('?','?','?',?,?,?,?,'?','?')", txtModelName.Text, ModelShowInfo.Time_Start.ToString("yyyy-MM-dd HH:mm:ss"), ModelShowInfo.Time_End.ToString("yyyy-MM-dd HH:mm:ss"), 0, 0, 0, 0, txtModelRemark.Text,FileInfo.md5);
                 }
                 else
                 {
-                    SQLiteFunc.ExcuteSQL("update Apply_Model set 起始时间='?',结束时间='?',起始经度=?,结束经度=?,起始纬度=?,结束纬度=?,备注='?' where 名称='?'", ModelShowInfo.Time_Start.ToString("yyyy-MM-dd HH:mm:ss"), ModelShowInfo.Time_End.ToString("yyyy-MM-dd HH:mm:ss"), ModelShowInfo.Coord_TL.Lon, ModelShowInfo.Coord_TL.Lat, ModelShowInfo.Coord_DR.Lon, ModelShowInfo.Coord_DR.Lat, txtModelRemark.Text, txtModelName.Text);
+                    SQLiteFunc.ExcuteSQL("update Apply_Model set 起始时间='?',结束时间='?',起始经度=?,结束经度=?,起始纬度=?,结束纬度=?,备注='?',MD5='?' where 名称='?'", ModelShowInfo.Time_Start.ToString("yyyy-MM-dd HH:mm:ss"), ModelShowInfo.Time_End.ToString("yyyy-MM-dd HH:mm:ss"), ModelShowInfo.Coord_TL.Lon, ModelShowInfo.Coord_TL.Lat, ModelShowInfo.Coord_DR.Lon, ModelShowInfo.Coord_DR.Lat, txtModelRemark.Text,FileInfo.md5, txtModelName.Text);
                  }
                 getCurApplyModel();
             }
@@ -623,132 +624,103 @@ namespace Spectra
         {
             try
             {
-                DataTable dt = await DataProc.QueryResult(ModelShowInfo.Time_Start != ModelShowInfo.Time_End, ModelShowInfo.Coord_TL.Lon != ModelShowInfo.Coord_DR.Lon && ModelShowInfo.Coord_TL.Lat != ModelShowInfo.Coord_DR.Lat, false, ModelShowInfo.Time_Start, ModelShowInfo.Time_End, 0, 0, ModelShowInfo.Coord_TL, ModelShowInfo.Coord_DR);
+                DataTable dt = await DataProc.QueryResult(ModelShowInfo.md5,ModelShowInfo.Time_Start != ModelShowInfo.Time_End, ModelShowInfo.Coord_TL.Lon != ModelShowInfo.Coord_DR.Lon && ModelShowInfo.Coord_TL.Lat != ModelShowInfo.Coord_DR.Lat, false, ModelShowInfo.Time_Start, ModelShowInfo.Time_End, 0, 0, ModelShowInfo.Coord_TL, ModelShowInfo.Coord_DR);
                 dataGrid_Result.ItemsSource = dt.DefaultView;
                 dataGrid_SatePose.ItemsSource = dt.DefaultView;
                 DataQuery.QueryResult = dt;
                 ImageInfo.GetImgInfo(dt);       /*存储图像信息*/
                 SetImgInfo();
+                initWindows(ModelShowInfo.WindowsCnt, ModelShowInfo.dtWinShowInfo,ModelShowInfo.md5);
             }
             catch
             {
                 System.Windows.MessageBox.Show("无数据!", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
-            try
-            { 
-                App.global_ApplyModel.Clear();
-                for (int i = 0; i < ModelShowInfo.WindowsCnt; i++)
-                    App.global_ApplyModel.Add(new MultiFuncWindow());
-                int[] subCnt = new int[ModelShowInfo.WindowsCnt];
-                subCnt[0] = Convert.ToUInt16(ModelShowInfo.dtWinShowInfo.Rows[0][3]);
-                int p = subCnt[0];
-                for (int i = 1; i < ModelShowInfo.WindowsCnt; i++)
-                {
-                    subCnt[i] = Convert.ToUInt16(ModelShowInfo.dtWinShowInfo.Rows[p][3]);
-                    p += subCnt[i];
-                }
-                MultiFuncWindow[] w = new MultiFuncWindow[ModelShowInfo.WindowsCnt];
-                for (int i = 0; i < ModelShowInfo.WindowsCnt; i++)
-                {
-                    w[i] = (MultiFuncWindow)App.global_ApplyModel[i];
-                    w[i].DisplayMode = (GridMode)(subCnt[i] - 1);
-                }
-                foreach (DataRow dr in ModelShowInfo.dtWinShowInfo.Rows)
-                {
-                    if (!w[Convert.ToUInt16(dr[1]) - 1].isShow)
-                        w[Convert.ToUInt16(dr[1]) - 1].ScreenShow(Screen.AllScreens, 0, Convert.ToUInt16(dr[1]).ToString());
-                    w[Convert.ToUInt16(dr[1]) - 1].Refresh(Convert.ToUInt16(dr[4]) - 1, (WinFunc)Convert.ToUInt16(dr[6]));
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Windows.MessageBox.Show(ex.ToString());
-            }
         }
         #endregion
 
         #region 默认显示方式
         /*初始化显示窗体*/
-        private void initDefaultWindows()
+        private void initWindows(int winSum,DataTable dtShow,string md5)
         {
-            for (int i = 0; i < WinShowInfo.WindowsCnt; i++)
+            for (int i = 0; i < winSum; i++)
                 App.global_Windows.Add(new MultiFuncWindow());
-            MultiFuncWindow[] w = new MultiFuncWindow[WinShowInfo.WindowsCnt];
+            MultiFuncWindow[] w = new MultiFuncWindow[winSum];
             int cnt = 0;
-            if (WinShowInfo.dtWinShowInfo.Rows[0][1].ToString() == "True")
+            if (dtShow.Rows[0][1].ToString() == "True")
             {
                 w[cnt] = (MultiFuncWindow)App.global_Windows[cnt];
                 w[cnt].DisplayMode = GridMode.One;
                 if (!w[cnt].isShow)
                     w[cnt].ScreenShow(Screen.AllScreens, 0, cnt.ToString());
-                w[cnt].Refresh(0, WinFunc.Image);
+                w[cnt].Refresh(0, WinFunc.Image, md5);
                 cnt++;
             }
-            if (WinShowInfo.dtWinShowInfo.Rows[0][2].ToString() == "True")
+            if (dtShow.Rows[0][2].ToString() == "True")
             {
                 w[cnt] = (MultiFuncWindow)App.global_Windows[cnt];
                 w[cnt].DisplayMode = GridMode.Four;
                 if (!w[cnt].isShow)
                     w[cnt].ScreenShow(Screen.AllScreens, 0, cnt.ToString());
-                w[cnt].Refresh(0, WinFunc.Image);
-                w[cnt].Refresh(1, WinFunc.Image);
-                w[cnt].Refresh(2, WinFunc.Image);
-                w[cnt].Refresh(3, WinFunc.Image);
+                w[cnt].Refresh(0, WinFunc.Image, md5);
+                w[cnt].Refresh(1, WinFunc.Image, md5);
+                w[cnt].Refresh(2, WinFunc.Image, md5);
+                w[cnt].Refresh(3, WinFunc.Image, md5);
                 cnt++;
             }
             //谷歌地图
-            if (WinShowInfo.dtWinShowInfo.Rows[0][3].ToString() == "True")
+            if (dtShow.Rows[0][3].ToString() == "True")
             {
                 w[cnt] = (MultiFuncWindow)App.global_Windows[cnt];
                 w[cnt].DisplayMode = GridMode.One;
                 if (!w[cnt].isShow)
                     w[cnt].ScreenShow(Screen.AllScreens, 0, cnt.ToString());
-                w[cnt].Refresh(0, WinFunc.Image);
+                w[cnt].Refresh(0, WinFunc.Map, md5);
                 cnt++;
             }
             //三维立方体
-            if (WinShowInfo.dtWinShowInfo.Rows[0][4].ToString() == "True")
+            if (dtShow.Rows[0][4].ToString() == "True")
             {
                 w[cnt] = (MultiFuncWindow)App.global_Windows[cnt];
                 w[cnt].DisplayMode = GridMode.One;
                 if (!w[cnt].isShow)
                     w[cnt].ScreenShow(Screen.AllScreens, 0, cnt.ToString());
-                w[cnt].Refresh(0, WinFunc.Cube);
+                w[cnt].Refresh(0, WinFunc.Cube, md5);
                 cnt++;
             }
-            //三维立方体
-            if (WinShowInfo.dtWinShowInfo.Rows[0][5].ToString() == "True")
+            //图像地图
+            if (dtShow.Rows[0][5].ToString() == "True")
             {
                 w[cnt] = (MultiFuncWindow)App.global_Windows[cnt];
                 w[cnt].DisplayMode = GridMode.Two;
                 if (!w[cnt].isShow)
                     w[cnt].ScreenShow(Screen.AllScreens, 0, cnt.ToString());
-                w[cnt].Refresh(0, WinFunc.Image);
-                w[cnt].Refresh(1, WinFunc.Image);
+                w[cnt].Refresh(0, WinFunc.Image, md5);
+                w[cnt].Refresh(1, WinFunc.Map, md5);
                 cnt++;
             }
             //曲线模式1
-            if (WinShowInfo.dtWinShowInfo.Rows[0][6].ToString() == "模式1")
+            if (dtShow.Rows[0][6].ToString() == "模式1")
             {
                 w[cnt] = (MultiFuncWindow)App.global_Windows[cnt];
                 w[cnt].DisplayMode = GridMode.One;
                 if (!w[cnt].isShow)
                     w[cnt].ScreenShow(Screen.AllScreens, 0, cnt.ToString());
-                w[cnt].Refresh(0, WinFunc.Curve);
+                w[cnt].Refresh(0, WinFunc.Curve, md5);
                 cnt++;
             }
             //曲线模式4
-            if (WinShowInfo.dtWinShowInfo.Rows[0][6].ToString() == "模式4")
+            if (dtShow.Rows[0][6].ToString() == "模式4")
             {
                 w[cnt] = (MultiFuncWindow)App.global_Windows[cnt];
                 w[cnt].DisplayMode = GridMode.Four;
                 if (!w[cnt].isShow)
                     w[cnt].ScreenShow(Screen.AllScreens, 0, cnt.ToString());
-                w[cnt].Refresh(0, WinFunc.Curve);
-                w[cnt].Refresh(1, WinFunc.Curve);
-                w[cnt].Refresh(2, WinFunc.Curve);
-                w[cnt].Refresh(3, WinFunc.Curve);
+                w[cnt].Refresh(0, WinFunc.Curve, md5);
+                w[cnt].Refresh(1, WinFunc.Curve, md5);
+                w[cnt].Refresh(2, WinFunc.Curve, md5);
+                w[cnt].Refresh(3, WinFunc.Curve, md5);
                 cnt++;
             }
         }
@@ -784,7 +756,7 @@ namespace Spectra
                 System.Windows.MessageBox.Show(ex.ToString());
             }
         }
-        /*获取默认值*/
+        /*刷新界面*/
         private void getDefaultShow()
         {
             try
