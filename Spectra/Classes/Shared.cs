@@ -6,8 +6,8 @@ using System.Drawing;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 
 namespace Spectra
 {
@@ -48,10 +48,9 @@ namespace Spectra
         public static string str_pathWork = Environment.CurrentDirectory + "\\Work";
     }
 
-
     public enum WinFunc {Image,Curve,Cube,Map};
-    public enum GridMode {One,Two,Three,Four};
 
+    public enum GridMode {One,Two,Three,Four};
 
     public class ScreenParams
     {
@@ -109,6 +108,7 @@ namespace Spectra
         public static int WindowsCnt = 0;               //显示的窗体个数
         public static DataTable dtWinShowInfo;          //默认显示方式的列表
     }
+
     public class ModelShowInfo
     { 
         public static int WindowsCnt = 0;               //应用样式的窗口数量
@@ -125,12 +125,15 @@ namespace Spectra
     {
         [DllImport("DLL\\DataOperation.dll", EntryPoint = "Split_Chanel")]
         static extern void Split_Chanel(string path, string outpath, int sum, string[] file);
+        [DllImport("DLL\\DataOperation.dll", EntryPoint = "GetCurrentPosition")]
+        static extern double GetCurrentPosition();
 
         public static long import_id = 0;
         public static int noise_value = 0;
 
         public static DataTable dtImgInfo;
         public static string[] strFileName;
+        public static string strFilesPath = Environment.CurrentDirectory + "\\showFiles\\";
 
         public static int minFrm;
         public static int maxFrm;
@@ -162,12 +165,27 @@ namespace Spectra
             startTime = T0.AddSeconds(startSec);
             endTime = T0.AddSeconds(endSec);
         }
-        public static void MakeImage()
+
+        /// <summary>
+        /// 生成图像
+        /// </summary>
+        /// <param name="Prog"></param>
+        /// <returns></returns>
+        public static Task<int> MakeImage(IProgress<double> Prog)
         {
-            strFileName = new string[imgWidth];
-            for (int i = 0; i < imgWidth; i++)
-                strFileName[i] = $"{(Convert.ToUInt32(dtImgInfo.Rows[i][2])).ToString("D10")}_{(Convert.ToUInt32(dtImgInfo.Rows[i][17])).ToString("D10")}_";
-            Split_Chanel($"{Environment.CurrentDirectory}\\channelFiles\\", $"{Environment.CurrentDirectory}\\showFiles\\", imgWidth, strFileName);
+            return Task.Run(() => {
+                //512拼2048*N图
+                Timer t = new Timer((o) =>
+                {
+                    IProgress<double> a = o as IProgress<double>;
+                    a.Report(GetCurrentPosition());
+                }, Prog, 0, 10);
+                strFileName = new string[imgWidth];
+                for (int i = 0; i < imgWidth; i++)
+                    strFileName[i] = $"{(Convert.ToUInt32(dtImgInfo.Rows[i][2])).ToString("D10")}_{(Convert.ToUInt32(dtImgInfo.Rows[i][17])).ToString("D10")}_";
+                Split_Chanel($"{Environment.CurrentDirectory}\\channelFiles\\", $"{Environment.CurrentDirectory}\\showFiles\\", imgWidth, strFileName);
+                return 1;
+            });
         }
 
         /// <summary>

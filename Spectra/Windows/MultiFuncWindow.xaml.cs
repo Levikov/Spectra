@@ -70,7 +70,7 @@ namespace Spectra
             DisplayMode = GridMode.Two;
         }
 
-        public void Refresh(int SubGridInedex, WinFunc setWinFunc,string md5)
+        public void Refresh(string path, int SubGridInedex, WinFunc setWinFunc)
         {
             SubGrid[SubGridInedex].Children.Clear();
             WinFunc[SubGridInedex] = setWinFunc;
@@ -79,14 +79,14 @@ namespace Spectra
             {
                 case Spectra.WinFunc.Image:
                     UserControls[SubGridInedex] = new Ctrl_ImageView();
-                    ((Ctrl_ImageView)(UserControls[SubGridInedex])).Refresh(120, ColorRenderMode.Grayscale,md5);
+                    ((Ctrl_ImageView)(UserControls[SubGridInedex])).Refresh(120, ColorRenderMode.Grayscale,path);
                     break;
                 case Spectra.WinFunc.Curve:
                     UserControls[SubGridInedex] = new Ctrl_SpecCurv();
                     break;
                 case Spectra.WinFunc.Cube:
                     UserControls[SubGridInedex] = new Ctrl_3DView();
-                    ((Ctrl_3DView)UserControls[SubGridInedex]).Refresh();
+                    ((Ctrl_3DView)UserControls[SubGridInedex]).Refresh(path);
                     break;
                 case Spectra.WinFunc.Map:
                     break;

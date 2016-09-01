@@ -271,11 +271,12 @@ namespace Spectra
             }
         }
         /*点击生成图像*/
-        private void btnMakeImage_Click(object sender, RoutedEventArgs e)
+        private async void btnMakeImage_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                ImageInfo.MakeImage();
+                IProgress<double> IProgress_Prog = new Progress<double>((ProgressValue) => { progMakeImage.Value = ProgressValue * progMakeImage.Maximum; });
+                await ImageInfo.MakeImage(IProgress_Prog);
                 System.Windows.MessageBox.Show("OK");
             }
             catch (Exception ex)
@@ -326,7 +327,7 @@ namespace Spectra
                 //App.global_Win_Map = new MapWindow();
                 //App.global_Win_Map.Show();
                 //App.global_Win_Map.DrawRectangle(new Point((double)DataQuery.QueryResult.Rows[0].ItemArray[3], (double)DataQuery.QueryResult.Rows[0].ItemArray[4]), new Point((double)DataQuery.QueryResult.Rows[DataQuery.QueryResult.Rows.Count - 1].ItemArray[3], (double)DataQuery.QueryResult.Rows[DataQuery.QueryResult.Rows.Count - 1].ItemArray[4]));
-                initWindows(WinShowInfo.WindowsCnt,WinShowInfo.dtWinShowInfo,FileInfo.md5);
+                initWindows(ImageInfo.strFilesPath, WinShowInfo.WindowsCnt,WinShowInfo.dtWinShowInfo);
             }
             catch (Exception ex)
             {
@@ -368,7 +369,7 @@ namespace Spectra
             }
             if (!App.global_Win_SpecImg.isShow)
                 App.global_Win_SpecImg.ScreenShow(Screen.AllScreens, 0, "光谱图像");
-            App.global_Win_SpecImg.Refresh(0, WinFunc.Image,FileInfo.md5);
+            App.global_Win_SpecImg.Refresh(ImageInfo.strFilesPath, 0, WinFunc.Image);
         }
         /*显示光谱立方体*/
         private void btnShow3D_Click(object sender, RoutedEventArgs e)
@@ -380,7 +381,7 @@ namespace Spectra
             }
             if (!App.global_Win_3D.isShow)
                 App.global_Win_3D.ScreenShow(Screen.AllScreens, 0, "光谱立方体");
-            App.global_Win_3D.Refresh(0, WinFunc.Cube, FileInfo.md5);
+            App.global_Win_3D.Refresh(ImageInfo.strFilesPath, 0, WinFunc.Cube);
         }
         /*显示典型谱段对比*/
         private void btnShowImgCompare_Click(object sender, RoutedEventArgs e)
@@ -392,10 +393,10 @@ namespace Spectra
             }
             if (!App.global_Win_ImgCompare.isShow)
                 App.global_Win_ImgCompare.ScreenShow(Screen.AllScreens, 0, "典型谱段图像对比");
-            App.global_Win_ImgCompare.Refresh(0, WinFunc.Image, FileInfo.md5);
-            App.global_Win_ImgCompare.Refresh(1, WinFunc.Image, FileInfo.md5);
-            App.global_Win_ImgCompare.Refresh(2, WinFunc.Image, FileInfo.md5);
-            App.global_Win_ImgCompare.Refresh(3, WinFunc.Image, FileInfo.md5);
+            App.global_Win_ImgCompare.Refresh(ImageInfo.strFilesPath, 0, WinFunc.Image);
+            App.global_Win_ImgCompare.Refresh(ImageInfo.strFilesPath, 1, WinFunc.Image);
+            App.global_Win_ImgCompare.Refresh(ImageInfo.strFilesPath, 2, WinFunc.Image);
+            App.global_Win_ImgCompare.Refresh(ImageInfo.strFilesPath, 3, WinFunc.Image);
         }
         /*设置对比图像谱段*/
         private void btnCompareSet_Click(object sender, RoutedEventArgs e)
@@ -403,13 +404,13 @@ namespace Spectra
             try
             {
                 if (ckb1sub.IsChecked == true)
-                    ((Ctrl_ImageView)(App.global_Win_ImgCompare.UserControls[0])).Refresh(Convert.ToUInt16(txtCompareR.Text), ColorRenderMode.Grayscale,FileInfo.md5);
+                    ((Ctrl_ImageView)(App.global_Win_ImgCompare.UserControls[0])).Refresh(Convert.ToUInt16(txtCompareR.Text), ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
                 if (ckb2sub.IsChecked == true)
-                    ((Ctrl_ImageView)(App.global_Win_ImgCompare.UserControls[1])).Refresh(Convert.ToUInt16(txtCompareGray2.Text), ColorRenderMode.Grayscale, FileInfo.md5);
+                    ((Ctrl_ImageView)(App.global_Win_ImgCompare.UserControls[1])).Refresh(Convert.ToUInt16(txtCompareGray2.Text), ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
                 if (ckb3sub.IsChecked == true)
-                    ((Ctrl_ImageView)(App.global_Win_ImgCompare.UserControls[2])).Refresh(Convert.ToUInt16(txtCompareGray3.Text), ColorRenderMode.Grayscale, FileInfo.md5);
+                    ((Ctrl_ImageView)(App.global_Win_ImgCompare.UserControls[2])).Refresh(Convert.ToUInt16(txtCompareGray3.Text), ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
                 if (ckb4sub.IsChecked == true)
-                    ((Ctrl_ImageView)(App.global_Win_ImgCompare.UserControls[3])).Refresh(Convert.ToUInt16(txtCompareGray4.Text), ColorRenderMode.Grayscale, FileInfo.md5);
+                    ((Ctrl_ImageView)(App.global_Win_ImgCompare.UserControls[3])).Refresh(Convert.ToUInt16(txtCompareGray4.Text), ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
             }
             catch (Exception)
             {
@@ -645,7 +646,7 @@ namespace Spectra
                 ImageInfo.dtImgInfo = dt;
                 ImageInfo.GetImgInfo();       /*存储图像信息*/
                 SetImgInfo();
-                initWindows(ModelShowInfo.WindowsCnt, ModelShowInfo.dtWinShowInfo,ModelShowInfo.md5);
+                initWindows(ImageInfo.strFilesPath, ModelShowInfo.WindowsCnt, ModelShowInfo.dtWinShowInfo);
             }
             catch
             {
@@ -657,7 +658,7 @@ namespace Spectra
 
         #region 默认显示方式
         /*初始化显示窗体*/
-        private void initWindows(int winSum,DataTable dtShow,string md5)
+        private void initWindows(string path, int winSum, DataTable dtShow)
         {
             for (int i = 0; i < winSum; i++)
                 App.global_Windows.Add(new MultiFuncWindow());
@@ -669,7 +670,7 @@ namespace Spectra
                 w[cnt].DisplayMode = GridMode.One;
                 if (!w[cnt].isShow)
                     w[cnt].ScreenShow(Screen.AllScreens, 0, cnt.ToString());
-                w[cnt].Refresh(0, WinFunc.Image, md5);
+                w[cnt].Refresh(path, 0, WinFunc.Image);
                 cnt++;
             }
             if (dtShow.Rows[0][2].ToString() == "True")
@@ -678,10 +679,10 @@ namespace Spectra
                 w[cnt].DisplayMode = GridMode.Four;
                 if (!w[cnt].isShow)
                     w[cnt].ScreenShow(Screen.AllScreens, 0, cnt.ToString());
-                w[cnt].Refresh(0, WinFunc.Image, md5);
-                w[cnt].Refresh(1, WinFunc.Image, md5);
-                w[cnt].Refresh(2, WinFunc.Image, md5);
-                w[cnt].Refresh(3, WinFunc.Image, md5);
+                w[cnt].Refresh(path, 0, WinFunc.Image);
+                w[cnt].Refresh(path, 1, WinFunc.Image);
+                w[cnt].Refresh(path, 2, WinFunc.Image);
+                w[cnt].Refresh(path, 3, WinFunc.Image);
                 cnt++;
             }
             //谷歌地图
@@ -691,7 +692,7 @@ namespace Spectra
                 w[cnt].DisplayMode = GridMode.One;
                 if (!w[cnt].isShow)
                     w[cnt].ScreenShow(Screen.AllScreens, 0, cnt.ToString());
-                w[cnt].Refresh(0, WinFunc.Map, md5);
+                w[cnt].Refresh(path, 0, WinFunc.Map);
                 cnt++;
             }
             //三维立方体
@@ -701,7 +702,7 @@ namespace Spectra
                 w[cnt].DisplayMode = GridMode.One;
                 if (!w[cnt].isShow)
                     w[cnt].ScreenShow(Screen.AllScreens, 0, cnt.ToString());
-                w[cnt].Refresh(0, WinFunc.Cube, md5);
+                w[cnt].Refresh(path, 0, WinFunc.Cube);
                 cnt++;
             }
             //图像地图
@@ -711,8 +712,8 @@ namespace Spectra
                 w[cnt].DisplayMode = GridMode.Two;
                 if (!w[cnt].isShow)
                     w[cnt].ScreenShow(Screen.AllScreens, 0, cnt.ToString());
-                w[cnt].Refresh(0, WinFunc.Image, md5);
-                w[cnt].Refresh(1, WinFunc.Map, md5);
+                w[cnt].Refresh(path, 0, WinFunc.Image);
+                w[cnt].Refresh(path, 1, WinFunc.Map);
                 cnt++;
             }
             //曲线模式1
@@ -722,7 +723,7 @@ namespace Spectra
                 w[cnt].DisplayMode = GridMode.One;
                 if (!w[cnt].isShow)
                     w[cnt].ScreenShow(Screen.AllScreens, 0, cnt.ToString());
-                w[cnt].Refresh(0, WinFunc.Curve, md5);
+                w[cnt].Refresh(path, 0, WinFunc.Curve);
                 cnt++;
             }
             //曲线模式4
@@ -732,10 +733,10 @@ namespace Spectra
                 w[cnt].DisplayMode = GridMode.Four;
                 if (!w[cnt].isShow)
                     w[cnt].ScreenShow(Screen.AllScreens, 0, cnt.ToString());
-                w[cnt].Refresh(0, WinFunc.Curve, md5);
-                w[cnt].Refresh(1, WinFunc.Curve, md5);
-                w[cnt].Refresh(2, WinFunc.Curve, md5);
-                w[cnt].Refresh(3, WinFunc.Curve, md5);
+                w[cnt].Refresh(path, 0, WinFunc.Curve);
+                w[cnt].Refresh(path, 1, WinFunc.Curve);
+                w[cnt].Refresh(path, 2, WinFunc.Curve);
+                w[cnt].Refresh(path, 3, WinFunc.Curve);
                 cnt++;
             }
         }
@@ -814,5 +815,22 @@ namespace Spectra
             }
             App.global_Win_Map.webMap.Refresh();
         }
+
+        #region 数据存储
+
+        private void btnSaveFilesPath_Click(object sender, RoutedEventArgs e)
+        {
+            FolderBrowserDialog fbd = new FolderBrowserDialog();
+            if (fbd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                string flodPath = fbd.SelectedPath;
+            }
+        }
+
+        private void btnSaveFiles_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+        #endregion
     }
 }

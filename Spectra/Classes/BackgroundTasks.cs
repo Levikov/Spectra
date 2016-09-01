@@ -262,6 +262,11 @@ namespace Spectra
                 //解压完成后才对数据库进行操作
                 List.Report($"{DateTime.Now.ToString("HH:mm:ss")} 开始写数据库");
                 /*需要添加清除该MD5数据的代码*/
+                sqlExcute.ExecuteNonQuery("delete from AuxData where MD5=@MD5",
+                    new List<SQLiteParameter>()
+                        {
+                            new SQLiteParameter("MD5",FileInfo.md5)
+                        });
                 FileStream fs_chanel = new FileStream(FileInfo.srcFilePathName, FileMode.Open, FileAccess.Read, FileShare.Read);
                 byte[] buf_row1 = new byte[PACK_LEN * 1024 * 1024];
                 while (fs_chanel.Position < fs_chanel.Length)
@@ -306,7 +311,7 @@ namespace Spectra
                 FileInfo.endCoord.convertToCoord($"({lat},{lon})");                                                                                             //结束经纬
                 long Frm_Start = (long)sqlExcute.ExecuteScalar($"SELECT FrameId FROM AuxData WHERE MD5='{FileInfo.md5}' ORDER BY FrameId ASC");                 //帧起始
 
-                DataTable dtGST = sqlExcute.GetDataTable("select GST,GST_US from AuxData where md5=@MD5 order by GST,GST_US",
+                DataTable dtGST = sqlExcute.GetDataTable("select GST,GST_US from AuxData where MD5=@MD5 order by GST,GST_US",
                     new List<SQLiteParameter>()
                         {
                             new SQLiteParameter("MD5",FileInfo.md5)
@@ -331,7 +336,14 @@ namespace Spectra
         #endregion
 
         #region Bitmap Operations
-        public static Task<Bitmap> GetBmp(int v,ColorRenderMode cMode,string md5)
+        /// <summary>
+        /// 通过raw文件转为bmp进行显示
+        /// </summary>
+        /// <param name="path">图像文件的路径</param>
+        /// <param name="v">谱段号</param>
+        /// <param name="cMode">显示的模式:灰度、伪彩、真彩</param>
+        /// <returns></returns>
+        public static Task<Bitmap> GetBmp(string path,int v,ColorRenderMode cMode)
         { 
             return Task.Run(() =>
             {
@@ -389,16 +401,20 @@ namespace Spectra
                 return bmpTop;
             });
         }
-
-        public static Task<Bitmap[]> GetBmp3D()
+        /// <summary>
+        /// 取三维立方体
+        /// </summary>
+        /// <param name="path">raw文件的存储位置</param>
+        /// <returns>bmp图像</returns>
+        public static Task<Bitmap[]> GetBmp3D(string path)
         {
             return Task.Run(async () =>
             {
 
                 Bitmap[] r = new Bitmap[6];
 
-                r[0] = await GetBmp(0,ColorRenderMode.Grayscale,FileInfo.md5);
-                r[1] = await GetBmp(159,ColorRenderMode.Grayscale,FileInfo.md5);
+                r[0] = await GetBmp(path,0, ColorRenderMode.Grayscale);
+                r[1] = await GetBmp(path,159, ColorRenderMode.Grayscale);
                 Thread _tUp = new Thread(new ThreadStart(() => {
                     Bitmap bmpUp = new Bitmap(2048, 160, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
                     BitmapData bmpData = bmpUp.LockBits(new System.Drawing.Rectangle(0, 0, 2048, 160), System.Drawing.Imaging.ImageLockMode.WriteOnly, bmpUp.PixelFormat);

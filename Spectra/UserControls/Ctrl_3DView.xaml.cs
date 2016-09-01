@@ -129,10 +129,10 @@ namespace Spectra
 
         }
 
-        internal async void Refresh()
+        internal async void Refresh(string path)
         {
             this.Busy.isBusy = true;
-            Bitmap[] bmp = await DataProc.GetBmp3D();
+            Bitmap[] bmp = await DataProc.GetBmp3D(path);
             imheight = DataQuery.QueryResult.Rows.Count;
             RenderBox(imheight, bmp);
             InitializeCameras();
@@ -182,7 +182,7 @@ namespace Spectra
                 int X = (int)(scene.touchPoint.X * 10) + 1024;
                 int Y = (int)(scene.touchPoint.Y * 10 + imheight / 2);
                 int Z = (int)(scene.touchPoint.Z * 10 / 4 + 80);
-                Bitmap bmp = await DataProc.GetBmp(Z, ColorRenderMode.Grayscale,FileInfo.md5);
+                Bitmap bmp = await DataProc.GetBmp(ImageInfo.strFilesPath, Z, ColorRenderMode.Grayscale);
                 BitmapImage bmpSource = new BitmapImage();
 
                 bmp.Save($"{Z}.bmp");

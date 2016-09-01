@@ -29,12 +29,12 @@
                 <Button x:Name="btnMin" Content="—" Template="{DynamicResource ButtonMinMax}" Click="btnMin_Click"/>
             </StackPanel>
             <DockPanel Margin="0,40,0,0" MinHeight="50">
-                <RadioButton x:Name="btnTopA" Content="数据管理" Template="{DynamicResource ButtonIcon1st}" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch" Margin="20,0,0,0">
+                <RadioButton x:Name="btnTopA" Content="数据管理" Template="{DynamicResource ButtonIcon1st}" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch" Margin="20,0,0,0" IsChecked="True">
                     <RadioButton.Background>
                         <ImageBrush ImageSource="image/ICON/1.ico" Stretch="Uniform"/>
                     </RadioButton.Background>
                 </RadioButton>
-                <RadioButton x:Name="btnTopB" Content="光谱分析" Template="{DynamicResource ButtonIcon1st}" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch" Margin="20,0,0,0" IsChecked="True">
+                <RadioButton x:Name="btnTopB" Content="光谱分析" Template="{DynamicResource ButtonIcon1st}" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch" Margin="20,0,0,0">
                     <RadioButton.Background>
                         <ImageBrush ImageSource="image/ICON/2.ico" Stretch="Uniform"/>
                     </RadioButton.Background>
@@ -181,13 +181,11 @@
                             <ColumnDefinition Width="1*"/>
                             <ColumnDefinition Width="1*"/>
                         </Grid.ColumnDefinitions>
-                        <Label Grid.Row="0" Grid.Column="0" Content="文件存储名称:" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        <TextBox Grid.Row="0" Grid.Column="1"/>
                         <Label Grid.Row="1" Grid.Column="0" Content="文件存储路径:" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        <TextBox Grid.Row="1" Grid.Column="1" IsReadOnly="True"/>
-                        <Button Grid.Row="1" Grid.Column="2" Content="选择存储路径" Template="{DynamicResource ButtonDefault}" Width="160" />
+                        <TextBox x:Name="txtSaveFilesPath" Grid.Row="1" Grid.Column="1" IsReadOnly="True"/>
+                        <Button x:Name="btnSaveFilesPath" Grid.Row="1" Grid.Column="2" Content="选择存储路径" Template="{DynamicResource ButtonDefault}" Width="160" Click="btnSaveFilesPath_Click" />
                         <ProgressBar Grid.Row="2" Grid.Column="1" Height="36" BorderBrush="{StaticResource ButtonBack}"/>
-                        <Button Grid.Row="2" Grid.Column="2" Content="开始存储" Template="{DynamicResource ButtonDefault}" Width="160" />
+                        <Button x:Name="btnSaveFiles" Grid.Row="2" Grid.Column="2" Content="开始存储" Template="{DynamicResource ButtonDefault}" Width="160" Click="btnSaveFiles_Click" />
                     </Grid>
                 </GroupBox>
             </Grid>
@@ -286,7 +284,7 @@
                                 <Button x:Name="btnDelRecord" Content="删除记录" Template="{DynamicResource ButtonDefault}" Width="120" Click="btnDelRecord_Click" Margin="40,0,0,0"/>
                             </StackPanel>
                         </Grid>
-                    </GroupBox>                    
+                    </GroupBox>
                 </Grid>
             </Grid>
         </Grid>
@@ -419,6 +417,7 @@
                         <RowDefinition Height="1*"/>
                         <RowDefinition Height="1*"/>
                     </Grid.RowDefinitions>
+                    <ProgressBar x:Name="progMakeImage" Height="34" BorderBrush="{StaticResource ButtonBack}"/>
                     <Button x:Name="b_Query" Grid.Row="1" Content="图像检索" Width="160" Template="{DynamicResource ButtonDefault}" Margin="0" VerticalAlignment="Center" Click="b_Query_Click"/>
                     <Button x:Name="btnMakeImage" Grid.Row="2" Content="生成图像" Width="160" Template="{DynamicResource ButtonDefault}" Margin="0" VerticalAlignment="Center" Click="btnMakeImage_Click"/>
                     <Button x:Name="button_Clear_Result" Grid.Row="3" Content="清空结果" Width="160" Template="{DynamicResource ButtonDefault}" Margin="0" VerticalAlignment="Center" Click="button_Clear_Result_Click"/>
