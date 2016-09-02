@@ -264,6 +264,8 @@ namespace Spectra
                 ImageInfo.dtImgInfo = dt;
                 ImageInfo.GetImgInfo();       /*存储图像信息*/
                 SetImgInfo();
+                btnMakeImage.IsEnabled = true;
+                btnDisplay.IsEnabled = false;
             }
             catch (Exception E)
             {
@@ -278,6 +280,8 @@ namespace Spectra
                 IProgress<double> IProgress_Prog = new Progress<double>((ProgressValue) => { progMakeImage.Value = ProgressValue * progMakeImage.Maximum; });
                 await ImageInfo.MakeImage(IProgress_Prog);
                 System.Windows.MessageBox.Show("OK");
+                btnMakeImage.IsEnabled = false;
+                btnDisplay.IsEnabled = true;
             }
             catch (Exception ex)
             {
@@ -319,7 +323,7 @@ namespace Spectra
 
         #region 图像提取
         /*显示图像按钮*/
-        private void button_Display_Click(object sender, RoutedEventArgs e)
+        private void btnDisplay_Click(object sender, RoutedEventArgs e)
         {
             try
             {

@@ -29,12 +29,12 @@
                 <Button x:Name="btnMin" Content="—" Template="{DynamicResource ButtonMinMax}" Click="btnMin_Click"/>
             </StackPanel>
             <DockPanel Margin="0,40,0,0" MinHeight="50">
-                <RadioButton x:Name="btnTopA" Content="数据管理" Template="{DynamicResource ButtonIcon1st}" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch" Margin="20,0,0,0" IsChecked="True">
+                <RadioButton x:Name="btnTopA" Content="数据管理" Template="{DynamicResource ButtonIcon1st}" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch" Margin="20,0,0,0">
                     <RadioButton.Background>
                         <ImageBrush ImageSource="image/ICON/1.ico" Stretch="Uniform"/>
                     </RadioButton.Background>
                 </RadioButton>
-                <RadioButton x:Name="btnTopB" Content="光谱分析" Template="{DynamicResource ButtonIcon1st}" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch" Margin="20,0,0,0">
+                <RadioButton x:Name="btnTopB" Content="光谱分析" Template="{DynamicResource ButtonIcon1st}" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch" Margin="20,0,0,0" IsChecked="True">
                     <RadioButton.Background>
                         <ImageBrush ImageSource="image/ICON/2.ico" Stretch="Uniform"/>
                     </RadioButton.Background>
@@ -419,9 +419,9 @@
                     </Grid.RowDefinitions>
                     <ProgressBar x:Name="progMakeImage" Height="34" BorderBrush="{StaticResource ButtonBack}"/>
                     <Button x:Name="b_Query" Grid.Row="1" Content="图像检索" Width="160" Template="{DynamicResource ButtonDefault}" Margin="0" VerticalAlignment="Center" Click="b_Query_Click"/>
-                    <Button x:Name="btnMakeImage" Grid.Row="2" Content="生成图像" Width="160" Template="{DynamicResource ButtonDefault}" Margin="0" VerticalAlignment="Center" Click="btnMakeImage_Click"/>
-                    <Button x:Name="button_Clear_Result" Grid.Row="3" Content="清空结果" Width="160" Template="{DynamicResource ButtonDefault}" Margin="0" VerticalAlignment="Center" Click="button_Clear_Result_Click"/>
-                    <Button x:Name="button_Display" Grid.Row="4" Content="显示结果" Width="160" Template="{DynamicResource ButtonDefault}" Margin="0" VerticalAlignment="Center" Click="button_Display_Click"/>
+                    <Button x:Name="button_Clear_Result" Grid.Row="2" Content="清空结果" Width="160" Template="{DynamicResource ButtonDefault}" Margin="0" VerticalAlignment="Center" Click="button_Clear_Result_Click"/>
+                    <Button x:Name="btnMakeImage" Grid.Row="3" Content="生成图像" Width="160" Template="{DynamicResource ButtonDefault}" Margin="0" VerticalAlignment="Center" IsEnabled="False" Click="btnMakeImage_Click"/>
+                    <Button x:Name="btnDisplay" Grid.Row="4" Content="显示结果" Width="160" Template="{DynamicResource ButtonDefault}" Margin="0" VerticalAlignment="Center" IsEnabled="False" Click="btnDisplay_Click"/>
                 </Grid>
                 <GroupBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="4" Margin="0,0,0,50" Header="检索结果" FontSize="20">
                     <DataGrid x:Name="dataGrid_Result" Margin="5"  LoadingRow="LoadingRowHeader">

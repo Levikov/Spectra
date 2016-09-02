@@ -349,7 +349,7 @@ namespace Spectra
             {
                 byte[] buf_full = new byte[2048 * DataQuery.QueryResult.Rows.Count * 3];
                 byte[] buf_band = new byte[2048 * DataQuery.QueryResult.Rows.Count*2];
-                FileStream fs = new FileStream($"{Environment.CurrentDirectory}\\showFiles\\{v}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
+                FileStream fs = new FileStream($"{path}{v}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
                 fs.Read(buf_band, 0, 2048 * DataQuery.QueryResult.Rows.Count * 2);
                         Parallel.For(0, 2048*DataQuery.QueryResult.Rows.Count, i =>
                         {
@@ -410,7 +410,6 @@ namespace Spectra
         {
             return Task.Run(async () =>
             {
-
                 Bitmap[] r = new Bitmap[6];
 
                 r[0] = await GetBmp(path,0, ColorRenderMode.Grayscale);
@@ -425,7 +424,7 @@ namespace Spectra
                         Parallel.For(0, 4, k =>
                         {
                             byte[] buf_file = new byte[512 * 160 * 2];
-                            FileStream fs = new FileStream($"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\raw\\{(long)(DataQuery.QueryResult.Rows[0].ItemArray[14])}_{(long)(DataQuery.QueryResult.Rows[0].ItemArray[0])}_{k + 1}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
+                            FileStream fs = new FileStream($"{ImageInfo.channelFilesPath}{(Convert.ToUInt64(DataQuery.QueryResult.Rows[0].ItemArray[2])).ToString("D10")}_{(Convert.ToUInt64(DataQuery.QueryResult.Rows[0].ItemArray[17])).ToString("D10")}_{k + 1}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
                             fs.Read(buf_file, 0, 512 * 160 * 2);
                             Parallel.For(0, 160, i => {
                                 Parallel.For(0, 512, j =>
@@ -455,7 +454,7 @@ namespace Spectra
                         Parallel.For(0, 4, k =>
                         {
                             byte[] buf_file = new byte[512 * 160 * 2];
-                            FileStream fs = new FileStream($"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\raw\\{(long)(DataQuery.QueryResult.Rows[DataQuery.QueryResult.Rows.Count - 1].ItemArray[14])}_{(long)(DataQuery.QueryResult.Rows[DataQuery.QueryResult.Rows.Count - 1].ItemArray[0])}_{k + 1}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
+                            FileStream fs = new FileStream($"{ImageInfo.channelFilesPath}{(Convert.ToUInt64(DataQuery.QueryResult.Rows[DataQuery.QueryResult.Rows.Count - 1].ItemArray[2])).ToString("D10")}_{(Convert.ToUInt64(DataQuery.QueryResult.Rows[DataQuery.QueryResult.Rows.Count - 1].ItemArray[17])).ToString("D10")}_{k + 1}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
                             fs.Read(buf_file, 0, 512 * 160 * 2);
                             Parallel.For(0, 160, i =>
                             {
@@ -487,7 +486,7 @@ namespace Spectra
                     {
                         Parallel.For(0, DataQuery.QueryResult.Rows.Count, (i) =>
                         {
-                            FileStream fs = new FileStream($"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\raw\\{(long)(DataQuery.QueryResult.Rows[i].ItemArray[14])}_{(long)(DataQuery.QueryResult.Rows[DataQuery.QueryResult.Rows.Count - 1 - i].ItemArray[0])}_4.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
+                            FileStream fs = new FileStream($"{ImageInfo.channelFilesPath}{(Convert.ToUInt64(DataQuery.QueryResult.Rows[DataQuery.QueryResult.Rows.Count - 1 - i].ItemArray[2])).ToString("D10")}_{(Convert.ToUInt64(DataQuery.QueryResult.Rows[DataQuery.QueryResult.Rows.Count - 1 - i].ItemArray[17])).ToString("D10")}_4.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
                             byte[] buf_temp = new byte[512 * 160 * 2];
                             fs.Read(buf_temp, 0, 512 * 160 * 2);
                             Parallel.For(0, 160, j =>
@@ -519,7 +518,7 @@ namespace Spectra
                     try
                     {
                         Parallel.For(0, DataQuery.QueryResult.Rows.Count, (i) => {
-                            FileStream fs = new FileStream($"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\raw\\{(long)(DataQuery.QueryResult.Rows[i].ItemArray[14])}_{(long)(DataQuery.QueryResult.Rows[i].ItemArray[0])}_1.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
+                            FileStream fs = new FileStream($"{ImageInfo.channelFilesPath}{(Convert.ToUInt64(DataQuery.QueryResult.Rows[i].ItemArray[2])).ToString("D10")}_{(Convert.ToUInt64(DataQuery.QueryResult.Rows[i].ItemArray[17])).ToString("D10")}_1.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
                             byte[] buf_temp = new byte[512 * 160 * 2];
                             fs.Read(buf_temp, 0, 512 * 160 * 2);
                             Parallel.For(0, 160, j => {

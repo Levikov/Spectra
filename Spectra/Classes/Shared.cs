@@ -133,6 +133,7 @@ namespace Spectra
 
         public static DataTable dtImgInfo;
         public static string[] strFileName;
+        public static string channelFilesPath = Environment.CurrentDirectory + "\\channelFiles\\";
         public static string strFilesPath = Environment.CurrentDirectory + "\\showFiles\\";
 
         public static int minFrm;
