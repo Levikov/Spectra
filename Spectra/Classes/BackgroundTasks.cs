@@ -587,7 +587,7 @@ namespace Spectra
                     command = $"SELECT * FROM AuxData WHERE Chanel=1";
                 if ((bool)isChecked2)
                 {
-                    command += " AND Lat>" + (coord_DR.Lat.ToString()) + " AND Lat<" + coord_TL.Lat.ToString() + " AND Lon>" + (coord_TL.Lon.ToString()) + " AND Lon<" + coord_DR.Lon.ToString();
+                    command += " AND Lat>=" + (coord_DR.Lat.ToString()) + " AND Lat<=" + coord_TL.Lat.ToString() + " AND Lon>=" + (coord_TL.Lon.ToString()) + " AND Lon<=" + coord_DR.Lon.ToString();
                 }
                 if ((bool)isChecked1)
                 {
@@ -596,11 +596,11 @@ namespace Spectra
                     DateTime T0 = new DateTime(2010, 12, 1, 12, 0, 0);
                     TimeSpan ts_Start = selectedStartDate.Subtract(T0);
                     TimeSpan ts_End = selectedEndDate.Subtract(T0);
-                    command += " AND GST>" + (ts_Start.TotalSeconds.ToString()) + " AND GST<" + ts_End.TotalSeconds.ToString();
+                    command += " AND GST>=" + (ts_Start.TotalSeconds.ToString()) + " AND GST<=" + ts_End.TotalSeconds.ToString();
                 }
                 if ((bool)isChecked3)
                 {
-                    command += " AND FrameId>" + start_FrmCnt.ToString() + " AND FrameId<" + end_FrmCnt.ToString();
+                    command += " AND FrameId>=" + start_FrmCnt.ToString() + " AND FrameId<=" + end_FrmCnt.ToString();
                 }
                 
                 SQLiteDatabase db = new SQLiteDatabase(Variables.dbPath);

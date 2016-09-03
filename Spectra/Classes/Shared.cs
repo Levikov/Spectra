@@ -111,6 +111,8 @@ namespace Spectra
 
     public class ModelShowInfo
     { 
+        [DllImport("DLL\\DataOperation.dll", EntryPoint = "Split_Chanel")]
+        static extern void Split_Chanel(string path, string outpath, int sum, string[] file);
         public static int WindowsCnt = 0;               //应用样式的窗口数量
         public static DataTable dtModelList;            //应用样式列表
         public static DataTable dtWinShowInfo;          //应用样式细则
@@ -118,7 +120,20 @@ namespace Spectra
         public static DateTime Time_End = DateTime.Now;
         public static Coord Coord_TL = new Coord(0, 0); //左上角坐标
         public static Coord Coord_DR = new Coord(0, 0); //右下角坐标
-        public static string md5;
+        public static int imgWidth=0;                   //像宽(行数)
+        public static DataTable dtImgInfo;              //应用样式细则
+
+        public static int MakeImage()
+        {
+            if (imgWidth == 0)
+                return 0;
+            //512拼2048*N图
+            string[] strFileName = new string[imgWidth];
+            for (int i = 0; i < imgWidth; i++)
+                strFileName[i] = $"{(Convert.ToUInt32(dtImgInfo.Rows[i][2])).ToString("D10")}_{(Convert.ToUInt32(dtImgInfo.Rows[i][17])).ToString("D10")}_";
+            Split_Chanel($"{Environment.CurrentDirectory}\\channelFiles\\", $"{Environment.CurrentDirectory}\\showFiles\\", imgWidth, strFileName);
+            return 1;
+        }
     }
 
     public class ImageInfo : DependencyObject

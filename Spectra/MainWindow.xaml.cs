@@ -229,6 +229,7 @@ namespace Spectra
                         SQLiteFunc.ExcuteSQL("delete from FileDetails where MD5='" + sel.Row[5] + "'");
                         SQLiteFunc.ExcuteSQL("delete from FileDetails_dec where MD5='" + sel.Row[5] + "'");
                         SQLiteFunc.ExcuteSQL("delete from FileErrors where MD5='" + sel.Row[5] + "'");
+                        SQLiteFunc.ExcuteSQL("delete from AuxData where MD5='" + sel.Row[5] + "'");
                         dataGrid_srcFile.ItemsSource = SQLiteFunc.SelectDTSQL("SELECT * from FileDetails").DefaultView;
                     }
                     if (System.Windows.MessageBox.Show("是否同时删除缓存文件?", "提示", MessageBoxButton.OKCancel, MessageBoxImage.Warning) == MessageBoxResult.OK)
@@ -506,22 +507,21 @@ namespace Spectra
                     ModelShowInfo.dtWinShowInfo = SQLiteFunc.SelectDTSQL("SELECT 窗口数量,图像模式1,图像模式4,谷歌地图,三维立方体,图像地图模式,曲线模式 from Apply_Model where 名称='" + sel.Row[0] + "'");
                     txtModelName.Text = sel.Row[0].ToString();                                                                          /*名称*/
                     txtModelWinCnt.Text = Convert.ToString(sel.Row[1]);                                                                 /*窗口数量*/
-                    txtModelStartTime.Text = (sel.Row[2].ToString() == "") ? "" : Convert.ToDateTime(sel.Row[2]).ToString();            /*起始时间*/
-                    txtModelEndTime.Text = (sel.Row[3].ToString() == "") ? "" : Convert.ToDateTime(sel.Row[3]).ToString();              /*结束时间*/
-                    txtModelStartLon.Text = (sel.Row[4].ToString() == "") ? "" : sel.Row[4].ToString();                                 /*起始经度*/
-                    txtModelEndLon.Text = (sel.Row[5].ToString() == "") ? "" : sel.Row[5].ToString();                                   /*结束经度*/
-                    txtModelStartLat.Text = (sel.Row[6].ToString() == "") ? "" : sel.Row[6].ToString();                                 /*起始纬度*/
-                    txtModelEndLat.Text = (sel.Row[7].ToString() == "") ? "" : sel.Row[7].ToString();                                   /*结束纬度*/
-                    cbModelImage1.IsChecked = (sel.Row[8].ToString() == "True");                                                        /*图像模式1*/
-                    cbModelImage4.IsChecked = (sel.Row[9].ToString() == "True");                                                        /*图像模式4*/
-                    cbModelMap.IsChecked = (sel.Row[10].ToString() == "True");                                                          /*谷歌地图*/
-                    cbModel3D.IsChecked = (sel.Row[11].ToString() == "True");                                                           /*三维立方体*/
-                    cbModelImageMap.IsChecked = (sel.Row[12].ToString() == "True");                                                     /*图像/地图模式*/
-                    cbModelCurve.IsChecked = (sel.Row[13].ToString() != "False");                                                       /*曲线模式*/
-                    rbModelCurve1.IsChecked = (sel.Row[13].ToString() != "模式4");                                                      /*曲线模式*/
-                    rbModelCurve4.IsChecked = (sel.Row[13].ToString() == "模式4");                                                      /*曲线模式*/
-                    txtModelRemark.Text = sel.Row[14].ToString();                                                                       /*备注*/
-                    ModelShowInfo.md5 = sel.Row[15].ToString();                                                                         /*MD5*/
+                    txtModelStartTime.Text = (sel.Row[3].ToString() == "") ? "" : Convert.ToDateTime(sel.Row[3]).ToString("yyyy-MM-dd HH:mm:ss");            /*起始时间*/
+                    txtModelEndTime.Text = (sel.Row[4].ToString() == "") ? "" : Convert.ToDateTime(sel.Row[4]).ToString("yyyy-MM-dd HH:mm:ss");              /*结束时间*/
+                    txtModelStartLon.Text = (sel.Row[5].ToString() == "") ? "" : sel.Row[5].ToString();                                 /*起始经度*/
+                    txtModelEndLon.Text = (sel.Row[6].ToString() == "") ? "" : sel.Row[6].ToString();                                   /*结束经度*/
+                    txtModelStartLat.Text = (sel.Row[7].ToString() == "") ? "" : sel.Row[7].ToString();                                 /*起始纬度*/
+                    txtModelEndLat.Text = (sel.Row[8].ToString() == "") ? "" : sel.Row[8].ToString();                                   /*结束纬度*/
+                    cbModelImage1.IsChecked = (sel.Row[9].ToString() == "True");                                                        /*图像模式1*/
+                    cbModelImage4.IsChecked = (sel.Row[10].ToString() == "True");                                                        /*图像模式4*/
+                    cbModelMap.IsChecked = (sel.Row[11].ToString() == "True");                                                          /*谷歌地图*/
+                    cbModel3D.IsChecked = (sel.Row[12].ToString() == "True");                                                           /*三维立方体*/
+                    cbModelImageMap.IsChecked = (sel.Row[13].ToString() == "True");                                                     /*图像/地图模式*/
+                    cbModelCurve.IsChecked = (sel.Row[14].ToString() != "False");                                                       /*曲线模式*/
+                    rbModelCurve1.IsChecked = (sel.Row[14].ToString() != "模式4");                                                      /*曲线模式*/
+                    rbModelCurve4.IsChecked = (sel.Row[14].ToString() == "模式4");                                                      /*曲线模式*/
+                    txtModelRemark.Text = sel.Row[15].ToString();                                                                       /*备注*/
 
                     ModelShowInfo.Time_Start = Convert.ToDateTime(txtModelStartTime.Text);
                     ModelShowInfo.Time_End = Convert.ToDateTime(txtModelEndTime.Text);
@@ -529,6 +529,7 @@ namespace Spectra
                     ModelShowInfo.Coord_TL.Lat = Convert.ToDouble(txtModelStartLat.Text);
                     ModelShowInfo.Coord_DR.Lon = Convert.ToDouble(txtModelEndLon.Text);
                     ModelShowInfo.Coord_DR.Lat = Convert.ToDouble(txtModelEndLat.Text);
+                    ModelShowInfo.imgWidth = Convert.ToInt32(sel.Row[2]);
                 }
                 else
                 {
@@ -541,8 +542,18 @@ namespace Spectra
                 System.Windows.MessageBox.Show(ex.ToString());
             }
         }
+        /*取当前图像信息*/
+        private void btnModelGetCurImg_Click(object sender, RoutedEventArgs e)
+        {
+            txtModelStartTime.Text = ImageInfo.startTime.ToString("yyyy-MM-dd HH:mm:ss");
+            txtModelEndTime.Text = ImageInfo.endTime.ToString("yyyy-MM-dd HH:mm:ss");
+            txtModelStartLat.Text = ImageInfo.startCoord.Lat.ToString();
+            txtModelStartLon.Text = ImageInfo.startCoord.Lon.ToString();
+            txtModelEndLat.Text = ImageInfo.endCoord.Lat.ToString();
+            txtModelEndLon.Text = ImageInfo.endCoord.Lon.ToString();
+        }
         /*设置数据*/
-        private void btnModelSetData_Click(object sender, RoutedEventArgs e)
+        private async void btnModelSetData_Click(object sender, RoutedEventArgs e)
         {
             try
             { 
@@ -552,15 +563,17 @@ namespace Spectra
                 ModelShowInfo.Coord_TL.Lat = Convert.ToDouble(txtModelStartLat.Text);
                 ModelShowInfo.Coord_DR.Lon = Convert.ToDouble(txtModelEndLon.Text);
                 ModelShowInfo.Coord_DR.Lat = Convert.ToDouble(txtModelEndLat.Text);
+                DataTable dt = await DataProc.QueryResult(null, ModelShowInfo.Time_Start != ModelShowInfo.Time_End, ModelShowInfo.Coord_TL.Lon != ModelShowInfo.Coord_DR.Lon && ModelShowInfo.Coord_TL.Lat != ModelShowInfo.Coord_DR.Lat, false, ModelShowInfo.Time_Start, ModelShowInfo.Time_End, 0, 0, ModelShowInfo.Coord_TL, ModelShowInfo.Coord_DR);
+                ModelShowInfo.imgWidth = dt.Rows.Count;
                 string sql = "select * from Apply_Model where 名称='" + txtModelName.Text + "'";
                 DataTable dtModel = SQLiteFunc.SelectDTSQL(sql);
                 if (dtModel.Rows.Count == 0)
                 {
-                    SQLiteFunc.ExcuteSQL("insert into Apply_Model (名称,起始时间,结束时间,起始经度,结束经度,起始纬度,结束纬度,备注,MD5) values ('?','?','?',?,?,?,?,'?','?')", txtModelName.Text, ModelShowInfo.Time_Start.ToString("yyyy-MM-dd HH:mm:ss"), ModelShowInfo.Time_End.ToString("yyyy-MM-dd HH:mm:ss"), 0, 0, 0, 0, txtModelRemark.Text,FileInfo.md5);
+                    SQLiteFunc.ExcuteSQL("insert into Apply_Model (图像帧数,名称,起始时间,结束时间,起始经度,结束经度,起始纬度,结束纬度,备注) values (?,'?','?','?',?,?,?,?,'?')",ModelShowInfo.imgWidth, txtModelName.Text, ModelShowInfo.Time_Start.ToString("yyyy-MM-dd HH:mm:ss"), ModelShowInfo.Time_End.ToString("yyyy-MM-dd HH:mm:ss"), 0, 0, 0, 0, txtModelRemark.Text);
                 }
                 else
                 {
-                    SQLiteFunc.ExcuteSQL("update Apply_Model set 起始时间='?',结束时间='?',起始经度=?,结束经度=?,起始纬度=?,结束纬度=?,备注='?',MD5='?' where 名称='?'", ModelShowInfo.Time_Start.ToString("yyyy-MM-dd HH:mm:ss"), ModelShowInfo.Time_End.ToString("yyyy-MM-dd HH:mm:ss"), ModelShowInfo.Coord_TL.Lon, ModelShowInfo.Coord_TL.Lat, ModelShowInfo.Coord_DR.Lon, ModelShowInfo.Coord_DR.Lat, txtModelRemark.Text,FileInfo.md5, txtModelName.Text);
+                    SQLiteFunc.ExcuteSQL("update Apply_Model set 图像帧数=?,起始时间='?',结束时间='?',起始经度=?,结束经度=?,起始纬度=?,结束纬度=?,备注='?' where 名称='?'",ModelShowInfo.imgWidth, ModelShowInfo.Time_Start.ToString("yyyy-MM-dd HH:mm:ss"), ModelShowInfo.Time_End.ToString("yyyy-MM-dd HH:mm:ss"), ModelShowInfo.Coord_TL.Lon, ModelShowInfo.Coord_DR.Lon, ModelShowInfo.Coord_TL.Lat, ModelShowInfo.Coord_DR.Lat, txtModelRemark.Text, txtModelName.Text);
                  }
                 getCurApplyModel();
             }
@@ -638,12 +651,32 @@ namespace Spectra
                 System.Windows.MessageBox.Show(ex.ToString());
             }
         }
+        /*准备应用图像*/
+        private async void btnModelMakeImage_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                ModelShowInfo.dtImgInfo = await DataProc.QueryResult(null, ModelShowInfo.Time_Start != ModelShowInfo.Time_End, ModelShowInfo.Coord_TL.Lon != ModelShowInfo.Coord_DR.Lon && ModelShowInfo.Coord_TL.Lat != ModelShowInfo.Coord_DR.Lat, false, ModelShowInfo.Time_Start, ModelShowInfo.Time_End, 0, 0, ModelShowInfo.Coord_TL, ModelShowInfo.Coord_DR);
+                if (ModelShowInfo.imgWidth != ModelShowInfo.dtImgInfo.Rows.Count)
+                {
+                    ModelShowInfo.imgWidth = ModelShowInfo.dtImgInfo.Rows.Count;
+                    SQLiteFunc.ExcuteSQL("update Apply_Model set 图像帧数=? where 名称='?'", ModelShowInfo.imgWidth, txtModelName.Text);
+                }
+                getCurApplyModel();
+                ModelShowInfo.MakeImage();
+                System.Windows.MessageBox.Show("OK");
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(ex.ToString());
+            }
+        }
         /*显示样式*/
         private async void btnModelShow_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                DataTable dt = await DataProc.QueryResult(ModelShowInfo.md5,ModelShowInfo.Time_Start != ModelShowInfo.Time_End, ModelShowInfo.Coord_TL.Lon != ModelShowInfo.Coord_DR.Lon && ModelShowInfo.Coord_TL.Lat != ModelShowInfo.Coord_DR.Lat, false, ModelShowInfo.Time_Start, ModelShowInfo.Time_End, 0, 0, ModelShowInfo.Coord_TL, ModelShowInfo.Coord_DR);
+                DataTable dt = await DataProc.QueryResult(null,ModelShowInfo.Time_Start != ModelShowInfo.Time_End, ModelShowInfo.Coord_TL.Lon != ModelShowInfo.Coord_DR.Lon && ModelShowInfo.Coord_TL.Lat != ModelShowInfo.Coord_DR.Lat, false, ModelShowInfo.Time_Start, ModelShowInfo.Time_End, 0, 0, ModelShowInfo.Coord_TL, ModelShowInfo.Coord_DR);
                 dataGrid_Result.ItemsSource = dt.DefaultView;
                 dataGrid_SatePose.ItemsSource = dt.DefaultView;
                 DataQuery.QueryResult = dt;
