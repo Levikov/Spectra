@@ -15,7 +15,7 @@
 
     <Style TargetType="DataGridColumnHeader">
         <Setter Property="SnapsToDevicePixels" Value="True" />
-        <Setter Property="MinWidth" Value="150" />
+        <Setter Property="MinWidth" Value="100" />
         <Setter Property="MinHeight" Value="33" />
         <Setter Property="Foreground" Value="Black" />
         <Setter Property="FontSize" Value="17" />

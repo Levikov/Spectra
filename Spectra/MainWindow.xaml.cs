@@ -28,6 +28,7 @@ namespace Spectra
         {
             getDefaultShow();
             getApplyModel();
+            getBandWave();
         }
         /*拖动界面*/
         private void WindowMain_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -364,6 +365,42 @@ namespace Spectra
         #endregion
 
         #region 光谱显示
+        //取一行谱段与波长的对应关系存储至Band_Wave表(不用该函数)
+        private void setBandWave()
+        {
+            DataTable dt1 = SQLiteFunc.SelectDTSQL("select * from SpectrumMap where SpaN=1");
+            SQLiteFunc.SelectDTSQL("delete from Band_Wave");
+            for (int i = 0; i < 160; i++)
+            {
+                if (Convert.ToDouble(dt1.Rows[0][i + 1]) < 400)
+                    SQLiteFunc.ExcuteSQL("insert into Band_Wave (谱段,波长,光谱色) values (?,?,'紫外')", i + 1, Convert.ToDouble(dt1.Rows[0][i + 1]));
+                else if (Convert.ToDouble(dt1.Rows[0][i + 1]) < 450)
+                    SQLiteFunc.ExcuteSQL("insert into Band_Wave (谱段,波长,光谱色) values (?,?,'紫')", i + 1, Convert.ToDouble(dt1.Rows[0][i + 1]));
+                else if (Convert.ToDouble(dt1.Rows[0][i + 1]) < 480)
+                    SQLiteFunc.ExcuteSQL("insert into Band_Wave (谱段,波长,光谱色) values (?,?,'蓝')", i + 1, Convert.ToDouble(dt1.Rows[0][i + 1]));
+                else if (Convert.ToDouble(dt1.Rows[0][i + 1]) < 490)
+                    SQLiteFunc.ExcuteSQL("insert into Band_Wave (谱段,波长,光谱色) values (?,?,'绿蓝')", i + 1, Convert.ToDouble(dt1.Rows[0][i + 1]));
+                else if (Convert.ToDouble(dt1.Rows[0][i + 1]) < 500)
+                    SQLiteFunc.ExcuteSQL("insert into Band_Wave (谱段,波长,光谱色) values (?,?,'蓝绿')", i + 1, Convert.ToDouble(dt1.Rows[0][i + 1]));
+                else if (Convert.ToDouble(dt1.Rows[0][i + 1]) < 560)
+                    SQLiteFunc.ExcuteSQL("insert into Band_Wave (谱段,波长,光谱色) values (?,?,'绿')", i + 1, Convert.ToDouble(dt1.Rows[0][i + 1]));
+                else if (Convert.ToDouble(dt1.Rows[0][i + 1]) < 580)
+                    SQLiteFunc.ExcuteSQL("insert into Band_Wave (谱段,波长,光谱色) values (?,?,'黄绿')", i + 1, Convert.ToDouble(dt1.Rows[0][i + 1]));
+                else if (Convert.ToDouble(dt1.Rows[0][i + 1]) < 610)
+                    SQLiteFunc.ExcuteSQL("insert into Band_Wave (谱段,波长,光谱色) values (?,?,'黄')", i + 1, Convert.ToDouble(dt1.Rows[0][i + 1]));
+                else if (Convert.ToDouble(dt1.Rows[0][i + 1]) < 650)
+                    SQLiteFunc.ExcuteSQL("insert into Band_Wave (谱段,波长,光谱色) values (?,?,'橙')", i + 1, Convert.ToDouble(dt1.Rows[0][i + 1]));
+                else if (Convert.ToDouble(dt1.Rows[0][i + 1]) < 760)
+                    SQLiteFunc.ExcuteSQL("insert into Band_Wave (谱段,波长,光谱色) values (?,?,'红')", i + 1, Convert.ToDouble(dt1.Rows[0][i + 1]));
+                else if (Convert.ToDouble(dt1.Rows[0][i + 1]) < 1500)
+                    SQLiteFunc.ExcuteSQL("insert into Band_Wave (谱段,波长,光谱色) values (?,?,'近红外')", i + 1, Convert.ToDouble(dt1.Rows[0][i + 1]));
+            }
+        }
+        /*获得谱段-波长对应关系刷新DataGrid*/
+        private void getBandWave()
+        { 
+            dataGrid_BandWave.ItemsSource = SQLiteFunc.SelectDTSQL("select * from Band_Wave order by 谱段").DefaultView;
+        }
         /*显示单张图像*/
         private void btnShowSpeImg_Click(object sender, RoutedEventArgs e)
         {
