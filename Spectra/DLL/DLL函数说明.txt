@@ -1,11 +1,20 @@
-﻿1.	void Split_Channel(string path,string outpath,int sum,string[] file);
+﻿1.	int Split_Channel(string path,string outpath,int sum,string[] file);
 	功能：将path和file[]指定的文件拼成160张单谱段图像、1张固定谱段合成的真彩图像、4张用于三维立方体显示的图像(均在同一路径下，文件名自定义)
 	参数---path:通道文件存储的路径(含\)
 	参数---outpath:要输出的文件路径(含\)
 	参数---sum:总共的帧数(4个通道对应同1帧)
 	参数---file[]:文件名列表(不含通道号和后缀)
-2.	void Make_PseudoColor(string path,string outpath,int[] band);
+	返回值:1代表正确运行完成；-1代表运行出错。
+2.	int Make_PseudoColor(string path,string outpath,int[] band);
 	功能：将path和band[]指定的3个文件生成伪彩图
 	参数---path:160个谱段图像存储的路径(含\)
 	参数---outpath:要输出的文件路径(含\)
 	参数---band[]:该数组固定为3,分别代表3个谱段(1~160)
+	返回值:1代表正确运行完成；-1代表运行出错。
+3.	int Save_Files(string path,string outpath,int startFrm,int endFrm);
+	功能：用于另存储功能，将path中160个图像文件另存储到outpath路径下，每个谱段图像裁剪为startFrm至endFrm的数据
+	参数---path:160个谱段图像存储的路径(含\)
+	参数---outpath:要输出的文件路径(含\)
+	参数---startFrm:开始的帧号(行号)
+	参数---endFrm:结束的帧号(行号)
+	返回值:1代表正确运行完成；-1代表运行出错。
