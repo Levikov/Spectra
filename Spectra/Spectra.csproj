@@ -369,6 +369,7 @@
     <Content Include="DLL\DataOperation.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Resource Include="DLL\DLL函数说明.txt" />
     <Content Include="DLL\DynamicDataDisplay.dll" />
     <Content Include="FreeImage.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
