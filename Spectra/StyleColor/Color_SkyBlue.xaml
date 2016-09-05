@@ -27,4 +27,7 @@
     <!--DataGrid-->
     <SolidColorBrush x:Key="DgvColHeader" Color="#FFD1F0FF"/>
     <SolidColorBrush x:Key="DgvRowMove" Color="LightGray"/>
+    <!--DataGrid-->
+    <SolidColorBrush x:Key="WinViewFore" Color="#FF3CFF03"/>
+    <SolidColorBrush x:Key="WinViewBack" Color="Gray"/>
 </ResourceDictionary>

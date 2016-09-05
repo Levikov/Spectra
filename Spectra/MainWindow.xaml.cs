@@ -401,44 +401,38 @@ namespace Spectra
         { 
             dataGrid_BandWave.ItemsSource = SQLiteFunc.SelectDTSQL("select * from Band_Wave order by 谱段").DefaultView;
         }
-        /*显示单张图像*/
+        /*显示单谱段图像*/
         private void btnShowSpeImg_Click(object sender, RoutedEventArgs e)
         {
-            if (App.global_Win_SpecImg == null)
-            {
-                App.global_Win_SpecImg = new MultiFuncWindow();
-                App.global_Win_SpecImg.DisplayMode = GridMode.One;
-            }
-            if (!App.global_Win_SpecImg.isShow)
-                App.global_Win_SpecImg.ScreenShow(Screen.AllScreens, 0, "光谱图像");
-            App.global_Win_SpecImg.Refresh(ImageInfo.strFilesPath, 0, WinFunc.Image);
+            MultiFuncWindow w = new MultiFuncWindow();
+            w = (MultiFuncWindow)App.global_Windows[0];
+            w.DisplayMode = GridMode.One;
+            if (!w.isShow)
+                w.ScreenShow(Screen.AllScreens, 0, "单谱段图像");
+            w.Refresh(ImageInfo.strFilesPath, 0, WinFunc.Image);
         }
-        /*显示光谱立方体*/
-        private void btnShow3D_Click(object sender, RoutedEventArgs e)
-        {
-            if (App.global_Win_3D == null)
-            {
-                App.global_Win_3D = new MultiFuncWindow();
-                App.global_Win_3D.DisplayMode = GridMode.One;
-            }
-            if (!App.global_Win_3D.isShow)
-                App.global_Win_3D.ScreenShow(Screen.AllScreens, 0, "光谱立方体");
-            App.global_Win_3D.Refresh(ImageInfo.strFilesPath, 0, WinFunc.Cube);
-        }
-        /*显示典型谱段对比*/
+        /*显示典型谱段图像对比*/
         private void btnShowImgCompare_Click(object sender, RoutedEventArgs e)
         {
-            if (App.global_Win_ImgCompare == null)
-            {
-                App.global_Win_ImgCompare = new MultiFuncWindow();
-                App.global_Win_ImgCompare.DisplayMode = GridMode.Four;
-            }
-            if (!App.global_Win_ImgCompare.isShow)
-                App.global_Win_ImgCompare.ScreenShow(Screen.AllScreens, 0, "典型谱段图像对比");
-            App.global_Win_ImgCompare.Refresh(ImageInfo.strFilesPath, 0, WinFunc.Image);
-            App.global_Win_ImgCompare.Refresh(ImageInfo.strFilesPath, 1, WinFunc.Image);
-            App.global_Win_ImgCompare.Refresh(ImageInfo.strFilesPath, 2, WinFunc.Image);
-            App.global_Win_ImgCompare.Refresh(ImageInfo.strFilesPath, 3, WinFunc.Image);
+            MultiFuncWindow w = new MultiFuncWindow();
+            w = (MultiFuncWindow)App.global_Windows[1];
+            w.DisplayMode = GridMode.Four;
+            if (!w.isShow)
+                w.ScreenShow(Screen.AllScreens, 0, "典型谱段图像对比");
+            w.Refresh(ImageInfo.strFilesPath, 0, WinFunc.Image);
+            w.Refresh(ImageInfo.strFilesPath, 1, WinFunc.Image);
+            w.Refresh(ImageInfo.strFilesPath, 2, WinFunc.Image);
+            w.Refresh(ImageInfo.strFilesPath, 3, WinFunc.Image);
+        }
+        /*显示光谱三维立方体*/
+        private void btnShow3D_Click(object sender, RoutedEventArgs e)
+        {
+            MultiFuncWindow w = new MultiFuncWindow();
+            w = (MultiFuncWindow)App.global_Windows[3];
+            w.DisplayMode = GridMode.One;
+            if (!w.isShow)
+                w.ScreenShow(Screen.AllScreens, 0, "光谱三维立方体");
+            w.Refresh(ImageInfo.strFilesPath, 0, WinFunc.Cube);
         }
         /*设置对比图像谱段*/
         private void btnCompareSet_Click(object sender, RoutedEventArgs e)
@@ -446,13 +440,13 @@ namespace Spectra
             try
             {
                 if (ckb1sub.IsChecked == true)
-                    ((Ctrl_ImageView)(App.global_Win_ImgCompare.UserControls[0])).Refresh(Convert.ToUInt16(txtCompareR.Text), ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
+                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[1]).UserControls[0]).Refresh(Convert.ToUInt16(txtCompareR.Text), ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
                 if (ckb2sub.IsChecked == true)
-                    ((Ctrl_ImageView)(App.global_Win_ImgCompare.UserControls[1])).Refresh(Convert.ToUInt16(txtCompareGray2.Text), ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
+                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[1]).UserControls[1]).Refresh(Convert.ToUInt16(txtCompareGray2.Text), ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
                 if (ckb3sub.IsChecked == true)
-                    ((Ctrl_ImageView)(App.global_Win_ImgCompare.UserControls[2])).Refresh(Convert.ToUInt16(txtCompareGray3.Text), ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
+                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[1]).UserControls[2]).Refresh(Convert.ToUInt16(txtCompareGray3.Text), ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
                 if (ckb4sub.IsChecked == true)
-                    ((Ctrl_ImageView)(App.global_Win_ImgCompare.UserControls[3])).Refresh(Convert.ToUInt16(txtCompareGray4.Text), ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
+                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[1]).UserControls[3]).Refresh(Convert.ToUInt16(txtCompareGray4.Text), ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
             }
             catch (Exception)
             {
@@ -734,84 +728,70 @@ namespace Spectra
         /*初始化显示窗体*/
         private void initWindows(string path, int winSum, DataTable dtShow)
         {
-            for (int i = 0; i < winSum; i++)
-                App.global_Windows.Add(new MultiFuncWindow());
-            MultiFuncWindow[] w = new MultiFuncWindow[winSum];
-            int cnt = 0;
+            MultiFuncWindow[] w = new MultiFuncWindow[6];
+            for (int i = 0; i < 6; i++)
+                w[i] = (MultiFuncWindow)App.global_Windows[i];
+
             if (dtShow.Rows[0][1].ToString() == "True")
             {
-                w[cnt] = (MultiFuncWindow)App.global_Windows[cnt];
-                w[cnt].DisplayMode = GridMode.One;
-                if (!w[cnt].isShow)
-                    w[cnt].ScreenShow(Screen.AllScreens, 0, cnt.ToString());
-                w[cnt].Refresh(path, 0, WinFunc.Image);
-                cnt++;
+                w[0].DisplayMode = GridMode.One;
+                if (!w[0].isShow)
+                    w[0].ScreenShow(Screen.AllScreens, 0, "单谱段图像");
+                w[0].Refresh(path, 0, WinFunc.Image);
             }
             if (dtShow.Rows[0][2].ToString() == "True")
             {
-                w[cnt] = (MultiFuncWindow)App.global_Windows[cnt];
-                w[cnt].DisplayMode = GridMode.Four;
-                if (!w[cnt].isShow)
-                    w[cnt].ScreenShow(Screen.AllScreens, 0, cnt.ToString());
-                w[cnt].Refresh(path, 0, WinFunc.Image);
-                w[cnt].Refresh(path, 1, WinFunc.Image);
-                w[cnt].Refresh(path, 2, WinFunc.Image);
-                w[cnt].Refresh(path, 3, WinFunc.Image);
-                cnt++;
+                w[1].DisplayMode = GridMode.Four;
+                if (!w[1].isShow)
+                    w[1].ScreenShow(Screen.AllScreens, 0, "典型谱段图像对比");
+                w[1].Refresh(path, 0, WinFunc.Image);
+                w[1].Refresh(path, 1, WinFunc.Image);
+                w[1].Refresh(path, 2, WinFunc.Image);
+                w[1].Refresh(path, 3, WinFunc.Image);
             }
             //谷歌地图
             if (dtShow.Rows[0][3].ToString() == "True")
             {
-                w[cnt] = (MultiFuncWindow)App.global_Windows[cnt];
-                w[cnt].DisplayMode = GridMode.One;
-                if (!w[cnt].isShow)
-                    w[cnt].ScreenShow(Screen.AllScreens, 0, cnt.ToString());
-                w[cnt].Refresh(path, 0, WinFunc.Map);
-                cnt++;
+                w[2].DisplayMode = GridMode.One;
+                if (!w[2].isShow)
+                    w[2].ScreenShow(Screen.AllScreens, 0, "谷歌地图");
+                w[2].Refresh(path, 0, WinFunc.Map);
             }
             //三维立方体
             if (dtShow.Rows[0][4].ToString() == "True")
             {
-                w[cnt] = (MultiFuncWindow)App.global_Windows[cnt];
-                w[cnt].DisplayMode = GridMode.One;
-                if (!w[cnt].isShow)
-                    w[cnt].ScreenShow(Screen.AllScreens, 0, cnt.ToString());
-                w[cnt].Refresh(path, 0, WinFunc.Cube);
-                cnt++;
+                w[3].DisplayMode = GridMode.One;
+                if (!w[3].isShow)
+                    w[3].ScreenShow(Screen.AllScreens, 0, "光谱三维立方体");
+                w[3].Refresh(path, 0, WinFunc.Cube);
             }
             //图像地图
             if (dtShow.Rows[0][5].ToString() == "True")
             {
-                w[cnt] = (MultiFuncWindow)App.global_Windows[cnt];
-                w[cnt].DisplayMode = GridMode.Two;
-                if (!w[cnt].isShow)
-                    w[cnt].ScreenShow(Screen.AllScreens, 0, cnt.ToString());
-                w[cnt].Refresh(path, 0, WinFunc.Image);
-                w[cnt].Refresh(path, 1, WinFunc.Map);
-                cnt++;
+                w[4].DisplayMode = GridMode.Two;
+                if (!w[4].isShow)
+                    w[4].ScreenShow(Screen.AllScreens, 0, "图像/地图");
+                w[4].Refresh(path, 0, WinFunc.Image);
+                w[4].Refresh(path, 1, WinFunc.Map);
             }
             //曲线模式1
             if (dtShow.Rows[0][6].ToString() == "模式1")
             {
-                w[cnt] = (MultiFuncWindow)App.global_Windows[cnt];
-                w[cnt].DisplayMode = GridMode.One;
-                if (!w[cnt].isShow)
-                    w[cnt].ScreenShow(Screen.AllScreens, 0, cnt.ToString());
-                w[cnt].Refresh(path, 0, WinFunc.Curve);
-                cnt++;
+                w[5].DisplayMode = GridMode.One;
+                if (!w[5].isShow)
+                    w[5].ScreenShow(Screen.AllScreens, 0, "曲线");
+                w[5].Refresh(path, 0, WinFunc.Curve);
             }
             //曲线模式4
             if (dtShow.Rows[0][6].ToString() == "模式4")
             {
-                w[cnt] = (MultiFuncWindow)App.global_Windows[cnt];
-                w[cnt].DisplayMode = GridMode.Four;
-                if (!w[cnt].isShow)
-                    w[cnt].ScreenShow(Screen.AllScreens, 0, cnt.ToString());
-                w[cnt].Refresh(path, 0, WinFunc.Curve);
-                w[cnt].Refresh(path, 1, WinFunc.Curve);
-                w[cnt].Refresh(path, 2, WinFunc.Curve);
-                w[cnt].Refresh(path, 3, WinFunc.Curve);
-                cnt++;
+                w[5].DisplayMode = GridMode.Four;
+                if (!w[5].isShow)
+                    w[5].ScreenShow(Screen.AllScreens, 0, "曲线");
+                w[5].Refresh(path, 0, WinFunc.Curve);
+                w[5].Refresh(path, 1, WinFunc.Curve);
+                w[5].Refresh(path, 2, WinFunc.Curve);
+                w[5].Refresh(path, 3, WinFunc.Curve);
             }
         }
         /*设置默认值*/
