@@ -146,6 +146,7 @@ namespace Spectra
         public static long import_id = 0;
         public static int noise_value = 0;
 
+        public static DataTable dtBandWave;
         public static DataTable dtImgInfo;
         public static string[] strFileName;
         public static string channelFilesPath = Environment.CurrentDirectory + "\\channelFiles\\";
@@ -265,6 +266,28 @@ namespace Spectra
             conn.Close();
 
             return 160;
+        }
+
+        //通过波长返回谱段
+        public static int getBand(double wave)
+        {
+            double min = 2000;
+            int index = 0;
+            for (int i = 0; i < dtBandWave.Rows.Count; i++)
+            {
+                if (Math.Abs(wave - Convert.ToDouble(dtBandWave.Rows[i][1])) < min)
+                {
+                    index = i;
+                    min = wave - Convert.ToDouble(dtBandWave.Rows[i][1]);
+                }
+            }
+            return Convert.ToInt32(dtBandWave.Rows[index][0]);
+        }
+
+        //通过谱段返回波长
+        public static double getWave(int band)
+        {
+            return Convert.ToDouble(dtBandWave.Rows[band-1][1]);
         }
     }
 }

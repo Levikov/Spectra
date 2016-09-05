@@ -29,12 +29,12 @@
                 <Button x:Name="btnMin" Content="—" Template="{DynamicResource ButtonMinMax}" Click="btnMin_Click"/>
             </StackPanel>
             <DockPanel Margin="0,40,0,0" MinHeight="50">
-                <RadioButton x:Name="btnTopA" Content="数据管理" Template="{DynamicResource ButtonIcon1st}" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch" Margin="20,0,0,0">
+                <RadioButton x:Name="btnTopA" Content="数据管理" Template="{DynamicResource ButtonIcon1st}" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch" Margin="20,0,0,0" IsChecked="True">
                     <RadioButton.Background>
                         <ImageBrush ImageSource="image/ICON/1.ico" Stretch="Uniform"/>
                     </RadioButton.Background>
                 </RadioButton>
-                <RadioButton x:Name="btnTopB" Content="光谱分析" Template="{DynamicResource ButtonIcon1st}" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch" Margin="20,0,0,0" IsChecked="True">
+                <RadioButton x:Name="btnTopB" Content="光谱分析" Template="{DynamicResource ButtonIcon1st}" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch" Margin="20,0,0,0">
                     <RadioButton.Background>
                         <ImageBrush ImageSource="image/ICON/2.ico" Stretch="Uniform"/>
                     </RadioButton.Background>
@@ -528,14 +528,14 @@
                                     <ColumnDefinition Width="1*"/>
                                 </Grid.ColumnDefinitions>
                                 <Label Content="R:" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                <TextBox Text="120" Grid.Column="1" Margin="5,0" Height="34" VerticalAlignment="Center" />
+                                <TextBox x:Name="txtSingleR" Text="120" Grid.Column="1" Margin="5,0" Height="34" VerticalAlignment="Center" />
                                 <Label Content="G:" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                <TextBox Text="80" Grid.Column="3" Margin="5,0" Height="34" VerticalAlignment="Center" />
+                                <TextBox x:Name="txtSingleG" Text="80" Grid.Column="3" Margin="5,0" Height="34" VerticalAlignment="Center" />
                                 <Label Content="B:" Grid.Column="4" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                <TextBox Text="40" Grid.Column="5" Margin="5,0" Height="34" VerticalAlignment="Center" />
+                                <TextBox x:Name="txtSingleB" Text="40" Grid.Column="5" Margin="5,0" Height="34" VerticalAlignment="Center" />
                             </Grid>
-                            <TextBox Grid.Row="2" Grid.Column="0" Text="120" Margin="10,0" VerticalAlignment="Center" IsEnabled="{Binding ElementName=rb2Single,Path=IsChecked}" Height="34"/>
-                            <Button Grid.Row="2" Grid.Column="1" Content="设置" MinWidth="100" MaxWidth="150" Template="{DynamicResource ButtonDefault}" Margin="10,0" Click="btnCompareSet_Click" VerticalAlignment="Center"/>
+                            <TextBox x:Name="txtSingleGray" Grid.Row="2" Grid.Column="0" Text="120" Margin="10,0" VerticalAlignment="Center" IsEnabled="{Binding ElementName=rb2Single,Path=IsChecked}" Height="34"/>
+                            <Button x:Name="btnSingleSet" Grid.Row="2" Grid.Column="1" Content="设置" Width="150" Template="{DynamicResource ButtonDefault}" Margin="10,0" Click="btnSingleSet_Click" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                         </Grid>
                     </Grid>
                 </GroupBox>
@@ -593,7 +593,7 @@
                             <TextBox x:Name="txtCompareGray2" Grid.Row="2" Grid.Column="0" Text="120" Margin="10,0" VerticalAlignment="Center" IsEnabled="{Binding ElementName=ckb2sub,Path=IsChecked}" Height="34"/>
                             <TextBox x:Name="txtCompareGray3" Grid.Row="3" Grid.Column="0" Text="80" Margin="10,0" VerticalAlignment="Center" IsEnabled="{Binding ElementName=ckb3sub,Path=IsChecked}" Height="34"/>
                             <TextBox x:Name="txtCompareGray4" Grid.Row="4" Grid.Column="0" Text="40" Margin="10,0" VerticalAlignment="Center" IsEnabled="{Binding ElementName=ckb4sub,Path=IsChecked}" Height="34"/>
-                            <Button x:Name="btnCompareSet" Grid.Row="4" Grid.Column="1" Content="设置" MinWidth="100" MaxWidth="150" Height="40" Template="{DynamicResource ButtonDefault}" Margin="10,0" Click="btnCompareSet_Click" VerticalAlignment="Center"/>
+                            <Button x:Name="btnCompareSet" Grid.Row="4" Grid.Column="1" Content="设置" Width="150" Height="40" Template="{DynamicResource ButtonDefault}" Margin="10,0" Click="btnCompareSet_Click" VerticalAlignment="Center"/>
                         </Grid>
                     </Grid>
                 </GroupBox>

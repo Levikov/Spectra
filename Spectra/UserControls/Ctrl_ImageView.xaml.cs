@@ -64,7 +64,7 @@ namespace Spectra
             bmp.Save(ms, System.Drawing.Imaging.ImageFormat.Bmp);
             ImgW = bmp.Width;
             ImgH = bmp.Height;
-
+            
             BitmapImage bmpSource = new BitmapImage();
             bmpSource.BeginInit();
             bmpSource.StreamSource = ms;
@@ -73,6 +73,7 @@ namespace Spectra
             
             SpecNum = band;
             Band.Text = $"{SpecNum}";
+            Wave.Text = ImageInfo.getWave(SpecNum).ToString("F0");
             this.Busy.isBusy = false;
         }
 
@@ -132,7 +133,6 @@ namespace Spectra
                 tb_3DCoord.Text = $"({Math.Floor(curXinImg)},{Math.Floor(curYinImg)},{SpecNum})";
                 Col.Text = $"{Math.Floor(curXinImg)}";
                 Row.Text = $"{Math.Floor(curYinImg)}";
-                Band.Text = $"{SpecNum}";
             }
         }
 

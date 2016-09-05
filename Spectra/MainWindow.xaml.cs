@@ -398,8 +398,9 @@ namespace Spectra
         }
         /*获得谱段-波长对应关系刷新DataGrid*/
         private void getBandWave()
-        { 
-            dataGrid_BandWave.ItemsSource = SQLiteFunc.SelectDTSQL("select * from Band_Wave order by 谱段").DefaultView;
+        {
+            ImageInfo.dtBandWave = SQLiteFunc.SelectDTSQL("select * from Band_Wave order by 谱段");
+            dataGrid_BandWave.ItemsSource = ImageInfo.dtBandWave.DefaultView;
         }
         /*显示单谱段图像*/
         private void btnShowSpeImg_Click(object sender, RoutedEventArgs e)
@@ -434,19 +435,87 @@ namespace Spectra
                 w.ScreenShow(Screen.AllScreens, 0, "光谱三维立方体");
             w.Refresh(ImageInfo.strFilesPath, 0, WinFunc.Cube);
         }
+        /*设置单谱段图像谱段*/
+        private void btnSingleSet_Click(object sender, RoutedEventArgs e)
+        {
+            int bandR, bandG, bandB,band;
+            try
+            { 
+                if (rb1Single.IsChecked == true)
+                {
+                    if (Convert.ToDouble(txtSingleR.Text) > 160)
+                        bandR = ImageInfo.getBand(Convert.ToDouble(txtSingleR.Text));
+                    else
+                        bandR = Convert.ToInt32(txtSingleR.Text);
+                    if (Convert.ToDouble(txtSingleG.Text) > 160)
+                        bandG = ImageInfo.getBand(Convert.ToDouble(txtSingleG.Text));
+                    else
+                        bandG = Convert.ToInt32(txtSingleG.Text);
+                    if (Convert.ToDouble(txtSingleB.Text) > 160)
+                        bandB = ImageInfo.getBand(Convert.ToDouble(txtSingleB.Text));
+                    else
+                        bandB = Convert.ToInt32(txtSingleB.Text);
+                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[0]).UserControls[0]).Refresh(bandR, ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
+                }
+                else
+                {
+                    if (Convert.ToDouble(txtSingleGray.Text) > 160)
+                        band = ImageInfo.getBand(Convert.ToDouble(txtSingleGray.Text));
+                    else
+                        band = Convert.ToInt32(txtSingleGray.Text);
+                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[0]).UserControls[0]).Refresh(band, ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
+                }
+            }
+            catch (Exception)
+            {
+                System.Windows.MessageBox.Show("窗体未初始化！", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
         /*设置对比图像谱段*/
         private void btnCompareSet_Click(object sender, RoutedEventArgs e)
         {
+            int bandR, bandG, bandB;
+            if (Convert.ToDouble(txtCompareR.Text) > 160)
+                bandR = ImageInfo.getBand(Convert.ToDouble(txtCompareR.Text));
+            else
+                bandR = Convert.ToInt32(txtCompareR.Text);
+            if (Convert.ToDouble(txtCompareG.Text) > 160)
+                bandG = ImageInfo.getBand(Convert.ToDouble(txtCompareG.Text));
+            else
+                bandG = Convert.ToInt32(txtCompareG.Text);
+            if (Convert.ToDouble(txtCompareB.Text) > 160)
+                bandB = ImageInfo.getBand(Convert.ToDouble(txtCompareB.Text));
+            else
+                bandB = Convert.ToInt32(txtCompareB.Text);
+            int band = 0;
             try
             {
                 if (ckb1sub.IsChecked == true)
-                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[1]).UserControls[0]).Refresh(Convert.ToUInt16(txtCompareR.Text), ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
+                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[1]).UserControls[0]).Refresh(bandR, ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
                 if (ckb2sub.IsChecked == true)
-                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[1]).UserControls[1]).Refresh(Convert.ToUInt16(txtCompareGray2.Text), ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
+                {
+                    if (Convert.ToDouble(txtCompareGray2.Text) > 160)
+                        band = ImageInfo.getBand(Convert.ToDouble(txtCompareGray2.Text));
+                    else
+                        band = Convert.ToInt32(txtCompareGray2.Text);
+                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[1]).UserControls[1]).Refresh(band, ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
+                }
                 if (ckb3sub.IsChecked == true)
-                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[1]).UserControls[2]).Refresh(Convert.ToUInt16(txtCompareGray3.Text), ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
+                {
+                    if (Convert.ToDouble(txtCompareGray3.Text) > 160)
+                        band = ImageInfo.getBand(Convert.ToDouble(txtCompareGray3.Text));
+                    else
+                        band = Convert.ToInt32(txtCompareGray3.Text);
+                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[1]).UserControls[2]).Refresh(band, ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
+                }
                 if (ckb4sub.IsChecked == true)
-                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[1]).UserControls[3]).Refresh(Convert.ToUInt16(txtCompareGray4.Text), ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
+                {
+                    if (Convert.ToDouble(txtCompareGray4.Text) > 160)
+                        band = ImageInfo.getBand(Convert.ToDouble(txtCompareGray4.Text));
+                    else
+                        band = Convert.ToInt32(txtCompareGray4.Text);
+                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[1]).UserControls[3]).Refresh(band, ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
+                }
             }
             catch (Exception)
             {
