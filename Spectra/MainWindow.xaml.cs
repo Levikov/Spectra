@@ -368,72 +368,103 @@ namespace Spectra
         //取一行谱段与波长的对应关系存储至Band_Wave表(不用该函数)
         private void setBandWave()
         {
+            SQLiteFunc.ExcuteSQL("delete from Band_Wave");
             DataTable dt1 = SQLiteFunc.SelectDTSQL("select * from SpectrumMap where SpaN=1");
             SQLiteFunc.SelectDTSQL("delete from Band_Wave");
-            for (int i = 0; i < 160; i++)
+            for (int i = 159; i >= 0; i--)
             {
-                if (Convert.ToDouble(dt1.Rows[0][i + 1]) < 400)
-                    SQLiteFunc.ExcuteSQL("insert into Band_Wave (谱段,波长,光谱色) values (?,?,'紫外')", i + 1, Convert.ToDouble(dt1.Rows[0][i + 1]));
+                if (Convert.ToDouble(dt1.Rows[0][i + 1]) == 0)
+                    SQLiteFunc.ExcuteSQL("insert into Band_Wave (谱段,波长,光谱色) values (?,0,'-')", 160 - i);
+                else if (Convert.ToDouble(dt1.Rows[0][i + 1]) < 400)
+                    SQLiteFunc.ExcuteSQL("insert into Band_Wave (谱段,波长,光谱色) values (?,?,'紫外')", 160 - i, Convert.ToDouble(dt1.Rows[0][i + 1]));
                 else if (Convert.ToDouble(dt1.Rows[0][i + 1]) < 450)
-                    SQLiteFunc.ExcuteSQL("insert into Band_Wave (谱段,波长,光谱色) values (?,?,'紫')", i + 1, Convert.ToDouble(dt1.Rows[0][i + 1]));
+                    SQLiteFunc.ExcuteSQL("insert into Band_Wave (谱段,波长,光谱色) values (?,?,'紫')", 160 - i, Convert.ToDouble(dt1.Rows[0][i + 1]));
                 else if (Convert.ToDouble(dt1.Rows[0][i + 1]) < 480)
-                    SQLiteFunc.ExcuteSQL("insert into Band_Wave (谱段,波长,光谱色) values (?,?,'蓝')", i + 1, Convert.ToDouble(dt1.Rows[0][i + 1]));
+                    SQLiteFunc.ExcuteSQL("insert into Band_Wave (谱段,波长,光谱色) values (?,?,'蓝')", 160 - i, Convert.ToDouble(dt1.Rows[0][i + 1]));
                 else if (Convert.ToDouble(dt1.Rows[0][i + 1]) < 490)
-                    SQLiteFunc.ExcuteSQL("insert into Band_Wave (谱段,波长,光谱色) values (?,?,'绿蓝')", i + 1, Convert.ToDouble(dt1.Rows[0][i + 1]));
+                    SQLiteFunc.ExcuteSQL("insert into Band_Wave (谱段,波长,光谱色) values (?,?,'绿蓝')", 160 - i, Convert.ToDouble(dt1.Rows[0][i + 1]));
                 else if (Convert.ToDouble(dt1.Rows[0][i + 1]) < 500)
-                    SQLiteFunc.ExcuteSQL("insert into Band_Wave (谱段,波长,光谱色) values (?,?,'蓝绿')", i + 1, Convert.ToDouble(dt1.Rows[0][i + 1]));
+                    SQLiteFunc.ExcuteSQL("insert into Band_Wave (谱段,波长,光谱色) values (?,?,'蓝绿')", 160 - i, Convert.ToDouble(dt1.Rows[0][i + 1]));
                 else if (Convert.ToDouble(dt1.Rows[0][i + 1]) < 560)
-                    SQLiteFunc.ExcuteSQL("insert into Band_Wave (谱段,波长,光谱色) values (?,?,'绿')", i + 1, Convert.ToDouble(dt1.Rows[0][i + 1]));
+                    SQLiteFunc.ExcuteSQL("insert into Band_Wave (谱段,波长,光谱色) values (?,?,'绿')", 160 - i, Convert.ToDouble(dt1.Rows[0][i + 1]));
                 else if (Convert.ToDouble(dt1.Rows[0][i + 1]) < 580)
-                    SQLiteFunc.ExcuteSQL("insert into Band_Wave (谱段,波长,光谱色) values (?,?,'黄绿')", i + 1, Convert.ToDouble(dt1.Rows[0][i + 1]));
+                    SQLiteFunc.ExcuteSQL("insert into Band_Wave (谱段,波长,光谱色) values (?,?,'黄绿')", 160 - i, Convert.ToDouble(dt1.Rows[0][i + 1]));
                 else if (Convert.ToDouble(dt1.Rows[0][i + 1]) < 610)
-                    SQLiteFunc.ExcuteSQL("insert into Band_Wave (谱段,波长,光谱色) values (?,?,'黄')", i + 1, Convert.ToDouble(dt1.Rows[0][i + 1]));
+                    SQLiteFunc.ExcuteSQL("insert into Band_Wave (谱段,波长,光谱色) values (?,?,'黄')", 160 - i, Convert.ToDouble(dt1.Rows[0][i + 1]));
                 else if (Convert.ToDouble(dt1.Rows[0][i + 1]) < 650)
-                    SQLiteFunc.ExcuteSQL("insert into Band_Wave (谱段,波长,光谱色) values (?,?,'橙')", i + 1, Convert.ToDouble(dt1.Rows[0][i + 1]));
+                    SQLiteFunc.ExcuteSQL("insert into Band_Wave (谱段,波长,光谱色) values (?,?,'橙')", 160 - i, Convert.ToDouble(dt1.Rows[0][i + 1]));
                 else if (Convert.ToDouble(dt1.Rows[0][i + 1]) < 760)
-                    SQLiteFunc.ExcuteSQL("insert into Band_Wave (谱段,波长,光谱色) values (?,?,'红')", i + 1, Convert.ToDouble(dt1.Rows[0][i + 1]));
+                    SQLiteFunc.ExcuteSQL("insert into Band_Wave (谱段,波长,光谱色) values (?,?,'红')", 160 - i, Convert.ToDouble(dt1.Rows[0][i + 1]));
                 else if (Convert.ToDouble(dt1.Rows[0][i + 1]) < 1500)
-                    SQLiteFunc.ExcuteSQL("insert into Band_Wave (谱段,波长,光谱色) values (?,?,'近红外')", i + 1, Convert.ToDouble(dt1.Rows[0][i + 1]));
+                    SQLiteFunc.ExcuteSQL("insert into Band_Wave (谱段,波长,光谱色) values (?,?,'近红外')", 160 - i, Convert.ToDouble(dt1.Rows[0][i + 1]));
             }
         }
         /*获得谱段-波长对应关系刷新DataGrid*/
         private void getBandWave()
         {
-            ImageInfo.dtBandWave = SQLiteFunc.SelectDTSQL("select * from Band_Wave order by 谱段");
-            dataGrid_BandWave.ItemsSource = ImageInfo.dtBandWave.DefaultView;
+            try
+            { 
+                ImageInfo.dtBandWave = SQLiteFunc.SelectDTSQL("select * from Band_Wave order by 谱段");
+                dataGrid_BandWave.ItemsSource = ImageInfo.dtBandWave.DefaultView;
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(ex.ToString());
+            }
         }
         /*显示单谱段图像*/
         private void btnShowSpeImg_Click(object sender, RoutedEventArgs e)
         {
-            MultiFuncWindow w = new MultiFuncWindow();
-            w = (MultiFuncWindow)App.global_Windows[0];
-            w.DisplayMode = GridMode.One;
-            if (!w.isShow)
-                w.ScreenShow(Screen.AllScreens, 0, "单谱段图像");
-            w.Refresh(ImageInfo.strFilesPath, 0, WinFunc.Image);
+            try
+            {
+                MultiFuncWindow w = new MultiFuncWindow();
+                w = (MultiFuncWindow)App.global_Windows[0];
+                w.DisplayMode = GridMode.One;
+                if (!w.isShow)
+                    w.ScreenShow(Screen.AllScreens, 0, "单谱段图像");
+                w.Refresh(ImageInfo.strFilesPath, 0, WinFunc.Image);
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(ex.ToString());
+            }
         }
         /*显示典型谱段图像对比*/
         private void btnShowImgCompare_Click(object sender, RoutedEventArgs e)
         {
-            MultiFuncWindow w = new MultiFuncWindow();
-            w = (MultiFuncWindow)App.global_Windows[1];
-            w.DisplayMode = GridMode.Four;
-            if (!w.isShow)
-                w.ScreenShow(Screen.AllScreens, 0, "典型谱段图像对比");
-            w.Refresh(ImageInfo.strFilesPath, 0, WinFunc.Image);
-            w.Refresh(ImageInfo.strFilesPath, 1, WinFunc.Image);
-            w.Refresh(ImageInfo.strFilesPath, 2, WinFunc.Image);
-            w.Refresh(ImageInfo.strFilesPath, 3, WinFunc.Image);
+            try
+            {
+                MultiFuncWindow w = new MultiFuncWindow();
+                w = (MultiFuncWindow)App.global_Windows[1];
+                w.DisplayMode = GridMode.Four;
+                if (!w.isShow)
+                    w.ScreenShow(Screen.AllScreens, 0, "典型谱段图像对比");
+                w.Refresh(ImageInfo.strFilesPath, 0, WinFunc.Image);
+                w.Refresh(ImageInfo.strFilesPath, 1, WinFunc.Image);
+                w.Refresh(ImageInfo.strFilesPath, 2, WinFunc.Image);
+                w.Refresh(ImageInfo.strFilesPath, 3, WinFunc.Image);
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(ex.ToString());
+            }
         }
         /*显示光谱三维立方体*/
         private void btnShow3D_Click(object sender, RoutedEventArgs e)
         {
-            MultiFuncWindow w = new MultiFuncWindow();
-            w = (MultiFuncWindow)App.global_Windows[3];
-            w.DisplayMode = GridMode.One;
-            if (!w.isShow)
-                w.ScreenShow(Screen.AllScreens, 0, "光谱三维立方体");
-            w.Refresh(ImageInfo.strFilesPath, 0, WinFunc.Cube);
+            try
+            {
+                MultiFuncWindow w = new MultiFuncWindow();
+                w = (MultiFuncWindow)App.global_Windows[3];
+                w.DisplayMode = GridMode.One;
+                if (!w.isShow)
+                    w.ScreenShow(Screen.AllScreens, 0, "光谱三维立方体");
+                w.Refresh(ImageInfo.strFilesPath, 0, WinFunc.Cube);
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(ex.ToString());
+            }
         }
         /*设置单谱段图像谱段*/
         private void btnSingleSet_Click(object sender, RoutedEventArgs e)
@@ -520,6 +551,46 @@ namespace Spectra
             catch (Exception)
             {
                 System.Windows.MessageBox.Show("窗体未初始化！", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+        /*设置曲线模式*/
+        private void rbChartMode_Checked(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                System.Windows.Controls.RadioButton rb = sender as System.Windows.Controls.RadioButton;
+
+                if (rb.Name == "rbChartMode1")
+                {
+                    ImageInfo.chartMode = true;
+                    ImageInfo.chartShowCnt = 0;
+                }
+                else if (rb.Name == "rbChartMode4")
+                {
+                    ImageInfo.chartMode = false;
+                    ImageInfo.chartShowCnt = 0;
+                }
+
+                if (((MultiFuncWindow)App.global_Windows[5]).UserControls[0] != null)
+                {
+                    if (ImageInfo.chartMode)
+                    {
+                        ((MultiFuncWindow)App.global_Windows[5]).DisplayMode = GridMode.One;
+                        ((MultiFuncWindow)App.global_Windows[5]).Refresh(null, 0, WinFunc.Curve);
+                    }
+                    else
+                    {
+                        ((MultiFuncWindow)App.global_Windows[5]).DisplayMode = GridMode.Four;
+                        ((MultiFuncWindow)App.global_Windows[5]).Refresh(null, 0, WinFunc.Curve);
+                        ((MultiFuncWindow)App.global_Windows[5]).Refresh(null, 1, WinFunc.Curve);
+                        ((MultiFuncWindow)App.global_Windows[5]).Refresh(null, 2, WinFunc.Curve);
+                        ((MultiFuncWindow)App.global_Windows[5]).Refresh(null, 3, WinFunc.Curve);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(ex.ToString());
             }
         }
         #endregion
@@ -850,6 +921,7 @@ namespace Spectra
                 if (!w[5].isShow)
                     w[5].ScreenShow(Screen.AllScreens, 0, "曲线");
                 w[5].Refresh(path, 0, WinFunc.Curve);
+                rbChartMode1.IsChecked = true;
             }
             //曲线模式4
             if (dtShow.Rows[0][6].ToString() == "模式4")
@@ -861,6 +933,7 @@ namespace Spectra
                 w[5].Refresh(path, 1, WinFunc.Curve);
                 w[5].Refresh(path, 2, WinFunc.Curve);
                 w[5].Refresh(path, 3, WinFunc.Curve);
+                rbChartMode4.IsChecked = true;
             }
         }
         /*设置默认值*/
@@ -921,23 +994,6 @@ namespace Spectra
             }
         }
         #endregion
-
-        private void btnMapUpdate_Click(object sender, RoutedEventArgs e)
-        {
-            string[] line = File.ReadAllLines(@"E:\Map\Amap.html");
-            switch (cmbMapType.SelectedIndex)
-            {
-                case 0:
-                    File.WriteAllText(@"E:\Map\Amap.html", File.ReadAllText(@"E:\Map\Amap.html").Replace(line[94], $"	  var strURL = \"D:/Amap/roadmap/\" + zoom + \"/\" + tile_x+ \"/\" + tile_y + \".png\";"));
-                    break;
-                case 1:
-                    File.WriteAllText(@"E:\Map\Amap.html", File.ReadAllText(@"E:\Map\Amap.html").Replace(line[94], $"	  var strURL = \"D:/Gmap/satellite/\" + zoom + \"/\" + tile_x+ \"/\" + tile_y + \".jpg\";"));
-                    break;
-                default:
-                    break;
-            }
-            App.global_Win_Map.webMap.Refresh();
-        }
 
         #region 数据存储
 

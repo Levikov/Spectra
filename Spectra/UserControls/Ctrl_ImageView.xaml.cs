@@ -59,7 +59,8 @@ namespace Spectra
         {
             this.Busy.isBusy = true;
             
-            Bitmap bmp = await DataProc.GetBmp(path,160 - band, cMode);
+            Bitmap bmp = await DataProc.GetBmp(path,band-1, cMode);
+            if (bmp == null) return;
             MemoryStream ms = new MemoryStream();
             bmp.Save(ms, System.Drawing.Imaging.ImageFormat.Bmp);
             ImgW = bmp.Width;
@@ -209,6 +210,25 @@ namespace Spectra
             //tY.Text = $"{Math.Floor(p.Y)}";
         }
 
+        //右键点击显示曲线
+        private void IMG1_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            System.Windows.Point p = new System.Windows.Point((int)curXinImg, (int)curYinImg);
+            if (((MultiFuncWindow)App.global_Windows[5]).UserControls[0] != null)
+            {
+                if (ImageInfo.chartMode)
+                {
+                    if (ImageInfo.chartShowCnt % 10 == 0)
+                        ((MultiFuncWindow)App.global_Windows[5]).Refresh(null, 0, WinFunc.Curve);
+                    ((Ctrl_SpecCurv)((MultiFuncWindow)App.global_Windows[5]).UserControls[0]).Draw1(p, ImageInfo.chartShowCnt % 10);
+                }
+                else
+                    ((Ctrl_SpecCurv)((MultiFuncWindow)App.global_Windows[5]).UserControls[ImageInfo.chartShowCnt % 4]).Draw4(p);
+            }
+            if (++ImageInfo.chartShowCnt == 40)
+                ImageInfo.chartShowCnt = 0;
+        }
+
         //双击后放大到16:1像元大小
         private const int DOUBLERATIO = 16;
         private void IMG1_MouseDown(object sender, MouseButtonEventArgs e)
@@ -242,7 +262,6 @@ namespace Spectra
 
             IMG1.MouseDown += IMG1_MouseDown;
         }
-
     }
 
 }

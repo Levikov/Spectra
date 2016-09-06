@@ -146,7 +146,10 @@ namespace Spectra
         public static long import_id = 0;
         public static int noise_value = 0;
 
-        public static DataTable dtBandWave;
+        public static bool chartMode;           //曲线模式1或4
+        public static int chartShowCnt=0;       //显示的曲线计数
+
+        public static DataTable dtBandWave;     //谱段和波长的对应表，该表在系统运行过程中为固定值
         public static DataTable dtImgInfo;
         public static string[] strFileName;
         public static string channelFilesPath = Environment.CurrentDirectory + "\\channelFiles\\";

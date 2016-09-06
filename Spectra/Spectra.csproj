@@ -116,6 +116,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <None Include="bmpFiles\bmpFiles文件说明.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <Compile Include="Classes\ExcelHelper.cs" />
     <Compile Include="Test3D.xaml.cs">
       <DependentUpon>Test3D.xaml</DependentUpon>

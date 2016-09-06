@@ -22,7 +22,7 @@
                              MouseLeftButtonUp="IMG1_MouseLeftButtonUp"
                              MouseMove="IMG1_MouseMove"
                              MouseWheel="IMG1_MouseWheel" MouseLeftButtonDown="IMG1_MouseLeftButtonDown" >
-                <Image Name="IMG1" RenderTransform="{StaticResource Imageview}" RenderOptions.BitmapScalingMode="NearestNeighbor" StretchDirection="DownOnly" MouseDown="IMG1_MouseDown"/>
+                <Image Name="IMG1" RenderTransform="{StaticResource Imageview}" RenderOptions.BitmapScalingMode="NearestNeighbor" StretchDirection="DownOnly" MouseDown="IMG1_MouseDown" MouseRightButtonDown="IMG1_MouseRightButtonDown"/>
             </ContentControl>
         </ScrollViewer>
         <DockPanel Margin="0,200,0,0" Height="40" VerticalAlignment="Top" HorizontalAlignment="Left" Visibility="Collapsed">
