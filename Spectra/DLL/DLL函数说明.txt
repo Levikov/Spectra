@@ -18,3 +18,8 @@
 	参数---startFrm:开始的帧号(行号)
 	参数---endFrm:结束的帧号(行号)
 	返回值:1代表正确运行完成；-1代表运行出错。
+4.	int preProcess_File(string pathName,int len);
+	功能：将pathName文件从头检索EB905716，检索到后取288或280(len)存至输出文件。
+	参数---pathName:源文件的路径+文件名+后缀(即文件全名)
+	参数---len:288或280
+	输出---输出文件为pathName将文件名加"_p"

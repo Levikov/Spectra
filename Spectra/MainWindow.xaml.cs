@@ -122,9 +122,7 @@ namespace Spectra
                 System.Windows.MessageBox.Show(ex.ToString());
             }
         }
-        #endregion
 
-        #region 数据解压
         /*用于放弃操作*/
         private CancellationTokenSource cancelImport = new CancellationTokenSource();
         /*点击解压*/
