@@ -142,19 +142,19 @@ namespace Spectra
         static extern void Split_Chanel(string path, string outpath, int sum, string[] file);
         [DllImport("DLL\\DataOperation.dll", EntryPoint = "GetCurrentPosition")]
         static extern double GetCurrentPosition();
-
-        public static long import_id = 0;
-        public static int noise_value = 0;
+        
+        public static int noise_value = 0;      //噪声值
 
         public static bool chartMode;           //曲线模式1或4
         public static int chartShowCnt=0;       //显示的曲线计数
 
         public static DataTable dtBandWave;     //谱段和波长的对应表，该表在系统运行过程中为固定值
-        public static DataTable dtImgInfo;
-        public static string[] strFileName;
-        public static string channelFilesPath = Environment.CurrentDirectory + "\\channelFiles\\";
-        public static string strFilesPath = Environment.CurrentDirectory + "\\showFiles\\";
+        public static DataTable dtImgInfo;      //图像信息对应的DataTable
+        public static string[] strFileName;     //图像对应的文件名称
+        public static string channelFilesPath = Environment.CurrentDirectory + "\\channelFiles\\";  //通道图像的存储位置
+        public static string strFilesPath = Environment.CurrentDirectory + "\\showFiles\\";         //显示图像的存储位置
 
+        //图像检索结果对应的图像信息
         public static int minFrm;
         public static int maxFrm;
         public static double startSec;
@@ -164,11 +164,15 @@ namespace Spectra
         public static Coord startCoord = new Coord(0,0);
         public static Coord endCoord = new Coord(0, 0);
 
+        //图像的宽和高
         public static int imgWidth;
         public static int imgHeight = 2048;
 
         public ImageInfo()  { }
 
+        /// <summary>
+        /// 获取图像信息
+        /// </summary>
         public static void GetImgInfo()
         {
             minFrm = Convert.ToInt32(dtImgInfo.Compute("min(FrameId)", ""));
@@ -189,8 +193,8 @@ namespace Spectra
         /// <summary>
         /// 生成图像
         /// </summary>
-        /// <param name="Prog"></param>
-        /// <returns></returns>
+        /// <param name="Prog">进度条</param>
+        /// <returns>进度条的值</returns>
         public static Task<int> MakeImage(IProgress<double> Prog)
         {
             return Task.Run(() => {
@@ -271,7 +275,11 @@ namespace Spectra
             return 160;
         }
 
-        //通过波长返回谱段
+        /// <summary>
+        /// 通过波长返回谱段
+        /// </summary>
+        /// <param name="wave">波长</param>
+        /// <returns>谱段</returns>
         public static int getBand(double wave)
         {
             double min = 2000;
@@ -287,10 +295,52 @@ namespace Spectra
             return Convert.ToInt32(dtBandWave.Rows[index][0]);
         }
 
-        //通过谱段返回波长
+        /// <summary>
+        /// 通过谱段返回波长
+        /// </summary>
+        /// <param name="band">谱段</param>
+        /// <returns>波长</returns>
         public static double getWave(int band)
         {
             return Convert.ToDouble(dtBandWave.Rows[band-1][1]);
+        }
+    }
+
+    public class ImageBuffer
+    {
+        public int width, height, mean, max, min;
+        public byte[] buffer;
+
+        public ImageBuffer(int w,int h)
+        {
+            width = w;
+            height = h;
+        }
+
+        public void getBuffer(string path,int band)
+        {
+            if (!File.Exists($"{path}{band}.raw"))
+                return;
+            FileStream file = new FileStream($"{path}{band}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
+            buffer = new byte[file.Length];
+            file.Read(buffer, 0, (int)file.Length);
+            UInt32 sum = 0;
+            min = 4096;
+            max = 0;
+            for (UInt32 i = 0; i < file.Length/2; i++)
+            {
+                sum += (UInt32)buffer[i * 2] + (UInt32)buffer[i * 2 + 1] * 256;
+                if ((int)buffer[i * 2] + (int)buffer[i * 2 + 1] * 256 > max)
+                    max = (int)buffer[i * 2] + (int)buffer[i * 2 + 1] * 256;
+                if ((int)buffer[i * 2] + (int)buffer[i * 2 + 1] * 256 < min)
+                    min = (int)buffer[i * 2] + (int)buffer[i * 2 + 1] * 256;
+            }
+            mean = (int)(sum / (width * height));
+        }
+
+        public int getValue(int row,int col)
+        {
+            return (int)buffer[row * height * 2 + col * 2] + (int)buffer[row * height * 2 + col * 2 + 1] * 256;
         }
     }
 }

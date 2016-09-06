@@ -16,6 +16,7 @@ namespace Spectra
     {
         public static MapWindow global_Win_Map;
         public static List<Window> global_Windows = new List<Window>();
+        public static ImageBuffer[] global_ImageBuffer = new ImageBuffer[4];
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {

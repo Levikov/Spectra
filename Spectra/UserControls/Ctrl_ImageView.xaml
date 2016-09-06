@@ -38,6 +38,8 @@
             <TextBlock x:Name="Row" Text="0" Width="60" VerticalAlignment="Center" Foreground="{StaticResource WinViewFore}"/>
             <Label HorizontalAlignment="Left" Content="列号:" VerticalAlignment="Center" Foreground="{StaticResource WinViewFore}"/>
             <TextBlock x:Name="Col" Text="0" Width="60" VerticalAlignment="Center" Foreground="{StaticResource WinViewFore}"/>
+            <Label HorizontalAlignment="Left" Content="灰度值:" VerticalAlignment="Center" Foreground="{StaticResource WinViewFore}"/>
+            <TextBlock x:Name="grayValue" Text="0" Width="60" VerticalAlignment="Center" Foreground="{StaticResource WinViewFore}"/>
         </DockPanel>
         <DockPanel Margin="20,0,0,20" Height="40" VerticalAlignment="Bottom" HorizontalAlignment="Left">
             <Label HorizontalAlignment="Left" Content="像宽:" VerticalAlignment="Center" Foreground="{StaticResource WinViewFore}"/>

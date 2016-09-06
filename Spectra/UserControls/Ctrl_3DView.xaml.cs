@@ -164,7 +164,7 @@ namespace Spectra
                     int Z = (int)(scene.touchPoint.Z * 10 / 4 + 80);
                     
                     if((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[0]).UserControls[0] != null)
-                        ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[0]).UserControls[0]).Refresh(Z, ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
+                        ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[0]).UserControls[0]).Refresh(0, Z, ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
                     
                     Bitmap bmp = await DataProc.GetBmp(ImageInfo.strFilesPath, Z-1, ColorRenderMode.Grayscale);
                     if (bmp == null) return;

@@ -79,7 +79,7 @@ namespace Spectra
             {
                 case Spectra.WinFunc.Image:
                     UserControls[SubGridInedex] = new Ctrl_ImageView();
-                    ((Ctrl_ImageView)(UserControls[SubGridInedex])).Refresh(40, ColorRenderMode.Grayscale,path);
+                    ((Ctrl_ImageView)(UserControls[SubGridInedex])).Refresh(SubGridInedex, 40, ColorRenderMode.Grayscale,path);
                     break;
                 case Spectra.WinFunc.Curve:
                     UserControls[SubGridInedex] = new Ctrl_SpecCurv();

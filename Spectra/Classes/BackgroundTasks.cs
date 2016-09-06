@@ -162,7 +162,7 @@ namespace Spectra
         [DllImport("kernel32.dll", CharSet = CharSet.Ansi, ExactSpelling = true)]
         public static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
 
-        public static Task<string> Import_5(IProgress<double> Prog, IProgress<string> List, CancellationToken cancel)
+        public static Task<string> Import_5(int PACK_LEN,IProgress<double> Prog, IProgress<string> List, CancellationToken cancel)
         {
             return Task.Run(()=> {
 
@@ -181,7 +181,6 @@ namespace Spectra
                     Directory.CreateDirectory($"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\result");
                 }
 
-                UInt16 PACK_LEN = 288;
                 string cmdline = "";
 
                 //分包并解压

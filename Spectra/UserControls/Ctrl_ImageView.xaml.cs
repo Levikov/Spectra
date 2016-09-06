@@ -28,6 +28,7 @@ namespace Spectra
         /// </summary>
         public string Title;
         public int ScreenIndex;
+        public int SubWinIndex;
         public enum DisplayContent { Single,Pick,Sync};
         public int SpecNum;
         public int[] RgbSpec=new int[3];
@@ -55,10 +56,11 @@ namespace Spectra
            // this.IMG1.Source = bmp;
         }
 
-        public async void Refresh(int band,ColorRenderMode cMode,string path)
+        public async void Refresh(int sub,int band,ColorRenderMode cMode,string path)
         {
             this.Busy.isBusy = true;
-            
+
+            SubWinIndex = sub;
             Bitmap bmp = await DataProc.GetBmp(path,band-1, cMode);
             if (bmp == null) return;
             MemoryStream ms = new MemoryStream();
@@ -75,6 +77,10 @@ namespace Spectra
             SpecNum = band;
             Band.Text = $"{SpecNum}";
             Wave.Text = ImageInfo.getWave(SpecNum).ToString("F0");
+            ImageWidth.Text = ImageInfo.imgWidth.ToString();
+            MinValue.Text = App.global_ImageBuffer[SubWinIndex].min.ToString();
+            MaxValue.Text = App.global_ImageBuffer[SubWinIndex].max.ToString();
+            MeanValue.Text = App.global_ImageBuffer[SubWinIndex].mean.ToString();
             this.Busy.isBusy = false;
         }
 
@@ -134,6 +140,7 @@ namespace Spectra
                 tb_3DCoord.Text = $"({Math.Floor(curXinImg)},{Math.Floor(curYinImg)},{SpecNum})";
                 Col.Text = $"{Math.Floor(curXinImg)}";
                 Row.Text = $"{Math.Floor(curYinImg)}";
+                grayValue.Text = App.global_ImageBuffer[SubWinIndex].getValue((int)curYinImg,(int)curXinImg).ToString();
             }
         }
 

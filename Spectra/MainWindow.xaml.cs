@@ -22,6 +22,7 @@ namespace Spectra
             //sds = new SelectedDatesCollection(calendarFile);
             //calendarFile.SelectedDates.AddRange((DateTime.Now.Date).AddDays(-100), (DateTime.Now.Date).AddDays(-1));
         }
+
         #region 界面控制
         /*窗体加载时显示默认值*/
         private void GroupBox_Loaded(object sender, RoutedEventArgs e)
@@ -144,7 +145,8 @@ namespace Spectra
                 IProgress<string> IProgress_List = new Progress<string>((ProgressString) => { this.tb_Console.Text = ProgressString + "\n" + this.tb_Console.Text; });
                 //App.global_Win_Dynamic = new DynamicImagingWindow_Win32();
                 //App.global_Win_Dynamic.Show();
-                await DataProc.Import_5(IProgress_Prog, IProgress_List, cancelImport.Token);
+                int PACK_LEN = (bool)cb280.IsChecked ? 280 : 288;
+                await DataProc.Import_5(PACK_LEN, IProgress_Prog, IProgress_List, cancelImport.Token);
                 IProgress_List.Report(DateTime.Now.ToString("HH:mm:ss") + " 操作成功！");
                 //App.global_Win_Dynamic.Close();
 
@@ -421,6 +423,8 @@ namespace Spectra
                 if (!w.isShow)
                     w.ScreenShow(Screen.AllScreens, 0, "单谱段图像");
                 w.Refresh(ImageInfo.strFilesPath, 0, WinFunc.Image);
+                App.global_ImageBuffer[0] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
+                App.global_ImageBuffer[0].getBuffer($"showFiles\\", 40);
             }
             catch (Exception ex)
             {
@@ -437,6 +441,14 @@ namespace Spectra
                 w.DisplayMode = GridMode.Four;
                 if (!w.isShow)
                     w.ScreenShow(Screen.AllScreens, 0, "典型谱段图像对比");
+                App.global_ImageBuffer[0] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
+                App.global_ImageBuffer[0].getBuffer($"showFiles\\", 40);
+                App.global_ImageBuffer[1] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
+                App.global_ImageBuffer[1].getBuffer($"showFiles\\", 40);
+                App.global_ImageBuffer[2] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
+                App.global_ImageBuffer[2].getBuffer($"showFiles\\", 77);
+                App.global_ImageBuffer[3] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
+                App.global_ImageBuffer[3].getBuffer($"showFiles\\", 121);
                 w.Refresh(ImageInfo.strFilesPath, 0, WinFunc.Image);
                 w.Refresh(ImageInfo.strFilesPath, 1, WinFunc.Image);
                 w.Refresh(ImageInfo.strFilesPath, 2, WinFunc.Image);
@@ -484,7 +496,9 @@ namespace Spectra
                         bandB = ImageInfo.getBand(Convert.ToDouble(txtSingleB.Text));
                     else
                         bandB = Convert.ToInt32(txtSingleB.Text);
-                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[0]).UserControls[0]).Refresh(bandR, ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
+                    App.global_ImageBuffer[0] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
+                    App.global_ImageBuffer[0].getBuffer($"showFiles\\", bandR);
+                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[0]).UserControls[0]).Refresh(0,bandR, ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
                 }
                 else
                 {
@@ -492,7 +506,9 @@ namespace Spectra
                         band = ImageInfo.getBand(Convert.ToDouble(txtSingleGray.Text));
                     else
                         band = Convert.ToInt32(txtSingleGray.Text);
-                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[0]).UserControls[0]).Refresh(band, ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
+                    App.global_ImageBuffer[0] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
+                    App.global_ImageBuffer[0].getBuffer($"showFiles\\", band);
+                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[0]).UserControls[0]).Refresh(0,band, ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
                 }
             }
             catch (Exception)
@@ -520,14 +536,16 @@ namespace Spectra
             try
             {
                 if (ckb1sub.IsChecked == true)
-                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[1]).UserControls[0]).Refresh(bandR, ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
+                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[1]).UserControls[0]).Refresh(0,bandR, ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
                 if (ckb2sub.IsChecked == true)
                 {
                     if (Convert.ToDouble(txtCompareGray2.Text) > 160)
                         band = ImageInfo.getBand(Convert.ToDouble(txtCompareGray2.Text));
                     else
                         band = Convert.ToInt32(txtCompareGray2.Text);
-                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[1]).UserControls[1]).Refresh(band, ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
+                    App.global_ImageBuffer[1] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
+                    App.global_ImageBuffer[1].getBuffer($"showFiles\\", band);
+                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[1]).UserControls[1]).Refresh(1,band, ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
                 }
                 if (ckb3sub.IsChecked == true)
                 {
@@ -535,7 +553,9 @@ namespace Spectra
                         band = ImageInfo.getBand(Convert.ToDouble(txtCompareGray3.Text));
                     else
                         band = Convert.ToInt32(txtCompareGray3.Text);
-                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[1]).UserControls[2]).Refresh(band, ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
+                    App.global_ImageBuffer[2] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
+                    App.global_ImageBuffer[2].getBuffer($"showFiles\\", band);
+                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[1]).UserControls[2]).Refresh(2,band, ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
                 }
                 if (ckb4sub.IsChecked == true)
                 {
@@ -543,7 +563,9 @@ namespace Spectra
                         band = ImageInfo.getBand(Convert.ToDouble(txtCompareGray4.Text));
                     else
                         band = Convert.ToInt32(txtCompareGray4.Text);
-                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[1]).UserControls[3]).Refresh(band, ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
+                    App.global_ImageBuffer[3] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
+                    App.global_ImageBuffer[3].getBuffer($"showFiles\\", band);
+                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[1]).UserControls[3]).Refresh(3, band, ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
                 }
             }
             catch (Exception)
@@ -876,6 +898,8 @@ namespace Spectra
                 if (!w[0].isShow)
                     w[0].ScreenShow(Screen.AllScreens, 0, "单谱段图像");
                 w[0].Refresh(path, 0, WinFunc.Image);
+                App.global_ImageBuffer[0] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
+                App.global_ImageBuffer[0].getBuffer($"showFiles\\",40);
             }
             if (dtShow.Rows[0][2].ToString() == "True")
             {
