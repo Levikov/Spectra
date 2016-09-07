@@ -42,6 +42,14 @@ namespace Spectra
         {
             Environment.Exit(0);
         }
+
+        private void btnMax_Click(object sender, RoutedEventArgs e)
+        {
+            if(WindowState == WindowState.Normal)
+                WindowState = WindowState.Maximized;
+            else
+                WindowState = WindowState.Normal;
+        }
         /*程序最小化*/
         private void btnMin_Click(object sender, RoutedEventArgs e)
         {
@@ -276,7 +284,7 @@ namespace Spectra
             }
             catch (Exception E)
             {
-                System.Windows.MessageBox.Show(E.Message);
+                System.Windows.MessageBox.Show("无数据!","警告",MessageBoxButton.OK,MessageBoxImage.Warning);
             }
         }
         /*点击生成图像*/

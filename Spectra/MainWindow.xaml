@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:System="clr-namespace:System;assembly=mscorlib" mc:Ignorable="d" x:Name="WindowMain" x:Class="Spectra.MainWindow"
         Title="光谱微纳卫星数据分析系统" Height="768" Width="1366" MinHeight="430" MinWidth="800"
-        WindowStartupLocation="CenterScreen" MouseLeftButtonDown="WindowMain_MouseLeftButtonDown" Icon="image/ICON/14.ico">
+        WindowStartupLocation="CenterScreen" MouseLeftButtonDown="WindowMain_MouseLeftButtonDown" Icon="image/ICON/14.ico" WindowStyle="None">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
     </Window.Resources>
@@ -18,7 +18,7 @@
             <ImageBrush ImageSource="image/Image_BackGround.jpg" Stretch="UniformToFill" Opacity="0.3"/>
         </Grid.Background>
         <Grid.RowDefinitions>
-            <RowDefinition Height="200"/>
+            <RowDefinition Height="180"/>
             <RowDefinition />
         </Grid.RowDefinitions>
         <Rectangle Stroke="{StaticResource WindowBorder}" StrokeThickness="1" Grid.RowSpan="1"/>
@@ -26,6 +26,7 @@
         <Grid Margin="0" Grid.RowSpan="1">
             <StackPanel Height="33" Orientation="Horizontal" FlowDirection="RightToLeft" VerticalAlignment="Top">
                 <Button x:Name="btnExit" Content="×" Template="{DynamicResource ButtonClose}" Click="btnExit_Click"/>
+                <Button x:Name="btnMax" Content="□" Template="{DynamicResource ButtonMinMax}" Click="btnMax_Click"/>
                 <Button x:Name="btnMin" Content="—" Template="{DynamicResource ButtonMinMax}" Click="btnMin_Click"/>
             </StackPanel>
             <DockPanel Margin="0,40,0,0" MinHeight="50">
@@ -69,7 +70,7 @@
             </Grid.Resources>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*" MaxWidth="240" MinWidth="150"/>
-                <ColumnDefinition Width="5*"/>
+                <ColumnDefinition Width="6*"/>
             </Grid.ColumnDefinitions>
             <GridSplitter x:Name="splitA" Grid.RowSpan="1" Margin="0,50" Width="1" Background="{StaticResource ButtonBack}"/>
             <StackPanel>
@@ -316,7 +317,7 @@
             </Grid.Resources>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*" MaxWidth="240" MinWidth="150"/>
-                <ColumnDefinition Width="5*"/>
+                <ColumnDefinition Width="6*"/>
             </Grid.ColumnDefinitions>
             <GridSplitter x:Name="splitB" Grid.RowSpan="1" Margin="0,50" Width="1" Background="{StaticResource ButtonBack}"/>
             <StackPanel>
@@ -638,7 +639,7 @@
             </Grid.Resources>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*" MaxWidth="240" MinWidth="150"/>
-                <ColumnDefinition Width="5*"/>
+                <ColumnDefinition Width="6*"/>
             </Grid.ColumnDefinitions>
             <GridSplitter Margin="0,50" Width="1" Background="{StaticResource ButtonBack}"/>
             <StackPanel>
@@ -906,7 +907,7 @@
             </Grid.Resources>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*" MaxWidth="240" MinWidth="150"/>
-                <ColumnDefinition Width="5*"/>
+                <ColumnDefinition Width="6*"/>
             </Grid.ColumnDefinitions>
             <GridSplitter Margin="0,50" Width="1" Background="{StaticResource ButtonBack}"/>
             <StackPanel>
