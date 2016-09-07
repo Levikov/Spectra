@@ -146,7 +146,8 @@ namespace Spectra
         public static int noise_value = 0;      //噪声值
 
         public static bool chartMode;           //曲线模式1或4
-        public static int chartShowCnt=0;       //显示的曲线计数
+        public static int chartShowCnt = 0;     //显示的曲线计数
+        public static int chartShowSum = 10;    //显示的曲线总数
 
         public static DataTable dtBandWave;     //谱段和波长的对应表，该表在系统运行过程中为固定值
         public static DataTable dtImgInfo;      //图像信息对应的DataTable

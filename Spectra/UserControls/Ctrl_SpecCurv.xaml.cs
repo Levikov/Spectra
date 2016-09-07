@@ -43,7 +43,7 @@ namespace Spectra
             chart1st.Viewport.Visible = new Rect(new System.Windows.Point(400, 4096), new System.Windows.Point(1020, 0));
         }
 
-        public void Draw1(Point p,int index)
+        public void Draw1(Point p, Coord coo, int index)
         {
             Point[] points = GetPoint(p);
             dtsChart1st = new ObservableDataSource<System.Windows.Point>();
@@ -51,10 +51,10 @@ namespace Spectra
             {
                 dtsChart1st.AppendAsync(base.Dispatcher, point);
             }
-            initChart(getPen(index),$"({p})");
+            initChart(getPen(index),$"({coo.Lon.ToString("F4")},{coo.Lat.ToString("F4")})");
         }
 
-        public void Draw4(Point p)
+        public void Draw4(Point p, Coord coo)
         {
             Point[] points = GetPoint(p);
             dtsChart1st = new ObservableDataSource<System.Windows.Point>();
@@ -64,7 +64,7 @@ namespace Spectra
             }
             chart1st.Children.Remove(lm.LineGraph);
             chart1st.Children.Remove(lm.MarkerGraph);
-            initChart($"({p})");
+            initChart($"({coo.Lon.ToString("F4")},{coo.Lat.ToString("F4")})");
         }
 
         public Pen getPen(int index)
