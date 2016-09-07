@@ -78,7 +78,7 @@ namespace Spectra
         }
         #endregion
 
-        #region 数据解包
+        #region 数据解包解压
         /*点击打开文件*/
         private void btnOpenFile_Click(object sender, RoutedEventArgs e)
         {
@@ -144,16 +144,17 @@ namespace Spectra
 
                 IProgress<double> IProgress_Prog = new Progress<double>((ProgressValue) => { prog_Import.Value = ProgressValue * this.prog_Import.Maximum; });
                 IProgress<string> IProgress_List = new Progress<string>((ProgressString) => { this.tb_Console.Text = ProgressString + "\n" + this.tb_Console.Text; });
-                //App.global_Win_Dynamic = new DynamicImagingWindow_Win32();
-                //App.global_Win_Dynamic.Show();
+                App.global_Win_Dynamic = new DynamicImagingWindow_Win32();
+                App.global_Win_Dynamic.Show();
                 int PACK_LEN = (bool)cb280.IsChecked ? 280 : 288;
                 await DataProc.Import_5(PACK_LEN, IProgress_Prog, IProgress_List, cancelImport.Token);
                 IProgress_List.Report(DateTime.Now.ToString("HH:mm:ss") + " 操作成功！");
-                //App.global_Win_Dynamic.Close();
+                App.global_Win_Dynamic.Close();
 
                 SQLiteFunc.ExcuteSQL("update FileDetails_dec set 解压时间='?',解压后文件路径='?',帧数='?',起始时间='?',结束时间='?',起始经纬='?',结束经纬='?' where MD5='?'",
                     DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), $"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\result\\", FileInfo.frmSum, FileInfo.startTime.ToString("yyyy-MM-dd HH:mm:ss"), FileInfo.endTime.ToString("yyyy-MM-dd HH:mm:ss"), FileInfo.startCoord.convertToString(), FileInfo.endCoord.convertToString(), FileInfo.md5);
                 SQLiteFunc.ExcuteSQL("update FileDetails set 是否已解压='是' where MD5='?';", FileInfo.md5);
+                FileInfo.decFilePathName = $"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\result\\";
 
                 b_Abort_Import.IsEnabled = false;
                 btnOpenFile.IsEnabled = true;
@@ -189,6 +190,9 @@ namespace Spectra
                     FileInfo.isDecomp = ((string)sel.Row[4] == "是");
                     FileInfo.md5 = (string)sel.Row[5];
                     txtCurrentFile.Text = FileInfo.srcFileName;
+                    DataTable dt = SQLiteFunc.SelectDTSQL("SELECT * from FileDetails_dec where MD5='" + FileInfo.md5 + "'");
+                    FileInfo.upkFilePathName = dt.Rows[0][7].ToString();
+                    FileInfo.decFilePathName = dt.Rows[0][9].ToString();
                 }
                 else
                 {
