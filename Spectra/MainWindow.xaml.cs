@@ -9,6 +9,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Forms;
+using System.Windows.Threading;
 
 namespace Spectra
 {
@@ -423,6 +424,7 @@ namespace Spectra
                 if (!w.isShow)
                     w.ScreenShow(Screen.AllScreens, 0, "单谱段图像");
                 w.Refresh(ImageInfo.strFilesPath, 0, WinFunc.Image);
+                
                 App.global_ImageBuffer[0] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
                 App.global_ImageBuffer[0].getBuffer($"showFiles\\", 40);
             }
@@ -1018,7 +1020,43 @@ namespace Spectra
         #endregion
 
         #region 数据存储
+        /*开始截取*/
+        private void btnSectionBegin_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                MultiFuncWindow w = new MultiFuncWindow();
+                w = (MultiFuncWindow)App.global_Windows[0];
+                w.DisplayMode = GridMode.One;
+                if (!w.isShow)
+                    w.ScreenShow(Screen.AllScreens, 0, "单谱段图像");
+                w.Refresh(ImageInfo.strFilesPath, 0, WinFunc.Image);
 
+                App.global_ImageBuffer[0] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
+                App.global_ImageBuffer[0].getBuffer($"showFiles\\", 40);
+
+                ImageSection.beginSection = true;
+
+                timerSection.Interval = TimeSpan.FromSeconds(0.1);
+                timerSection.Tick += timerSection_Tick;
+                timerSection.Start();
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show("无数据!","警告",MessageBoxButton.OK,MessageBoxImage.Warning);
+            }
+        }
+
+        DispatcherTimer timerSection = new DispatcherTimer();
+
+        private void timerSection_Tick(object sender, EventArgs e)
+        {
+            if (ImageSection.startFrm > ImageSection.endFrm)
+                return;
+            txtSectionStartFrm.Text = ImageSection.startFrm.ToString();
+            txtSectionEndFrm.Text = ImageSection.endFrm.ToString();
+        }
+        /*存储路径*/
         private void btnSaveFilesPath_Click(object sender, RoutedEventArgs e)
         {
             FolderBrowserDialog fbd = new FolderBrowserDialog();
@@ -1027,10 +1065,11 @@ namespace Spectra
                 string flodPath = fbd.SelectedPath;
             }
         }
-
+        /*开始存储*/
         private void btnSaveFiles_Click(object sender, RoutedEventArgs e)
         {
-
+            ImageSection.beginSection = false;
+            timerSection.Stop();
         }
         #endregion
     }

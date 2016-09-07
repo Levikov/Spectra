@@ -117,6 +117,15 @@ namespace Spectra
             if (img == null)
                 return;
             img.ReleaseMouseCapture();
+            if (ImageSection.beginSection)
+            {
+                borderSection.Visibility = Visibility.Visible;
+                ImageSection.startFrm = (int)curXinImg;
+                Thickness mov = new Thickness();
+                mov = borderSection.Margin;
+                mov.Left = MousePoint.X;
+                borderSection.Margin = mov;
+            }
             mouseDown = false;
         }
 
@@ -234,6 +243,15 @@ namespace Spectra
             }
             if (++ImageInfo.chartShowCnt == 40)
                 ImageInfo.chartShowCnt = 0;
+            if (ImageSection.beginSection)
+            {
+                borderSection.Visibility = Visibility.Visible;
+                ImageSection.endFrm = (int)curXinImg;
+                Thickness mov = new Thickness();
+                mov = borderSection.Margin;
+                mov.Right = ActualWidth - MousePoint.X + 1;
+                borderSection.Margin = mov;
+            }
         }
 
         //双击后放大到16:1像元大小

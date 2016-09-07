@@ -327,7 +327,7 @@ namespace Spectra
             UInt32 sum = 0;
             min = 4096;
             max = 0;
-            for (UInt32 i = 0; i < file.Length/2; i++)
+            for (UInt32 i = 0; i < file.Length / 2; i++)
             {
                 sum += (UInt32)buffer[i * 2] + (UInt32)buffer[i * 2 + 1] * 256;
                 if ((int)buffer[i * 2] + (int)buffer[i * 2 + 1] * 256 > max)
@@ -342,5 +342,11 @@ namespace Spectra
         {
             return (int)buffer[row * height * 2 + col * 2] + (int)buffer[row * height * 2 + col * 2 + 1] * 256;
         }
+    }
+
+    public class ImageSection
+    {
+        public static bool beginSection;        //是否开始抠图
+        public static int startFrm,endFrm;      //取图的帧起始和结束
     }
 }
