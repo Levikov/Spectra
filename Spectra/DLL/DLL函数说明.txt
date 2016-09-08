@@ -5,10 +5,11 @@
 	参数---sum:总共的帧数(4个通道对应同1帧)
 	参数---file[]:文件名列表(不含通道号和后缀)
 	返回值:1代表正确运行完成；-1代表运行出错。
-2.	int Make_PseudoColor(string path,string outpath,int[] band);
+2.	int Make_PseudoColor(string path,string outpath,int sum,int[] band);
 	功能：将path和band[]指定的3个文件生成伪彩图
 	参数---path:160个谱段图像存储的路径(含\)
 	参数---outpath:要输出的文件路径(含\)
+	参数---sum:总共的帧数
 	参数---band[]:该数组固定为3,分别代表3个谱段(1~160)
 	返回值:1代表正确运行完成；-1代表运行出错。
 3.	int Save_Files(string path,string outpath,int startFrm,int endFrm);
@@ -18,3 +19,15 @@
 	参数---startFrm:开始的帧号(行号)
 	参数---endFrm:结束的帧号(行号)
 	返回值:1代表正确运行完成；-1代表运行出错。
+4.	int preProcess_File(string pathName,int len);
+	功能：将pathName文件从头检索EB905716，检索到后取288或280(len)存至输出文件。
+	参数---pathName:源文件的路径+文件名+后缀(即文件全名)
+	参数---len:288或280
+	输出---输出文件为pathName将文件名加"_p"
+5.	int Get3DRaw(string path, string outpath, int startFrm, int endFrm);
+	功能：生成3D立方体侧面图像，每个谱段图像裁剪为startFrm至endFrm的数据
+	参数---path:160个谱段图像存储的路径(含\)
+	参数---outpath:要输出的文件路径(含\)
+	参数---startFrm:开始的帧号(行号)
+	参数---endFrm:结束的帧号(行号)
+	返回值:1代表正确运行完成；-1代表运行出错。	

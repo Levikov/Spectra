@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -85,33 +86,6 @@ namespace Spectra
 
             scene.Viewport.Children[2].Transform = new ScaleTransform3D(1, imheight/600, 1);
 
-            #region 3D立方体正视图
-
-            
-
-
-
-            #endregion
-
-            #region 3D立方体左视图
-
-            #endregion
-
-            #region 3D立方体右视图
-
-            #endregion
-
-            #region 3D立方体背视图
-
-            #endregion
-
-            #region 3D立方体顶视图
-
-            #endregion
-
-            #region 3D立方体底视图
-
-            #endregion
             BitmapImage[] bmpSource = new BitmapImage[6];
 
             for (int i = 0; i <6; i++)
@@ -131,9 +105,10 @@ namespace Spectra
 
         internal async void Refresh(string path)
         {
+            imheight = DataQuery.QueryResult.Rows.Count;
+            if (imheight < 1) return;
             this.Busy.isBusy = true;
             Bitmap[] bmp = await DataProc.GetBmp3D(path);
-            imheight = DataQuery.QueryResult.Rows.Count;
             RenderBox(imheight, bmp);
             InitializeCameras();
             this.Busy.isBusy=false;
@@ -151,16 +126,19 @@ namespace Spectra
 
         private void scene_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            int X = (int)(scene.touchPoint.X * 10) +1024;
-            int Y = (int)(scene.touchPoint.Y * 10+imheight / 2) ;
-            int Z = (int)(scene.touchPoint.Z * 10 / 4+80);
-            this.tb_3DCoord.Text = $"({X},{Y},{Z})";
-            this.Row.Text = $"{Y}";
-            this.Col.Text = $"{X}";
-            this.Band.Text = $"{Z}";
-            if (IsValid(ref X,ref Y,ref Z))
+            try
+            { 
+                int X = (int)(scene.touchPoint.X * 10) +1024;
+                int Y = (int)(scene.touchPoint.Y * 10+imheight / 2) ;
+                int Z = (int)(scene.touchPoint.Z * 10 / 4+80);
+                this.tb_3DCoord.Text = $"({X},{Y},{Z})";
+                this.Row.Text = $"{Y}";
+                this.Col.Text = $"{X}";
+                this.Band.Text = $"{Z}";
+            }
+            catch (Exception ex)
             {
-                //App.global_Win_SpecImg.Refresh(Z, 1);                
+                MessageBox.Show(ex.ToString());
             }
         }
 
@@ -177,24 +155,36 @@ namespace Spectra
 
         private async void scene_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if (scene.touchPoint.X != 0 || scene.touchPoint.Y != 0 || scene.touchPoint.Z != 0)
+            try
             {
-                int X = (int)(scene.touchPoint.X * 10) + 1024;
-                int Y = (int)(scene.touchPoint.Y * 10 + imheight / 2);
-                int Z = (int)(scene.touchPoint.Z * 10 / 4 + 80);
-                Bitmap bmp = await DataProc.GetBmp(ImageInfo.strFilesPath, Z, ColorRenderMode.Grayscale);
-                BitmapImage bmpSource = new BitmapImage();
+                if (scene.touchPoint.X != 0 || scene.touchPoint.Y != 0 || scene.touchPoint.Z != 0)
+                {
+                    int X = (int)(scene.touchPoint.X * 10) + 1024;
+                    int Y = (int)(scene.touchPoint.Y * 10 + imheight / 2);
+                    int Z = (int)(scene.touchPoint.Z * 10 / 4 + 80);
+                    
+                    if((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[0]).UserControls[0] != null)
+                        ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[0]).UserControls[0]).Refresh(0, Z, ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
+                    
+                    Bitmap bmp = await DataProc.GetBmp(ImageInfo.strFilesPath, Z-1, ColorRenderMode.Grayscale);
+                    if (bmp == null) return;
+                    BitmapImage bmpSource = new BitmapImage();
+                    
+                    bmp.Save($"bmpFiles\\{Z}.bmp");
+                    bmpSource = new BitmapImage(new Uri($"{Environment.CurrentDirectory}\\bmpFiles\\{Z}.bmp"));
 
-                bmp.Save($"{Z}.bmp");
-                    bmpSource = new BitmapImage(new Uri($"{Environment.CurrentDirectory}\\{Z}.bmp"));
-
-                gm3d_Active.Material = new DiffuseMaterial(new System.Windows.Media.ImageBrush(bmpSource));
-                DoubleAnimation day = new DoubleAnimation { From = 0, To = imheight/10*(imheight/600), Duration = new Duration(TimeSpan.FromSeconds(1)) };
-                TranslateTransform3D transtrans3d = new TranslateTransform3D(0, 0, scene.touchPoint.Z);
-                gm3d_Active.Transform = transtrans3d;
-                transtrans3d.BeginAnimation(TranslateTransform3D.OffsetYProperty, day);
+                    gm3d_Active.Material = new DiffuseMaterial(new System.Windows.Media.ImageBrush(bmpSource));
+                    DoubleAnimation day = new DoubleAnimation { From = 0, To = imheight / 10 * (imheight / 600), Duration = new Duration(TimeSpan.FromSeconds(1)) };
+                    TranslateTransform3D transtrans3d = new TranslateTransform3D(0, 0, scene.touchPoint.Z);
+                    gm3d_Active.Transform = transtrans3d;
+                    transtrans3d.BeginAnimation(TranslateTransform3D.OffsetYProperty, day);
+                    curBand.Text = Z.ToString();
+                }
             }
-
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
         }
     }
 }

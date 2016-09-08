@@ -9,6 +9,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Forms;
+using System.Windows.Threading;
 
 namespace Spectra
 {
@@ -22,12 +23,14 @@ namespace Spectra
             //sds = new SelectedDatesCollection(calendarFile);
             //calendarFile.SelectedDates.AddRange((DateTime.Now.Date).AddDays(-100), (DateTime.Now.Date).AddDays(-1));
         }
+
         #region 界面控制
         /*窗体加载时显示默认值*/
         private void GroupBox_Loaded(object sender, RoutedEventArgs e)
         {
             getDefaultShow();
             getApplyModel();
+            getBandWave();
         }
         /*拖动界面*/
         private void WindowMain_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -121,9 +124,7 @@ namespace Spectra
                 System.Windows.MessageBox.Show(ex.ToString());
             }
         }
-        #endregion
 
-        #region 数据解压
         /*用于放弃操作*/
         private CancellationTokenSource cancelImport = new CancellationTokenSource();
         /*点击解压*/
@@ -145,7 +146,8 @@ namespace Spectra
                 IProgress<string> IProgress_List = new Progress<string>((ProgressString) => { this.tb_Console.Text = ProgressString + "\n" + this.tb_Console.Text; });
                 //App.global_Win_Dynamic = new DynamicImagingWindow_Win32();
                 //App.global_Win_Dynamic.Show();
-                await DataProc.Import_5(IProgress_Prog, IProgress_List, cancelImport.Token);
+                int PACK_LEN = (bool)cb280.IsChecked ? 280 : 288;
+                await DataProc.Import_5(PACK_LEN, IProgress_Prog, IProgress_List, cancelImport.Token);
                 IProgress_List.Report(DateTime.Now.ToString("HH:mm:ss") + " 操作成功！");
                 //App.global_Win_Dynamic.Close();
 
@@ -336,7 +338,7 @@ namespace Spectra
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show(ex.ToString());
+                System.Windows.MessageBox.Show("数据出错!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
         /*清除datagrid*/
@@ -364,62 +366,253 @@ namespace Spectra
         #endregion
 
         #region 光谱显示
-        /*显示单张图像*/
+        //取一行谱段与波长的对应关系存储至Band_Wave表(不用该函数)
+        private void setBandWave()
+        {
+            SQLiteFunc.ExcuteSQL("delete from Band_Wave");
+            DataTable dt1 = SQLiteFunc.SelectDTSQL("select * from SpectrumMap where SpaN=1");
+            SQLiteFunc.SelectDTSQL("delete from Band_Wave");
+            for (int i = 159; i >= 0; i--)
+            {
+                if (Convert.ToDouble(dt1.Rows[0][i + 1]) == 0)
+                    SQLiteFunc.ExcuteSQL("insert into Band_Wave (谱段,波长,光谱色) values (?,0,'-')", 160 - i);
+                else if (Convert.ToDouble(dt1.Rows[0][i + 1]) < 400)
+                    SQLiteFunc.ExcuteSQL("insert into Band_Wave (谱段,波长,光谱色) values (?,?,'紫外')", 160 - i, Convert.ToDouble(dt1.Rows[0][i + 1]));
+                else if (Convert.ToDouble(dt1.Rows[0][i + 1]) < 450)
+                    SQLiteFunc.ExcuteSQL("insert into Band_Wave (谱段,波长,光谱色) values (?,?,'紫')", 160 - i, Convert.ToDouble(dt1.Rows[0][i + 1]));
+                else if (Convert.ToDouble(dt1.Rows[0][i + 1]) < 480)
+                    SQLiteFunc.ExcuteSQL("insert into Band_Wave (谱段,波长,光谱色) values (?,?,'蓝')", 160 - i, Convert.ToDouble(dt1.Rows[0][i + 1]));
+                else if (Convert.ToDouble(dt1.Rows[0][i + 1]) < 490)
+                    SQLiteFunc.ExcuteSQL("insert into Band_Wave (谱段,波长,光谱色) values (?,?,'绿蓝')", 160 - i, Convert.ToDouble(dt1.Rows[0][i + 1]));
+                else if (Convert.ToDouble(dt1.Rows[0][i + 1]) < 500)
+                    SQLiteFunc.ExcuteSQL("insert into Band_Wave (谱段,波长,光谱色) values (?,?,'蓝绿')", 160 - i, Convert.ToDouble(dt1.Rows[0][i + 1]));
+                else if (Convert.ToDouble(dt1.Rows[0][i + 1]) < 560)
+                    SQLiteFunc.ExcuteSQL("insert into Band_Wave (谱段,波长,光谱色) values (?,?,'绿')", 160 - i, Convert.ToDouble(dt1.Rows[0][i + 1]));
+                else if (Convert.ToDouble(dt1.Rows[0][i + 1]) < 580)
+                    SQLiteFunc.ExcuteSQL("insert into Band_Wave (谱段,波长,光谱色) values (?,?,'黄绿')", 160 - i, Convert.ToDouble(dt1.Rows[0][i + 1]));
+                else if (Convert.ToDouble(dt1.Rows[0][i + 1]) < 610)
+                    SQLiteFunc.ExcuteSQL("insert into Band_Wave (谱段,波长,光谱色) values (?,?,'黄')", 160 - i, Convert.ToDouble(dt1.Rows[0][i + 1]));
+                else if (Convert.ToDouble(dt1.Rows[0][i + 1]) < 650)
+                    SQLiteFunc.ExcuteSQL("insert into Band_Wave (谱段,波长,光谱色) values (?,?,'橙')", 160 - i, Convert.ToDouble(dt1.Rows[0][i + 1]));
+                else if (Convert.ToDouble(dt1.Rows[0][i + 1]) < 760)
+                    SQLiteFunc.ExcuteSQL("insert into Band_Wave (谱段,波长,光谱色) values (?,?,'红')", 160 - i, Convert.ToDouble(dt1.Rows[0][i + 1]));
+                else if (Convert.ToDouble(dt1.Rows[0][i + 1]) < 1500)
+                    SQLiteFunc.ExcuteSQL("insert into Band_Wave (谱段,波长,光谱色) values (?,?,'近红外')", 160 - i, Convert.ToDouble(dt1.Rows[0][i + 1]));
+            }
+        }
+        /*获得谱段-波长对应关系刷新DataGrid*/
+        private void getBandWave()
+        {
+            try
+            { 
+                ImageInfo.dtBandWave = SQLiteFunc.SelectDTSQL("select * from Band_Wave order by 谱段");
+                dataGrid_BandWave.ItemsSource = ImageInfo.dtBandWave.DefaultView;
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show("数据出错!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+        /*显示单谱段图像*/
         private void btnShowSpeImg_Click(object sender, RoutedEventArgs e)
-        {
-            if (App.global_Win_SpecImg == null)
-            {
-                App.global_Win_SpecImg = new MultiFuncWindow();
-                App.global_Win_SpecImg.DisplayMode = GridMode.One;
-            }
-            if (!App.global_Win_SpecImg.isShow)
-                App.global_Win_SpecImg.ScreenShow(Screen.AllScreens, 0, "光谱图像");
-            App.global_Win_SpecImg.Refresh(ImageInfo.strFilesPath, 0, WinFunc.Image);
-        }
-        /*显示光谱立方体*/
-        private void btnShow3D_Click(object sender, RoutedEventArgs e)
-        {
-            if (App.global_Win_3D == null)
-            {
-                App.global_Win_3D = new MultiFuncWindow();
-                App.global_Win_3D.DisplayMode = GridMode.One;
-            }
-            if (!App.global_Win_3D.isShow)
-                App.global_Win_3D.ScreenShow(Screen.AllScreens, 0, "光谱立方体");
-            App.global_Win_3D.Refresh(ImageInfo.strFilesPath, 0, WinFunc.Cube);
-        }
-        /*显示典型谱段对比*/
-        private void btnShowImgCompare_Click(object sender, RoutedEventArgs e)
-        {
-            if (App.global_Win_ImgCompare == null)
-            {
-                App.global_Win_ImgCompare = new MultiFuncWindow();
-                App.global_Win_ImgCompare.DisplayMode = GridMode.Four;
-            }
-            if (!App.global_Win_ImgCompare.isShow)
-                App.global_Win_ImgCompare.ScreenShow(Screen.AllScreens, 0, "典型谱段图像对比");
-            App.global_Win_ImgCompare.Refresh(ImageInfo.strFilesPath, 0, WinFunc.Image);
-            App.global_Win_ImgCompare.Refresh(ImageInfo.strFilesPath, 1, WinFunc.Image);
-            App.global_Win_ImgCompare.Refresh(ImageInfo.strFilesPath, 2, WinFunc.Image);
-            App.global_Win_ImgCompare.Refresh(ImageInfo.strFilesPath, 3, WinFunc.Image);
-        }
-        /*设置对比图像谱段*/
-        private void btnCompareSet_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                if (ckb1sub.IsChecked == true)
-                    ((Ctrl_ImageView)(App.global_Win_ImgCompare.UserControls[0])).Refresh(Convert.ToUInt16(txtCompareR.Text), ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
-                if (ckb2sub.IsChecked == true)
-                    ((Ctrl_ImageView)(App.global_Win_ImgCompare.UserControls[1])).Refresh(Convert.ToUInt16(txtCompareGray2.Text), ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
-                if (ckb3sub.IsChecked == true)
-                    ((Ctrl_ImageView)(App.global_Win_ImgCompare.UserControls[2])).Refresh(Convert.ToUInt16(txtCompareGray3.Text), ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
-                if (ckb4sub.IsChecked == true)
-                    ((Ctrl_ImageView)(App.global_Win_ImgCompare.UserControls[3])).Refresh(Convert.ToUInt16(txtCompareGray4.Text), ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
+                MultiFuncWindow w = new MultiFuncWindow();
+                w = (MultiFuncWindow)App.global_Windows[0];
+                w.DisplayMode = GridMode.One;
+                if (!w.isShow)
+                    w.ScreenShow(Screen.AllScreens, 0, "单谱段图像");
+                w.Refresh(ImageInfo.strFilesPath, 0, WinFunc.Image);
+                
+                App.global_ImageBuffer[0] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
+                App.global_ImageBuffer[0].getBuffer($"showFiles\\", 40);
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show("数据出错!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+        /*显示典型谱段图像对比*/
+        private void btnShowImgCompare_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                MultiFuncWindow w = new MultiFuncWindow();
+                w = (MultiFuncWindow)App.global_Windows[1];
+                w.DisplayMode = GridMode.Four;
+                if (!w.isShow)
+                    w.ScreenShow(Screen.AllScreens, 0, "典型谱段图像对比");
+                App.global_ImageBuffer[0] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
+                App.global_ImageBuffer[0].getBuffer($"showFiles\\", 40);
+                App.global_ImageBuffer[1] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
+                App.global_ImageBuffer[1].getBuffer($"showFiles\\", 40);
+                App.global_ImageBuffer[2] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
+                App.global_ImageBuffer[2].getBuffer($"showFiles\\", 77);
+                App.global_ImageBuffer[3] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
+                App.global_ImageBuffer[3].getBuffer($"showFiles\\", 121);
+                w.Refresh(ImageInfo.strFilesPath, 0, WinFunc.Image);
+                w.Refresh(ImageInfo.strFilesPath, 1, WinFunc.Image);
+                w.Refresh(ImageInfo.strFilesPath, 2, WinFunc.Image);
+                w.Refresh(ImageInfo.strFilesPath, 3, WinFunc.Image);
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show("数据出错!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+        /*显示光谱三维立方体*/
+        private void btnShow3D_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                MultiFuncWindow w = new MultiFuncWindow();
+                w = (MultiFuncWindow)App.global_Windows[3];
+                w.DisplayMode = GridMode.One;
+                if (!w.isShow)
+                    w.ScreenShow(Screen.AllScreens, 0, "光谱三维立方体");
+                w.Refresh(ImageInfo.strFilesPath, 0, WinFunc.Cube);
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show("数据出错!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+        /*设置单谱段图像谱段*/
+        private void btnSingleSet_Click(object sender, RoutedEventArgs e)
+        {
+            int bandR, bandG, bandB,band;
+            try
+            { 
+                if (rb1Single.IsChecked == true)
+                {
+                    if (Convert.ToDouble(txtSingleR.Text) > 160)
+                        bandR = ImageInfo.getBand(Convert.ToDouble(txtSingleR.Text));
+                    else
+                        bandR = Convert.ToInt32(txtSingleR.Text);
+                    if (Convert.ToDouble(txtSingleG.Text) > 160)
+                        bandG = ImageInfo.getBand(Convert.ToDouble(txtSingleG.Text));
+                    else
+                        bandG = Convert.ToInt32(txtSingleG.Text);
+                    if (Convert.ToDouble(txtSingleB.Text) > 160)
+                        bandB = ImageInfo.getBand(Convert.ToDouble(txtSingleB.Text));
+                    else
+                        bandB = Convert.ToInt32(txtSingleB.Text);
+                    App.global_ImageBuffer[0] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
+                    App.global_ImageBuffer[0].getBuffer($"showFiles\\", bandR);
+                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[0]).UserControls[0]).Refresh(0,bandR, ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
+                }
+                else
+                {
+                    if (Convert.ToDouble(txtSingleGray.Text) > 160)
+                        band = ImageInfo.getBand(Convert.ToDouble(txtSingleGray.Text));
+                    else
+                        band = Convert.ToInt32(txtSingleGray.Text);
+                    App.global_ImageBuffer[0] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
+                    App.global_ImageBuffer[0].getBuffer($"showFiles\\", band);
+                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[0]).UserControls[0]).Refresh(0,band, ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
+                }
             }
             catch (Exception)
             {
                 System.Windows.MessageBox.Show("窗体未初始化！", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+        /*设置对比图像谱段*/
+        private void btnCompareSet_Click(object sender, RoutedEventArgs e)
+        {
+            int bandR, bandG, bandB;
+            if (Convert.ToDouble(txtCompareR.Text) > 160)
+                bandR = ImageInfo.getBand(Convert.ToDouble(txtCompareR.Text));
+            else
+                bandR = Convert.ToInt32(txtCompareR.Text);
+            if (Convert.ToDouble(txtCompareG.Text) > 160)
+                bandG = ImageInfo.getBand(Convert.ToDouble(txtCompareG.Text));
+            else
+                bandG = Convert.ToInt32(txtCompareG.Text);
+            if (Convert.ToDouble(txtCompareB.Text) > 160)
+                bandB = ImageInfo.getBand(Convert.ToDouble(txtCompareB.Text));
+            else
+                bandB = Convert.ToInt32(txtCompareB.Text);
+            int band = 0;
+            try
+            {
+                if (ckb1sub.IsChecked == true)
+                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[1]).UserControls[0]).Refresh(0,bandR, ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
+                if (ckb2sub.IsChecked == true)
+                {
+                    if (Convert.ToDouble(txtCompareGray2.Text) > 160)
+                        band = ImageInfo.getBand(Convert.ToDouble(txtCompareGray2.Text));
+                    else
+                        band = Convert.ToInt32(txtCompareGray2.Text);
+                    App.global_ImageBuffer[1] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
+                    App.global_ImageBuffer[1].getBuffer($"showFiles\\", band);
+                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[1]).UserControls[1]).Refresh(1,band, ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
+                }
+                if (ckb3sub.IsChecked == true)
+                {
+                    if (Convert.ToDouble(txtCompareGray3.Text) > 160)
+                        band = ImageInfo.getBand(Convert.ToDouble(txtCompareGray3.Text));
+                    else
+                        band = Convert.ToInt32(txtCompareGray3.Text);
+                    App.global_ImageBuffer[2] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
+                    App.global_ImageBuffer[2].getBuffer($"showFiles\\", band);
+                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[1]).UserControls[2]).Refresh(2,band, ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
+                }
+                if (ckb4sub.IsChecked == true)
+                {
+                    if (Convert.ToDouble(txtCompareGray4.Text) > 160)
+                        band = ImageInfo.getBand(Convert.ToDouble(txtCompareGray4.Text));
+                    else
+                        band = Convert.ToInt32(txtCompareGray4.Text);
+                    App.global_ImageBuffer[3] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
+                    App.global_ImageBuffer[3].getBuffer($"showFiles\\", band);
+                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[1]).UserControls[3]).Refresh(3, band, ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
+                }
+            }
+            catch (Exception)
+            {
+                System.Windows.MessageBox.Show("窗体未初始化！", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+        /*设置曲线模式*/
+        private void rbChartMode_Checked(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                System.Windows.Controls.RadioButton rb = sender as System.Windows.Controls.RadioButton;
+
+                if (rb.Name == "rbChartMode1")
+                {
+                    ImageInfo.chartMode = true;
+                    ImageInfo.chartShowCnt = 0;
+                }
+                else if (rb.Name == "rbChartMode4")
+                {
+                    ImageInfo.chartMode = false;
+                    ImageInfo.chartShowCnt = 0;
+                }
+
+                if (((MultiFuncWindow)App.global_Windows[5]).UserControls[0] != null)
+                {
+                    if (ImageInfo.chartMode)
+                    {
+                        ((MultiFuncWindow)App.global_Windows[5]).DisplayMode = GridMode.One;
+                        ((MultiFuncWindow)App.global_Windows[5]).Refresh(null, 0, WinFunc.Curve);
+                    }
+                    else
+                    {
+                        ((MultiFuncWindow)App.global_Windows[5]).DisplayMode = GridMode.Four;
+                        ((MultiFuncWindow)App.global_Windows[5]).Refresh(null, 0, WinFunc.Curve);
+                        ((MultiFuncWindow)App.global_Windows[5]).Refresh(null, 1, WinFunc.Curve);
+                        ((MultiFuncWindow)App.global_Windows[5]).Refresh(null, 2, WinFunc.Curve);
+                        ((MultiFuncWindow)App.global_Windows[5]).Refresh(null, 3, WinFunc.Curve);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show("数据出错!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
         #endregion
@@ -539,7 +732,7 @@ namespace Spectra
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show(ex.ToString());
+                System.Windows.MessageBox.Show("数据出错!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
         /*取当前图像信息*/
@@ -579,7 +772,7 @@ namespace Spectra
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show(ex.ToString());
+                System.Windows.MessageBox.Show("数据出错!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
         /*设置样式*/
@@ -621,7 +814,7 @@ namespace Spectra
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show(ex.ToString());
+                System.Windows.MessageBox.Show("数据出错!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
         /*删除应用样式*/
@@ -636,7 +829,7 @@ namespace Spectra
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show(ex.ToString());
+                System.Windows.MessageBox.Show("数据出错!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
         /*刷新列表*/
@@ -648,7 +841,7 @@ namespace Spectra
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show(ex.ToString());
+                System.Windows.MessageBox.Show("数据出错!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
         /*准备应用图像*/
@@ -668,7 +861,7 @@ namespace Spectra
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show(ex.ToString());
+                System.Windows.MessageBox.Show("数据出错!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
         /*显示样式*/
@@ -687,7 +880,7 @@ namespace Spectra
             }
             catch
             {
-                System.Windows.MessageBox.Show("无数据!", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+                System.Windows.MessageBox.Show("数据出错!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
         }
@@ -697,84 +890,74 @@ namespace Spectra
         /*初始化显示窗体*/
         private void initWindows(string path, int winSum, DataTable dtShow)
         {
-            for (int i = 0; i < winSum; i++)
-                App.global_Windows.Add(new MultiFuncWindow());
-            MultiFuncWindow[] w = new MultiFuncWindow[winSum];
-            int cnt = 0;
+            MultiFuncWindow[] w = new MultiFuncWindow[6];
+            for (int i = 0; i < 6; i++)
+                w[i] = (MultiFuncWindow)App.global_Windows[i];
+
             if (dtShow.Rows[0][1].ToString() == "True")
             {
-                w[cnt] = (MultiFuncWindow)App.global_Windows[cnt];
-                w[cnt].DisplayMode = GridMode.One;
-                if (!w[cnt].isShow)
-                    w[cnt].ScreenShow(Screen.AllScreens, 0, cnt.ToString());
-                w[cnt].Refresh(path, 0, WinFunc.Image);
-                cnt++;
+                w[0].DisplayMode = GridMode.One;
+                if (!w[0].isShow)
+                    w[0].ScreenShow(Screen.AllScreens, 0, "单谱段图像");
+                w[0].Refresh(path, 0, WinFunc.Image);
+                App.global_ImageBuffer[0] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
+                App.global_ImageBuffer[0].getBuffer($"showFiles\\",40);
             }
             if (dtShow.Rows[0][2].ToString() == "True")
             {
-                w[cnt] = (MultiFuncWindow)App.global_Windows[cnt];
-                w[cnt].DisplayMode = GridMode.Four;
-                if (!w[cnt].isShow)
-                    w[cnt].ScreenShow(Screen.AllScreens, 0, cnt.ToString());
-                w[cnt].Refresh(path, 0, WinFunc.Image);
-                w[cnt].Refresh(path, 1, WinFunc.Image);
-                w[cnt].Refresh(path, 2, WinFunc.Image);
-                w[cnt].Refresh(path, 3, WinFunc.Image);
-                cnt++;
+                w[1].DisplayMode = GridMode.Four;
+                if (!w[1].isShow)
+                    w[1].ScreenShow(Screen.AllScreens, 0, "典型谱段图像对比");
+                w[1].Refresh(path, 0, WinFunc.Image);
+                w[1].Refresh(path, 1, WinFunc.Image);
+                w[1].Refresh(path, 2, WinFunc.Image);
+                w[1].Refresh(path, 3, WinFunc.Image);
             }
             //谷歌地图
             if (dtShow.Rows[0][3].ToString() == "True")
             {
-                w[cnt] = (MultiFuncWindow)App.global_Windows[cnt];
-                w[cnt].DisplayMode = GridMode.One;
-                if (!w[cnt].isShow)
-                    w[cnt].ScreenShow(Screen.AllScreens, 0, cnt.ToString());
-                w[cnt].Refresh(path, 0, WinFunc.Map);
-                cnt++;
+                w[2].DisplayMode = GridMode.One;
+                if (!w[2].isShow)
+                    w[2].ScreenShow(Screen.AllScreens, 0, "谷歌地图");
+                w[2].Refresh(path, 0, WinFunc.Map);
             }
             //三维立方体
             if (dtShow.Rows[0][4].ToString() == "True")
             {
-                w[cnt] = (MultiFuncWindow)App.global_Windows[cnt];
-                w[cnt].DisplayMode = GridMode.One;
-                if (!w[cnt].isShow)
-                    w[cnt].ScreenShow(Screen.AllScreens, 0, cnt.ToString());
-                w[cnt].Refresh(path, 0, WinFunc.Cube);
-                cnt++;
+                w[3].DisplayMode = GridMode.One;
+                if (!w[3].isShow)
+                    w[3].ScreenShow(Screen.AllScreens, 0, "光谱三维立方体");
+                w[3].Refresh(path, 0, WinFunc.Cube);
             }
             //图像地图
             if (dtShow.Rows[0][5].ToString() == "True")
             {
-                w[cnt] = (MultiFuncWindow)App.global_Windows[cnt];
-                w[cnt].DisplayMode = GridMode.Two;
-                if (!w[cnt].isShow)
-                    w[cnt].ScreenShow(Screen.AllScreens, 0, cnt.ToString());
-                w[cnt].Refresh(path, 0, WinFunc.Image);
-                w[cnt].Refresh(path, 1, WinFunc.Map);
-                cnt++;
+                w[4].DisplayMode = GridMode.Two;
+                if (!w[4].isShow)
+                    w[4].ScreenShow(Screen.AllScreens, 0, "图像/地图");
+                w[4].Refresh(path, 0, WinFunc.Image);
+                w[4].Refresh(path, 1, WinFunc.Map);
             }
             //曲线模式1
             if (dtShow.Rows[0][6].ToString() == "模式1")
             {
-                w[cnt] = (MultiFuncWindow)App.global_Windows[cnt];
-                w[cnt].DisplayMode = GridMode.One;
-                if (!w[cnt].isShow)
-                    w[cnt].ScreenShow(Screen.AllScreens, 0, cnt.ToString());
-                w[cnt].Refresh(path, 0, WinFunc.Curve);
-                cnt++;
+                w[5].DisplayMode = GridMode.One;
+                if (!w[5].isShow)
+                    w[5].ScreenShow(Screen.AllScreens, 0, "曲线");
+                w[5].Refresh(path, 0, WinFunc.Curve);
+                rbChartMode1.IsChecked = true;
             }
             //曲线模式4
             if (dtShow.Rows[0][6].ToString() == "模式4")
             {
-                w[cnt] = (MultiFuncWindow)App.global_Windows[cnt];
-                w[cnt].DisplayMode = GridMode.Four;
-                if (!w[cnt].isShow)
-                    w[cnt].ScreenShow(Screen.AllScreens, 0, cnt.ToString());
-                w[cnt].Refresh(path, 0, WinFunc.Curve);
-                w[cnt].Refresh(path, 1, WinFunc.Curve);
-                w[cnt].Refresh(path, 2, WinFunc.Curve);
-                w[cnt].Refresh(path, 3, WinFunc.Curve);
-                cnt++;
+                w[5].DisplayMode = GridMode.Four;
+                if (!w[5].isShow)
+                    w[5].ScreenShow(Screen.AllScreens, 0, "曲线");
+                w[5].Refresh(path, 0, WinFunc.Curve);
+                w[5].Refresh(path, 1, WinFunc.Curve);
+                w[5].Refresh(path, 2, WinFunc.Curve);
+                w[5].Refresh(path, 3, WinFunc.Curve);
+                rbChartMode4.IsChecked = true;
             }
         }
         /*设置默认值*/
@@ -806,7 +989,7 @@ namespace Spectra
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show(ex.ToString());
+                System.Windows.MessageBox.Show("数据出错!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
         /*刷新界面*/
@@ -831,30 +1014,49 @@ namespace Spectra
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show(ex.ToString());
+                System.Windows.MessageBox.Show("数据出错!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
         #endregion
 
-        private void btnMapUpdate_Click(object sender, RoutedEventArgs e)
+        #region 数据存储
+        /*开始截取*/
+        private void btnSectionBegin_Click(object sender, RoutedEventArgs e)
         {
-            string[] line = File.ReadAllLines(@"E:\Map\Amap.html");
-            switch (cmbMapType.SelectedIndex)
+            try
             {
-                case 0:
-                    File.WriteAllText(@"E:\Map\Amap.html", File.ReadAllText(@"E:\Map\Amap.html").Replace(line[94], $"	  var strURL = \"D:/Amap/roadmap/\" + zoom + \"/\" + tile_x+ \"/\" + tile_y + \".png\";"));
-                    break;
-                case 1:
-                    File.WriteAllText(@"E:\Map\Amap.html", File.ReadAllText(@"E:\Map\Amap.html").Replace(line[94], $"	  var strURL = \"D:/Gmap/satellite/\" + zoom + \"/\" + tile_x+ \"/\" + tile_y + \".jpg\";"));
-                    break;
-                default:
-                    break;
+                MultiFuncWindow w = new MultiFuncWindow();
+                w = (MultiFuncWindow)App.global_Windows[0];
+                w.DisplayMode = GridMode.One;
+                if (!w.isShow)
+                    w.ScreenShow(Screen.AllScreens, 0, "单谱段图像");
+                w.Refresh(ImageInfo.strFilesPath, 0, WinFunc.Image);
+
+                App.global_ImageBuffer[0] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
+                App.global_ImageBuffer[0].getBuffer($"showFiles\\", 40);
+
+                ImageSection.beginSection = true;
+
+                timerSection.Interval = TimeSpan.FromSeconds(0.1);
+                timerSection.Tick += timerSection_Tick;
+                timerSection.Start();
             }
-            App.global_Win_Map.webMap.Refresh();
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show("无数据!","警告",MessageBoxButton.OK,MessageBoxImage.Warning);
+            }
         }
 
-        #region 数据存储
+        DispatcherTimer timerSection = new DispatcherTimer();
 
+        private void timerSection_Tick(object sender, EventArgs e)
+        {
+            if (ImageSection.startFrm > ImageSection.endFrm)
+                return;
+            txtSectionStartFrm.Text = ImageSection.startFrm.ToString();
+            txtSectionEndFrm.Text = ImageSection.endFrm.ToString();
+        }
+        /*存储路径*/
         private void btnSaveFilesPath_Click(object sender, RoutedEventArgs e)
         {
             FolderBrowserDialog fbd = new FolderBrowserDialog();
@@ -863,10 +1065,11 @@ namespace Spectra
                 string flodPath = fbd.SelectedPath;
             }
         }
-
+        /*开始存储*/
         private void btnSaveFiles_Click(object sender, RoutedEventArgs e)
         {
-
+            ImageSection.beginSection = false;
+            timerSection.Stop();
         }
         #endregion
     }
