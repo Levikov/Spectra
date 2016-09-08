@@ -8,8 +8,8 @@
             <!-- 引用资源字典 -->
             <ResourceDictionary.MergedDictionaries>
                 <!--调色板-->
-                <ResourceDictionary Source="StyleColor\Color_SkyBlue.xaml"/>
-                <!--<ResourceDictionary Source="StyleColor\Color_Apple.xaml"/>-->
+                <!--<ResourceDictionary Source="StyleColor\Color_SkyBlue.xaml"/>-->
+                <ResourceDictionary Source="StyleColor\Color_Apple.xaml"/>
                 <!--Button-->
                 <ResourceDictionary Source="StyleLabel\LabelIcon.xaml"/>
                 <ResourceDictionary Source="StyleButton\ButtonDefault.xaml"/>

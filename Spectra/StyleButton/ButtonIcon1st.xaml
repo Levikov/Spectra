@@ -2,13 +2,13 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:local="clr-namespace:Spectra.StyleButton">
     <ControlTemplate x:Key="ButtonIcon1st" TargetType="RadioButton">
-        <Grid x:Name="grid" Width="140">
+        <Grid x:Name="grid" Width="120">
             <Grid.RowDefinitions>
-                <RowDefinition Height="100"/>
+                <RowDefinition Height="80"/>
                 <RowDefinition Height="40"/>
             </Grid.RowDefinitions>
             <Grid Grid.Row="0">
-                <Rectangle x:Name="bord" Stroke="{StaticResource WindowBorder}" StrokeThickness="1" Grid.RowSpan="1" Visibility="Collapsed" VerticalAlignment="Stretch" Width="100"/>
+                <Rectangle x:Name="bord" Stroke="{StaticResource WindowBorder}" StrokeThickness="1" Grid.RowSpan="1" Visibility="Collapsed" VerticalAlignment="Stretch" Width="80"/>
                 <Label x:Name="icon" Background="{TemplateBinding Background}" Margin="1"/>
             </Grid>
             <Grid Grid.Row="1">
@@ -30,9 +30,9 @@
                 <!--故事板-->
                 <DoubleAnimationUsingKeyFrames BeginTime="00:00:00" Storyboard.TargetName="icon" Storyboard.TargetProperty="Width">
                     <!--开始时间、应用对象、应用属性-->
-                    <SplineDoubleKeyFrame KeyTime="00:00:00.00" Value="95"/>
+                    <SplineDoubleKeyFrame KeyTime="00:00:00.00" Value="75"/>
                     <!--发生时间、值-->
-                    <SplineDoubleKeyFrame KeyTime="00:00:00.50" Value="100"/>
+                    <SplineDoubleKeyFrame KeyTime="00:00:00.50" Value="80"/>
                     <!--发生时间、值-->
                 </DoubleAnimationUsingKeyFrames>
             </Storyboard>

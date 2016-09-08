@@ -2,9 +2,9 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:local="clr-namespace:Spectra.StyleButton">
     <ControlTemplate x:Key="ButtonClose" TargetType="Button">
-        <Label x:Name="label" Foreground="{StaticResource CloseFontFore}" Background="{StaticResource CloseBack}" FlowDirection="LeftToRight" FontSize="20" Width="24" ToolTip="关闭">
+        <Label x:Name="label" Foreground="{StaticResource CloseFontFore}" Background="{StaticResource CloseBack}" FlowDirection="LeftToRight" FontSize="16" Width="24" ToolTip="关闭">
             <!--通过Label重写Button-->
-            <ContentPresenter HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center"/>
+            <ContentPresenter HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" Height="24"/>
             <!--设置文本的位置-->
         </Label>
         <ControlTemplate.Triggers>

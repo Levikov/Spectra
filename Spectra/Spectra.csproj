@@ -363,6 +363,11 @@
     <Resource Include="image\1920.jpg" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="image\GRAY\10.png" />
+    <Resource Include="image\GRAY\13.png" />
+    <Resource Include="image\GRAY\9.png" />
+    <Resource Include="image\GRAY\8.png" />
+    <Resource Include="image\GRAY\1.png" />
     <None Include="showFiles\showFiles文件内容说明.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -395,6 +400,7 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>
