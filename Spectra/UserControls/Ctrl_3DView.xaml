@@ -32,7 +32,7 @@
         </GeometryModel3D>
         <GeometryModel3D x:Key="Up" x:Name="Up">
             <GeometryModel3D.Geometry>
-                <MeshGeometry3D Positions="-102.4 30 -32 -102.4 30 32 102.4 30 32 102.4 30 -32" TriangleIndices="0 1 2 2 3 0" TextureCoordinates="0 1 1 1 1 0 0 0" />
+                <MeshGeometry3D Positions="-102.4 30 -32 -102.4 30 32 102.4 30 32 102.4 30 -32" TriangleIndices="0 1 2 2 3 0" TextureCoordinates="0 1 0 0 1 0 1 1" />
             </GeometryModel3D.Geometry>
             <GeometryModel3D.Material>
                 <DiffuseMaterial>
@@ -52,7 +52,7 @@
         </GeometryModel3D>
         <GeometryModel3D x:Key="Left" x:Name="Left">
             <GeometryModel3D.Geometry>
-                <MeshGeometry3D Positions="-102.4 -30 -32 -102.4 -30 32 -102.4 30 32 -102.4 30 -32" TriangleIndices="0 1 2 2 3 0" TextureCoordinates="1 1 1 0 0 0 0 1" />
+                <MeshGeometry3D Positions="-102.4 -30 -32 -102.4 -30 32 -102.4 30 32 -102.4 30 -32" TriangleIndices="0 1 2 2 3 0" TextureCoordinates="1 1 0 1 0 0 1 0" />
             </GeometryModel3D.Geometry>
             <GeometryModel3D.Material>
                 <DiffuseMaterial>
@@ -62,7 +62,7 @@
         </GeometryModel3D>
         <GeometryModel3D x:Key="Right" x:Name="Right">
             <GeometryModel3D.Geometry>
-                <MeshGeometry3D x:Name="mg3d_Right" Positions="102.4 -30 -32 102.4 30 -32 102.4 30 32 102.4 -30 32" TriangleIndices="0 1 2 2 3 0" TextureCoordinates="0 1 1 1 1 0 0 0" />
+                <MeshGeometry3D x:Name="mg3d_Right" Positions="102.4 -30 -32 102.4 30 -32 102.4 30 32 102.4 -30 32" TriangleIndices="0 1 2 2 3 0" TextureCoordinates="1 1 1 0 0 0 0 1" />
             </GeometryModel3D.Geometry>
             <GeometryModel3D.Material>
                 <DiffuseMaterial>
@@ -72,7 +72,7 @@
         </GeometryModel3D>
         <GeometryModel3D x:Key="Active" x:Name="Active">
             <GeometryModel3D.Geometry>
-                <MeshGeometry3D Positions="-102.4 -30 0 102.4 -30 0 102.4 30 0 -102.4 30 0" TriangleIndices="0 1 2 2 3 0" TextureCoordinates="0 1 1 1 1 0 0 0" />
+                <MeshGeometry3D Positions="-102.4 -30 0 102.4 -30 0 102.4 30 0 -102.4 30 0" TriangleIndices="0 1 2 2 3 0 0 3 2 2 1 0" TextureCoordinates="0 1 1 1 1 0 0 0 0 1 0 0 1 0 1 1" />
             </GeometryModel3D.Geometry>
             <GeometryModel3D.Material>
                 <DiffuseMaterial>
