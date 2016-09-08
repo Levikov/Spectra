@@ -9,6 +9,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Forms;
+using System.Windows.Threading;
 
 namespace Spectra
 {
@@ -337,7 +338,7 @@ namespace Spectra
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show(ex.ToString());
+                System.Windows.MessageBox.Show("数据出错!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
         /*清除datagrid*/
@@ -409,7 +410,7 @@ namespace Spectra
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show(ex.ToString());
+                System.Windows.MessageBox.Show("数据出错!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
         /*显示单谱段图像*/
@@ -423,12 +424,13 @@ namespace Spectra
                 if (!w.isShow)
                     w.ScreenShow(Screen.AllScreens, 0, "单谱段图像");
                 w.Refresh(ImageInfo.strFilesPath, 0, WinFunc.Image);
+                
                 App.global_ImageBuffer[0] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
                 App.global_ImageBuffer[0].getBuffer($"showFiles\\", 40);
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show(ex.ToString());
+                System.Windows.MessageBox.Show("数据出错!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
         /*显示典型谱段图像对比*/
@@ -456,7 +458,7 @@ namespace Spectra
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show(ex.ToString());
+                System.Windows.MessageBox.Show("数据出错!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
         /*显示光谱三维立方体*/
@@ -473,7 +475,7 @@ namespace Spectra
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show(ex.ToString());
+                System.Windows.MessageBox.Show("数据出错!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
         /*设置单谱段图像谱段*/
@@ -610,7 +612,7 @@ namespace Spectra
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show(ex.ToString());
+                System.Windows.MessageBox.Show("数据出错!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
         #endregion
@@ -730,7 +732,7 @@ namespace Spectra
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show(ex.ToString());
+                System.Windows.MessageBox.Show("数据出错!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
         /*取当前图像信息*/
@@ -770,7 +772,7 @@ namespace Spectra
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show(ex.ToString());
+                System.Windows.MessageBox.Show("数据出错!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
         /*设置样式*/
@@ -812,7 +814,7 @@ namespace Spectra
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show(ex.ToString());
+                System.Windows.MessageBox.Show("数据出错!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
         /*删除应用样式*/
@@ -827,7 +829,7 @@ namespace Spectra
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show(ex.ToString());
+                System.Windows.MessageBox.Show("数据出错!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
         /*刷新列表*/
@@ -839,7 +841,7 @@ namespace Spectra
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show(ex.ToString());
+                System.Windows.MessageBox.Show("数据出错!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
         /*准备应用图像*/
@@ -859,7 +861,7 @@ namespace Spectra
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show(ex.ToString());
+                System.Windows.MessageBox.Show("数据出错!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
         /*显示样式*/
@@ -878,7 +880,7 @@ namespace Spectra
             }
             catch
             {
-                System.Windows.MessageBox.Show("无数据!", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+                System.Windows.MessageBox.Show("数据出错!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
         }
@@ -987,7 +989,7 @@ namespace Spectra
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show(ex.ToString());
+                System.Windows.MessageBox.Show("数据出错!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
         /*刷新界面*/
@@ -1012,13 +1014,49 @@ namespace Spectra
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show(ex.ToString());
+                System.Windows.MessageBox.Show("数据出错!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
         #endregion
 
         #region 数据存储
+        /*开始截取*/
+        private void btnSectionBegin_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                MultiFuncWindow w = new MultiFuncWindow();
+                w = (MultiFuncWindow)App.global_Windows[0];
+                w.DisplayMode = GridMode.One;
+                if (!w.isShow)
+                    w.ScreenShow(Screen.AllScreens, 0, "单谱段图像");
+                w.Refresh(ImageInfo.strFilesPath, 0, WinFunc.Image);
 
+                App.global_ImageBuffer[0] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
+                App.global_ImageBuffer[0].getBuffer($"showFiles\\", 40);
+
+                ImageSection.beginSection = true;
+
+                timerSection.Interval = TimeSpan.FromSeconds(0.1);
+                timerSection.Tick += timerSection_Tick;
+                timerSection.Start();
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show("无数据!","警告",MessageBoxButton.OK,MessageBoxImage.Warning);
+            }
+        }
+
+        DispatcherTimer timerSection = new DispatcherTimer();
+
+        private void timerSection_Tick(object sender, EventArgs e)
+        {
+            if (ImageSection.startFrm > ImageSection.endFrm)
+                return;
+            txtSectionStartFrm.Text = ImageSection.startFrm.ToString();
+            txtSectionEndFrm.Text = ImageSection.endFrm.ToString();
+        }
+        /*存储路径*/
         private void btnSaveFilesPath_Click(object sender, RoutedEventArgs e)
         {
             FolderBrowserDialog fbd = new FolderBrowserDialog();
@@ -1027,10 +1065,11 @@ namespace Spectra
                 string flodPath = fbd.SelectedPath;
             }
         }
-
+        /*开始存储*/
         private void btnSaveFiles_Click(object sender, RoutedEventArgs e)
         {
-
+            ImageSection.beginSection = false;
+            timerSection.Stop();
         }
         #endregion
     }

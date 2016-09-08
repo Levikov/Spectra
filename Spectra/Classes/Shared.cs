@@ -146,7 +146,8 @@ namespace Spectra
         public static int noise_value = 0;      //噪声值
 
         public static bool chartMode;           //曲线模式1或4
-        public static int chartShowCnt=0;       //显示的曲线计数
+        public static int chartShowCnt = 0;     //显示的曲线计数
+        public static int chartShowSum = 10;    //显示的曲线总数
 
         public static DataTable dtBandWave;     //谱段和波长的对应表，该表在系统运行过程中为固定值
         public static DataTable dtImgInfo;      //图像信息对应的DataTable
@@ -327,7 +328,7 @@ namespace Spectra
             UInt32 sum = 0;
             min = 4096;
             max = 0;
-            for (UInt32 i = 0; i < file.Length/2; i++)
+            for (UInt32 i = 0; i < file.Length / 2; i++)
             {
                 sum += (UInt32)buffer[i * 2] + (UInt32)buffer[i * 2 + 1] * 256;
                 if ((int)buffer[i * 2] + (int)buffer[i * 2 + 1] * 256 > max)
@@ -342,5 +343,11 @@ namespace Spectra
         {
             return (int)buffer[row * height * 2 + col * 2] + (int)buffer[row * height * 2 + col * 2 + 1] * 256;
         }
+    }
+
+    public class ImageSection
+    {
+        public static bool beginSection;        //是否开始抠图
+        public static int startFrm,endFrm;      //取图的帧起始和结束
     }
 }

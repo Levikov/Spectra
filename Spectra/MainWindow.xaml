@@ -73,12 +73,12 @@
             </Grid.ColumnDefinitions>
             <GridSplitter x:Name="splitA" Grid.RowSpan="1" Margin="0,50" Width="1" Background="{StaticResource ButtonBack}"/>
             <StackPanel>
-                <RadioButton x:Name="btnLeftA1" Content="数据处理" Template="{DynamicResource ButtonIcon2nd}" Margin="0,50,0,0" Height="70" VerticalAlignment="Top" IsChecked="True">
+                <RadioButton x:Name="btnLeftA1" Content="数据处理" Template="{DynamicResource ButtonIcon2nd}" Margin="0,50,0,0" Height="70" VerticalAlignment="Top">
                     <RadioButton.Background>
                         <ImageBrush ImageSource="image/ICON/1.ico"/>
                     </RadioButton.Background>
                 </RadioButton>
-                <RadioButton x:Name="btnLeftA2" Content="数据存储" Template="{DynamicResource ButtonIcon2nd}" Margin="0,0,0,0" Height="70" VerticalAlignment="Top">
+                <RadioButton x:Name="btnLeftA2" Content="数据存储" Template="{DynamicResource ButtonIcon2nd}" Margin="0,0,0,0" Height="70" VerticalAlignment="Top" IsChecked="True">
                     <RadioButton.Background>
                         <ImageBrush ImageSource="image/ICON/2.ico"/>
                     </RadioButton.Background>
@@ -174,9 +174,9 @@
                 <GroupBox Grid.Row="1" Grid.Column="1" Header="存储图像" FontSize="20">
                     <Grid>
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="60"/>
-                            <RowDefinition Height="60"/>
-                            <RowDefinition Height="60"/>
+                            <RowDefinition Height="50"/>
+                            <RowDefinition Height="50"/>
+                            <RowDefinition Height="50"/>
                             <RowDefinition Height="1*"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
@@ -184,11 +184,23 @@
                             <ColumnDefinition Width="1*"/>
                             <ColumnDefinition Width="1*"/>
                         </Grid.ColumnDefinitions>
+                        <Label Content="图像起止:" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <Grid Grid.Column="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="30"/>
+                                <ColumnDefinition Width="1*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="txtSectionStartFrm" Grid.Column="0" Height="34"/>
+                            <Label Grid.Column="1" Content="—" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <TextBox x:Name="txtSectionEndFrm" Grid.Column="2" Height="34"/>
+                        </Grid>
+                        <Button x:Name="btnSectionBegin" Grid.Row="0" Grid.Column="2" Content="开始选择" Template="{DynamicResource ButtonDefault}" Width="160" Click="btnSectionBegin_Click" HorizontalAlignment="Center" VerticalAlignment="Center" />
                         <Label Grid.Row="1" Grid.Column="0" Content="文件存储路径:" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        <TextBox x:Name="txtSaveFilesPath" Grid.Row="1" Grid.Column="1" IsReadOnly="True"/>
-                        <Button x:Name="btnSaveFilesPath" Grid.Row="1" Grid.Column="2" Content="选择存储路径" Template="{DynamicResource ButtonDefault}" Width="160" Click="btnSaveFilesPath_Click" />
-                        <ProgressBar Grid.Row="2" Grid.Column="1" Height="36" BorderBrush="{StaticResource ButtonBack}"/>
-                        <Button x:Name="btnSaveFiles" Grid.Row="2" Grid.Column="2" Content="开始存储" Template="{DynamicResource ButtonDefault}" Width="160" Click="btnSaveFiles_Click" />
+                        <TextBox x:Name="txtSaveFilesPath" Grid.Row="1" Grid.Column="1" IsReadOnly="True" Height="34"/>
+                        <Button x:Name="btnSaveFilesPath" Grid.Row="1" Grid.Column="2" Content="选择存储路径" Template="{DynamicResource ButtonDefault}" Width="160" Click="btnSaveFilesPath_Click" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                        <ProgressBar Grid.Row="2" Grid.Column="1" Height="34" BorderBrush="{StaticResource ButtonBack}"/>
+                        <Button x:Name="btnSaveFiles" Grid.Row="2" Grid.Column="2" Content="开始存储" Template="{DynamicResource ButtonDefault}" Width="160" Click="btnSaveFiles_Click" HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Grid>
                 </GroupBox>
             </Grid>

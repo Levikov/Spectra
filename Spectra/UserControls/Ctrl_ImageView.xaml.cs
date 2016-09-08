@@ -39,6 +39,7 @@ namespace Spectra
         public double realRatio;                    //图像显示的真实比例（scale为1时）
         public double realX, realY;                 //IMG1在窗体的真实位置
         public double curXinImg, curYinImg;         //当前鼠标值IMG1的位置
+        public Coord coo;                           //点位置的经纬
 
         public Ctrl_ImageView()
         {
@@ -117,6 +118,15 @@ namespace Spectra
             if (img == null)
                 return;
             img.ReleaseMouseCapture();
+            if (ImageSection.beginSection)
+            {
+                borderSection.Visibility = Visibility.Visible;
+                ImageSection.startFrm = (int)curXinImg;
+                Thickness mov = new Thickness();
+                mov = borderSection.Margin;
+                mov.Left = MousePoint.X;
+                borderSection.Margin = mov;
+            }
             mouseDown = false;
         }
 
@@ -141,6 +151,9 @@ namespace Spectra
                 Col.Text = $"{Math.Floor(curXinImg)}";
                 Row.Text = $"{Math.Floor(curYinImg)}";
                 grayValue.Text = App.global_ImageBuffer[SubWinIndex].getValue((int)curYinImg,(int)curXinImg).ToString();
+                coo = new Coord(Convert.ToDouble(ImageInfo.dtImgInfo.Rows[(int)curYinImg][3]), Convert.ToDouble(ImageInfo.dtImgInfo.Rows[(int)curYinImg][4]));
+                Lat.Text = coo.Lat.ToString("F4");
+                Lon.Text = coo.Lon.ToString("F4");
             }
         }
 
@@ -225,15 +238,24 @@ namespace Spectra
             {
                 if (ImageInfo.chartMode)
                 {
-                    if (ImageInfo.chartShowCnt % 10 == 0)
+                    if (ImageInfo.chartShowCnt % ImageInfo.chartShowSum == 0)
                         ((MultiFuncWindow)App.global_Windows[5]).Refresh(null, 0, WinFunc.Curve);
-                    ((Ctrl_SpecCurv)((MultiFuncWindow)App.global_Windows[5]).UserControls[0]).Draw1(p, ImageInfo.chartShowCnt % 10);
+                    ((Ctrl_SpecCurv)((MultiFuncWindow)App.global_Windows[5]).UserControls[0]).Draw1(p, coo, ImageInfo.chartShowCnt % ImageInfo.chartShowSum);
                 }
                 else
-                    ((Ctrl_SpecCurv)((MultiFuncWindow)App.global_Windows[5]).UserControls[ImageInfo.chartShowCnt % 4]).Draw4(p);
+                    ((Ctrl_SpecCurv)((MultiFuncWindow)App.global_Windows[5]).UserControls[ImageInfo.chartShowCnt % 4]).Draw4(p, coo);
             }
-            if (++ImageInfo.chartShowCnt == 40)
+            if (++ImageInfo.chartShowCnt == 25200)
                 ImageInfo.chartShowCnt = 0;
+            if (ImageSection.beginSection)
+            {
+                borderSection.Visibility = Visibility.Visible;
+                ImageSection.endFrm = (int)curXinImg;
+                Thickness mov = new Thickness();
+                mov = borderSection.Margin;
+                mov.Right = ActualWidth - MousePoint.X + 1;
+                borderSection.Margin = mov;
+            }
         }
 
         //双击后放大到16:1像元大小
