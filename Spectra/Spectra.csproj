@@ -430,6 +430,9 @@
     <Resource Include="image\1920.jpg" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="decFiles\decFiles.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Mapsui\BruTile.Desktop.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -476,6 +479,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Mapsui\SQLite.Net.Platform.Win32.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="srcFiles\srcFiles.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Resource Include="Mapsui\Newtonsoft.Json.xml">
