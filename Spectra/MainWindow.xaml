@@ -24,11 +24,16 @@
         <Rectangle Stroke="{StaticResource WindowBorder}" StrokeThickness="1" Grid.RowSpan="1"/>
         <Rectangle Stroke="{StaticResource WindowBorder}" StrokeThickness="1" Grid.RowSpan="2"/>
         <StackPanel>
-            <StackPanel Height="24" Orientation="Horizontal" FlowDirection="RightToLeft" VerticalAlignment="Top" Background="{StaticResource TitleBack}">
-                <Button x:Name="btnExit" Content="×" Template="{DynamicResource ButtonClose}" Click="btnExit_Click"/>
-                <Button x:Name="btnMax" Content="□" Template="{DynamicResource ButtonMinMax}" Click="btnMax_Click"/>
-                <Button x:Name="btnMin" Content="—" Template="{DynamicResource ButtonMinMax}" Click="btnMin_Click"/>
-            </StackPanel>
+            <DockPanel Height="24" FlowDirection="RightToLeft" VerticalAlignment="Top" Background="{StaticResource TitleBack}">
+                <StackPanel Height="24" Orientation="Horizontal" FlowDirection="RightToLeft" VerticalAlignment="Top" Background="{StaticResource TitleBack}">
+                    <Button x:Name="btnExit" Content="×" Template="{DynamicResource ButtonClose}" Click="btnExit_Click"/>
+                    <Button x:Name="btnMax" Content="□" Template="{DynamicResource ButtonMinMax}" Click="btnMax_Click"/>
+                    <Button x:Name="btnMin" Content="—" Template="{DynamicResource ButtonMinMax}" Click="btnMin_Click"/>
+                </StackPanel>
+                <StackPanel Height="24" Orientation="Horizontal" FlowDirection="LeftToRight" VerticalAlignment="Top" Background="{StaticResource TitleBack}" HorizontalAlignment="Right">
+                    <Label Content="光谱微纳卫星数据分析系统" Foreground="{StaticResource MinFontFore}"/>
+                </StackPanel>
+            </DockPanel>
             <DockPanel Margin="2,2,2,0" Background="{StaticResource 2ndTitleBack}">
                 <RadioButton x:Name="btnTopA" Content="数据管理" Template="{DynamicResource ButtonIcon1st}" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch" Margin="20,0,0,0">
                     <RadioButton.Background>
