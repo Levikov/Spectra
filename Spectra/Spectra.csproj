@@ -189,6 +189,9 @@
     <Compile Include="UserControls\Ctrl_ImageView.xaml.cs">
       <DependentUpon>Ctrl_ImageView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UserControls\Ctrl_Map.xaml.cs">
+      <DependentUpon>Ctrl_Map.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UserControls\Ctrl_SpecCurv.xaml.cs">
       <DependentUpon>Ctrl_SpecCurv.xaml</DependentUpon>
     </Compile>
@@ -304,6 +307,10 @@
     <Page Include="UserControls\Ctrl_ImageView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UserControls\Ctrl_Map.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UserControls\Ctrl_SpecCurv.xaml">
       <Generator>MSBuild:Compile</Generator>
