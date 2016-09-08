@@ -425,7 +425,7 @@ namespace Spectra
             {
                 Bitmap[] r = new Bitmap[6];
                 r[0] = await GetBmp(path,40, ColorRenderMode.Grayscale);
-                r[1] = await GetBmp(path,40, ColorRenderMode.Grayscale);
+                r[1] = await GetBmp(path,6, ColorRenderMode.Grayscale);
                 Thread _tUp = new Thread(new ThreadStart(() => {
                     try
                     {

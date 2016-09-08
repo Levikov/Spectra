@@ -64,6 +64,7 @@ namespace Spectra
             SubWinIndex = sub;
             Bitmap bmp = await DataProc.GetBmp(path,band-1, cMode);
             if (bmp == null) return;
+            bmp.RotateFlip(RotateFlipType.Rotate90FlipX);
             MemoryStream ms = new MemoryStream();
             bmp.Save(ms, System.Drawing.Imaging.ImageFormat.Bmp);
             ImgW = bmp.Width;
@@ -79,9 +80,6 @@ namespace Spectra
             Band.Text = $"{SpecNum}";
             Wave.Text = ImageInfo.getWave(SpecNum).ToString("F0");
             ImageWidth.Text = ImageInfo.imgWidth.ToString();
-            MinValue.Text = App.global_ImageBuffer[SubWinIndex].min.ToString();
-            MaxValue.Text = App.global_ImageBuffer[SubWinIndex].max.ToString();
-            MeanValue.Text = App.global_ImageBuffer[SubWinIndex].mean.ToString();
             this.Busy.isBusy = false;
         }
 
@@ -150,10 +148,14 @@ namespace Spectra
                 tb_3DCoord.Text = $"({Math.Floor(curXinImg)},{Math.Floor(curYinImg)},{SpecNum})";
                 Col.Text = $"{Math.Floor(curXinImg)}";
                 Row.Text = $"{Math.Floor(curYinImg)}";
-                grayValue.Text = App.global_ImageBuffer[SubWinIndex].getValue((int)curYinImg,(int)curXinImg).ToString();
-                coo = new Coord(Convert.ToDouble(ImageInfo.dtImgInfo.Rows[(int)curYinImg][3]), Convert.ToDouble(ImageInfo.dtImgInfo.Rows[(int)curYinImg][4]));
+                coo = new Coord(Convert.ToDouble(ImageInfo.dtImgInfo.Rows[(int)curXinImg][3]), Convert.ToDouble(ImageInfo.dtImgInfo.Rows[(int)curXinImg][4]));
                 Lat.Text = coo.Lat.ToString("F4");
                 Lon.Text = coo.Lon.ToString("F4");
+
+                grayValue.Text = App.global_ImageBuffer[SubWinIndex].getValue((int)curXinImg,(int)curYinImg).ToString();
+                MinValue.Text = App.global_ImageBuffer[SubWinIndex].min.ToString();
+                MaxValue.Text = App.global_ImageBuffer[SubWinIndex].max.ToString();
+                MeanValue.Text = App.global_ImageBuffer[SubWinIndex].mean.ToString();
             }
         }
 
@@ -202,8 +204,8 @@ namespace Spectra
                 transform.ScaleX += delta;
                 transform.ScaleY += delta;
 
-                transform1.X = -1 * (curXinImg * transform.ScaleX * realRatio - MousePoint.X + realX + 5);  //这里加了偏置5,不知道为什么计算的不准
-                transform1.Y = -1 * (curYinImg * transform.ScaleY * realRatio - MousePoint.Y + realY - 68); //这里加了偏置68,只能通过加偏置处理
+                transform1.X = -1 * (curXinImg * transform.ScaleX * realRatio - MousePoint.X + realX - 95);  //这里加了偏置5,不知道为什么计算的不准
+                transform1.Y = -1 * (curYinImg * transform.ScaleY * realRatio - MousePoint.Y + realY); //这里加了偏置68,只能通过加偏置处理
             }
         }
 
@@ -212,7 +214,7 @@ namespace Spectra
         {
             MousePoint = e.GetPosition(e.Source as FrameworkElement);
 
-            realRatio = IMG1.ActualWidth / 2048;
+            realRatio = IMG1.ActualHeight / 2048;
 
             if (IMG1.ActualHeight > IMG1.ActualWidth)
             {

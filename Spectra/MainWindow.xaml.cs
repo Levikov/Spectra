@@ -184,7 +184,7 @@ namespace Spectra
 
         #region 文件检索
         /*选定文件*/
-        private void btnSelectFile_Click(object sender, RoutedEventArgs e)
+        private async void btnSelectFile_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -201,6 +201,16 @@ namespace Spectra
                     DataTable dt = SQLiteFunc.SelectDTSQL("SELECT * from FileDetails_dec where MD5='" + FileInfo.md5 + "'");
                     FileInfo.upkFilePathName = dt.Rows[0][7].ToString();
                     FileInfo.decFilePathName = dt.Rows[0][9].ToString();
+                    Func<Task>func = () => {
+                        return Task.Run(() =>
+                        {
+                            Parallel.For(0, 160, i =>
+                            {
+                                File.Copy($"{FileInfo.decFilePathName}{i}.raw", $"{ImageInfo.strFilesPath}{i}.raw", true);
+                            });
+                        });
+                    };
+                    await func();
                 }
                 else
                 {
@@ -272,15 +282,12 @@ namespace Spectra
         {
             try
             {
-                DataTable dt = await DataProc.QueryResult(FileInfo.md5,(bool)cb_byTime.IsChecked, (bool)this.cb_byCoord.IsChecked, (bool)this.cb_byFrmCnt.IsChecked, start_time, end_time, start_FrmCnt, end_FrmCnt, Coord_TL, Coord_DR);
-                dataGrid_Result.ItemsSource = dt.DefaultView;
-                dataGrid_SatePose.ItemsSource = dt.DefaultView;
-                DataQuery.QueryResult = dt;
-                ImageInfo.dtImgInfo = dt;
+                ImageInfo.dtImgInfo = DataQuery.QueryResult = await DataProc.QueryResult(FileInfo.md5,(bool)cb_byTime.IsChecked, (bool)this.cb_byCoord.IsChecked, (bool)this.cb_byFrmCnt.IsChecked,
+                    start_time, end_time, start_FrmCnt, end_FrmCnt, Coord_TL, Coord_DR);
+                dataGrid_SatePose.ItemsSource = dataGrid_Result.ItemsSource = DataQuery.QueryResult.DefaultView;
                 ImageInfo.GetImgInfo();       /*存储图像信息*/
                 SetImgInfo();
                 btnMakeImage.IsEnabled = true;
-                btnDisplay.IsEnabled = false;
             }
             catch (Exception E)
             {
@@ -338,7 +345,7 @@ namespace Spectra
 
         #region 图像提取
         /*显示图像按钮*/
-        private void btnDisplay_Click(object sender, RoutedEventArgs e)
+        private async void btnDisplay_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -346,7 +353,15 @@ namespace Spectra
                 //App.global_Win_Map = new MapWindow();
                 //App.global_Win_Map.Show();
                 //App.global_Win_Map.DrawRectangle(new Point((double)DataQuery.QueryResult.Rows[0].ItemArray[3], (double)DataQuery.QueryResult.Rows[0].ItemArray[4]), new Point((double)DataQuery.QueryResult.Rows[DataQuery.QueryResult.Rows.Count - 1].ItemArray[3], (double)DataQuery.QueryResult.Rows[DataQuery.QueryResult.Rows.Count - 1].ItemArray[4]));
-                initWindows(ImageInfo.strFilesPath, WinShowInfo.WindowsCnt,WinShowInfo.dtWinShowInfo);
+                if (FileInfo.md5 != null)
+                {
+                    ImageInfo.dtImgInfo = DataQuery.QueryResult = await DataProc.QueryResult(FileInfo.md5, false, false, false,
+                        start_time, end_time, start_FrmCnt, end_FrmCnt, Coord_TL, Coord_DR);
+                    dataGrid_SatePose.ItemsSource = dataGrid_Result.ItemsSource = DataQuery.QueryResult.DefaultView;
+                    ImageInfo.GetImgInfo();       /*存储图像信息*/
+                    SetImgInfo();
+                }
+                initWindows(ImageInfo.strFilesPath, WinShowInfo.WindowsCnt, WinShowInfo.dtWinShowInfo);
             }
             catch (Exception ex)
             {
@@ -457,12 +472,7 @@ namespace Spectra
                     w.ScreenShow(Screen.AllScreens, 0, "典型谱段图像对比");
                 App.global_ImageBuffer[0] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
                 App.global_ImageBuffer[0].getBuffer($"showFiles\\", 40);
-                App.global_ImageBuffer[1] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
-                App.global_ImageBuffer[1].getBuffer($"showFiles\\", 40);
-                App.global_ImageBuffer[2] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
-                App.global_ImageBuffer[2].getBuffer($"showFiles\\", 77);
-                App.global_ImageBuffer[3] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
-                App.global_ImageBuffer[3].getBuffer($"showFiles\\", 121);
+                App.global_ImageBuffer[3] = App.global_ImageBuffer[2] = App.global_ImageBuffer[1] = App.global_ImageBuffer[0];
                 w.Refresh(ImageInfo.strFilesPath, 0, WinFunc.Image);
                 w.Refresh(ImageInfo.strFilesPath, 1, WinFunc.Image);
                 w.Refresh(ImageInfo.strFilesPath, 2, WinFunc.Image);
@@ -902,6 +912,12 @@ namespace Spectra
         /*初始化显示窗体*/
         private void initWindows(string path, int winSum, DataTable dtShow)
         {
+            new Thread(() =>
+            {
+                App.global_ImageBuffer[0] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
+                App.global_ImageBuffer[0].getBuffer($"showFiles\\", 40);
+                App.global_ImageBuffer[3] = App.global_ImageBuffer[2] = App.global_ImageBuffer[1] = App.global_ImageBuffer[0];
+            });
             MultiFuncWindow[] w = new MultiFuncWindow[6];
             for (int i = 0; i < 6; i++)
                 w[i] = (MultiFuncWindow)App.global_Windows[i];
@@ -912,14 +928,17 @@ namespace Spectra
                 if (!w[0].isShow)
                     w[0].ScreenShow(Screen.AllScreens, 0, "单谱段图像");
                 w[0].Refresh(path, 0, WinFunc.Image);
-                App.global_ImageBuffer[0] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
-                App.global_ImageBuffer[0].getBuffer($"showFiles\\",40);
+                //App.global_ImageBuffer[0] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
+                //App.global_ImageBuffer[0].getBuffer($"showFiles\\",40);
             }
             if (dtShow.Rows[0][2].ToString() == "True")
             {
                 w[1].DisplayMode = GridMode.Four;
                 if (!w[1].isShow)
                     w[1].ScreenShow(Screen.AllScreens, 0, "典型谱段图像对比");
+                //App.global_ImageBuffer[0] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
+                //App.global_ImageBuffer[0].getBuffer($"showFiles\\", 40);
+                //App.global_ImageBuffer[3] = App.global_ImageBuffer[2] = App.global_ImageBuffer[1] = App.global_ImageBuffer[0];
                 w[1].Refresh(path, 0, WinFunc.Image);
                 w[1].Refresh(path, 1, WinFunc.Image);
                 w[1].Refresh(path, 2, WinFunc.Image);
