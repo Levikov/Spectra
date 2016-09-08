@@ -136,6 +136,12 @@ namespace Spectra
         }
     }
 
+    public class MapInfo : DependencyObject
+    {
+        public static string RoadMapPath = @"D:\Amap\roadmap";
+        public static string TerrainMapPath = "";
+    }
+
     public class ImageInfo : DependencyObject
     {
         [DllImport("DLL\\DataOperation.dll", EntryPoint = "Split_Chanel")]

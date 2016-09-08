@@ -89,6 +89,8 @@ namespace Spectra
                     ((Ctrl_3DView)UserControls[SubGridInedex]).Refresh(path);
                     break;
                 case Spectra.WinFunc.Map:
+                    UserControls[SubGridInedex] = new Ctrl_Map();
+                    ((Ctrl_Map)UserControls[SubGridInedex]).Refresh();
                     break;
                 default:
                     break;
