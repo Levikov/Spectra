@@ -38,6 +38,11 @@ namespace Spectra
             MapControl.ZoomToFullEnvelope();
             MapControl.Refresh();
         }
+
+        internal void Refresh()
+        {
+            
+        }
     }
     public static class MapTilerSample
     {
