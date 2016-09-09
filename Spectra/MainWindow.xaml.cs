@@ -1,13 +1,11 @@
-﻿using Microsoft.Win32;
-using System;
+﻿using System;
 using System.Data;
-using System.Data.SQLite;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Forms;
 using System.Windows.Threading;
 
@@ -31,6 +29,7 @@ namespace Spectra
             getDefaultShow();
             getApplyModel();
             getBandWave();
+            dataGrid_srcFile.ItemsSource = SQLiteFunc.SelectDTSQL("SELECT * from FileDetails").DefaultView;
         }
         /*拖动界面*/
         private void WindowMain_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -164,11 +163,21 @@ namespace Spectra
                 SQLiteFunc.ExcuteSQL("update FileDetails set 是否已解压='是' where MD5='?';", FileInfo.md5);
                 FileInfo.decFilePathName = $"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\result\\";
 
+                new Thread(() =>
+                {
+                    Parallel.For(0, 160, i =>
+                    {
+                        File.Copy($"{FileInfo.decFilePathName}{i}.raw", $"{ImageInfo.strFilesPath}{i}.raw", true);
+                    });
+                }).Start();
+
                 b_Abort_Import.IsEnabled = false;
                 btnOpenFile.IsEnabled = true;
                 btnDecFile.IsEnabled = true;
                 btnSelectFile.IsEnabled = true;
                 btnDelRecord.IsEnabled = true;
+                btnTopB.IsChecked = true;
+                btnLeftB1.IsChecked = true;
             }
             catch (Exception ex)
             {
@@ -211,6 +220,8 @@ namespace Spectra
                         });
                     };
                     await func();
+                    btnTopB.IsChecked = true;
+                    btnLeftB1.IsChecked = true;
                 }
                 else
                 {
@@ -270,46 +281,13 @@ namespace Spectra
         }
         #endregion
 
-        #region 图像检索
+        #region 数据检索
         public DateTime start_time;                     //起始检索时刻
         public DateTime end_time;                       //终止检索时刻
         public Coord Coord_TL = new Coord(0, 0);        //左上角坐标
         public Coord Coord_DR = new Coord(0, 0);        //右下角坐标
         public long start_FrmCnt;                       //起始帧号
         public long end_FrmCnt;                         //终止帧号
-        /*点击图像检索*/
-        private async void b_Query_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                ImageInfo.dtImgInfo = DataQuery.QueryResult = await DataProc.QueryResult(FileInfo.md5,(bool)cb_byTime.IsChecked, (bool)this.cb_byCoord.IsChecked, (bool)this.cb_byFrmCnt.IsChecked,
-                    start_time, end_time, start_FrmCnt, end_FrmCnt, Coord_TL, Coord_DR);
-                dataGrid_SatePose.ItemsSource = dataGrid_Result.ItemsSource = DataQuery.QueryResult.DefaultView;
-                ImageInfo.GetImgInfo();       /*存储图像信息*/
-                SetImgInfo();
-                btnMakeImage.IsEnabled = true;
-            }
-            catch (Exception E)
-            {
-                System.Windows.MessageBox.Show("无数据!","警告",MessageBoxButton.OK,MessageBoxImage.Warning);
-            }
-        }
-        /*点击生成图像*/
-        private async void btnMakeImage_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                IProgress<double> IProgress_Prog = new Progress<double>((ProgressValue) => { progMakeImage.Value = ProgressValue * progMakeImage.Maximum; });
-                await ImageInfo.MakeImage(IProgress_Prog);
-                System.Windows.MessageBox.Show("OK");
-                btnMakeImage.IsEnabled = false;
-                btnDisplay.IsEnabled = true;
-            }
-            catch (Exception ex)
-            {
-                System.Windows.MessageBox.Show(ex.ToString());
-            }
-        }
         /*选择时间条件*/
         private void dtp_TextChanged(object sender, TextChangedEventArgs e)
         {
@@ -341,11 +319,48 @@ namespace Spectra
                 default: break;
             }
         }
-        #endregion
-
-        #region 图像提取
+        /*点击图像检索*/
+        private async void b_Query_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                ImageInfo.dtImgInfo = DataQuery.QueryResult = await DataProc.QueryResult(FileInfo.md5,(bool)cb_byTime.IsChecked, (bool)this.cb_byCoord.IsChecked, (bool)this.cb_byFrmCnt.IsChecked,
+                    start_time, end_time, start_FrmCnt, end_FrmCnt, Coord_TL, Coord_DR);
+                dataGrid_SatePose.ItemsSource = dataGrid_Result.ItemsSource = DataQuery.QueryResult.DefaultView;
+                ImageInfo.GetImgInfo();
+                SetImgInfo();
+                btnMakeImage.IsEnabled = true;
+            }
+            catch
+            {
+                System.Windows.MessageBox.Show("无数据!","警告",MessageBoxButton.OK,MessageBoxImage.Warning);
+            }
+        }
+        /*清空结果*/
+        private void button_Clear_Result_Click(object sender, RoutedEventArgs e)
+        {
+            DataQuery.QueryResult.Clear();
+            ImageInfo.dtImgInfo.Clear();
+            dataGrid_Result.ItemsSource = null;
+            dataGrid_SatePose.ItemsSource = null;
+        }
+        /*点击生成图像*/
+        private async void btnMakeImage_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                IProgress<double> IProgress_Prog = new Progress<double>((ProgressValue) => { progMakeImage.Value = ProgressValue * progMakeImage.Maximum; });
+                await ImageInfo.MakeImage(IProgress_Prog);
+                System.Windows.MessageBox.Show("OK");
+                btnMakeImage.IsEnabled = false;
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(ex.ToString());
+            }
+        }
         /*显示图像按钮*/
-        private async void btnDisplay_Click(object sender, RoutedEventArgs e)
+        private void btnDisplay_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -353,26 +368,12 @@ namespace Spectra
                 //App.global_Win_Map = new MapWindow();
                 //App.global_Win_Map.Show();
                 //App.global_Win_Map.DrawRectangle(new Point((double)DataQuery.QueryResult.Rows[0].ItemArray[3], (double)DataQuery.QueryResult.Rows[0].ItemArray[4]), new Point((double)DataQuery.QueryResult.Rows[DataQuery.QueryResult.Rows.Count - 1].ItemArray[3], (double)DataQuery.QueryResult.Rows[DataQuery.QueryResult.Rows.Count - 1].ItemArray[4]));
-                if (FileInfo.md5 != null)
-                {
-                    ImageInfo.dtImgInfo = DataQuery.QueryResult = await DataProc.QueryResult(FileInfo.md5, false, false, false,
-                        start_time, end_time, start_FrmCnt, end_FrmCnt, Coord_TL, Coord_DR);
-                    dataGrid_SatePose.ItemsSource = dataGrid_Result.ItemsSource = DataQuery.QueryResult.DefaultView;
-                    ImageInfo.GetImgInfo();       /*存储图像信息*/
-                    SetImgInfo();
-                }
                 initWindows(ImageInfo.strFilesPath, WinShowInfo.WindowsCnt, WinShowInfo.dtWinShowInfo);
             }
-            catch (Exception ex)
+            catch
             {
-                System.Windows.MessageBox.Show("数据出错!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
+                System.Windows.MessageBox.Show("无数据!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
-        }
-        /*清除datagrid*/
-        private void button_Clear_Result_Click(object sender, RoutedEventArgs e)
-        {
-            DataQuery.QueryResult.Clear();
-            dataGrid_Result.ItemsSource = null;
         }
         #endregion
 
@@ -445,19 +446,22 @@ namespace Spectra
         {
             try
             {
+                new Thread(() =>
+                {
+                    App.global_ImageBuffer[0] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
+                    App.global_ImageBuffer[0].getBuffer($"showFiles\\", 40);
+                }).Start();
+
                 MultiFuncWindow w = new MultiFuncWindow();
                 w = (MultiFuncWindow)App.global_Windows[0];
                 w.DisplayMode = GridMode.One;
                 if (!w.isShow)
                     w.ScreenShow(Screen.AllScreens, 0, "单谱段图像");
                 w.Refresh(ImageInfo.strFilesPath, 0, WinFunc.Image);
-                
-                App.global_ImageBuffer[0] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
-                App.global_ImageBuffer[0].getBuffer($"showFiles\\", 40);
             }
-            catch (Exception ex)
+            catch
             {
-                System.Windows.MessageBox.Show("数据出错!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
+                System.Windows.MessageBox.Show("无数据!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
         /*显示典型谱段图像对比*/
@@ -465,22 +469,26 @@ namespace Spectra
         {
             try
             {
+                new Thread(() =>
+                {
+                    App.global_ImageBuffer[0] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
+                    App.global_ImageBuffer[0].getBuffer($"showFiles\\", 40);
+                    App.global_ImageBuffer[3] = App.global_ImageBuffer[2] = App.global_ImageBuffer[1] = App.global_ImageBuffer[0];
+                }).Start();
+
                 MultiFuncWindow w = new MultiFuncWindow();
                 w = (MultiFuncWindow)App.global_Windows[1];
                 w.DisplayMode = GridMode.Four;
                 if (!w.isShow)
                     w.ScreenShow(Screen.AllScreens, 0, "典型谱段图像对比");
-                App.global_ImageBuffer[0] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
-                App.global_ImageBuffer[0].getBuffer($"showFiles\\", 40);
-                App.global_ImageBuffer[3] = App.global_ImageBuffer[2] = App.global_ImageBuffer[1] = App.global_ImageBuffer[0];
                 w.Refresh(ImageInfo.strFilesPath, 0, WinFunc.Image);
                 w.Refresh(ImageInfo.strFilesPath, 1, WinFunc.Image);
                 w.Refresh(ImageInfo.strFilesPath, 2, WinFunc.Image);
                 w.Refresh(ImageInfo.strFilesPath, 3, WinFunc.Image);
             }
-            catch (Exception ex)
+            catch
             {
-                System.Windows.MessageBox.Show("数据出错!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
+                System.Windows.MessageBox.Show("无数据!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
         /*显示光谱三维立方体*/
@@ -520,8 +528,11 @@ namespace Spectra
                         bandB = ImageInfo.getBand(Convert.ToDouble(txtSingleB.Text));
                     else
                         bandB = Convert.ToInt32(txtSingleB.Text);
-                    App.global_ImageBuffer[0] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
-                    App.global_ImageBuffer[0].getBuffer($"showFiles\\", bandR);
+                    new Thread(() =>
+                    {
+                        App.global_ImageBuffer[0] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
+                        App.global_ImageBuffer[0].getBuffer($"showFiles\\", bandR);
+                    }).Start();
                     ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[0]).UserControls[0]).Refresh(0,bandR, ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
                 }
                 else
@@ -530,12 +541,15 @@ namespace Spectra
                         band = ImageInfo.getBand(Convert.ToDouble(txtSingleGray.Text));
                     else
                         band = Convert.ToInt32(txtSingleGray.Text);
-                    App.global_ImageBuffer[0] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
-                    App.global_ImageBuffer[0].getBuffer($"showFiles\\", band);
+                    new Thread(() =>
+                    {
+                        App.global_ImageBuffer[0] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
+                        App.global_ImageBuffer[0].getBuffer($"showFiles\\", band);
+                    }).Start();
                     ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[0]).UserControls[0]).Refresh(0,band, ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
                 }
             }
-            catch (Exception)
+            catch
             {
                 System.Windows.MessageBox.Show("窗体未初始化！", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
             }
@@ -917,7 +931,7 @@ namespace Spectra
                 App.global_ImageBuffer[0] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
                 App.global_ImageBuffer[0].getBuffer($"showFiles\\", 40);
                 App.global_ImageBuffer[3] = App.global_ImageBuffer[2] = App.global_ImageBuffer[1] = App.global_ImageBuffer[0];
-            });
+            }).Start();
             MultiFuncWindow[] w = new MultiFuncWindow[6];
             for (int i = 0; i < 6; i++)
                 w[i] = (MultiFuncWindow)App.global_Windows[i];
@@ -928,17 +942,12 @@ namespace Spectra
                 if (!w[0].isShow)
                     w[0].ScreenShow(Screen.AllScreens, 0, "单谱段图像");
                 w[0].Refresh(path, 0, WinFunc.Image);
-                //App.global_ImageBuffer[0] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
-                //App.global_ImageBuffer[0].getBuffer($"showFiles\\",40);
             }
             if (dtShow.Rows[0][2].ToString() == "True")
             {
                 w[1].DisplayMode = GridMode.Four;
                 if (!w[1].isShow)
                     w[1].ScreenShow(Screen.AllScreens, 0, "典型谱段图像对比");
-                //App.global_ImageBuffer[0] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
-                //App.global_ImageBuffer[0].getBuffer($"showFiles\\", 40);
-                //App.global_ImageBuffer[3] = App.global_ImageBuffer[2] = App.global_ImageBuffer[1] = App.global_ImageBuffer[0];
                 w[1].Refresh(path, 0, WinFunc.Image);
                 w[1].Refresh(path, 1, WinFunc.Image);
                 w[1].Refresh(path, 2, WinFunc.Image);
@@ -1052,10 +1061,18 @@ namespace Spectra
 
         #region 数据存储
         /*开始截取*/
-        private void btnSectionBegin_Click(object sender, RoutedEventArgs e)
+        private async void btnSectionBegin_Click(object sender, RoutedEventArgs e)
         {
             try
             {
+                if (ImageInfo.dtImgInfo == null && FileInfo.md5 == null)
+                {
+                    System.Windows.MessageBox.Show("先选择文件或数据!","警告",MessageBoxButton.OK,MessageBoxImage.Warning);
+                    return;
+                }
+                if(ImageInfo.dtImgInfo==null)
+                    ImageInfo.dtImgInfo = DataQuery.QueryResult = await DataProc.QueryResult(FileInfo.md5, (bool)cb_byTime.IsChecked, (bool)this.cb_byCoord.IsChecked, (bool)this.cb_byFrmCnt.IsChecked,
+                        start_time, end_time, start_FrmCnt, end_FrmCnt, Coord_TL, Coord_DR);
                 MultiFuncWindow w = new MultiFuncWindow();
                 w = (MultiFuncWindow)App.global_Windows[0];
                 w.DisplayMode = GridMode.One;
@@ -1064,7 +1081,7 @@ namespace Spectra
                 w.Refresh(ImageInfo.strFilesPath, 0, WinFunc.Image);
 
                 App.global_ImageBuffer[0] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
-                App.global_ImageBuffer[0].getBuffer($"showFiles\\", 40);
+                App.global_ImageBuffer[0].getBuffer($"showFiles\\", 120);
 
                 ImageSection.beginSection = true;
 
@@ -1072,7 +1089,7 @@ namespace Spectra
                 timerSection.Tick += timerSection_Tick;
                 timerSection.Start();
             }
-            catch (Exception ex)
+            catch
             {
                 System.Windows.MessageBox.Show("无数据!","警告",MessageBoxButton.OK,MessageBoxImage.Warning);
             }
@@ -1093,14 +1110,38 @@ namespace Spectra
             FolderBrowserDialog fbd = new FolderBrowserDialog();
             if (fbd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                string flodPath = fbd.SelectedPath;
+                txtSaveFilesPath.Text = fbd.SelectedPath + "\\";
             }
         }
         /*开始存储*/
+        [DllImport("DLL\\DataOperation.dll", EntryPoint = "Split_Chanel")]
+        static extern int Save_Files(string path, string outpath, int startFrm, int endFrm);
         private void btnSaveFiles_Click(object sender, RoutedEventArgs e)
         {
-            ImageSection.beginSection = false;
-            timerSection.Stop();
+            try
+            {
+                ImageSection.beginSection = false;
+                timerSection.Stop();
+                if (ImageSection.startFrm >= ImageSection.endFrm)
+                {
+                    System.Windows.MessageBox.Show("无选中区域!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+                if (txtSaveFilesPath.Text == "")
+                {
+                    System.Windows.MessageBox.Show("选择输出路径!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+                int i = Save_Files(ImageInfo.strFilesPath, txtSaveFilesPath.Text, ImageSection.startFrm, ImageSection.endFrm);
+                if (i == 1)
+                    System.Windows.MessageBox.Show("完成!", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+                else
+                    System.Windows.MessageBox.Show("存储过程出错!", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch(Exception ex)
+            {
+                System.Windows.MessageBox.Show(ex.ToString(), "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
         }
         #endregion
     }

@@ -15,6 +15,7 @@
     <SolidColorBrush x:Key="TitleBack" Color="#FF444444"/>
     <SolidColorBrush x:Key="2ndTitleBack" Color="#FFF2F2F2"/>
     <SolidColorBrush x:Key="WindowBorder" Color="#FF2C2C2C"/>
+    <SolidColorBrush x:Key="WindowBack" Color="#FFDDDDDD"/>
     <!--默认Button-->
     <SolidColorBrush x:Key="ButtonBack" Color="#FF2C2C2C"/>
     <SolidColorBrush x:Key="ButtonFore" Color="#FFE3E3E3"/>
@@ -28,6 +29,6 @@
     <SolidColorBrush x:Key="DgvColHeader" Color="#FF909090"/>
     <SolidColorBrush x:Key="DgvRowMove" Color="#FFC0C0C0"/>
     <!--View-->
-    <SolidColorBrush x:Key="WinViewFore" Color="#FF3CFF03"/>
+    <SolidColorBrush x:Key="WinViewFore" Color="#FFDDDDDD"/>
     <SolidColorBrush x:Key="WinViewBack" Color="Gray"/>
 </ResourceDictionary>

@@ -62,9 +62,25 @@ namespace Spectra
             this.Busy.isBusy = true;
 
             SubWinIndex = sub;
-            Bitmap bmp = await DataProc.GetBmp(path,band-1, cMode);
+            Bitmap bmp;
+            switch(cMode)
+            {
+                case ColorRenderMode.Grayscale:
+                    bmp = await DataProc.GetBmp(path,band-1, cMode);
+                    break;
+                case ColorRenderMode.ArtColor:
+                    bmp = await DataProc.GetBmp(path, band - 1, cMode);
+                    break;
+                case ColorRenderMode.TrueColor:
+                    bmp = await DataProc.GetRealColorBmp(path);
+                    break;
+                default:
+                    bmp = await DataProc.GetBmp(path,band-1, cMode);
+                    break;
+            }
             if (bmp == null) return;
             bmp.RotateFlip(RotateFlipType.Rotate90FlipX);
+            bmp.Save("E:\\rgb.bmp");
             MemoryStream ms = new MemoryStream();
             bmp.Save(ms, System.Drawing.Imaging.ImageFormat.Bmp);
             ImgW = bmp.Width;

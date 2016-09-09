@@ -6,7 +6,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*"/>
                 <ColumnDefinition Width="50"/>
-                <ColumnDefinition Width="120"/>
+                <ColumnDefinition Width="100"/>
                 <ColumnDefinition Width="1*"/>
             </Grid.ColumnDefinitions>
             <Grid Grid.Column="1">
@@ -14,7 +14,7 @@
                 <Label x:Name="icon" Background="{TemplateBinding Background}" Margin="0"/>
             </Grid>
             <Grid Grid.Column="2">
-                <Label x:Name="label" Content="{TemplateBinding Content}" FontSize="24" FontFamily="YouYuan" HorizontalAlignment="Center" VerticalAlignment="Center" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
+                <Label x:Name="label" Content="{TemplateBinding Content}" FontSize="20" FontFamily="YouYuan" HorizontalAlignment="Center" VerticalAlignment="Center" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
             </Grid>
         </Grid>
         <ControlTemplate.Resources>
@@ -22,9 +22,9 @@
                 <!--故事板-->
                 <DoubleAnimationUsingKeyFrames BeginTime="00:00:00" Storyboard.TargetName="label" Storyboard.TargetProperty="FontSize">
                     <!--开始时间、应用对象、应用属性-->
-                    <SplineDoubleKeyFrame KeyTime="00:00:00.00" Value="26"/>
+                    <SplineDoubleKeyFrame KeyTime="00:00:00.00" Value="22"/>
                     <!--发生时间、值-->
-                    <SplineDoubleKeyFrame KeyTime="00:00:00.10" Value="24"/>
+                    <SplineDoubleKeyFrame KeyTime="00:00:00.10" Value="20"/>
                     <!--发生时间、值-->
                 </DoubleAnimationUsingKeyFrames>
             </Storyboard>

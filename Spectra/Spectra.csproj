@@ -433,6 +433,25 @@
     <Content Include="decFiles\decFiles.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Resource Include="image\GRAY\1.png" />
+    <Resource Include="image\GRAY\10.png" />
+    <Resource Include="image\GRAY\12.png" />
+    <Resource Include="image\GRAY\13.png" />
+    <Resource Include="image\GRAY\8.png" />
+    <Resource Include="image\GRAY\9.png" />
+    <Resource Include="image\GRAY\14.png" />
+    <Resource Include="image\GRAY\15.png" />
+    <Resource Include="image\GRAY\11.png" />
+    <Resource Include="image\GRAY\3.png" />
+    <Resource Include="image\GRAY\4.png" />
+    <Resource Include="image\GRAY\16.png" />
+    <Resource Include="image\GRAY\17.png" />
+    <Resource Include="image\GRAY\18.png" />
+    <Resource Include="image\GRAY\19.png" />
+    <Resource Include="image\GRAY\2.png" />
+    <Resource Include="image\GRAY\5.png" />
+    <Resource Include="image\GRAY\6.png" />
+    <Resource Include="image\GRAY\7.png" />
     <Content Include="Mapsui\BruTile.Desktop.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -449,12 +468,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Mapsui\Mapsui.Geometries.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Mapsui\Mapsui.Geometries.pdb">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Mapsui\Mapsui.pdb">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Mapsui\Mapsui.Rendering.Gdi.dll">
@@ -522,6 +535,7 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>

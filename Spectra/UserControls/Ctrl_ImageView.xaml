@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Spectra"
              mc:Ignorable="d" 
-             d:DesignHeight="768" d:DesignWidth="1024" FontSize="20" Background="{StaticResource WinViewBack}" MouseMove="UserControl_MouseMove">
+             d:DesignHeight="768" d:DesignWidth="1024" FontSize="14" Background="{StaticResource WinViewBack}" MouseMove="UserControl_MouseMove">
     <Grid x:Name="grid_Image" Width="auto" Height="auto">
         <Grid.Resources>
             <TransformGroup x:Key="Imageview">
@@ -31,31 +31,31 @@
         </DockPanel>
         <DockPanel Margin="20,20,0,0" Height="40" VerticalAlignment="Top" HorizontalAlignment="Left">
             <Label HorizontalAlignment="Left" Content="谱段:" VerticalAlignment="Center" Foreground="{StaticResource WinViewFore}"/>
-            <TextBlock x:Name="Band" Text="0" Width="60" VerticalAlignment="Center" Foreground="{StaticResource WinViewFore}"/>
+            <TextBlock x:Name="Band" Text="0" Width="45" VerticalAlignment="Center" Foreground="{StaticResource WinViewFore}"/>
             <Label HorizontalAlignment="Left" Content="波长:" VerticalAlignment="Center" Foreground="{StaticResource WinViewFore}"/>
-            <TextBlock x:Name="Wave" Text="0" Width="60" VerticalAlignment="Center" Foreground="{StaticResource WinViewFore}"/>
+            <TextBlock x:Name="Wave" Text="0" Width="45" VerticalAlignment="Center" Foreground="{StaticResource WinViewFore}"/>
             <Label HorizontalAlignment="Left" Content="行号:" VerticalAlignment="Center" Foreground="{StaticResource WinViewFore}"/>
-            <TextBlock x:Name="Row" Text="0" Width="60" VerticalAlignment="Center" Foreground="{StaticResource WinViewFore}"/>
+            <TextBlock x:Name="Row" Text="0" Width="45" VerticalAlignment="Center" Foreground="{StaticResource WinViewFore}"/>
             <Label HorizontalAlignment="Left" Content="列号:" VerticalAlignment="Center" Foreground="{StaticResource WinViewFore}"/>
-            <TextBlock x:Name="Col" Text="0" Width="60" VerticalAlignment="Center" Foreground="{StaticResource WinViewFore}"/>
+            <TextBlock x:Name="Col" Text="0" Width="45" VerticalAlignment="Center" Foreground="{StaticResource WinViewFore}"/>
             <Label HorizontalAlignment="Left" Content="灰度值:" VerticalAlignment="Center" Foreground="{StaticResource WinViewFore}"/>
-            <TextBlock x:Name="grayValue" Text="0" Width="60" VerticalAlignment="Center" Foreground="{StaticResource WinViewFore}"/>
+            <TextBlock x:Name="grayValue" Text="0" Width="45" VerticalAlignment="Center" Foreground="{StaticResource WinViewFore}"/>
             <Label HorizontalAlignment="Left" Content="经度:" VerticalAlignment="Center" Foreground="{StaticResource WinViewFore}"/>
-            <TextBlock x:Name="Lon" Text="0" Width="100" VerticalAlignment="Center" Foreground="{StaticResource WinViewFore}"/>
+            <TextBlock x:Name="Lon" Text="0" Width="75" VerticalAlignment="Center" Foreground="{StaticResource WinViewFore}"/>
             <Label HorizontalAlignment="Left" Content="纬度:" VerticalAlignment="Center" Foreground="{StaticResource WinViewFore}"/>
-            <TextBlock x:Name="Lat" Text="0" Width="100" VerticalAlignment="Center" Foreground="{StaticResource WinViewFore}"/>
+            <TextBlock x:Name="Lat" Text="0" Width="75" VerticalAlignment="Center" Foreground="{StaticResource WinViewFore}"/>
         </DockPanel>
         <DockPanel Margin="20,0,0,20" Height="40" VerticalAlignment="Bottom" HorizontalAlignment="Left">
             <Label HorizontalAlignment="Left" Content="像宽:" VerticalAlignment="Center" Foreground="{StaticResource WinViewFore}"/>
-            <TextBlock x:Name="ImageWidth" Text="0" Width="60" VerticalAlignment="Center" Foreground="{StaticResource WinViewFore}"/>
+            <TextBlock x:Name="ImageWidth" Text="0" Width="45" VerticalAlignment="Center" Foreground="{StaticResource WinViewFore}"/>
             <Label HorizontalAlignment="Left" Content="像高:" VerticalAlignment="Center" Foreground="{StaticResource WinViewFore}"/>
-            <TextBlock x:Name="ImageHeight" Text="2048" Width="60" VerticalAlignment="Center" Foreground="{StaticResource WinViewFore}"/>
+            <TextBlock x:Name="ImageHeight" Text="2048" Width="45" VerticalAlignment="Center" Foreground="{StaticResource WinViewFore}"/>
             <Label HorizontalAlignment="Left" Content="最小值:" VerticalAlignment="Center" Foreground="{StaticResource WinViewFore}"/>
-            <TextBlock x:Name="MinValue" Text="0" Width="60" VerticalAlignment="Center" Foreground="{StaticResource WinViewFore}"/>
+            <TextBlock x:Name="MinValue" Text="0" Width="45" VerticalAlignment="Center" Foreground="{StaticResource WinViewFore}"/>
             <Label HorizontalAlignment="Left" Content="最大值:" VerticalAlignment="Center" Foreground="{StaticResource WinViewFore}"/>
-            <TextBlock x:Name="MaxValue" Text="0" Width="60" VerticalAlignment="Center" Foreground="{StaticResource WinViewFore}"/>
+            <TextBlock x:Name="MaxValue" Text="0" Width="45" VerticalAlignment="Center" Foreground="{StaticResource WinViewFore}"/>
             <Label HorizontalAlignment="Left" Content="平均值:" VerticalAlignment="Center" Foreground="{StaticResource WinViewFore}"/>
-            <TextBlock x:Name="MeanValue" Text="0" Width="60" VerticalAlignment="Center" Foreground="{StaticResource WinViewFore}"/>
+            <TextBlock x:Name="MeanValue" Text="0" Width="45" VerticalAlignment="Center" Foreground="{StaticResource WinViewFore}"/>
         </DockPanel>
         <Border x:Name="borderSection" BorderBrush="Yellow" BorderThickness="1" Visibility="Collapsed"/>
     </Grid>
