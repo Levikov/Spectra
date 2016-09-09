@@ -315,7 +315,7 @@ namespace Spectra
                 FileInfo.endCoord.convertToCoord($"({lat},{lon})");                                                                                             //结束经纬
                 long Frm_Start = (long)sqlExcute.ExecuteScalar($"SELECT FrameId FROM AuxData WHERE MD5='{FileInfo.md5}' ORDER BY FrameId ASC");                 //帧起始
 
-                DataTable dtGST = sqlExcute.GetDataTable("select GST,GST_US from AuxData where MD5=@MD5 order by GST,GST_US",
+                DataTable dtGST = sqlExcute.GetDataTable("select GST,GST_US from AuxData where MD5=@MD5",
                     new List<SQLiteParameter>()
                         {
                             new SQLiteParameter("MD5",FileInfo.md5)

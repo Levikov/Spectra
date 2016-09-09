@@ -332,7 +332,7 @@ namespace Spectra
             if (file.Length == 0) return;
             buffer = new byte[file.Length];
             file.Read(buffer, 0, (int)file.Length);
-            UInt32 sum = 0;
+            long sum = 0;
             min = 4096;
             max = 0;
             for (UInt32 i = 0; i < file.Length / 2; i++)

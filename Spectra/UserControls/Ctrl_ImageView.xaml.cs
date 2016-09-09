@@ -80,7 +80,7 @@ namespace Spectra
             }
             if (bmp == null) return;
             bmp.RotateFlip(RotateFlipType.Rotate90FlipX);
-            bmp.Save("E:\\rgb.bmp");
+            //bmp.Save("E:\\rgb.bmp");
             MemoryStream ms = new MemoryStream();
             bmp.Save(ms, System.Drawing.Imaging.ImageFormat.Bmp);
             ImgW = bmp.Width;
@@ -168,10 +168,13 @@ namespace Spectra
                 Lat.Text = coo.Lat.ToString("F4");
                 Lon.Text = coo.Lon.ToString("F4");
 
-                grayValue.Text = App.global_ImageBuffer[SubWinIndex].getValue((int)curXinImg,(int)curYinImg).ToString();
-                MinValue.Text = App.global_ImageBuffer[SubWinIndex].min.ToString();
-                MaxValue.Text = App.global_ImageBuffer[SubWinIndex].max.ToString();
-                MeanValue.Text = App.global_ImageBuffer[SubWinIndex].mean.ToString();
+                if (App.global_ImageBuffer[SubWinIndex] != null)
+                {
+                    grayValue.Text = App.global_ImageBuffer[SubWinIndex].getValue((int)curXinImg, (int)curYinImg).ToString();
+                    MinValue.Text = App.global_ImageBuffer[SubWinIndex].min.ToString();
+                    MaxValue.Text = App.global_ImageBuffer[SubWinIndex].max.ToString();
+                    MeanValue.Text = App.global_ImageBuffer[SubWinIndex].mean.ToString();
+                }
             }
         }
 

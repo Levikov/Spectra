@@ -17,14 +17,16 @@
     <SolidColorBrush x:Key="WindowBorder" Color="#FF2C2C2C"/>
     <SolidColorBrush x:Key="WindowBack" Color="#FFDDDDDD"/>
     <!--默认Button-->
-    <SolidColorBrush x:Key="ButtonBack" Color="#FF2C2C2C"/>
+    <!--<SolidColorBrush x:Key="ButtonBack" Color="#FF2C2C2C"/>-->
+    <SolidColorBrush x:Key="ButtonBack" Color="DarkCyan"/>
     <SolidColorBrush x:Key="ButtonFore" Color="#FFE3E3E3"/>
     <SolidColorBrush x:Key="ButtonBackMove" Color="Gray"/>
     <SolidColorBrush x:Key="ButtonForeMove" Color="#FF2C2C2C"/>
     <!--1级Button-->
     <SolidColorBrush x:Key="Btn1stNotSelected" Color="#FF999292"/>
     <!--2级Button-->
-    <SolidColorBrush x:Key="Btn2ndBackMove" Color="#FFB5B5B5"/>
+    <!--<SolidColorBrush x:Key="Btn2ndBackMove" Color="#FFB5B5B5"/>-->
+    <SolidColorBrush x:Key="Btn2ndBackMove" Color="GreenYellow"/>
     <!--DataGrid-->
     <SolidColorBrush x:Key="DgvColHeader" Color="#FF909090"/>
     <SolidColorBrush x:Key="DgvRowMove" Color="#FFC0C0C0"/>
