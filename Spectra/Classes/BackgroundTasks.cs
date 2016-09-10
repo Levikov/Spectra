@@ -160,6 +160,8 @@ namespace Spectra
         public static extern IntPtr LoadLibrary(string lpFileName);
         [DllImport("kernel32.dll", CharSet = CharSet.Ansi, ExactSpelling = true)]
         public static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
+        [DllImport("DLL\\DataOperation.dll", EntryPoint = "GetRGBFromBand")]
+        public static extern void GetRGBFromBand(int band, out double R, out double G, out double B);
 
         public static Task<string> Import_5(int PACK_LEN,IProgress<double> Prog, IProgress<string> List, CancellationToken cancel)
         {
@@ -353,8 +355,8 @@ namespace Spectra
             {
                 int Height = DataQuery.QueryResult.Rows.Count;
                 int Width = 2048;
-                if (v == 161 || v == 162) Height = 160;
-                if (v == 163 || v == 164) Width = 160;
+                if (v == 161 || v == 162) Height = 128;
+                if (v == 163 || v == 164) Width = 128;
 
                 byte[] buf_full = new byte[Width * Height * 3];
                 byte[] buf_band = new byte[Width * Height * 2];
@@ -372,13 +374,48 @@ namespace Spectra
                             }
                             break;
                         case ColorRenderMode.ArtColor:
-                            Spectra2RGB.HsvToRgb(300 * ((double)v / 160), ((double)(readU16_PIC(buf_band, i * 2)) / 4096), 1, out buf_full[3 * i + 2], out buf_full[3 * i + 1], out buf_full[3 * i + 0]);
+                            {
+
+                                double fR = 0;
+                                double fG = 0;
+                                double fB = 0;
+                                GetRGBFromBand(i / 2048+27, out fR,out fG, out fB);
+                                double R = (double)(readU16_PIC(buf_band, i * 2)) / 4096 * fR * 256;
+                                double G = (double)(readU16_PIC(buf_band, i * 2)) / 4096 * fG * 256;
+                                double B = (double)(readU16_PIC(buf_band, i * 2)) / 4096 * fB * 256;
+
+                                buf_full[3 * i + 2] = (byte)(Math.Floor(R));
+                                buf_full[3 * i + 1] = (byte)(Math.Floor(G));
+                                buf_full[3 * i + 0] = (byte)(Math.Floor(B));
+                            }
+                            
+                            break;
+                        case ColorRenderMode.ArtColorSide:
+                            {
+
+                                double fR = 0;
+                                double fG = 0;
+                                double fB = 0;
+                                GetRGBFromBand(i%Width+27, out fR, out fG, out fB);
+                                double R = (double)(readU16_PIC(buf_band, i * 2)) / 4096 * fR * 256;
+                                double G = (double)(readU16_PIC(buf_band, i * 2)) / 4096 * fG * 256;
+                                double B = (double)(readU16_PIC(buf_band, i * 2)) / 4096 * fB * 256;
+
+                                buf_full[3 * i + 2] = (byte)(Math.Floor(R));
+                                buf_full[3 * i + 1] = (byte)(Math.Floor(G));
+                                buf_full[3 * i + 0] = (byte)(Math.Floor(B));
+                            }
+
                             break;
                         case ColorRenderMode.TrueColor:
                             {
-                                double R = (double)(readU16_PIC(buf_band, i * 2)) / 4096 * 256;
-                                double G = (double)(readU16_PIC(buf_band, i * 2)) / 4096 * 256;
-                                double B = (double)(readU16_PIC(buf_band, i * 2)) / 4096 * 256;
+                                double fR = 0;
+                                double fG = 0;
+                                double fB = 0;
+                                GetRGBFromBand(v, out fR, out fG, out fB);
+                                double R = (double)(readU16_PIC(buf_band, i * 2)) / 4096 * fR * 256;
+                                double G = (double)(readU16_PIC(buf_band, i * 2)) / 4096 * fG * 256;
+                                double B = (double)(readU16_PIC(buf_band, i * 2)) / 4096 * fB * 256;
 
                                 buf_full[3 * i + 2] = (byte)(Math.Floor(R));
                                 buf_full[3 * i + 1] = (byte)(Math.Floor(G));
@@ -428,12 +465,12 @@ namespace Spectra
             return Task.Run(async () =>
             {
                 Bitmap[] r = new Bitmap[6];
-                r[0] = await GetBmp(path,120, ColorRenderMode.Grayscale);
-                r[1] = await GetBmp(path,120, ColorRenderMode.Grayscale);
-                r[2] = await GetBmp(path, 161, ColorRenderMode.Grayscale);
-                r[3] = await GetBmp(path, 162, ColorRenderMode.Grayscale);
-                r[4] = await GetBmp(path, 163, ColorRenderMode.Grayscale);
-                r[5] = await GetBmp(path, 164, ColorRenderMode.Grayscale);
+                r[0] = await GetBmp(path, 27, ColorRenderMode.TrueColor);
+                r[1] = await GetBmp(path, 154, ColorRenderMode.TrueColor);
+                r[2] = await GetBmp(path, 161, ColorRenderMode.ArtColor);
+                r[3] = await GetBmp(path, 162, ColorRenderMode.ArtColor);
+                r[4] = await GetBmp(path, 163, ColorRenderMode.ArtColorSide);
+                r[5] = await GetBmp(path, 164, ColorRenderMode.ArtColorSide);
                 return r;
             });
         }
@@ -918,6 +955,6 @@ namespace Spectra
     }
 
     #endregion
-    public enum ColorRenderMode { Grayscale, ArtColor, TrueColor };
+    public enum ColorRenderMode { Grayscale, ArtColor, TrueColor,ArtColorSide }
 
 }
