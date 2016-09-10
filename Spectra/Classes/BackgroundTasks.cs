@@ -357,6 +357,7 @@ namespace Spectra
                 int Width = 2048;
                 if (v == 161 || v == 162) Height = 128;
                 if (v == 163 || v == 164) Width = 128;
+ 
 
                 byte[] buf_full = new byte[Width * Height * 3];
                 byte[] buf_band = new byte[Width * Height * 2];
@@ -409,6 +410,10 @@ namespace Spectra
                             break;
                         case ColorRenderMode.TrueColor:
                             {
+                                int band = v;
+                                if (v == 165) v = 27;
+                                if (v == 166) v = 154;
+
                                 double fR = 0;
                                 double fG = 0;
                                 double fB = 0;
@@ -465,8 +470,8 @@ namespace Spectra
             return Task.Run(async () =>
             {
                 Bitmap[] r = new Bitmap[6];
-                r[0] = await GetBmp(path, 27, ColorRenderMode.TrueColor);
-                r[1] = await GetBmp(path, 154, ColorRenderMode.TrueColor);
+                r[0] = await GetBmp(path, 165, ColorRenderMode.TrueColor);
+                r[1] = await GetBmp(path, 166, ColorRenderMode.TrueColor);
                 r[2] = await GetBmp(path, 161, ColorRenderMode.ArtColor);
                 r[3] = await GetBmp(path, 162, ColorRenderMode.ArtColor);
                 r[4] = await GetBmp(path, 163, ColorRenderMode.ArtColorSide);
