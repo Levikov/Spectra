@@ -329,9 +329,10 @@ namespace Spectra
             if (!File.Exists($"{path}{band}.raw"))
                 return;
             FileStream file = new FileStream($"{path}{band}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
+            if (file.Length == 0) return;
             buffer = new byte[file.Length];
             file.Read(buffer, 0, (int)file.Length);
-            UInt32 sum = 0;
+            long sum = 0;
             min = 4096;
             max = 0;
             for (UInt32 i = 0; i < file.Length / 2; i++)
@@ -342,7 +343,7 @@ namespace Spectra
                 if ((int)buffer[i * 2] + (int)buffer[i * 2 + 1] * 256 < min)
                     min = (int)buffer[i * 2] + (int)buffer[i * 2 + 1] * 256;
             }
-            mean = (int)(sum / (width * height));
+            mean = (int)(sum / (file.Length / 2));
         }
 
         public int getValue(int row,int col)

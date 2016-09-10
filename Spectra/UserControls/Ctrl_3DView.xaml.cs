@@ -109,6 +109,7 @@ namespace Spectra
             if (imheight < 1) return;
             this.Busy.isBusy = true;
             Bitmap[] bmp = await DataProc.GetBmp3D(path);
+            bmp[1].RotateFlip(RotateFlipType.Rotate180FlipY);
             RenderBox(imheight, bmp);
             InitializeCameras();
             this.Busy.isBusy=false;

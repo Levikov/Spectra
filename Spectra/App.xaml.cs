@@ -15,6 +15,7 @@ namespace Spectra
     public partial class App : Application
     {
         public static MapWindow global_Win_Map;
+        public static DynamicImagingWindow_Win32 global_Win_Dynamic;
         public static List<Window> global_Windows = new List<Window>();
         public static ImageBuffer[] global_ImageBuffer = new ImageBuffer[4];
 

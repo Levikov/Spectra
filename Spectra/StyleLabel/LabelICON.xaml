@@ -2,25 +2,25 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:local="clr-namespace:Spectra.StyleLabel">
     <ControlTemplate x:Key="LabelIcon" TargetType="Label">
-        <Grid x:Name="grid" Width="570" Height="160" Margin="0,0,20,0">
+        <Grid x:Name="grid" Width="365" Height="80" Margin="0,0,20,0">
             <Grid.RowDefinitions>
-                <RowDefinition Height="100"/>
-                <RowDefinition Height="60"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="33"/>
             </Grid.RowDefinitions>
             <Grid Grid.Row="0" VerticalAlignment="Bottom" >
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="80"/>
+                    <ColumnDefinition Width="50"/>
                     <ColumnDefinition Width="auto"/>
                 </Grid.ColumnDefinitions>
                 <Grid Grid.Column="1">
-                    <Label x:Name="label" Content="光谱微纳卫星数据分析系统" HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="STXingkai" FontSize="40" Foreground="{TemplateBinding Foreground}"/>
+                    <Label x:Name="label" Content="光谱微纳卫星数据分析系统" HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="STXingkai" FontSize="24" Foreground="{TemplateBinding Foreground}"/>
                 </Grid>
                 <Grid Grid.Column="0">
-                    <Label x:Name="icon" Width="70" Height="70" Background="{TemplateBinding Background}"/>
+                    <Label x:Name="icon" Width="50" Height="50" Background="{TemplateBinding Background}"/>
                 </Grid>
             </Grid>
             <Grid Grid.Row="1" VerticalAlignment="Top">
-                <Label Content="Shanghai Engineering Center For Microsatellites" HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Arial" FontSize="22" Foreground="{TemplateBinding Foreground}"/>
+                <Label Content="Shanghai Engineering Center For Microsatellites" HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Arial" FontSize="16" Foreground="{TemplateBinding Foreground}"/>
             </Grid>
         </Grid>
     </ControlTemplate>

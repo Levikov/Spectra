@@ -153,8 +153,7 @@ namespace Spectra
 
         #region 解压
         [DllImport("DLL\\DataOperation.dll", EntryPoint = "Split_Chanel")]
-        //static extern void Split_Chanel(string path, string outpath, int start, int end, int import_id);
-        static extern void Split_Chanel(string path, string outpath, int sum, string[] file);
+        static extern int Split_Chanel(string path, string outpath, int sum, string[] file);
         [DllImport("DLL\\DataOperation.dll", EntryPoint = "GetCurrentPosition")]
         static extern double GetCurrentPosition();
         [DllImport("kernel32.dll", SetLastError = true)]
@@ -195,9 +194,10 @@ namespace Spectra
                         fs_split.Read(buf_split, 0, PACK_LEN);
                         int sum = 0;
                         ROW checkrow = new ROW(buf_split, import_id);
-                        if (checkrow.isValid() != 1)                                                                                    //判断数据格式及校验和是否正确
+                        int resultCheck = checkrow.isValid();
+                        if (resultCheck != 1)                                                                                    //判断数据格式及校验和是否正确
                         {
-                            cmdline = $"{DateTime.Now.ToString("HH:mm:ss")} 位置:{fs_split.Position} 错误代号:{checkrow.isValid()}";
+                            cmdline = $"{DateTime.Now.ToString("HH:mm:ss")} 位置:{fs_split.Position} 错误代号:{resultCheck}";
                             continue;
                         }
 
@@ -228,7 +228,7 @@ namespace Spectra
                                         byte[] buf_Dynamic = new byte[512 * 2];
                                         Marshal.Copy(FreeImage.GetBits(fibmp), buf_JP2, 0, 512 * 160 * 2);
                                         Array.Copy(buf_JP2, 40 * 512 * 2, buf_Dynamic, 0, 1024);
-                                        //App.global_Win_Dynamic.Update(buf_Dynamic,adr_last.FrameCount,adr_last.Chanel);
+                                        App.global_Win_Dynamic.Update(buf_Dynamic, adr_last.FrameCount, adr_last.Chanel);
                                         FreeImage.Unload(fibmp);
                                         FileStream fs_out_raw = new FileStream($"{Environment.CurrentDirectory}\\channelFiles\\{adr_last.CapTimeS.ToString("D10")}_{adr_last.CapTimeUS.ToString("D10")}_{adr_last.Chanel}.raw", FileMode.Create);
                                         fs_out_raw.Write(buf_JP2, 0, 512 * 160 * 2);
@@ -256,7 +256,7 @@ namespace Spectra
                     fs_out.Close();
                 });
 
-                //App.global_Win_Dynamic.StopTimer();
+                App.global_Win_Dynamic.StopTimer();
 
                 //解压完成后才对数据库进行操作
                 List.Report($"{DateTime.Now.ToString("HH:mm:ss")} 开始写数据库");
@@ -268,11 +268,16 @@ namespace Spectra
                         });
                 FileStream fs_chanel = new FileStream(FileInfo.srcFilePathName, FileMode.Open, FileAccess.Read, FileShare.Read);
                 byte[] buf_row1 = new byte[PACK_LEN * 1024 * 1024];
+                bool isErrWrDB = true;
                 while (fs_chanel.Position < fs_chanel.Length)
                 {
                     fs_chanel.Read(buf_row1, 0, PACK_LEN);
                     ROW checkrow = new ROW(buf_row1, import_id);
-                    checkrow.InsertError(fs_chanel.Position, sqlExcute);
+                    if (checkrow.isValid() != 1 && isErrWrDB)
+                    {
+                        isErrWrDB = false;
+                        checkrow.InsertError(fs_chanel.Position, sqlExcute);
+                    }
                     if ((buf_row1[4] == 0x08) && (buf_row1[5] == 0x01))
                     {
                         AuxDataRow adr = new AuxDataRow(buf_row1, import_id);
@@ -310,7 +315,7 @@ namespace Spectra
                 FileInfo.endCoord.convertToCoord($"({lat},{lon})");                                                                                             //结束经纬
                 long Frm_Start = (long)sqlExcute.ExecuteScalar($"SELECT FrameId FROM AuxData WHERE MD5='{FileInfo.md5}' ORDER BY FrameId ASC");                 //帧起始
 
-                DataTable dtGST = sqlExcute.GetDataTable("select GST,GST_US from AuxData where MD5=@MD5 order by GST,GST_US",
+                DataTable dtGST = sqlExcute.GetDataTable("select GST,GST_US from AuxData where MD5=@MD5",
                     new List<SQLiteParameter>()
                         {
                             new SQLiteParameter("MD5",FileInfo.md5)
@@ -327,7 +332,7 @@ namespace Spectra
                     a.Report(GetCurrentPosition());
                 }, Prog, 0, 10);
                 DataProc.Split_Chanel($"{Environment.CurrentDirectory}\\channelFiles\\", $"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\result\\", dtGST.Rows.Count, strGST);
-                
+
                 return "成功！";
             });
 
@@ -342,32 +347,32 @@ namespace Spectra
         /// <param name="v">谱段号</param>
         /// <param name="cMode">显示的模式:灰度、伪彩、真彩</param>
         /// <returns></returns>
-        public static Task<Bitmap> GetBmp(string path,int v,ColorRenderMode cMode)
+        public static Task<Bitmap> GetBmp(string path, int v, ColorRenderMode cMode)
         {
             return Task.Run(() =>
             {
                 int Height = DataQuery.QueryResult.Rows.Count;
                 int Width = 2048;
-                if (v == 161||v==162) Height = 160;
+                if (v == 161 || v == 162) Height = 160;
                 if (v == 163 || v == 164) Width = 160;
 
                 byte[] buf_full = new byte[Width * Height * 3];
-                byte[] buf_band = new byte[Width * Height*2];
+                byte[] buf_band = new byte[Width * Height * 2];
                 if (!File.Exists($"{path}{v}.raw") || Height < 1) return null;
                 FileStream fs = new FileStream($"{path}{v}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
                 if (fs == null) return null;
                 fs.Read(buf_band, 0, Width * Height * 2);
-                Parallel.For(0, Width*Height, i =>
+                Parallel.For(0, Width * Height, i =>
                 {
                     switch (cMode)
                     {
                         case ColorRenderMode.Grayscale:
                             {
-                                buf_full[3*i] = buf_full[3*i + 1] = buf_full[3*i+2] = (byte)(Math.Floor((double)(readU16_PIC(buf_band, 2*i)) / 4096 * 256));
+                                buf_full[3 * i] = buf_full[3 * i + 1] = buf_full[3 * i + 2] = (byte)(Math.Floor((double)(readU16_PIC(buf_band, 2 * i)) / 4096 * 256));
                             }
                             break;
                         case ColorRenderMode.ArtColor:
-                            Spectra2RGB.HsvToRgb(300 * ((double)v / 160), ((double)(readU16_PIC(buf_band, i * 2)) / 4096),1 , out buf_full[3*i + 2], out buf_full[3*i + 1], out buf_full[3*i + 0]);
+                            Spectra2RGB.HsvToRgb(300 * ((double)v / 160), ((double)(readU16_PIC(buf_band, i * 2)) / 4096), 1, out buf_full[3 * i + 2], out buf_full[3 * i + 1], out buf_full[3 * i + 0]);
                             break;
                         case ColorRenderMode.TrueColor:
                             {
@@ -375,9 +380,9 @@ namespace Spectra
                                 double G = (double)(readU16_PIC(buf_band, i * 2)) / 4096 * 256;
                                 double B = (double)(readU16_PIC(buf_band, i * 2)) / 4096 * 256;
 
-                                buf_full[3*i+2]= (byte)(Math.Floor(R));
-                                buf_full[3*i+1] = (byte)(Math.Floor(G));
-                                buf_full[3*i+ 0] = (byte)(Math.Floor(B));
+                                buf_full[3 * i + 2] = (byte)(Math.Floor(R));
+                                buf_full[3 * i + 1] = (byte)(Math.Floor(G));
+                                buf_full[3 * i + 0] = (byte)(Math.Floor(B));
                             }
                             break;
                         default:
@@ -385,24 +390,30 @@ namespace Spectra
                     }
                 });
                 fs.Close();
-                /*旋转90°*/
-                /*byte[] buf_90 = new byte[Height * Width * 3];
-                Parallel.For(0, Width, wid =>
-                {
-                    Parallel.For(0, Height, hei =>
-                    {
-                        buf_90[wid * Height * 3 + hei * 3] = buf_full[hei * Width * 3 + wid * 3];
-                        buf_90[wid * Height * 3 + hei * 3 + 1] = buf_full[hei * Width * 3 + wid * 3];
-                        buf_90[wid * Height * 3 + hei * 3 + 2] = buf_full[hei * Width * 3 + wid * 3];
-                    });
-                });
-                Array.Copy(buf_90, buf_full, Height * Width * 3);
-                Bitmap bmpTop = new Bitmap(Height, Width, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-                BitmapData bmpData = bmpTop.LockBits(new System.Drawing.Rectangle(0, 0, Height, Width), System.Drawing.Imaging.ImageLockMode.WriteOnly, bmpTop.PixelFormat);*/
 
                 Bitmap bmpTop = new Bitmap(Width, Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
                 BitmapData bmpData = bmpTop.LockBits(new System.Drawing.Rectangle(0, 0, Width, Height), System.Drawing.Imaging.ImageLockMode.WriteOnly, bmpTop.PixelFormat);
                 Marshal.Copy(buf_full, 0, bmpData.Scan0, Width * Height * 3);
+                bmpTop.UnlockBits(bmpData);
+                return bmpTop;
+            });
+        }
+        public static Task<Bitmap> GetRealColorBmp(string path)
+        {
+            return Task.Run(() =>
+            {
+                int Height = DataQuery.QueryResult.Rows.Count;
+                int Width = 2048;
+
+                byte[] buf_full = new byte[Width * Height * 2 * 3];
+                byte[] buf_band = new byte[Width * Height * 2];
+                if (!File.Exists($"{path}{160}.raw") || Height < 1) return null;
+                FileStream fs = new FileStream($"{path}{160}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
+                if (fs == null) return null;
+                fs.Read(buf_full, 0, Width * Height * 2 * 3);
+                Bitmap bmpTop = new Bitmap(Width, Height, System.Drawing.Imaging.PixelFormat.Format48bppRgb);
+                BitmapData bmpData = bmpTop.LockBits(new System.Drawing.Rectangle(0, 0, Width, Height), System.Drawing.Imaging.ImageLockMode.WriteOnly, bmpTop.PixelFormat);
+                Marshal.Copy(buf_full, 0, bmpData.Scan0, Width * Height * 2 * 3);
                 bmpTop.UnlockBits(bmpData);
                 return bmpTop;
             });
@@ -417,8 +428,8 @@ namespace Spectra
             return Task.Run(async () =>
             {
                 Bitmap[] r = new Bitmap[6];
-                r[0] = await GetBmp(path,0, ColorRenderMode.Grayscale);
-                r[1] = await GetBmp(path,159, ColorRenderMode.Grayscale);
+                r[0] = await GetBmp(path,120, ColorRenderMode.Grayscale);
+                r[1] = await GetBmp(path,120, ColorRenderMode.Grayscale);
                 r[2] = await GetBmp(path, 161, ColorRenderMode.Grayscale);
                 r[3] = await GetBmp(path, 162, ColorRenderMode.Grayscale);
                 r[4] = await GetBmp(path, 163, ColorRenderMode.Grayscale);
@@ -593,33 +604,30 @@ namespace Spectra
             switch (isValid())
             {
                 case -1:
-                    sql.ExecuteNonQuery("insert into FileErrors (文件路径,文件名,错误位置,错误类型) values (@filefullname,@filename,@errorpos,@error)",
+                    sql.ExecuteNonQuery("insert into FileErrors (MD5,错误位置,错误类型) values (@MD5,@errorpos,@error)",
                         new List<SQLiteParameter>()
                         {
-                            new SQLiteParameter("filefullname",FileInfo.srcFilePathName),
-                            new SQLiteParameter("filename",FileInfo.srcFilePathName.Substring(FileInfo.srcFilePathName.LastIndexOf("\\")+1)),
+                            new SQLiteParameter("MD5",FileInfo.md5),
                             new SQLiteParameter("errorpos",position),
                             new SQLiteParameter("error","解压帧头错误")
-                        });; break;
+                        }); ; break;
                 case -2:
-                    sql.ExecuteNonQuery("insert into FileErrors (文件路径,文件名,错误位置,错误类型) values (@filefullname,@filename,@errorpos,@error)",
+                    sql.ExecuteNonQuery("insert into FileErrors (MD5,错误位置,错误类型) values (@MD5,@errorpos,@error)",
                     new List<SQLiteParameter>()
                     {
-                            new SQLiteParameter("filefullname",FileInfo.srcFilePathName),
-                            new SQLiteParameter("filename",FileInfo.srcFilePathName.Substring(FileInfo.srcFilePathName.LastIndexOf("\\")+2)),
+                            new SQLiteParameter("MD5",FileInfo.md5),
                             new SQLiteParameter("errorpos",position),
                             new SQLiteParameter("error","解压帧尾错误")
                     }); ; break;
                 case -3:
-                    sql.ExecuteNonQuery("insert into FileErrors (文件路径,文件名,错误位置,错误类型) values (@filefullname,@filename,@errorpos,@error)",
+                    sql.ExecuteNonQuery("insert into FileErrors (MD5,错误位置,错误类型) values (@MD5,@errorpos,@error)",
                    new List<SQLiteParameter>()
                    {
-                            new SQLiteParameter("filefullname",FileInfo.srcFilePathName),
-                            new SQLiteParameter("filename",FileInfo.srcFilePathName.Substring(FileInfo.srcFilePathName.LastIndexOf("\\")+2)),
+                            new SQLiteParameter("MD5",FileInfo.md5),
                             new SQLiteParameter("errorpos",position),
                             new SQLiteParameter("error","解压校验和错误")
                    }); ; break;
-                default:break;
+                default: break;
             }
         }
     }
@@ -666,28 +674,44 @@ namespace Spectra
         protected double Ox;
         protected double Oy;
         protected double Oz;
+        protected double Q1;
+        protected double Q2;
+        protected double Q3;
+        protected double Q4;
         public AuxDataRow(byte[] ROW, long id) : base(ROW, id)
         {
-            X = 7000 * Math.Cos(Math.PI * ((double)(FrameCount % 360) / 180));//readLength(32);
-            Y = 7000 * Math.Sin(Math.PI * ((double)(FrameCount % 360) / 180));//readLength(36);
-            Z = 0;//readLength(40);
-            Vx = 7.546 * Math.Cos(Math.PI * ((double)(FrameCount % 360) / 180) + Math.PI / 2);//readLength(44);
-            Vy = 7.546 * Math.Sin(Math.PI * ((double)(FrameCount % 360) / 180) + Math.PI / 2);//readLength();
-            Vz = 0;//0;//
+            //X = 7000 * Math.Cos(Math.PI * ((double)(FrameCount % 360) / 180));//readLength(32);
+            //Y = 7000 * Math.Sin(Math.PI * ((double)(FrameCount % 360) / 180));//readLength(36);
+            //Z = 0;//readLength(40);
+            //Vx = 7.546 * Math.Cos(Math.PI * ((double)(FrameCount % 360) / 180) + Math.PI / 2);//readLength(44);
+            //Vy = 7.546 * Math.Sin(Math.PI * ((double)(FrameCount % 360) / 180) + Math.PI / 2);//readLength();
+            //Vz = 0;//0;//
             GST = DataProc.readU32(ROW, 17);
             GST_US = DataProc.readU32(ROW, 104);
+
+            X = DataProc.readI32(ROW, 32) / (double)1000;
+            Y = DataProc.readI32(ROW, 36) / (double)1000;
+            Z = DataProc.readI32(ROW, 40) / (double)1000;
             double[] latlon = new double[2];
             latlon = OrbitCalc.CalEarthLonLat(new double[3] { X, Y, Z }, GST);
-            Lat = latlon[1] * 180 / Math.PI;
-            Lon = latlon[0] * 180 / Math.PI;
-            Ox = 0;
-            Oy = 0;
-            Oz = 0;
+            Lat = double.IsNaN(latlon[1]) ? 0 : latlon[1];
+            Lon = double.IsNaN(latlon[0]) ? 0 : latlon[0];
+
+            Vx = DataProc.readI32(ROW, 44) / (double)1000;
+            Vy = DataProc.readI32(ROW, 48) / (double)1000;
+            Vz = DataProc.readI32(ROW, 52) / (double)1000;
+            Ox = DataProc.readI32(ROW, 81) / (double)10000 * 57.3;
+            Oy = DataProc.readI32(ROW, 85) / (double)10000 * 57.3;
+            Oz = DataProc.readI32(ROW, 89) / (double)10000 * 57.3;
+            Q1 = DataProc.readI32(ROW, 65) / (double)10000 * 57.3;
+            Q2 = DataProc.readI32(ROW, 69) / (double)10000 * 57.3;
+            Q3 = DataProc.readI32(ROW, 73) / (double)10000 * 57.3;
+            Q4 = DataProc.readI32(ROW, 77) / (double)10000 * 57.3;
         }
 
         public void Insert(SQLiteDatabase sqlExcute)
         {
-            var sql = "insert into AuxData values(@FrameId,@SatelliteId,@GST,@Lat,@Lon,@X,@Y,@Z,@Vx,@Vy,@Vz,@Ox,@Oy,@Oz,@ImportId,@Chanel,@MD5,@GST_US);";
+            var sql = "insert into AuxData values(@FrameId,@SatelliteId,@GST,@Lat,@Lon,@X,@Y,@Z,@Vx,@Vy,@Vz,@Ox,@Oy,@Oz,@ImportId,@Chanel,@MD5,@GST_US,@Q1,@Q2,@Q3,@Q4);";
             var cmdparams = new List<SQLiteParameter>()
                 {
                     new SQLiteParameter("FrameId", FrameCount),
@@ -707,7 +731,11 @@ namespace Spectra
                     new SQLiteParameter("ImportId",ImportId),
                     new SQLiteParameter("Chanel",Chanel),
                     new SQLiteParameter("MD5",FileInfo.md5),
-                    new SQLiteParameter("GST_US",GST_US)
+                    new SQLiteParameter("GST_US",GST_US),
+                    new SQLiteParameter("Q1",Q1),
+                    new SQLiteParameter("Q2",Q2),
+                    new SQLiteParameter("Q3",Q3),
+                    new SQLiteParameter("Q4",Q4)
                 };
 
             try

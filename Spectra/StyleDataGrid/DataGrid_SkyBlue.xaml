@@ -4,7 +4,7 @@
     <Style TargetType="DataGrid">
         <!--网格线颜色-->
         <Setter Property="AutoGenerateColumns" Value="False"/>
-        <Setter Property="FontSize" Value="17"/>
+        <Setter Property="FontSize" Value="14"/>
         <Setter Property="IsReadOnly" Value="True"/>
         <Setter Property="CanUserResizeColumns" Value="false"/>
         <Setter Property="Background" Value="{x:Null}" />
@@ -16,9 +16,9 @@
     <Style TargetType="DataGridColumnHeader">
         <Setter Property="SnapsToDevicePixels" Value="True" />
         <Setter Property="MinWidth" Value="100" />
-        <Setter Property="MinHeight" Value="33" />
+        <Setter Property="Height" Value="24" />
         <Setter Property="Foreground" Value="Black" />
-        <Setter Property="FontSize" Value="17" />
+        <Setter Property="FontSize" Value="14" />
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="Template">
             <Setter.Value>
