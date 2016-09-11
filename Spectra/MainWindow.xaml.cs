@@ -165,7 +165,7 @@ namespace Spectra
 
                 new Thread(() =>
                 {
-                    Parallel.For(0, 160, i =>
+                    Parallel.For(0, 167, i =>
                     {
                         File.Copy($"{FileInfo.decFilePathName}{i}.raw", $"{ImageInfo.strFilesPath}{i}.raw", true);
                     });
@@ -213,7 +213,7 @@ namespace Spectra
                     Func<Task>func = () => {
                         return Task.Run(() =>
                         {
-                            Parallel.For(0, 160, i =>
+                            Parallel.For(0, 167, i =>
                             {
                                 File.Copy($"{FileInfo.decFilePathName}{i}.raw", $"{ImageInfo.strFilesPath}{i}.raw", true);
                             });
@@ -457,7 +457,7 @@ namespace Spectra
                 w.DisplayMode = GridMode.One;
                 if (!w.isShow)
                     w.ScreenShow(Screen.AllScreens, 0, "单谱段图像");
-                w.Refresh(ImageInfo.strFilesPath, 0, WinFunc.Image);
+                w.Refresh(ImageInfo.strFilesPath, 0, WinFunc.Image,40);
             }
             catch
             {
@@ -481,10 +481,12 @@ namespace Spectra
                 w.DisplayMode = GridMode.Four;
                 if (!w.isShow)
                     w.ScreenShow(Screen.AllScreens, 0, "典型谱段图像对比");
-                w.Refresh(ImageInfo.strFilesPath, 0, WinFunc.Image);
-                w.Refresh(ImageInfo.strFilesPath, 1, WinFunc.Image);
-                w.Refresh(ImageInfo.strFilesPath, 2, WinFunc.Image);
-                w.Refresh(ImageInfo.strFilesPath, 3, WinFunc.Image);
+                w.Refresh(ImageInfo.strFilesPath, 0, WinFunc.Image,160);
+                w.Refresh(ImageInfo.strFilesPath, 1, WinFunc.Image,40);
+                w.Refresh(ImageInfo.strFilesPath, 2, WinFunc.Image,77);
+                w.Refresh(ImageInfo.strFilesPath, 3, WinFunc.Image,127);
+              
+
             }
             catch
             {

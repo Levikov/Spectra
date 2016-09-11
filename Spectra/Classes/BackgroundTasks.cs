@@ -355,16 +355,20 @@ namespace Spectra
             {
                 int Height = DataQuery.QueryResult.Rows.Count;
                 int Width = 2048;
+                int chanel = 1;
                 if (v == 161 || v == 162) Height = 128;
                 if (v == 163 || v == 164) Width = 128;
+                if (cMode ==ColorRenderMode.RealColor) chanel = 3;
  
 
                 byte[] buf_full = new byte[Width * Height * 3];
-                byte[] buf_band = new byte[Width * Height * 2];
+                byte[] buf_band;
+                buf_band = new byte[Width * Height * 2*chanel];
+
                 if (!File.Exists($"{path}{v}.raw") || Height < 1) return null;
                 FileStream fs = new FileStream($"{path}{v}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
                 if (fs == null) return null;
-                fs.Read(buf_band, 0, Width * Height * 2);
+                fs.Read(buf_band, 0, Width * Height * 2*chanel);
                 Parallel.For(0, Width * Height, i =>
                 {
                     switch (cMode)
@@ -390,6 +394,18 @@ namespace Spectra
                                 buf_full[3 * i + 0] = (byte)(Math.Floor(B));
                             }
                             
+                            break;
+                        case ColorRenderMode.RealColor:
+                            {
+                                double R = (double)(readU16_PIC(buf_band, i * 6+4)) / 4096  * 256;
+                                double G = (double)(readU16_PIC(buf_band, i * 6+2)) / 4096  * 256;
+                                double B = (double)(readU16_PIC(buf_band, i * 6)) / 4096  * 256;
+
+                                buf_full[3 * i + 2] = (byte)(Math.Floor(R));
+                                buf_full[3 * i + 1] = (byte)(Math.Floor(G));
+                                buf_full[3 * i + 0] = (byte)(Math.Floor(B));
+                            }
+
                             break;
                         case ColorRenderMode.ArtColorSide:
                             {
@@ -960,6 +976,8 @@ namespace Spectra
     }
 
     #endregion
-    public enum ColorRenderMode { Grayscale, ArtColor, TrueColor,ArtColorSide }
+    public enum ColorRenderMode { Grayscale, ArtColor, TrueColor,ArtColorSide,
+        RealColor
+    }
 
 }

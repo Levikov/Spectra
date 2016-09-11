@@ -74,6 +74,9 @@ namespace Spectra
                 case ColorRenderMode.TrueColor:
                     bmp = await DataProc.GetRealColorBmp(path);
                     break;
+                case ColorRenderMode.RealColor:
+                    bmp = await DataProc.GetBmp(path, 160, ColorRenderMode.RealColor);
+                    break;
                 default:
                     bmp = await DataProc.GetBmp(path,band-1, cMode);
                     break;
