@@ -35,6 +35,34 @@ namespace Spectra
         public static DateTime endTime;
         public static Coord startCoord = new Coord(0, 0);
         public static Coord endCoord = new Coord(0, 0);
+
+        [DllImport("DLL\\DataOperation.dll", EntryPoint = "preProcess_File")]
+        static extern int preProcess_File(string pathName, int len);
+        public static string preProcessFile(bool isUpk,int packLen)
+        {
+            string path = "";
+            if (isUpk)
+            {
+                if (preProcess_File(FileInfo.upkFilePathName, packLen) == -1)
+                {
+                    MessageBox.Show("输入文件错误", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return path;
+                }
+                string[] s = FileInfo.upkFilePathName.Split('.');
+                path = s[0] + "_p." + s[1];
+            }
+            else
+            {
+                if (preProcess_File(FileInfo.srcFilePathName, packLen) == -1)
+                {
+                    MessageBox.Show("输入文件错误", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return path;
+                }
+                string[] s = FileInfo.srcFilePathName.Split('.');
+                path = s[0] + "_p." + s[1];
+            }
+            return path;
+        }
     }
 
     public static class Variables

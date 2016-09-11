@@ -148,12 +148,14 @@ namespace Spectra
                 btnDecFile.IsEnabled = false;
                 btnSelectFile.IsEnabled = false;
                 btnDelRecord.IsEnabled = false;
+                int PACK_LEN = (bool)cb280.IsChecked ? 280 : 288;
 
                 IProgress<double> IProgress_Prog = new Progress<double>((ProgressValue) => { prog_Import.Value = ProgressValue * this.prog_Import.Maximum; });
                 IProgress<string> IProgress_List = new Progress<string>((ProgressString) => { this.tb_Console.Text = ProgressString + "\n" + this.tb_Console.Text; });
+
                 App.global_Win_Dynamic = new DynamicImagingWindow_Win32();
                 App.global_Win_Dynamic.Show();
-                int PACK_LEN = (bool)cb280.IsChecked ? 280 : 288;
+
                 await DataProc.Import_5(PACK_LEN, IProgress_Prog, IProgress_List, cancelImport.Token);
                 IProgress_List.Report(DateTime.Now.ToString("HH:mm:ss") + " 操作成功！");
                 App.global_Win_Dynamic.Close();

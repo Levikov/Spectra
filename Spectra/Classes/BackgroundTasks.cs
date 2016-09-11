@@ -167,6 +167,13 @@ namespace Spectra
         {
             return Task.Run(()=> {
 
+                string cmdline = "";
+                string srcPath = FileInfo.preProcessFile(FileInfo.isUnpack, PACK_LEN);   //预处理
+                if (srcPath == "")
+                    return "输入文件错误";
+                else
+                    cmdline = "文件预处理完成!";
+
                 IntPtr hModule = LoadLibrary("DLL\\DataOperation.dll");
                 IntPtr hVariable = GetProcAddress(hModule, "progress");
                 SQLiteDatabase sqlExcute = new SQLiteDatabase(Variables.dbPath);
@@ -182,12 +189,10 @@ namespace Spectra
                     Directory.CreateDirectory($"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\result");
                 }
 
-                string cmdline = "";
-
                 //分包并解压
                 Parallel.For(0, 4, i =>
                 {
-                    FileStream fs_split = new FileStream(FileInfo.srcFilePathName, FileMode.Open, FileAccess.Read, FileShare.Read);  //打开源文件
+                    FileStream fs_split = new FileStream(srcPath, FileMode.Open, FileAccess.Read, FileShare.Read);  //打开源文件
                     FileStream fs_out = new FileStream($"test_{i}", FileMode.Create);
                     AuxDataRow adr_last = new AuxDataRow(new byte[PACK_LEN], 0);                                                     //最近一包的行结构，新建时为0
                     byte[] buf_split = new byte[PACK_LEN];                                                                           //一包数据
@@ -268,7 +273,7 @@ namespace Spectra
                         {
                             new SQLiteParameter("MD5",FileInfo.md5)
                         });
-                FileStream fs_chanel = new FileStream(FileInfo.srcFilePathName, FileMode.Open, FileAccess.Read, FileShare.Read);
+                FileStream fs_chanel = new FileStream(srcPath, FileMode.Open, FileAccess.Read, FileShare.Read);
                 byte[] buf_row1 = new byte[PACK_LEN * 1024 * 1024];
                 bool isErrWrDB = true;
                 while (fs_chanel.Position < fs_chanel.Length)
