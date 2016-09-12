@@ -59,30 +59,6 @@ namespace Spectra
         {
             e.Row.Header = e.Row.GetIndex() + 1;
         }
-        /*选择日期后日历消失*/
-        private void calStart_SelectedDatesChanged(object sender, SelectionChangedEventArgs e)
-        {
-            Calendar cal = sender as Calendar;
-            cal.Visibility = Visibility.Collapsed;
-        }
-        //文本框获得焦点显示日历
-        private void DateGotFocus(object sender, RoutedEventArgs e)
-        {
-            System.Windows.Controls.TextBox txt = sender as System.Windows.Controls.TextBox;
-            switch (txt.Name)
-            {
-                case "dtp_Start":
-                    calStart.Visibility = Visibility.Visible;
-                    calEnd.Visibility = Visibility.Collapsed;
-                    break;
-                case "dtp_End":
-                    calStart.Visibility = Visibility.Collapsed;
-                    calEnd.Visibility = Visibility.Visible;
-                    break;
-                default:
-                    break;
-            }
-        }
         #endregion
 
         #region 数据解包解压
@@ -333,6 +309,14 @@ namespace Spectra
                 ImageInfo.GetImgInfo();
                 SetImgInfo();
                 btnMakeImage.IsEnabled = true;
+                dtp_Start.Text = ImageInfo.startTime.ToString("yyyy-MM-dd HH:mm:ss");
+                dtp_End.Text = ImageInfo.endTime.ToString("yyyy-MM-dd HH:mm:ss");
+                LT_Lat.Text = ImageInfo.endCoord.Lat.ToString();
+                LT_Lon.Text = ImageInfo.startCoord.Lon.ToString();
+                RB_Lat.Text = ImageInfo.startCoord.Lat.ToString();
+                RB_Lon.Text = ImageInfo.endCoord.Lon.ToString();
+                tb_start_frm.Text = ImageInfo.minFrm.ToString();
+                tb_end_frm.Text = ImageInfo.maxFrm.ToString();
             }
             catch
             {
@@ -796,7 +780,12 @@ namespace Spectra
         private async void btnModelSetData_Click(object sender, RoutedEventArgs e)
         {
             try
-            { 
+            {
+                string sql = "select * from Apply_Model where 名称='" + txtModelName.Text + "'";
+                DataTable dtModel = SQLiteFunc.SelectDTSQL(sql);
+                if(dtModel.Rows.Count > 0)
+                    if (System.Windows.MessageBox.Show("确认对该应用示范进行数据修改?(不可退回)", "提示", MessageBoxButton.YesNoCancel, MessageBoxImage.Information) != MessageBoxResult.Yes)
+                        return;
                 ModelShowInfo.Time_Start = Convert.ToDateTime(txtModelStartTime.Text);
                 ModelShowInfo.Time_End = Convert.ToDateTime(txtModelEndTime.Text);
                 ModelShowInfo.Coord_TL.Lon = Convert.ToDouble(txtModelStartLon.Text);
@@ -805,8 +794,6 @@ namespace Spectra
                 ModelShowInfo.Coord_DR.Lat = Convert.ToDouble(txtModelEndLat.Text);
                 DataTable dt = await DataProc.QueryResult(null, ModelShowInfo.Time_Start != ModelShowInfo.Time_End, ModelShowInfo.Coord_TL.Lon != ModelShowInfo.Coord_DR.Lon && ModelShowInfo.Coord_TL.Lat != ModelShowInfo.Coord_DR.Lat, false, ModelShowInfo.Time_Start, ModelShowInfo.Time_End, 0, 0, ModelShowInfo.Coord_TL, ModelShowInfo.Coord_DR);
                 ModelShowInfo.imgWidth = dt.Rows.Count;
-                string sql = "select * from Apply_Model where 名称='" + txtModelName.Text + "'";
-                DataTable dtModel = SQLiteFunc.SelectDTSQL(sql);
                 if (dtModel.Rows.Count == 0)
                 {
                     SQLiteFunc.ExcuteSQL("insert into Apply_Model (图像帧数,名称,起始时间,结束时间,起始经度,结束经度,起始纬度,结束纬度,备注) values (?,'?','?','?',?,?,?,?,'?')",ModelShowInfo.imgWidth, txtModelName.Text, ModelShowInfo.Time_Start.ToString("yyyy-MM-dd HH:mm:ss"), ModelShowInfo.Time_End.ToString("yyyy-MM-dd HH:mm:ss"), 0, 0, 0, 0, txtModelRemark.Text);
@@ -817,7 +804,7 @@ namespace Spectra
                  }
                 getCurApplyModel();
             }
-            catch (Exception ex)
+            catch
             {
                 System.Windows.MessageBox.Show("数据出错!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
