@@ -315,7 +315,7 @@ namespace Spectra
         /// </summary>
         /// <param name="wave">波长</param>
         /// <returns>谱段</returns>
-        public static int getBand(double wave)
+        public static UInt16 getBand(double wave)
         {
             double min = 2000;
             int index = 0;
@@ -327,7 +327,7 @@ namespace Spectra
                     min = wave - Convert.ToDouble(dtBandWave.Rows[i][1]);
                 }
             }
-            return Convert.ToInt32(dtBandWave.Rows[index][0]);
+            return Convert.ToUInt16(dtBandWave.Rows[index][0]);
         }
 
         /// <summary>

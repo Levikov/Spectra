@@ -212,16 +212,17 @@ namespace Spectra
                     DataTable dt = SQLiteFunc.SelectDTSQL("SELECT * from FileDetails_dec where MD5='" + FileInfo.md5 + "'");
                     FileInfo.upkFilePathName = dt.Rows[0][7].ToString();
                     FileInfo.decFilePathName = dt.Rows[0][9].ToString();
-                    Func<Task>func = () => {
-                        return Task.Run(() =>
-                        {
-                            Parallel.For(0, 167, i =>
-                            {
-                                File.Copy($"{FileInfo.decFilePathName}{i}.raw", $"{ImageInfo.strFilesPath}{i}.raw", true);
-                            });
-                        });
-                    };
-                    await func();
+                    ImageInfo.strFilesPath = FileInfo.decFilePathName;
+                    //Func<Task>func = () => {
+                    //    return Task.Run(() =>
+                    //    {
+                    //        Parallel.For(0, 167, i =>
+                    //        {
+                    //            File.Copy($"{FileInfo.decFilePathName}{i}.raw", $"{ImageInfo.strFilesPath}{i}.raw", true);
+                    //        });
+                    //    });
+                    //};
+                    //await func();
                     btnTopB.IsChecked = true;
                     btnLeftB1.IsChecked = true;
                 }
@@ -451,7 +452,7 @@ namespace Spectra
                 new Thread(() =>
                 {
                     App.global_ImageBuffer[0] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
-                    App.global_ImageBuffer[0].getBuffer($"showFiles\\", 40);
+                    App.global_ImageBuffer[0].getBuffer(ImageInfo.strFilesPath, 40);
                 }).Start();
 
                 MultiFuncWindow w = new MultiFuncWindow();
@@ -459,7 +460,8 @@ namespace Spectra
                 w.DisplayMode = GridMode.One;
                 if (!w.isShow)
                     w.ScreenShow(Screen.AllScreens, 0, "单谱段图像");
-                w.Refresh(ImageInfo.strFilesPath, 0, WinFunc.Image,40);
+                UInt16[] colorBand = { 40, 40, 40 };
+                w.RefreshImage(ImageInfo.strFilesPath, 0, WinFunc.Image, colorBand, ColorRenderMode.Grayscale);
             }
             catch
             {
@@ -473,9 +475,18 @@ namespace Spectra
             {
                 new Thread(() =>
                 {
-                    App.global_ImageBuffer[0] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
-                    App.global_ImageBuffer[0].getBuffer($"showFiles\\", 40);
-                    App.global_ImageBuffer[3] = App.global_ImageBuffer[2] = App.global_ImageBuffer[1] = App.global_ImageBuffer[0];
+                    App.global_ImageBuffer[1] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
+                    App.global_ImageBuffer[1].getBuffer(ImageInfo.strFilesPath, 40);
+                }).Start();
+                new Thread(() =>
+                {
+                    App.global_ImageBuffer[2] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
+                    App.global_ImageBuffer[2].getBuffer(ImageInfo.strFilesPath, 77);
+                }).Start();
+                new Thread(() =>
+                {
+                    App.global_ImageBuffer[3] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
+                    App.global_ImageBuffer[3].getBuffer(ImageInfo.strFilesPath, 127);
                 }).Start();
 
                 MultiFuncWindow w = new MultiFuncWindow();
@@ -483,12 +494,14 @@ namespace Spectra
                 w.DisplayMode = GridMode.Four;
                 if (!w.isShow)
                     w.ScreenShow(Screen.AllScreens, 0, "典型谱段图像对比");
-                w.Refresh(ImageInfo.strFilesPath, 0, WinFunc.Image,160);
-                w.Refresh(ImageInfo.strFilesPath, 1, WinFunc.Image,40);
-                w.Refresh(ImageInfo.strFilesPath, 2, WinFunc.Image,77);
-                w.Refresh(ImageInfo.strFilesPath, 3, WinFunc.Image,127);
-              
-
+                UInt16[] colorBand = { 40, 77, 127 };
+                w.RefreshImage(ImageInfo.strFilesPath, 0, WinFunc.Image, colorBand, ColorRenderMode.ArtColor);
+                UInt16[] colorBand1 = { 40, 40, 40 };
+                w.RefreshImage(ImageInfo.strFilesPath, 1, WinFunc.Image, colorBand1, ColorRenderMode.Grayscale);
+                UInt16[] colorBand2 = { 77, 77, 77 };
+                w.RefreshImage(ImageInfo.strFilesPath, 2, WinFunc.Image, colorBand2, ColorRenderMode.Grayscale);
+                UInt16[] colorBand3 = { 127, 127, 127 };
+                w.RefreshImage(ImageInfo.strFilesPath, 3, WinFunc.Image, colorBand3, ColorRenderMode.Grayscale);
             }
             catch
             {
@@ -515,42 +528,37 @@ namespace Spectra
         /*设置单谱段图像谱段*/
         private void btnSingleSet_Click(object sender, RoutedEventArgs e)
         {
-            int bandR, bandG, bandB,band;
+            UInt16[] band = new UInt16[3];
             try
             { 
                 if (rb1Single.IsChecked == true)
                 {
                     if (Convert.ToDouble(txtSingleR.Text) > 160)
-                        bandR = ImageInfo.getBand(Convert.ToDouble(txtSingleR.Text));
+                        band[0] = ImageInfo.getBand(Convert.ToDouble(txtSingleR.Text));
                     else
-                        bandR = Convert.ToInt32(txtSingleR.Text);
+                        band[0] = Convert.ToUInt16(txtSingleR.Text);
                     if (Convert.ToDouble(txtSingleG.Text) > 160)
-                        bandG = ImageInfo.getBand(Convert.ToDouble(txtSingleG.Text));
+                        band[1] = ImageInfo.getBand(Convert.ToDouble(txtSingleG.Text));
                     else
-                        bandG = Convert.ToInt32(txtSingleG.Text);
+                        band[1] = Convert.ToUInt16(txtSingleG.Text);
                     if (Convert.ToDouble(txtSingleB.Text) > 160)
-                        bandB = ImageInfo.getBand(Convert.ToDouble(txtSingleB.Text));
+                        band[2] = ImageInfo.getBand(Convert.ToDouble(txtSingleB.Text));
                     else
-                        bandB = Convert.ToInt32(txtSingleB.Text);
-                    new Thread(() =>
-                    {
-                        App.global_ImageBuffer[0] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
-                        App.global_ImageBuffer[0].getBuffer($"showFiles\\", bandR);
-                    }).Start();
-                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[0]).UserControls[0]).Refresh(0,bandR, ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
+                        band[2] = Convert.ToUInt16(txtSingleB.Text);
+                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[0]).UserControls[0]).RefreshPseudoColor(0,ImageInfo.strFilesPath, 4, band, ColorRenderMode.ArtColor);
                 }
                 else
                 {
                     if (Convert.ToDouble(txtSingleGray.Text) > 160)
-                        band = ImageInfo.getBand(Convert.ToDouble(txtSingleGray.Text));
+                        band[0] = band[1] = band[2] = ImageInfo.getBand(Convert.ToDouble(txtSingleGray.Text));
                     else
-                        band = Convert.ToInt32(txtSingleGray.Text);
+                        band[0] = band[1] = band[2] = Convert.ToUInt16(txtSingleGray.Text);
                     new Thread(() =>
                     {
                         App.global_ImageBuffer[0] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
-                        App.global_ImageBuffer[0].getBuffer($"showFiles\\", band);
+                        App.global_ImageBuffer[0].getBuffer(ImageInfo.strFilesPath, band[0]);
                     }).Start();
-                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[0]).UserControls[0]).Refresh(0,band, ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
+                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[0]).UserControls[0]).RefreshPseudoColor(0,ImageInfo.strFilesPath, 4, band, ColorRenderMode.Grayscale);
                 }
             }
             catch
@@ -561,53 +569,52 @@ namespace Spectra
         /*设置对比图像谱段*/
         private void btnCompareSet_Click(object sender, RoutedEventArgs e)
         {
-            int bandR, bandG, bandB;
+            UInt16[] band = new UInt16[3];
             if (Convert.ToDouble(txtCompareR.Text) > 160)
-                bandR = ImageInfo.getBand(Convert.ToDouble(txtCompareR.Text));
+                band[0] = ImageInfo.getBand(Convert.ToDouble(txtCompareR.Text));
             else
-                bandR = Convert.ToInt32(txtCompareR.Text);
+                band[0] = Convert.ToUInt16(txtCompareR.Text);
             if (Convert.ToDouble(txtCompareG.Text) > 160)
-                bandG = ImageInfo.getBand(Convert.ToDouble(txtCompareG.Text));
+                band[1] = ImageInfo.getBand(Convert.ToDouble(txtCompareG.Text));
             else
-                bandG = Convert.ToInt32(txtCompareG.Text);
+                band[1] = Convert.ToUInt16(txtCompareG.Text);
             if (Convert.ToDouble(txtCompareB.Text) > 160)
-                bandB = ImageInfo.getBand(Convert.ToDouble(txtCompareB.Text));
+                band[2] = ImageInfo.getBand(Convert.ToDouble(txtCompareB.Text));
             else
-                bandB = Convert.ToInt32(txtCompareB.Text);
-            int band = 0;
+                band[2] = Convert.ToUInt16(txtCompareB.Text);
             try
             {
                 if (ckb1sub.IsChecked == true)
-                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[1]).UserControls[0]).Refresh(0,bandR, ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
+                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[1]).UserControls[0]).RefreshPseudoColor(0,ImageInfo.strFilesPath, 4, band, ColorRenderMode.ArtColor);
                 if (ckb2sub.IsChecked == true)
                 {
                     if (Convert.ToDouble(txtCompareGray2.Text) > 160)
-                        band = ImageInfo.getBand(Convert.ToDouble(txtCompareGray2.Text));
+                        band[0] = band[1] = band[2] = ImageInfo.getBand(Convert.ToDouble(txtCompareGray2.Text));
                     else
-                        band = Convert.ToInt32(txtCompareGray2.Text);
+                        band[0] = band[1] = band[2] = Convert.ToUInt16(txtCompareGray2.Text);
                     App.global_ImageBuffer[1] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
-                    App.global_ImageBuffer[1].getBuffer($"showFiles\\", band);
-                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[1]).UserControls[1]).Refresh(1,band, ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
+                    App.global_ImageBuffer[1].getBuffer(ImageInfo.strFilesPath, band[0]);
+                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[1]).UserControls[1]).RefreshPseudoColor(1,ImageInfo.strFilesPath, 4, band, ColorRenderMode.Grayscale);
                 }
                 if (ckb3sub.IsChecked == true)
                 {
                     if (Convert.ToDouble(txtCompareGray3.Text) > 160)
-                        band = ImageInfo.getBand(Convert.ToDouble(txtCompareGray3.Text));
+                        band[0] = band[1] = band[2] = ImageInfo.getBand(Convert.ToDouble(txtCompareGray3.Text));
                     else
-                        band = Convert.ToInt32(txtCompareGray3.Text);
+                        band[0] = band[1] = band[2] = Convert.ToUInt16(txtCompareGray3.Text);
                     App.global_ImageBuffer[2] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
-                    App.global_ImageBuffer[2].getBuffer($"showFiles\\", band);
-                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[1]).UserControls[2]).Refresh(2,band, ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
+                    App.global_ImageBuffer[2].getBuffer(ImageInfo.strFilesPath, band[0]);
+                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[1]).UserControls[2]).RefreshPseudoColor(2,ImageInfo.strFilesPath, 4, band, ColorRenderMode.Grayscale);
                 }
                 if (ckb4sub.IsChecked == true)
                 {
                     if (Convert.ToDouble(txtCompareGray4.Text) > 160)
-                        band = ImageInfo.getBand(Convert.ToDouble(txtCompareGray4.Text));
+                        band[0] = band[1] = band[2] = ImageInfo.getBand(Convert.ToDouble(txtCompareGray4.Text));
                     else
-                        band = Convert.ToInt32(txtCompareGray4.Text);
+                        band[0] = band[1] = band[2] = Convert.ToUInt16(txtCompareGray4.Text);
                     App.global_ImageBuffer[3] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
-                    App.global_ImageBuffer[3].getBuffer($"showFiles\\", band);
-                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[1]).UserControls[3]).Refresh(3, band, ColorRenderMode.Grayscale, ImageInfo.strFilesPath);
+                    App.global_ImageBuffer[3].getBuffer(ImageInfo.strFilesPath, band[0]);
+                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[1]).UserControls[3]).RefreshPseudoColor(3,ImageInfo.strFilesPath, 4, band, ColorRenderMode.Grayscale);
                 }
             }
             catch (Exception)
@@ -933,9 +940,20 @@ namespace Spectra
             new Thread(() =>
             {
                 App.global_ImageBuffer[0] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
-                App.global_ImageBuffer[0].getBuffer($"showFiles\\", 40);
-                App.global_ImageBuffer[3] = App.global_ImageBuffer[2] = App.global_ImageBuffer[1] = App.global_ImageBuffer[0];
+                App.global_ImageBuffer[0].getBuffer(ImageInfo.strFilesPath, 40);
+                App.global_ImageBuffer[1] = App.global_ImageBuffer[0];
             }).Start();
+            new Thread(() =>
+            {
+                App.global_ImageBuffer[2] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
+                App.global_ImageBuffer[2].getBuffer(ImageInfo.strFilesPath, 77);
+            }).Start();
+            new Thread(() =>
+            {
+                App.global_ImageBuffer[3] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
+                App.global_ImageBuffer[3].getBuffer(ImageInfo.strFilesPath, 127);
+            }).Start();
+
             MultiFuncWindow[] w = new MultiFuncWindow[6];
             for (int i = 0; i < 6; i++)
                 w[i] = (MultiFuncWindow)App.global_Windows[i];
@@ -945,17 +963,22 @@ namespace Spectra
                 w[0].DisplayMode = GridMode.One;
                 if (!w[0].isShow)
                     w[0].ScreenShow(Screen.AllScreens, 0, "单谱段图像");
-                w[0].Refresh(path, 0, WinFunc.Image);
+                UInt16[] colorBand = { 40, 77, 127 };
+                w[0].RefreshImage(path, 0, WinFunc.Image, colorBand, ColorRenderMode.ArtColor);
             }
             if (dtShow.Rows[0][2].ToString() == "True")
             {
                 w[1].DisplayMode = GridMode.Four;
                 if (!w[1].isShow)
                     w[1].ScreenShow(Screen.AllScreens, 0, "典型谱段图像对比");
-                w[1].Refresh(path, 0, WinFunc.Image);
-                w[1].Refresh(path, 1, WinFunc.Image);
-                w[1].Refresh(path, 2, WinFunc.Image);
-                w[1].Refresh(path, 3, WinFunc.Image);
+                UInt16[] colorBand = { 40, 77, 127 };
+                w[1].RefreshImage(path, 0, WinFunc.Image, colorBand, ColorRenderMode.ArtColor);
+                UInt16[] colorBand1 = { 40, 40, 40 };
+                w[1].RefreshImage(path, 1, WinFunc.Image, colorBand1, ColorRenderMode.Grayscale);
+                UInt16[] colorBand2 = { 77, 77, 77 };
+                w[1].RefreshImage(path, 2, WinFunc.Image, colorBand2, ColorRenderMode.Grayscale);
+                UInt16[] colorBand3 = { 127, 127, 127 };
+                w[1].RefreshImage(path, 3, WinFunc.Image, colorBand3, ColorRenderMode.Grayscale);
             }
             //谷歌地图
             if (dtShow.Rows[0][3].ToString() == "True")
@@ -979,7 +1002,8 @@ namespace Spectra
                 w[4].DisplayMode = GridMode.Two;
                 if (!w[4].isShow)
                     w[4].ScreenShow(Screen.AllScreens, 0, "图像/地图");
-                w[4].Refresh(path, 0, WinFunc.Image);
+                UInt16[] colorBand = { 40, 77, 127 };
+                w[4].RefreshImage(path, 0, WinFunc.Image, colorBand, ColorRenderMode.ArtColor);
                 w[4].Refresh(path, 1, WinFunc.Map);
             }
             //曲线模式1
@@ -1082,10 +1106,11 @@ namespace Spectra
                 w.DisplayMode = GridMode.One;
                 if (!w.isShow)
                     w.ScreenShow(Screen.AllScreens, 0, "单谱段图像");
-                w.Refresh(ImageInfo.strFilesPath, 0, WinFunc.Image);
+                UInt16[] colorBand = { 40, 77, 127 };
+                w.RefreshImage(ImageInfo.strFilesPath, 0, WinFunc.Image, colorBand, ColorRenderMode.ArtColor);
 
                 App.global_ImageBuffer[0] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
-                App.global_ImageBuffer[0].getBuffer($"showFiles\\", 120);
+                App.global_ImageBuffer[0].getBuffer(ImageInfo.strFilesPath, 120);
 
                 ImageSection.beginSection = true;
 
