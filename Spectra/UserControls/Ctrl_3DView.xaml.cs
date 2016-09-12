@@ -70,46 +70,51 @@ namespace Spectra
             m3dg.Children.Add(gm3d_Active);
             mv3d.Content = m3dg;
             scene.Viewport.Children.Add(mv3d);
-
-
         }
 
-        private void RenderBox(double lines, System.Drawing.Bitmap[] bmpArray)
+        private void RenderBox(double lines, Bitmap[] bmpArray)
         {
-            GeometryModel3D gm3d_Top = FindName("Top") as GeometryModel3D;
-            GeometryModel3D gm3d_Bottom = FindName("Bottom") as GeometryModel3D;
-            GeometryModel3D gm3d_Up = FindName("Up") as GeometryModel3D;
-            GeometryModel3D gm3d_Down = FindName("Down") as GeometryModel3D;
-            GeometryModel3D gm3d_Right = FindName("Right") as GeometryModel3D;
-            GeometryModel3D gm3d_Left = FindName("Left") as GeometryModel3D;
-
-
-            scene.Viewport.Children[2].Transform = new ScaleTransform3D(1, imheight/600, 1);
-
-            BitmapImage[] bmpSource = new BitmapImage[6];
-
-            for (int i = 0; i <6; i++)
+            try
             {
-                bmpArray[i].Save($"cube_{i}.bmp");
-                bmpSource[i] = new BitmapImage(new Uri($"{Environment.CurrentDirectory}\\cube_{i}.bmp"));
-            };
+                GeometryModel3D gm3d_Top = FindName("Top") as GeometryModel3D;
+                GeometryModel3D gm3d_Bottom = FindName("Bottom") as GeometryModel3D;
+                GeometryModel3D gm3d_Up = FindName("Up") as GeometryModel3D;
+                GeometryModel3D gm3d_Down = FindName("Down") as GeometryModel3D;
+                GeometryModel3D gm3d_Right = FindName("Right") as GeometryModel3D;
+                GeometryModel3D gm3d_Left = FindName("Left") as GeometryModel3D;
 
-            gm3d_Top.Material = new DiffuseMaterial(new System.Windows.Media.ImageBrush(bmpSource[0]));
-            gm3d_Bottom.Material = new DiffuseMaterial(new System.Windows.Media.ImageBrush(bmpSource[1]));
-            gm3d_Up.Material = new DiffuseMaterial(new System.Windows.Media.ImageBrush(bmpSource[2]));
-            gm3d_Down.Material = new DiffuseMaterial(new System.Windows.Media.ImageBrush(bmpSource[3]));
-            gm3d_Right.Material = new DiffuseMaterial(new System.Windows.Media.ImageBrush(bmpSource[4]));
-            gm3d_Left.Material = new DiffuseMaterial(new System.Windows.Media.ImageBrush(bmpSource[5]));
+                scene.Viewport.Children[2].Transform = new ScaleTransform3D(1, imheight / 600, 1);
 
+                BitmapImage[] bmpSource = new BitmapImage[6];
+                for (int i = 0; i < 6; i++)
+                {
+                    bmpArray[i].Save($"cube_{i}.bmp");
+                    bmpSource[i] = new BitmapImage(new Uri($"{Environment.CurrentDirectory}\\cube_{i}.bmp"));
+                };
+
+                gm3d_Top.Material = new DiffuseMaterial(new ImageBrush(bmpSource[0]));
+                gm3d_Bottom.Material = new DiffuseMaterial(new ImageBrush(bmpSource[1]));
+                gm3d_Up.Material = new DiffuseMaterial(new ImageBrush(bmpSource[2]));
+                gm3d_Down.Material = new DiffuseMaterial(new ImageBrush(bmpSource[3]));
+                gm3d_Right.Material = new DiffuseMaterial(new ImageBrush(bmpSource[4]));
+                gm3d_Left.Material = new DiffuseMaterial(new ImageBrush(bmpSource[5]));
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
         }
 
         internal async void Refresh(string path)
         {
+            if (DataQuery.QueryResult == null) return;
             imheight = DataQuery.QueryResult.Rows.Count;
             if (imheight < 1) return;
             this.Busy.isBusy = true;
             Bitmap[] bmp = await DataProc.GetBmp3D(path);
+            bmp[0].RotateFlip(RotateFlipType.Rotate180FlipX);
             bmp[1].RotateFlip(RotateFlipType.Rotate180FlipY);
+            bmp[1].RotateFlip(RotateFlipType.Rotate180FlipX);
             RenderBox(imheight, bmp);
             InitializeCameras();
             this.Busy.isBusy=false;
@@ -170,6 +175,8 @@ namespace Spectra
                     
                     Bitmap bmp = await DataProc.GetBmp(ImageInfo.strFilesPath, Z-1, ColorRenderMode.Grayscale);
                     if (bmp == null) return;
+                    bmp.RotateFlip(RotateFlipType.Rotate180FlipNone);
+                    bmp.RotateFlip(RotateFlipType.Rotate180FlipY);
                     BitmapImage bmpSource = new BitmapImage();
                     
                     bmp.Save($"bmpFiles\\{Z}.bmp");

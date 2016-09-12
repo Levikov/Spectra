@@ -520,7 +520,7 @@ namespace Spectra
                     w.ScreenShow(Screen.AllScreens, 0, "光谱三维立方体");
                 w.Refresh(ImageInfo.strFilesPath, 0, WinFunc.Cube);
             }
-            catch (Exception ex)
+            catch
             {
                 System.Windows.MessageBox.Show("数据出错!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
             }

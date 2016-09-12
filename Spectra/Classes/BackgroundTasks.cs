@@ -491,8 +491,8 @@ namespace Spectra
             return Task.Run(async () =>
             {
                 Bitmap[] r = new Bitmap[6];
-                r[0] = await GetBmp(path, 165, ColorRenderMode.TrueColor);
-                r[1] = await GetBmp(path, 166, ColorRenderMode.TrueColor);
+                r[0] = await BmpOper.MakePseudoColor(path, new UInt16[] { 40, 77, 127 }, 4);
+                r[1] = await BmpOper.MakePseudoColor(path, new UInt16[] { 40, 40, 40 }, 4);
                 r[2] = await GetBmp(path, 161, ColorRenderMode.ArtColor);
                 r[3] = await GetBmp(path, 162, ColorRenderMode.ArtColor);
                 r[4] = await GetBmp(path, 163, ColorRenderMode.ArtColorSide);
