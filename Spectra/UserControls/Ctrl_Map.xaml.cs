@@ -17,6 +17,7 @@ using Mapsui.Providers;
 using Mapsui.Samples.Common;
 using Mapsui.Samples.Common.Desktop;
 using Mapsui.UI.Xaml;
+using Mapsui.Geometries;
 using BruTile;
 using BruTile.Predefined;
 using BruTile.FileSystem;
@@ -35,13 +36,47 @@ namespace Spectra
             InitializeComponent();
             MapControl.Map.Layers.Clear();
             MapControl.Map.Layers.Add(MapTilerSample.CreateLayer());
-            MapControl.ZoomToFullEnvelope();
+            
+
             MapControl.Refresh();
+           
+           
+        }
+
+        public void ZoomToBox(System.Windows.Point start, System.Windows.Point End)
+        {
+            this.MapControl.ZoomToBox(Mapsui.Projection.SphericalMercator.FromLonLat(start.X,start.Y),Mapsui.Projection.SphericalMercator.FromLonLat(End.X,End.Y));
+            this.MapControl.Refresh();
         }
 
         internal void Refresh()
         {
             
+        }
+
+        private void Right_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            Mapsui.Geometries.Point p= this.MapControl.Map.Viewport.ScreenToWorld(e.GetPosition(MapControl).X,e.GetPosition(MapControl).Y);
+            this.pLon.Text = (Mapsui.Projection.SphericalMercator.ToLonLat(p.X,p.Y).X).ToString();
+            this.pLat.Text = (Mapsui.Projection.SphericalMercator.ToLonLat(p.X, p.Y).Y).ToString();
+        }
+
+        private void Right_KeyDown(object sender, KeyEventArgs e)
+        {
+            String keyName = e.Key.ToString().ToLower();
+            if (keyName.Equals("ctrl") || keyName.Equals("leftctrl") || keyName.Equals("rightctrl"))
+            {
+                this.MapControl.ZoomToBoxMode = true;
+            }
+        }
+
+        private void Right_KeyUp(object sender, KeyEventArgs e)
+        {
+            String keyName = e.Key.ToString().ToLower();
+            if (keyName.Equals("ctrl") || keyName.Equals("leftctrl") || keyName.Equals("rightctrl"))
+            {
+                this.MapControl.ZoomToBoxMode = false;
+            }
         }
     }
     public static class MapTilerSample

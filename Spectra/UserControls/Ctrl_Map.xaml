@@ -6,8 +6,20 @@
              xmlns:local="clr-namespace:Spectra"
              xmlns:xaml="clr-namespace:Mapsui.UI.Xaml;assembly=Mapsui.UI.Xaml"
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300">
-    <Grid>
+             d:DesignHeight="768" d:DesignWidth="1024">
+    <Grid KeyDown="Right_KeyDown" KeyUp="Right_KeyUp" x:Name="Right" Background="Gray" MouseRightButtonUp="Right_MouseRightButtonUp" >
         <xaml:MapControl x:Name="MapControl" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" />
+        <DockPanel Margin="20,20,0,0" Height="50" VerticalAlignment="Top" HorizontalAlignment="Left">
+            <Label HorizontalAlignment="Left" Content="中心点经度:" VerticalAlignment="Center" FontSize="20" Foreground="Black"/>
+            <TextBlock x:Name="cLon" Text="0" Width="60" FontSize="20" Foreground="Black" VerticalAlignment="Center"/>
+            <Label HorizontalAlignment="Left" Content="中心点纬度:" VerticalAlignment="Center" FontSize="20" Foreground="Black"/>
+            <TextBlock x:Name="cLat" Text="0" Width="60" FontSize="20" Foreground="Black" VerticalAlignment="Center"/>
+            <Label HorizontalAlignment="Left" Content="当前级别:" VerticalAlignment="Center" FontSize="20" Foreground="Black"/>
+            <TextBlock x:Name="Level" Text="0" Width="60" FontSize="20" Foreground="Black" VerticalAlignment="Center"/>
+            <Label HorizontalAlignment="Left" Content="当前经度:" VerticalAlignment="Center" FontSize="20" Foreground="Black"/>
+            <TextBlock x:Name="pLon" Text="0"  FontSize="20" Foreground="Black" VerticalAlignment="Center"/>
+            <Label HorizontalAlignment="Left" Content="当前纬度:" VerticalAlignment="Center" FontSize="20" Foreground="Black"/>
+            <TextBlock x:Name="pLat" Text="0"  FontSize="20" Foreground="Black" VerticalAlignment="Center"/>
+        </DockPanel>
     </Grid>
 </UserControl>

@@ -166,7 +166,7 @@ namespace Spectra
 
     public class MapInfo : DependencyObject
     {
-        public static string RoadMapPath = @"D:\Amap\roadmap";
+        public static string RoadMapPath = @"C:\Users\Victo\Documents\t\Amap\roadmap";
         public static string TerrainMapPath = "";
     }
 
