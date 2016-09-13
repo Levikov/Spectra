@@ -379,17 +379,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="image\main.jpg" />
-    <Resource Include="image\top.jpg" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="image\top_1.jpg" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="image\Image_BackGround.jpg" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="image\today.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="image\ICON\1.jpg" />
@@ -426,9 +416,6 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="image\ICON\4.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="image\1920.jpg" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="decFiles\decFiles.txt">
