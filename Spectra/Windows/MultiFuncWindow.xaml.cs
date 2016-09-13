@@ -70,6 +70,7 @@ namespace Spectra
             DisplayMode = GridMode.Two;
         }
 
+        //该函数不再用于显示图像内容
         public void Refresh(string path, int SubGridInedex, WinFunc setWinFunc)
         {
             SubGrid[SubGridInedex].Children.Clear();
@@ -77,10 +78,6 @@ namespace Spectra
 
             switch (setWinFunc)
             {
-                case Spectra.WinFunc.Image:
-                    UserControls[SubGridInedex] = new Ctrl_ImageView();
-                    ((Ctrl_ImageView)(UserControls[SubGridInedex])).Refresh(SubGridInedex, 160, ColorRenderMode.RealColor,path);
-                    break;
                 case Spectra.WinFunc.Curve:
                     UserControls[SubGridInedex] = new Ctrl_SpecCurv();
                     break;
@@ -97,35 +94,16 @@ namespace Spectra
             }
             SubGrid[SubGridInedex].Children.Add(UserControls[SubGridInedex]);
         }
-        public void Refresh(string path, int SubGridInedex, WinFunc setWinFunc,int band)
+
+        //该函数仅用于显示图像内容
+        public void RefreshImage(string path, int SubGridInedex, WinFunc setWinFunc ,UInt16[] band ,ColorRenderMode mode)
         {
             SubGrid[SubGridInedex].Children.Clear();
             WinFunc[SubGridInedex] = setWinFunc;
+            
+            UserControls[SubGridInedex] = new Ctrl_ImageView();
+            ((Ctrl_ImageView)(UserControls[SubGridInedex])).RefreshPseudoColor(SubGridInedex,ImageInfo.strFilesPath, 4, band, mode);
 
-            switch (setWinFunc)
-            {
-                case Spectra.WinFunc.Image:
-
-                    UserControls[SubGridInedex] = new Ctrl_ImageView();
-                    ColorRenderMode mode;
-                    if (band < 160) mode = ColorRenderMode.Grayscale;
-                    else mode = ColorRenderMode.RealColor;
-                    ((Ctrl_ImageView)(UserControls[SubGridInedex])).Refresh(SubGridInedex, band, mode, path);
-                    break;
-                case Spectra.WinFunc.Curve:
-                    UserControls[SubGridInedex] = new Ctrl_SpecCurv();
-                    break;
-                case Spectra.WinFunc.Cube:
-                    UserControls[SubGridInedex] = new Ctrl_3DView();
-                    ((Ctrl_3DView)UserControls[SubGridInedex]).Refresh(path);
-                    break;
-                case Spectra.WinFunc.Map:
-                    UserControls[SubGridInedex] = new Ctrl_Map();
-                    ((Ctrl_Map)UserControls[SubGridInedex]).Refresh();
-                    break;
-                default:
-                    break;
-            }
             SubGrid[SubGridInedex].Children.Add(UserControls[SubGridInedex]);
         }
 

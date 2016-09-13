@@ -141,6 +141,7 @@ namespace Spectra
     { 
         [DllImport("DLL\\DataOperation.dll", EntryPoint = "Split_Chanel")]
         static extern void Split_Chanel(string path, string outpath, int sum, string[] file);
+
         public static int WindowsCnt = 0;               //应用样式的窗口数量
         public static DataTable dtModelList;            //应用样式列表
         public static DataTable dtWinShowInfo;          //应用样式细则
@@ -150,6 +151,9 @@ namespace Spectra
         public static Coord Coord_DR = new Coord(0, 0); //右下角坐标
         public static int imgWidth=0;                   //像宽(行数)
         public static DataTable dtImgInfo;              //应用样式细则
+        public static bool isMakeImage;                 //是否已生成图像
+        public static string strFilesPath;              //文件存储的路径
+        public static string MD5;                       //MD5
 
         public static int MakeImage()
         {
@@ -159,7 +163,7 @@ namespace Spectra
             string[] strFileName = new string[imgWidth];
             for (int i = 0; i < imgWidth; i++)
                 strFileName[i] = $"{(Convert.ToUInt32(dtImgInfo.Rows[i][2])).ToString("D10")}_{(Convert.ToUInt32(dtImgInfo.Rows[i][17])).ToString("D10")}_";
-            Split_Chanel($"{Environment.CurrentDirectory}\\channelFiles\\", $"{Environment.CurrentDirectory}\\showFiles\\", imgWidth, strFileName);
+            Split_Chanel($"{Environment.CurrentDirectory}\\channelFiles\\", strFilesPath, imgWidth, strFileName);
             return 1;
         }
     }
@@ -315,7 +319,7 @@ namespace Spectra
         /// </summary>
         /// <param name="wave">波长</param>
         /// <returns>谱段</returns>
-        public static int getBand(double wave)
+        public static UInt16 getBand(double wave)
         {
             double min = 2000;
             int index = 0;
@@ -324,10 +328,10 @@ namespace Spectra
                 if (Math.Abs(wave - Convert.ToDouble(dtBandWave.Rows[i][1])) < min)
                 {
                     index = i;
-                    min = wave - Convert.ToDouble(dtBandWave.Rows[i][1]);
+                    min = Math.Abs(wave - Convert.ToDouble(dtBandWave.Rows[i][1]));
                 }
             }
-            return Convert.ToInt32(dtBandWave.Rows[index][0]);
+            return Convert.ToUInt16(dtBandWave.Rows[index][0]);
         }
 
         /// <summary>

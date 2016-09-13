@@ -45,7 +45,8 @@ namespace Spectra
 
         public void Draw1(Point p, Coord coo, int index)
         {
-            Point[] points = GetPoint(p);
+            Point pp = new Point(p.Y, p.X);
+            Point[] points = GetPoint(pp);
             dtsChart1st = new ObservableDataSource<System.Windows.Point>();
             foreach (System.Windows.Point point in points)
             {
@@ -56,7 +57,8 @@ namespace Spectra
 
         public void Draw4(Point p, Coord coo)
         {
-            Point[] points = GetPoint(p);
+            Point pp = new Point(p.Y, p.X);
+            Point[] points = GetPoint(pp);
             dtsChart1st = new ObservableDataSource<System.Windows.Point>();
             foreach (System.Windows.Point point in points)
             {
