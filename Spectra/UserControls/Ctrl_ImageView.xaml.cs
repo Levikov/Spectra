@@ -266,9 +266,13 @@ namespace Spectra
             }
         }
 
+        private bool isFirst = true;    //防止第一次界面打开时刷新图像
         private void sldLow_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            RefreshPseudoColor(SubWinIndex, ImageInfo.strFilesPath, (UInt16)sldLow.Value,colorBand,colorMode);
+            if (isFirst)
+                isFirst = false;
+            else
+                RefreshPseudoColor(SubWinIndex, ImageInfo.strFilesPath, (UInt16)sldLow.Value,colorBand,colorMode);
         }
 
         //双击后放大到16:1像元大小

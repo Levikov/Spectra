@@ -107,14 +107,20 @@ namespace Spectra
 
         internal async void Refresh(string path)
         {
-            if (DataQuery.QueryResult == null) return;
-            imheight = DataQuery.QueryResult.Rows.Count;
+            if (ImageInfo.dtImgInfo == null) return;
+            imheight = ImageInfo.dtImgInfo.Rows.Count;
             if (imheight < 1) return;
             this.Busy.isBusy = true;
             Bitmap[] bmp = await DataProc.GetBmp3D(path);
             bmp[0].RotateFlip(RotateFlipType.Rotate180FlipX);
             bmp[1].RotateFlip(RotateFlipType.Rotate180FlipY);
             bmp[1].RotateFlip(RotateFlipType.Rotate180FlipX);
+            bmp[2].RotateFlip(RotateFlipType.Rotate180FlipX);
+            bmp[3].RotateFlip(RotateFlipType.Rotate180FlipX);
+            bmp[4].RotateFlip(RotateFlipType.Rotate180FlipY);
+            bmp[4].RotateFlip(RotateFlipType.Rotate180FlipX);
+            bmp[5].RotateFlip(RotateFlipType.Rotate180FlipY);
+            bmp[5].RotateFlip(RotateFlipType.Rotate180FlipX);
             RenderBox(imheight, bmp);
             InitializeCameras();
             this.Busy.isBusy=false;

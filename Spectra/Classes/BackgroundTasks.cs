@@ -358,13 +358,12 @@ namespace Spectra
         {
             return Task.Run(() =>
             {
-                int Height = DataQuery.QueryResult.Rows.Count;
+                int Height = ImageInfo.dtImgInfo.Rows.Count;
                 int Width = 2048;
                 int chanel = 1;
                 if (v == 161 || v == 162) Height = 128;
                 if (v == 163 || v == 164) Width = 128;
-                if (cMode ==ColorRenderMode.RealColor) chanel = 3;
- 
+                if (cMode ==ColorRenderMode.RealColor) chanel = 3; 
 
                 byte[] buf_full = new byte[Width * Height * 3];
                 byte[] buf_band;
@@ -465,7 +464,7 @@ namespace Spectra
         {
             return Task.Run(() =>
             {
-                int Height = DataQuery.QueryResult.Rows.Count;
+                int Height = ImageInfo.dtImgInfo.Rows.Count;
                 int Width = 2048;
 
                 byte[] buf_full = new byte[Width * Height * 2 * 3];
@@ -493,8 +492,8 @@ namespace Spectra
                 Bitmap[] r = new Bitmap[6];
                 r[0] = await BmpOper.MakePseudoColor(path, new UInt16[] { 40, 77, 127 }, 4);
                 r[1] = await BmpOper.MakePseudoColor(path, new UInt16[] { 40, 40, 40 }, 4);
-                r[2] = await GetBmp(path, 161, ColorRenderMode.ArtColor);
-                r[3] = await GetBmp(path, 162, ColorRenderMode.ArtColor);
+                r[3] = await GetBmp(path, 161, ColorRenderMode.ArtColor);
+                r[2] = await GetBmp(path, 162, ColorRenderMode.ArtColor);
                 r[4] = await GetBmp(path, 163, ColorRenderMode.ArtColorSide);
                 r[5] = await GetBmp(path, 164, ColorRenderMode.ArtColorSide);
                 return r;
@@ -522,7 +521,7 @@ namespace Spectra
                 SQLiteCommand cmmd = new SQLiteCommand("", conn);
 
                 string command;
-                if(md5!=null)
+                if (md5 != null && md5 != "")
                     command = $"SELECT * FROM AuxData WHERE Chanel=1 AND MD5='{md5}'";
                 else
                     command = $"SELECT * FROM AuxData WHERE Chanel=1";
