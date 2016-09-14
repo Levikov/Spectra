@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="Spectra.Ctrl_Map"
+﻿<UserControl x:Name="userControl" x:Class="Spectra.Ctrl_Map"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -6,20 +6,23 @@
              xmlns:local="clr-namespace:Spectra"
              xmlns:xaml="clr-namespace:Mapsui.UI.Xaml;assembly=Mapsui.UI.Xaml"
              mc:Ignorable="d" 
-             d:DesignHeight="768" d:DesignWidth="1024">
-    <Grid  x:Name="Right" Background="Gray" MouseRightButtonUp="Right_MouseRightButtonUp" >
-        <xaml:MapControl x:Name="MapControl" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" />
+             d:DesignHeight="768" d:DesignWidth="1024" MouseMove="userControl_MouseMove" MouseRightButtonUp="userControl_MouseRightButtonUp">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+    </UserControl.Resources>
+    <Grid x:Name="Right" Background="Gray">
+        <xaml:MapControl  x:Name="MapControl" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" ViewChanged="MapControl_ViewChanged" />
+        <Canvas Margin="0">
+            <Rectangle Visibility="Collapsed" x:Name="SelectionArea" Stroke="#FF2970EC" Width="500" Height="500" StrokeThickness="2" StrokeDashArray="3 3" StrokeDashCap="Round" Fill="#330D6CDE"/>
+        </Canvas>
+
         <DockPanel Margin="20,20,0,0" Height="50" VerticalAlignment="Top" HorizontalAlignment="Left">
-            <Label HorizontalAlignment="Left" Content="中心点经度:" VerticalAlignment="Center" FontSize="20" Foreground="Black"/>
-            <TextBlock x:Name="cLon" Text="0" Width="60" FontSize="20" Foreground="Black" VerticalAlignment="Center"/>
-            <Label HorizontalAlignment="Left" Content="中心点纬度:" VerticalAlignment="Center" FontSize="20" Foreground="Black"/>
-            <TextBlock x:Name="cLat" Text="0" Width="60" FontSize="20" Foreground="Black" VerticalAlignment="Center"/>
-            <Label HorizontalAlignment="Left" Content="当前级别:" VerticalAlignment="Center" FontSize="20" Foreground="Black"/>
-            <TextBlock x:Name="Level" Text="0" Width="60" FontSize="20" Foreground="Black" VerticalAlignment="Center"/>
             <Label HorizontalAlignment="Left" Content="当前经度:" VerticalAlignment="Center" FontSize="20" Foreground="Black"/>
             <TextBlock x:Name="pLon" Text="0"  FontSize="20" Foreground="Black" VerticalAlignment="Center"/>
             <Label HorizontalAlignment="Left" Content="当前纬度:" VerticalAlignment="Center" FontSize="20" Foreground="Black"/>
             <TextBlock x:Name="pLat" Text="0"  FontSize="20" Foreground="Black" VerticalAlignment="Center"/>
+            <Label x:Name="selectionNotice" Visibility="Collapsed" HorizontalAlignment="Left" Content="请点击第二个点" VerticalAlignment="Center" FontSize="20" Foreground="Red"/>
         </DockPanel>
+        <DockPanel Margin="20" Height="50" VerticalAlignment="Top" HorizontalAlignment="Right"/>
     </Grid>
 </UserControl>

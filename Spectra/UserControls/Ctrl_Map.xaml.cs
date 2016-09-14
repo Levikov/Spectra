@@ -31,6 +31,13 @@ namespace Spectra
     /// </summary>
     public partial class Ctrl_Map : UserControl
     {
+
+       
+        public Mapsui.Geometries.Point TopLeft = new Mapsui.Geometries.Point(0,0);
+        public Mapsui.Geometries.Point BottomRight = new Mapsui.Geometries.Point(0,0);
+        public System.Windows.Point TopLeftScreen = new System.Windows.Point(0, 0);
+        public System.Windows.Point BottomRightScreen = new System.Windows.Point(0, 0);
+        public bool selectionMode = false;
         public Ctrl_Map()
         {
             InitializeComponent();
@@ -38,8 +45,6 @@ namespace Spectra
             MapControl.Map.Layers.Add(MapTilerSample.CreateLayer());
             MapControl.ZoomToFullEnvelope();
             MapControl.Refresh();
-           
-           
         }
 
         public void ZoomToBox(System.Windows.Point start, System.Windows.Point End)
@@ -53,20 +58,41 @@ namespace Spectra
             
         }
 
-        private void Right_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        private void userControl_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
         {
-            Mapsui.Geometries.Point p= this.MapControl.Map.Viewport.ScreenToWorld(e.GetPosition(MapControl).X,e.GetPosition(MapControl).Y);
-            this.pLon.Text = (Mapsui.Projection.SphericalMercator.ToLonLat(p.X,p.Y).X).ToString();
-            this.pLat.Text = (Mapsui.Projection.SphericalMercator.ToLonLat(p.X, p.Y).Y).ToString();
+            Mapsui.Geometries.Point p = this.MapControl.Map.Viewport.ScreenToWorld(e.GetPosition(MapControl).X, e.GetPosition(MapControl).Y);
+            if (selectionMode == false)
+                {
+                    this.TopLeftScreen = e.GetPosition(this.MapControl);
+                    this.MapControl.ZoomLocked = true;
+                    this.TopLeft = Mapsui.Projection.SphericalMercator.ToLonLat(p.X, p.Y);
+                    this.selectionNotice.Visibility = Visibility.Visible;
+                    this.selectionMode = true;
+                }
+                else
+                {
+                    this.BottomRightScreen = e.GetPosition(this.MapControl);
+                    this.SelectionArea.Margin = new Thickness(TopLeftScreen.X<=BottomRightScreen.X?TopLeftScreen.X:BottomRightScreen.X,TopLeftScreen.Y<=BottomRightScreen.Y?TopLeftScreen.Y:BottomRightScreen.Y,0,0);
+                this.SelectionArea.Width = Math.Abs(BottomRightScreen.X - TopLeftScreen.X);
+                this.SelectionArea.Height = Math.Abs(BottomRightScreen.Y - TopLeftScreen.Y);
+                this.MapControl.ZoomLocked = false;
+                    this.selectionNotice.Visibility = Visibility.Collapsed;
+                    this.SelectionArea.Visibility = Visibility.Visible;
+                    this.selectionMode = false;
+                }
+
+            
+        }
+        private void MapControl_ViewChanged(object sender, ViewChangedEventArgs e)
+        {
+            this.SelectionArea.Visibility = Visibility.Collapsed;
         }
 
-        private void Right_KeyDown(object sender, KeyEventArgs e)
+        private void userControl_MouseMove(object sender, MouseEventArgs e)
         {
-            String keyName = e.Key.ToString().ToLower();
-            if (keyName.Equals("ctrl") || keyName.Equals("leftctrl") || keyName.Equals("rightctrl"))
-            {
-                this.MapControl.ZoomToBoxMode = true;
-            }
+            Mapsui.Geometries.Point p = this.MapControl.Map.Viewport.ScreenToWorld(e.GetPosition(MapControl).X, e.GetPosition(MapControl).Y);
+            this.pLon.Text = (Mapsui.Projection.SphericalMercator.ToLonLat(p.X, p.Y).X).ToString();
+            this.pLat.Text = (Mapsui.Projection.SphericalMercator.ToLonLat(p.X, p.Y).Y).ToString();
         }
     }
     public static class MapTilerSample
@@ -129,6 +155,49 @@ namespace Spectra
         {
             return System.IO.Path.GetDirectoryName(
               System.Reflection.Assembly.GetEntryAssembly().GetModules()[0].FullyQualifiedName);
+        }
+    }
+    public class MouseTrackerDecorator : Decorator
+    {
+        static readonly DependencyProperty MousePositionProperty;
+        static MouseTrackerDecorator()
+        {
+            MousePositionProperty = DependencyProperty.Register("MousePosition", typeof(System.Windows.Point), typeof(MouseTrackerDecorator));
+        }
+
+        public override UIElement Child
+        {
+            get
+            {
+                return base.Child;
+            }
+            set
+            {
+                if (base.Child != null)
+                    base.Child.MouseMove -= _controlledObject_MouseMove;
+                base.Child = value;
+                base.Child.MouseMove += _controlledObject_MouseMove;
+            }
+        }
+
+        public System.Windows.Point MousePosition
+        {
+            get
+            {
+                return (System.Windows.Point)GetValue(MouseTrackerDecorator.MousePositionProperty);
+            }
+            set
+            {
+                SetValue(MouseTrackerDecorator.MousePositionProperty, value);
+            }
+        }
+
+        void _controlledObject_MouseMove(object sender, MouseEventArgs e)
+        {
+            System.Windows.Point p = e.GetPosition(base.Child);
+
+            // Here you can add some validation logic
+            MousePosition = p;
         }
     }
 }
