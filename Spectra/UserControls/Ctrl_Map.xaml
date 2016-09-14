@@ -16,13 +16,19 @@
             <Rectangle Visibility="Collapsed" x:Name="SelectionArea" Stroke="#FF2970EC" Width="500" Height="500" StrokeThickness="2" StrokeDashArray="3 3" StrokeDashCap="Round" Fill="#330D6CDE"/>
         </Canvas>
 
-        <DockPanel Margin="20,20,0,0" Height="50" VerticalAlignment="Top" HorizontalAlignment="Left">
-            <Label HorizontalAlignment="Left" Content="当前经度:" VerticalAlignment="Center" FontSize="20" Foreground="Black"/>
-            <TextBlock x:Name="pLon" Text="0"  FontSize="20" Foreground="Black" VerticalAlignment="Center"/>
-            <Label HorizontalAlignment="Left" Content="当前纬度:" VerticalAlignment="Center" FontSize="20" Foreground="Black"/>
-            <TextBlock x:Name="pLat" Text="0"  FontSize="20" Foreground="Black" VerticalAlignment="Center"/>
-            <Label x:Name="selectionNotice" Visibility="Collapsed" HorizontalAlignment="Left" Content="请点击第二个点" VerticalAlignment="Center" FontSize="20" Foreground="Red"/>
+        <DockPanel Margin="20" Height="30" VerticalAlignment="Top" HorizontalAlignment="Right" Background="Wheat">
+            <RadioButton Content="道路图" FontSize="16" VerticalAlignment="Center"/>
+            <RadioButton Content="地形图" FontSize="16" VerticalAlignment="Center"/>
         </DockPanel>
-        <DockPanel Margin="20" Height="50" VerticalAlignment="Top" HorizontalAlignment="Right"/>
+        <!--<DockPanel Margin="20" Height="50" VerticalAlignment="Top" HorizontalAlignment="Right"/>-->
+        <StatusBar Height="30" Margin="0" VerticalAlignment="Bottom" FontSize="12" Background="{StaticResource TitleBack}" FontWeight="Thin">
+            <StackPanel Orientation="Horizontal">
+                <Label HorizontalAlignment="Left" Content="当前经度:" Foreground="{StaticResource MinFontFore}"/>
+                <Label x:Name="pLon" Content="0" Width="130" Foreground="{StaticResource MinFontFore}"/>
+                <Label HorizontalAlignment="Left" Content="当前纬度:" Foreground="{StaticResource MinFontFore}"/>
+                <Label x:Name="pLat" Content="0" Width="130" Foreground="{StaticResource MinFontFore}"/>
+                <Label x:Name="selectionNotice" Visibility="Collapsed" HorizontalAlignment="Left" Content="请点击第二个点" Foreground="Red"/>
+            </StackPanel>
+        </StatusBar>
     </Grid>
 </UserControl>

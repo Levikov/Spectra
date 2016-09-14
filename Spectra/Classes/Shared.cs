@@ -170,8 +170,10 @@ namespace Spectra
 
     public class MapInfo : DependencyObject
     {
-        public static string RoadMapPath = @"C:\Users\Victo\Documents\t\Amap\roadmap";
-        public static string TerrainMapPath = "";
+        public static string RoadMapPath = @"D:\Gmap\roadmap";
+        public static string TerrainMapPath = @"D:\Gmap\satellite";
+        public static Coord LT_Coord = new Coord(0, 0);
+        public static Coord RB_Coord = new Coord(0, 0);
     }
 
     public class ImageInfo : DependencyObject

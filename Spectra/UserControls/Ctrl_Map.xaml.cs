@@ -91,8 +91,8 @@ namespace Spectra
         private void userControl_MouseMove(object sender, MouseEventArgs e)
         {
             Mapsui.Geometries.Point p = this.MapControl.Map.Viewport.ScreenToWorld(e.GetPosition(MapControl).X, e.GetPosition(MapControl).Y);
-            this.pLon.Text = (Mapsui.Projection.SphericalMercator.ToLonLat(p.X, p.Y).X).ToString();
-            this.pLat.Text = (Mapsui.Projection.SphericalMercator.ToLonLat(p.X, p.Y).Y).ToString();
+            this.pLon.Content = (Mapsui.Projection.SphericalMercator.ToLonLat(p.X, p.Y).X).ToString();
+            this.pLat.Content = (Mapsui.Projection.SphericalMercator.ToLonLat(p.X, p.Y).Y).ToString();
         }
     }
     public static class MapTilerSample
@@ -117,7 +117,11 @@ namespace Spectra
 
         public byte[] GetTile(TileInfo tileInfo)
         {
-            return Provider.GetTile(tileInfo);
+            try
+            {
+                return Provider.GetTile(tileInfo);
+            }
+            catch { return null; }
         }
 
         public static ITileProvider GetTileProvider()
