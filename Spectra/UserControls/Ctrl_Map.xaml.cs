@@ -36,8 +36,7 @@ namespace Spectra
             InitializeComponent();
             MapControl.Map.Layers.Clear();
             MapControl.Map.Layers.Add(MapTilerSample.CreateLayer());
-            
-
+            MapControl.ZoomToFullEnvelope();
             MapControl.Refresh();
            
            
@@ -67,15 +66,6 @@ namespace Spectra
             if (keyName.Equals("ctrl") || keyName.Equals("leftctrl") || keyName.Equals("rightctrl"))
             {
                 this.MapControl.ZoomToBoxMode = true;
-            }
-        }
-
-        private void Right_KeyUp(object sender, KeyEventArgs e)
-        {
-            String keyName = e.Key.ToString().ToLower();
-            if (keyName.Equals("ctrl") || keyName.Equals("leftctrl") || keyName.Equals("rightctrl"))
-            {
-                this.MapControl.ZoomToBoxMode = false;
             }
         }
     }
