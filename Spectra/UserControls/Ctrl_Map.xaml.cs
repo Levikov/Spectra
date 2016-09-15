@@ -73,13 +73,21 @@ namespace Spectra
                 {
                     this.BottomRightScreen = e.GetPosition(this.MapControl);
                     this.SelectionArea.Margin = new Thickness(TopLeftScreen.X<=BottomRightScreen.X?TopLeftScreen.X:BottomRightScreen.X,TopLeftScreen.Y<=BottomRightScreen.Y?TopLeftScreen.Y:BottomRightScreen.Y,0,0);
-                this.SelectionArea.Width = Math.Abs(BottomRightScreen.X - TopLeftScreen.X);
-                this.SelectionArea.Height = Math.Abs(BottomRightScreen.Y - TopLeftScreen.Y);
-                this.MapControl.ZoomLocked = false;
+                    this.SelectionArea.Width = Math.Abs(BottomRightScreen.X - TopLeftScreen.X);
+                    this.SelectionArea.Height = Math.Abs(BottomRightScreen.Y - TopLeftScreen.Y);
+                    this.BottomRight = Mapsui.Projection.SphericalMercator.ToLonLat(p.X, p.Y);
+                    this.MapControl.ZoomLocked = false;
                     this.selectionNotice.Visibility = Visibility.Collapsed;
                     this.SelectionArea.Visibility = Visibility.Visible;
                     this.selectionMode = false;
-                }
+                    MapInfo.LT_Coord.Lat = this.TopLeft.Y >= this.BottomRight.Y ? this.TopLeft.Y : this.BottomRight.Y;
+                    MapInfo.LT_Coord.Lon = this.TopLeft.X <= this.BottomRight.X ? this.TopLeft.X : this.BottomRight.X;
+                    MapInfo.RB_Coord.Lat = this.TopLeft.Y < this.BottomRight.Y ? this.TopLeft.Y : this.BottomRight.Y;
+                    MapInfo.RB_Coord.Lon = this.TopLeft.X > this.BottomRight.X ? this.TopLeft.X : this.BottomRight.X;
+                    
+
+
+            }
 
             
         }
