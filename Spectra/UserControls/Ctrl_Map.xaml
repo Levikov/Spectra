@@ -17,8 +17,8 @@
         </Canvas>
 
         <DockPanel Margin="20" Height="30" VerticalAlignment="Top" HorizontalAlignment="Right" Background="Wheat">
-            <RadioButton Content="道路图" FontSize="16" VerticalAlignment="Center"/>
-            <RadioButton Content="地形图" FontSize="16" VerticalAlignment="Center"/>
+            <RadioButton x:Name="rdbMapModeRoad" Content="道路图" FontSize="16" VerticalAlignment="Bottom" Margin="10,0,10,6" Checked="rdbMapModeRoad_Checked" VerticalContentAlignment="Center"/>
+            <RadioButton x:Name="rdbMapModeSat" Content="地形图" FontSize="16" VerticalAlignment="Center" Margin="10,0" Checked="rdbMapModeSat_Checked" IsChecked="True" VerticalContentAlignment="Center"/>
         </DockPanel>
         <!--<DockPanel Margin="20" Height="50" VerticalAlignment="Top" HorizontalAlignment="Right"/>-->
         <StatusBar Height="30" Margin="0" VerticalAlignment="Bottom" FontSize="12" Background="{StaticResource TitleBack}" FontWeight="Thin">
@@ -28,6 +28,10 @@
                 <Label HorizontalAlignment="Left" Content="当前纬度:" Foreground="{StaticResource MinFontFore}"/>
                 <Label x:Name="pLat" Content="0" Width="130" Foreground="{StaticResource MinFontFore}"/>
                 <Label x:Name="selectionNotice" Visibility="Collapsed" HorizontalAlignment="Left" Content="请点击第二个点" Foreground="Red"/>
+                <Label x:Name="lcLon" HorizontalAlignment="Left" Content="左上经纬:" Visibility="Collapsed" Foreground="{StaticResource MinFontFore}"/>
+                <Label x:Name="cLT" Content="0" Width="260" Visibility="Collapsed" Foreground="{StaticResource MinFontFore}"/>
+                <Label x:Name="lcLat" HorizontalAlignment="Left" Content="右下经纬:" Visibility="Collapsed" Foreground="{StaticResource MinFontFore}"/>
+                <Label x:Name="cRB" Content="0" Width="260" Visibility="Collapsed" Foreground="{StaticResource MinFontFore}"/>                
             </StackPanel>
         </StatusBar>
     </Grid>

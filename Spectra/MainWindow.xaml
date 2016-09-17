@@ -267,7 +267,10 @@
                             </Grid.ColumnDefinitions>
                             <Label Content="当前选定:" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                             <TextBox x:Name="txtCurrentFile" Grid.Column="1" Margin="10,0" VerticalAlignment="Center" Height="30"/>
-                            <Button Grid.Row="1" Grid.ColumnSpan="2" x:Name="btnSelectFile" Content="选定文件" Template="{DynamicResource ButtonDefault}" Width="160" Click="btnSelectFile_Click" VerticalAlignment="Center"/>
+                            <StackPanel Margin="0" Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center">
+                                <Button x:Name="btnSelectFile" Content="选定文件" Template="{DynamicResource ButtonDefault}" Width="120" Click="btnSelectFile_Click" VerticalAlignment="Center"/>
+                                <Button x:Name="btnNoSelectFile" Content="清除选定" Template="{DynamicResource ButtonDefault}" Width="120" Click="btnNoSelectFile_Click" VerticalAlignment="Center" Margin="40,0,0,0"/>
+                            </StackPanel>
                         </Grid>
                     </GroupBox>
                     <GroupBox Grid.Row="1" Header="文件检索" FontSize="18" Margin="0,10,0,0">

@@ -62,38 +62,48 @@ namespace Spectra
         {
             Mapsui.Geometries.Point p = this.MapControl.Map.Viewport.ScreenToWorld(e.GetPosition(MapControl).X, e.GetPosition(MapControl).Y);
             if (selectionMode == false)
-                {
-                    this.TopLeftScreen = e.GetPosition(this.MapControl);
-                    this.MapControl.ZoomLocked = true;
-                    this.TopLeft = Mapsui.Projection.SphericalMercator.ToLonLat(p.X, p.Y);
-                    this.selectionNotice.Visibility = Visibility.Visible;
-                    this.selectionMode = true;
-                }
-                else
-                {
-                    this.BottomRightScreen = e.GetPosition(this.MapControl);
-                    this.SelectionArea.Margin = new Thickness(TopLeftScreen.X<=BottomRightScreen.X?TopLeftScreen.X:BottomRightScreen.X,TopLeftScreen.Y<=BottomRightScreen.Y?TopLeftScreen.Y:BottomRightScreen.Y,0,0);
-                    this.SelectionArea.Width = Math.Abs(BottomRightScreen.X - TopLeftScreen.X);
-                    this.SelectionArea.Height = Math.Abs(BottomRightScreen.Y - TopLeftScreen.Y);
-                    this.BottomRight = Mapsui.Projection.SphericalMercator.ToLonLat(p.X, p.Y);
-                    this.MapControl.ZoomLocked = false;
-                    this.selectionNotice.Visibility = Visibility.Collapsed;
-                    this.SelectionArea.Visibility = Visibility.Visible;
-                    this.selectionMode = false;
-                    MapInfo.LT_Coord.Lat = this.TopLeft.Y >= this.BottomRight.Y ? this.TopLeft.Y : this.BottomRight.Y;
-                    MapInfo.LT_Coord.Lon = this.TopLeft.X <= this.BottomRight.X ? this.TopLeft.X : this.BottomRight.X;
-                    MapInfo.RB_Coord.Lat = this.TopLeft.Y < this.BottomRight.Y ? this.TopLeft.Y : this.BottomRight.Y;
-                    MapInfo.RB_Coord.Lon = this.TopLeft.X > this.BottomRight.X ? this.TopLeft.X : this.BottomRight.X;
-                    
-
-
+            {
+                this.TopLeftScreen = e.GetPosition(this.MapControl);
+                this.MapControl.ZoomLocked = true;
+                this.TopLeft = Mapsui.Projection.SphericalMercator.ToLonLat(p.X, p.Y);
+                this.selectionNotice.Visibility = Visibility.Visible;
+                this.selectionMode = true;
+                lcLat.Visibility = Visibility.Collapsed;
+                lcLon.Visibility = Visibility.Collapsed;
+                cLT.Visibility = Visibility.Collapsed;
+                cRB.Visibility = Visibility.Collapsed;
             }
-
-            
+            else
+            {
+                this.BottomRightScreen = e.GetPosition(this.MapControl);
+                this.SelectionArea.Margin = new Thickness(TopLeftScreen.X<=BottomRightScreen.X?TopLeftScreen.X:BottomRightScreen.X,TopLeftScreen.Y<=BottomRightScreen.Y?TopLeftScreen.Y:BottomRightScreen.Y,0,0);
+                this.SelectionArea.Width = Math.Abs(BottomRightScreen.X - TopLeftScreen.X);
+                this.SelectionArea.Height = Math.Abs(BottomRightScreen.Y - TopLeftScreen.Y);
+                this.BottomRight = Mapsui.Projection.SphericalMercator.ToLonLat(p.X, p.Y);
+                this.MapControl.ZoomLocked = false;
+                this.selectionNotice.Visibility = Visibility.Collapsed;
+                this.SelectionArea.Visibility = Visibility.Visible;
+                this.selectionMode = false;
+                MapInfo.LT_Coord.Lat = this.TopLeft.Y >= this.BottomRight.Y ? this.TopLeft.Y : this.BottomRight.Y;
+                MapInfo.LT_Coord.Lon = this.TopLeft.X <= this.BottomRight.X ? this.TopLeft.X : this.BottomRight.X;
+                MapInfo.RB_Coord.Lat = this.TopLeft.Y < this.BottomRight.Y ? this.TopLeft.Y : this.BottomRight.Y;
+                MapInfo.RB_Coord.Lon = this.TopLeft.X > this.BottomRight.X ? this.TopLeft.X : this.BottomRight.X;
+                lcLat.Visibility = Visibility.Visible;
+                lcLon.Visibility = Visibility.Visible;
+                cLT.Visibility = Visibility.Visible;
+                cRB.Visibility = Visibility.Visible;
+                cLT.Content = $"({MapInfo.LT_Coord.Lon},{MapInfo.LT_Coord.Lat})";
+                cRB.Content = $"({MapInfo.RB_Coord.Lon},{MapInfo.RB_Coord.Lat})";
+            }
         }
+
         private void MapControl_ViewChanged(object sender, ViewChangedEventArgs e)
         {
             this.SelectionArea.Visibility = Visibility.Collapsed;
+            lcLat.Visibility = Visibility.Collapsed;
+            lcLon.Visibility = Visibility.Collapsed;
+            cLT.Visibility = Visibility.Collapsed;
+            cRB.Visibility = Visibility.Collapsed;
         }
 
         private void userControl_MouseMove(object sender, MouseEventArgs e)
@@ -101,6 +111,24 @@ namespace Spectra
             Mapsui.Geometries.Point p = this.MapControl.Map.Viewport.ScreenToWorld(e.GetPosition(MapControl).X, e.GetPosition(MapControl).Y);
             this.pLon.Content = (Mapsui.Projection.SphericalMercator.ToLonLat(p.X, p.Y).X).ToString();
             this.pLat.Content = (Mapsui.Projection.SphericalMercator.ToLonLat(p.X, p.Y).Y).ToString();
+        }
+
+        private void rdbMapModeRoad_Checked(object sender, RoutedEventArgs e)
+        {
+            MapInfo.MapPath = @"D:\Gmap\roadmap";
+            MapInfo.MapType = "png";
+            MapControl.Map.Layers.Clear();
+            MapControl.Map.Layers.Add(MapTilerSample.CreateLayer());
+            MapControl.Refresh();
+        }
+
+        private void rdbMapModeSat_Checked(object sender, RoutedEventArgs e)
+        {
+            MapInfo.MapPath = @"D:\Gmap\satellite";
+            MapInfo.MapType = "jpg";
+            MapControl.Map.Layers.Clear();
+            MapControl.Map.Layers.Add(MapTilerSample.CreateLayer());
+            MapControl.Refresh();
         }
     }
     public static class MapTilerSample
@@ -134,7 +162,7 @@ namespace Spectra
 
         public static ITileProvider GetTileProvider()
         {
-            return new FileTileProvider(new FileCache(MapInfo.RoadMapPath, "png"));
+            return new FileTileProvider(new FileCache(MapInfo.MapPath, MapInfo.MapType));
         }
 
         public static ITileSchema GetTileSchema()

@@ -112,6 +112,8 @@ namespace Spectra
             if (imheight < 1) return;
             this.Busy.isBusy = true;
             Bitmap[] bmp = await DataProc.GetBmp3D(path);
+            if (bmp[0] == null || bmp[1] == null || bmp[2] == null || bmp[3] == null || bmp[4] == null || bmp[5] == null)
+                return;
             bmp[0].RotateFlip(RotateFlipType.Rotate180FlipX);
             bmp[1].RotateFlip(RotateFlipType.Rotate180FlipY);
             bmp[1].RotateFlip(RotateFlipType.Rotate180FlipX);

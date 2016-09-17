@@ -189,16 +189,6 @@ namespace Spectra
                     FileInfo.upkFilePathName = dt.Rows[0][7].ToString();
                     FileInfo.decFilePathName = dt.Rows[0][9].ToString();
                     ImageInfo.strFilesPath = FileInfo.decFilePathName;
-                    //Func<Task>func = () => {
-                    //    return Task.Run(() =>
-                    //    {
-                    //        Parallel.For(0, 167, i =>
-                    //        {
-                    //            File.Copy($"{FileInfo.decFilePathName}{i}.raw", $"{ImageInfo.strFilesPath}{i}.raw", true);
-                    //        });
-                    //    });
-                    //};
-                    //await func();
                     btnTopB.IsChecked = true;
                     btnLeftB1.IsChecked = true;
                 }
@@ -211,6 +201,11 @@ namespace Spectra
             {
                 System.Windows.MessageBox.Show(ex.Message);
             }
+        }
+        /*清除选定*/
+        private void btnNoSelectFile_Click(object sender, RoutedEventArgs e)
+        {
+            FileInfo.md5 = null;
         }
         /*查找文件*/
         private void textSelectFile_TextChanged(object sender, TextChangedEventArgs e)
@@ -928,12 +923,12 @@ namespace Spectra
                     {
                         ModelShowInfo.imgWidth = ModelShowInfo.dtImgInfo.Rows.Count;
                         SQLiteFunc.ExcuteSQL("update Apply_Model set 图像帧数=? where 名称='?'", ModelShowInfo.imgWidth, txtModelName.Text);
-                        getCurApplyModel();
                     }
                     ModelShowInfo.MakeImage();
                     ModelShowInfo.isMakeImage = true;
                     SQLiteFunc.ExcuteSQL("update Apply_Model set 是否已生成图像=?,文件路径='?' where 名称='?'", Convert.ToUInt16(ModelShowInfo.isMakeImage), ModelShowInfo.strFilesPath, txtModelName.Text);
                     System.Windows.MessageBox.Show("OK");
+                    getCurApplyModel();
                 }
             }
             catch
