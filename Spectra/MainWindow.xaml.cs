@@ -1172,7 +1172,7 @@ namespace Spectra
             }
         }
         /*开始存储*/
-        [DllImport("DLL\\DataOperation.dll", EntryPoint = "Split_Chanel")]
+        [DllImport("DLL\\DataOperation.dll", EntryPoint = "Save_Files")]
         static extern int Save_Files(string path, string outpath, int startFrm, int endFrm);
         private void btnSaveFiles_Click(object sender, RoutedEventArgs e)
         {
@@ -1190,7 +1190,11 @@ namespace Spectra
                     System.Windows.MessageBox.Show("选择输出路径!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
-                int i = Save_Files(ImageInfo.strFilesPath, txtSaveFilesPath.Text, ImageSection.startFrm, ImageSection.endFrm);
+                int i;
+                if(FileInfo.md5==null|| FileInfo.md5=="")
+                    i = Save_Files(ImageInfo.strFilesPath, txtSaveFilesPath.Text, ImageSection.startFrm, ImageSection.endFrm);
+                else
+                    i = Save_Files(FileInfo.decFilePathName, txtSaveFilesPath.Text, ImageSection.startFrm, ImageSection.endFrm);
                 if (i == 1)
                     System.Windows.MessageBox.Show("完成!", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
                 else
