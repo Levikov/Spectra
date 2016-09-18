@@ -115,7 +115,7 @@ namespace Spectra
 
         private void rdbMapModeRoad_Checked(object sender, RoutedEventArgs e)
         {
-            MapInfo.MapPath = @"D:\Gmap\roadmap";
+            MapInfo.MapPath = @"C:\Program Files\GMap\roadmap";
             MapInfo.MapType = "png";
             MapControl.Map.Layers.Clear();
             MapControl.Map.Layers.Add(MapTilerSample.CreateLayer());
@@ -124,7 +124,7 @@ namespace Spectra
 
         private void rdbMapModeSat_Checked(object sender, RoutedEventArgs e)
         {
-            MapInfo.MapPath = @"D:\Gmap\satellite";
+            MapInfo.MapPath = @"C:\Program Files\GMap\satellite";
             MapInfo.MapType = "jpg";
             MapControl.Map.Layers.Clear();
             MapControl.Map.Layers.Add(MapTilerSample.CreateLayer());

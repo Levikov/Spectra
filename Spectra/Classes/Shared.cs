@@ -170,7 +170,7 @@ namespace Spectra
 
     public class MapInfo : DependencyObject
     {
-        public static string MapPath = @"D:\Gmap\satellite";
+        public static string MapPath = @"C:\Program Files\GMap\satellite";
         public static string MapType = "jpg";
         public static Coord LT_Coord = new Coord(0, 0);
         public static Coord RB_Coord = new Coord(0, 0);
