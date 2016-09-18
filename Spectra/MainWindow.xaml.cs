@@ -119,7 +119,7 @@ namespace Spectra
                     if (System.Windows.MessageBox.Show("该文件已解压,是否要重新解压并覆盖?", "提示", MessageBoxButton.OKCancel, MessageBoxImage.Information) == MessageBoxResult.Cancel)
                         return;
 
-                b_Abort_Import.IsEnabled = true;
+                //b_Abort_Import.IsEnabled = true;
                 btnOpenFile.IsEnabled = false;
                 btnDecFile.IsEnabled = false;
                 btnSelectFile.IsEnabled = false;
@@ -149,13 +149,14 @@ namespace Spectra
                     });
                 }).Start();
 
-                b_Abort_Import.IsEnabled = false;
+                //b_Abort_Import.IsEnabled = false;
                 btnOpenFile.IsEnabled = true;
                 btnDecFile.IsEnabled = true;
                 btnSelectFile.IsEnabled = true;
                 btnDelRecord.IsEnabled = true;
                 btnTopB.IsChecked = true;
                 btnLeftB1.IsChecked = true;
+                searchList(FileInfo.md5, false, false, false);
             }
             catch (Exception ex)
             {
@@ -163,10 +164,10 @@ namespace Spectra
             }
         }
 
-        private void b_Abort_Import_Click(object sender, RoutedEventArgs e)
-        {
-            cancelImport.Cancel();
-        }
+        //private void b_Abort_Import_Click(object sender, RoutedEventArgs e)
+        //{
+        //    cancelImport.Cancel();
+        //}
         #endregion
 
         #region 文件检索
@@ -191,6 +192,7 @@ namespace Spectra
                     ImageInfo.strFilesPath = FileInfo.decFilePathName;
                     btnTopB.IsChecked = true;
                     btnLeftB1.IsChecked = true;
+                    searchList(FileInfo.md5, false, false, false);
                 }
                 else
                 {
@@ -294,24 +296,27 @@ namespace Spectra
             }
         }
         /*点击图像检索*/
-        private async void b_Query_Click(object sender, RoutedEventArgs e)
+        private async void searchList(string path,bool bTime,bool bCoord,bool bFrm)
+        {
+            ImageInfo.dtImgInfo = await DataProc.QueryResult(path, bTime, bCoord, bFrm,start_time, end_time, start_FrmCnt, end_FrmCnt, Coord_TL, Coord_DR);
+            dataGrid_SatePose.ItemsSource = dataGrid_Result.ItemsSource = ImageInfo.dtImgInfo.DefaultView;
+            ImageInfo.GetImgInfo();
+            SetImgInfo();
+            btnMakeImage.IsEnabled = true;
+            dtp_Start.Text = ImageInfo.startTime.ToString("yyyy-MM-dd HH:mm:ss");
+            dtp_End.Text = ImageInfo.endTime.ToString("yyyy-MM-dd HH:mm:ss");
+            LT_Lat.Text = ImageInfo.endCoord.Lat.ToString();
+            LT_Lon.Text = ImageInfo.startCoord.Lon.ToString();
+            RB_Lat.Text = ImageInfo.startCoord.Lat.ToString();
+            RB_Lon.Text = ImageInfo.endCoord.Lon.ToString();
+            tb_start_frm.Text = ImageInfo.minFrm.ToString();
+            tb_end_frm.Text = ImageInfo.maxFrm.ToString();
+        }
+        private void b_Query_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                ImageInfo.dtImgInfo = await DataProc.QueryResult(FileInfo.md5,(bool)cb_byTime.IsChecked, (bool)this.cb_byCoord.IsChecked, (bool)this.cb_byFrmCnt.IsChecked,
-                    start_time, end_time, start_FrmCnt, end_FrmCnt, Coord_TL, Coord_DR);
-                dataGrid_SatePose.ItemsSource = dataGrid_Result.ItemsSource = ImageInfo.dtImgInfo.DefaultView;
-                ImageInfo.GetImgInfo();
-                SetImgInfo();
-                btnMakeImage.IsEnabled = true;
-                dtp_Start.Text = ImageInfo.startTime.ToString("yyyy-MM-dd HH:mm:ss");
-                dtp_End.Text = ImageInfo.endTime.ToString("yyyy-MM-dd HH:mm:ss");
-                LT_Lat.Text = ImageInfo.endCoord.Lat.ToString();
-                LT_Lon.Text = ImageInfo.startCoord.Lon.ToString();
-                RB_Lat.Text = ImageInfo.startCoord.Lat.ToString();
-                RB_Lon.Text = ImageInfo.endCoord.Lon.ToString();
-                tb_start_frm.Text = ImageInfo.minFrm.ToString();
-                tb_end_frm.Text = ImageInfo.maxFrm.ToString();
+                searchList(FileInfo.md5, (bool)cb_byTime.IsChecked, (bool)this.cb_byCoord.IsChecked, (bool)this.cb_byFrmCnt.IsChecked);
             }
             catch
             {
@@ -346,7 +351,6 @@ namespace Spectra
         {
             try
             {
-                //DataTable dt = DataQuery.QueryResult;
                 //App.global_Win_Map = new MapWindow();
                 //App.global_Win_Map.Show();
                 //App.global_Win_Map.DrawRectangle(new Point((double)ImageInfo.dtImgInfo.Rows[0].ItemArray[3], (double)ImageInfo.dtImgInfo.Rows[0].ItemArray[4]), new Point((double)ImageInfo.dtImgInfo.Rows[ImageInfo.dtImgInfo.Rows.Count - 1].ItemArray[3], (double)ImageInfo.dtImgInfo.Rows[ImageInfo.dtImgInfo.Rows.Count - 1].ItemArray[4]));
