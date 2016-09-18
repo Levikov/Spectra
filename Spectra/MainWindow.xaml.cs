@@ -1128,18 +1128,28 @@ namespace Spectra
                     return;
                 }
                 if(ImageInfo.dtImgInfo==null)
-                    ImageInfo.dtImgInfo = await DataProc.QueryResult(FileInfo.md5, (bool)cb_byTime.IsChecked, (bool)this.cb_byCoord.IsChecked, (bool)this.cb_byFrmCnt.IsChecked,
+                    ImageInfo.dtImgInfo = await DataProc.QueryResult(FileInfo.md5, false, false, false,
                         start_time, end_time, start_FrmCnt, end_FrmCnt, Coord_TL, Coord_DR);
                 MultiFuncWindow w = new MultiFuncWindow();
                 w = (MultiFuncWindow)App.global_Windows[0];
                 w.DisplayMode = GridMode.One;
                 if (!w.isShow)
                     w.ScreenShow(Screen.AllScreens, 0, "单谱段图像");
-                UInt16[] colorBand = { 40, 77, 127 };
-                w.RefreshImage(ImageInfo.strFilesPath, 0, WinFunc.Image, colorBand, ColorRenderMode.ArtColor);
 
-                App.global_ImageBuffer[0] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
-                App.global_ImageBuffer[0].getBuffer(ImageInfo.strFilesPath, 120);
+                //UInt16[] colorBand;
+                //if (ImageInfo.dtImgInfo.Rows.Count <= 2048)
+                //{
+                //    colorBand = new UInt16[] { 40, 77, 127 };
+                //    w.RefreshImage(ImageInfo.strFilesPath, 0, WinFunc.Image, colorBand, ColorRenderMode.ArtColor);
+                //}
+                //else
+                //{
+                //    colorBand = new UInt16[] { 40, 40, 40 };
+                //    w.RefreshImage(ImageInfo.strFilesPath, 0, WinFunc.Image, colorBand, ColorRenderMode.Grayscale);
+                //}
+
+                //App.global_ImageBuffer[0] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
+                //App.global_ImageBuffer[0].getBuffer(ImageInfo.strFilesPath, 120);
 
                 ImageSection.beginSection = true;
 

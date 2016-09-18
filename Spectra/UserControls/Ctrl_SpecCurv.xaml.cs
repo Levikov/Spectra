@@ -119,9 +119,9 @@ namespace Spectra
             byte[] buf = new byte[2];
             for (int i = 6; i < 155; i++)
             {
-                if (File.Exists($"{Environment.CurrentDirectory}\\showFiles\\{i}.raw"))
+                if (File.Exists($"{ImageInfo.strFilesPath}\\{i}.raw"))
                 {
-                    file[i - 6] = new FileStream($"{Environment.CurrentDirectory}\\showFiles\\{i}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
+                    file[i - 6] = new FileStream($"{ImageInfo.strFilesPath}\\{i}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
                     file[i - 6].Seek(((int)p.X + (int)p.Y*2048) * 2, 0);
                     file[i - 6].Read(buf,0,2);
                     file[i - 6].Close();
