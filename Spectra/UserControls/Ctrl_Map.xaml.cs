@@ -31,8 +31,6 @@ namespace Spectra
     /// </summary>
     public partial class Ctrl_Map : UserControl
     {
-
-       
         public Mapsui.Geometries.Point TopLeft = new Mapsui.Geometries.Point(0,0);
         public Mapsui.Geometries.Point BottomRight = new Mapsui.Geometries.Point(0,0);
         public System.Windows.Point TopLeftScreen = new System.Windows.Point(0, 0);
@@ -55,7 +53,6 @@ namespace Spectra
 
         internal void Refresh()
         {
-            
         }
 
         private void userControl_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
@@ -104,13 +101,50 @@ namespace Spectra
             lcLon.Visibility = Visibility.Collapsed;
             cLT.Visibility = Visibility.Collapsed;
             cRB.Visibility = Visibility.Collapsed;
+            setMaker();
         }
 
         private void userControl_MouseMove(object sender, MouseEventArgs e)
         {
             Mapsui.Geometries.Point p = this.MapControl.Map.Viewport.ScreenToWorld(e.GetPosition(MapControl).X, e.GetPosition(MapControl).Y);
-            this.pLon.Content = (Mapsui.Projection.SphericalMercator.ToLonLat(p.X, p.Y).X).ToString();
-            this.pLat.Content = (Mapsui.Projection.SphericalMercator.ToLonLat(p.X, p.Y).Y).ToString();
+            Mapsui.Geometries.Point pLonLat = new Mapsui.Geometries.Point(0, 0);
+            pLonLat.X = Mapsui.Projection.SphericalMercator.ToLonLat(p.X, p.Y).X;
+            pLonLat.Y = Mapsui.Projection.SphericalMercator.ToLonLat(p.X, p.Y).Y;
+
+            this.pLon.Content = pLonLat.X.ToString();
+            this.pLat.Content = pLonLat.Y.ToString();
+
+            setMaker();
+            //Mapsui.Geometries.Point pWldPosi = Mapsui.Projection.SphericalMercator.FromLonLat(pLonLat.X, pLonLat.Y);
+            //Mapsui.Geometries.Point pWinPosi = MapControl.Map.Viewport.WorldToScreen(pWldPosi);
+            ////iconMaker.Margin = new Thickness(pWinPosi.X - 20, pWinPosi.Y - 40, 0, 0);
+            //setMaker(pWinPosi);
+        }
+
+        public void setMaker()
+        {
+            Mapsui.Geometries.Point pWldPosi = Mapsui.Projection.SphericalMercator.FromLonLat((ImageInfo.startCoord.Lon + ImageInfo.endCoord.Lon) / 2, (ImageInfo.startCoord.Lat + ImageInfo.endCoord.Lat) / 2);
+            Mapsui.Geometries.Point pWinPosi = MapControl.Map.Viewport.WorldToScreen(pWldPosi);
+            iconMaker.Margin = new Thickness(pWinPosi.X-20, pWinPosi.Y-40, 0,0);
+            Mapsui.Geometries.Point pLB = MapControl.Map.Viewport.WorldToScreen(Mapsui.Projection.SphericalMercator.FromLonLat(ImageInfo.startCoord.Lon, ImageInfo.startCoord.Lat));
+            Mapsui.Geometries.Point pRT = MapControl.Map.Viewport.WorldToScreen(Mapsui.Projection.SphericalMercator.FromLonLat(ImageInfo.endCoord.Lon, ImageInfo.endCoord.Lat));
+
+            double len0 = 5;
+            double len1 = Math.Sqrt(Math.Pow((pLB.X- pRT.X),2)+ Math.Pow((pLB.Y - pRT.Y), 2));
+            double len2 = Math.Sqrt(Math.Pow(len0,2)+ Math.Pow(len1, 2));
+            double lenx = len0 * len0 / len2;
+            double leny = len0 * len1 / len2;
+
+            var pathFigure = new PathFigure { StartPoint = new System.Windows.Point(pLB.X - lenx, pLB.Y - leny) };
+            var l1 = new LineSegment { Point = new System.Windows.Point(pLB.X + lenx, pLB.Y + leny) };
+            var l2 = new LineSegment { Point = new System.Windows.Point(pRT.X + lenx, pRT.Y + leny) };
+            var l3 = new LineSegment { Point = new System.Windows.Point(pRT.X - lenx, pRT.Y - leny) };
+            pathFigure.Segments.Add(l1);
+            pathFigure.Segments.Add(l2);
+            pathFigure.Segments.Add(l3);
+            var pathGeometry = new PathGeometry();
+            pathGeometry.Figures.Add(pathFigure);
+            pathOrbit.Data = pathGeometry;
         }
 
         private void rdbMapModeRoad_Checked(object sender, RoutedEventArgs e)
@@ -129,6 +163,11 @@ namespace Spectra
             MapControl.Map.Layers.Clear();
             MapControl.Map.Layers.Add(MapTilerSample.CreateLayer());
             MapControl.Refresh();
+        }
+
+        private void MapControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            setMaker();
         }
     }
     public static class MapTilerSample

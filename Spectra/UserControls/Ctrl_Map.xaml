@@ -11,14 +11,20 @@
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
     </UserControl.Resources>
     <Grid x:Name="Right" Background="Gray">
-        <xaml:MapControl  x:Name="MapControl" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" ViewChanged="MapControl_ViewChanged" />
+        <xaml:MapControl  x:Name="MapControl" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" ViewChanged="MapControl_ViewChanged" Loaded="MapControl_Loaded" />
         <Canvas Margin="0">
             <Rectangle Visibility="Collapsed" x:Name="SelectionArea" Stroke="#FF2970EC" Width="500" Height="500" StrokeThickness="2" StrokeDashArray="3 3" StrokeDashCap="Round" Fill="#330D6CDE"/>
         </Canvas>
+        <Label x:Name="iconMaker" Margin="0,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="40" Height="40">
+            <Label.Background>
+                <ImageBrush ImageSource="/Spectra;component/image/ICON/map-marker-icon.png"/>
+            </Label.Background>
+        </Label>
+        <Path x:Name="pathOrbit" Data="M 50,100 L 100,100 100,50 50,50" StrokeThickness="10" Fill="Red" Opacity="0.4"/>
 
         <DockPanel Margin="20" Height="30" VerticalAlignment="Top" HorizontalAlignment="Right" Background="Wheat">
-            <RadioButton x:Name="rdbMapModeRoad" Content="道路图" FontSize="16" VerticalAlignment="Bottom" Margin="10,0,10,6" Checked="rdbMapModeRoad_Checked" VerticalContentAlignment="Center"/>
-            <RadioButton x:Name="rdbMapModeSat" Content="地形图" FontSize="16" VerticalAlignment="Center" Margin="10,0" Checked="rdbMapModeSat_Checked" IsChecked="True" VerticalContentAlignment="Center"/>
+            <RadioButton x:Name="rdbMapModeRoad" Content="道路图" FontSize="16" VerticalAlignment="Bottom" Margin="10,0,10,6" Checked="rdbMapModeRoad_Checked" VerticalContentAlignment="Center" IsChecked="True"/>
+            <RadioButton x:Name="rdbMapModeSat" Content="地形图" FontSize="16" VerticalAlignment="Center" Margin="10,0" Checked="rdbMapModeSat_Checked" VerticalContentAlignment="Center"/>
         </DockPanel>
         <!--<DockPanel Margin="20" Height="50" VerticalAlignment="Top" HorizontalAlignment="Right"/>-->
         <StatusBar Height="30" Margin="0" VerticalAlignment="Bottom" FontSize="12" Background="{StaticResource TitleBack}" FontWeight="Thin">
