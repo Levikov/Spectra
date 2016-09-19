@@ -99,23 +99,28 @@ namespace Spectra
         //鼠标滑过IMG控件
         private void IMG1_MouseMove(object sender, MouseEventArgs e)
         {
-            var img = sender as ContentControl;
-            if (img == null)
-                return;
-            if (mouseDown)
+            try
             {
-                Domousemove(img, e);
+                var img = sender as ContentControl;
+                if (img == null)
+                    return;
+                if (mouseDown)
+                {
+                    Domousemove(img, e);
+                }
+                else
+                {
+                    System.Windows.Point p = Mouse.GetPosition(e.Source as FrameworkElement);
+                    p.X = (p.X / IMG1.ActualWidth);
+                    p.Y = (p.Y / IMG1.ActualHeight);
+                    curXinImg = p.X * ImgW;
+                    curYinImg = p.Y * ImgH;
+                    coo = new Coord(Convert.ToDouble(ImageInfo.dtImgInfo.Rows[(int)curXinImg][3]), Convert.ToDouble(ImageInfo.dtImgInfo.Rows[(int)curXinImg][4]));
+                    viewSet();
+                }
             }
-            else
-            {
-                System.Windows.Point p = Mouse.GetPosition(e.Source as FrameworkElement);
-                p.X = (p.X / IMG1.ActualWidth);
-                p.Y = (p.Y / IMG1.ActualHeight);
-                curXinImg = p.X * ImgW;
-                curYinImg = p.Y * ImgH;
-                coo = new Coord(Convert.ToDouble(ImageInfo.dtImgInfo.Rows[(int)curXinImg][3]), Convert.ToDouble(ImageInfo.dtImgInfo.Rows[(int)curXinImg][4]));
-                viewSet();
-            }
+            catch
+            { }
         }
 
         //界面显示内容
@@ -241,29 +246,34 @@ namespace Spectra
         //右键点击显示曲线
         private void IMG1_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
-            System.Windows.Point p = new System.Windows.Point((int)curXinImg, (int)curYinImg);
-            if (((MultiFuncWindow)App.global_Windows[5]).UserControls[0] != null)
+            try
             {
-                if (ImageInfo.chartMode)
+                System.Windows.Point p = new System.Windows.Point((int)curXinImg, (int)curYinImg);
+                if (((MultiFuncWindow)App.global_Windows[5]).UserControls[0] != null)
                 {
-                    if (ImageInfo.chartShowCnt % ImageInfo.chartShowSum == 0)
-                        ((MultiFuncWindow)App.global_Windows[5]).Refresh(null, 0, WinFunc.Curve);
-                    ((Ctrl_SpecCurv)((MultiFuncWindow)App.global_Windows[5]).UserControls[0]).Draw1(p, coo, ImageInfo.chartShowCnt % ImageInfo.chartShowSum);
+                    if (ImageInfo.chartMode)
+                    {
+                        if (ImageInfo.chartShowCnt % ImageInfo.chartShowSum == 0)
+                            ((MultiFuncWindow)App.global_Windows[5]).Refresh(null, 0, WinFunc.Curve);
+                        ((Ctrl_SpecCurv)((MultiFuncWindow)App.global_Windows[5]).UserControls[0]).Draw1(p, coo, ImageInfo.chartShowCnt % ImageInfo.chartShowSum);
+                    }
+                    else
+                        ((Ctrl_SpecCurv)((MultiFuncWindow)App.global_Windows[5]).UserControls[ImageInfo.chartShowCnt % 4]).Draw4(p, coo);
                 }
-                else
-                    ((Ctrl_SpecCurv)((MultiFuncWindow)App.global_Windows[5]).UserControls[ImageInfo.chartShowCnt % 4]).Draw4(p, coo);
+                if (++ImageInfo.chartShowCnt == 25200)
+                    ImageInfo.chartShowCnt = 0;
+                if (ImageSection.beginSection)
+                {
+                    borderSection.Visibility = Visibility.Visible;
+                    ImageSection.endFrm = (int)curXinImg;
+                    Thickness mov = new Thickness();
+                    mov = borderSection.Margin;
+                    mov.Right = ActualWidth - MousePoint.X + 1;
+                    borderSection.Margin = mov;
+                }
             }
-            if (++ImageInfo.chartShowCnt == 25200)
-                ImageInfo.chartShowCnt = 0;
-            if (ImageSection.beginSection)
-            {
-                borderSection.Visibility = Visibility.Visible;
-                ImageSection.endFrm = (int)curXinImg;
-                Thickness mov = new Thickness();
-                mov = borderSection.Margin;
-                mov.Right = ActualWidth - MousePoint.X + 1;
-                borderSection.Margin = mov;
-            }
+            catch
+            { }
         }
 
         private bool isFirst = true;    //防止第一次界面打开时刷新图像

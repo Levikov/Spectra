@@ -815,7 +815,7 @@ namespace Spectra
                 ModelShowInfo.Coord_TL.Lat = Convert.ToDouble(txtModelStartLat.Text);
                 ModelShowInfo.Coord_DR.Lon = Convert.ToDouble(txtModelEndLon.Text);
                 ModelShowInfo.Coord_DR.Lat = Convert.ToDouble(txtModelEndLat.Text);
-                DataTable dt = await DataProc.QueryResult(null, ModelShowInfo.Time_Start != ModelShowInfo.Time_End, ModelShowInfo.Coord_TL.Lon != ModelShowInfo.Coord_DR.Lon && ModelShowInfo.Coord_TL.Lat != ModelShowInfo.Coord_DR.Lat, false, ModelShowInfo.Time_Start, ModelShowInfo.Time_End, 0, 0, ModelShowInfo.Coord_TL, ModelShowInfo.Coord_DR);
+                DataTable dt = await DataProc.QueryResult(FileInfo.md5, ModelShowInfo.Time_Start != ModelShowInfo.Time_End, ModelShowInfo.Coord_TL.Lon != ModelShowInfo.Coord_DR.Lon && ModelShowInfo.Coord_TL.Lat != ModelShowInfo.Coord_DR.Lat, false, ModelShowInfo.Time_Start, ModelShowInfo.Time_End, 0, 0, ModelShowInfo.Coord_TL, ModelShowInfo.Coord_DR);
                 ModelShowInfo.imgWidth = dt.Rows.Count;
                 ModelShowInfo.isMakeImage = false;
                 if (dtModel.Rows.Count == 0)
