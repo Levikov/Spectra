@@ -273,6 +273,7 @@ namespace Spectra
                         {
                             new SQLiteParameter("MD5",FileInfo.md5)
                         });
+                sqlExcute.BeginInsert();
                 FileStream fs_chanel = new FileStream(srcPath, FileMode.Open, FileAccess.Read, FileShare.Read);
                 byte[] buf_row1 = new byte[PACK_LEN * 1024 * 1024];
                 bool isErrWrDB = true;
@@ -306,8 +307,8 @@ namespace Spectra
                 List.Report($"{DateTime.Now.ToString("HH:mm:ss")} 写数据库完成");
 
                 //下面这两句会报错,不知为什么
-                //sqlExcute.EndInsert();
-                //sqlExcute.cnn.Open();
+                sqlExcute.EndInsert();
+                sqlExcute.cnn.Open();
 
                 //更新文件信息
                 FileInfo.frmSum = (long)sqlExcute.ExecuteScalar($"SELECT COUNT(*) FROM AuxData WHERE MD5='{FileInfo.md5}'");                                    //帧总数
