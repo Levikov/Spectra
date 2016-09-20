@@ -191,7 +191,7 @@ namespace Spectra
                     bmpSource = new BitmapImage(new Uri($"{Environment.CurrentDirectory}\\bmpFiles\\{Z}.bmp"));
 
                     gm3d_Active.Material = new DiffuseMaterial(new System.Windows.Media.ImageBrush(bmpSource));
-                    DoubleAnimation day = new DoubleAnimation { From = 0, To = imheight / 10 * (imheight / 600), Duration = new Duration(TimeSpan.FromSeconds(1)) };
+                    DoubleAnimation day = new DoubleAnimation { From = 0, To = imheight / 10 / (imheight / 600), Duration = new Duration(TimeSpan.FromSeconds(1)) };
                     TranslateTransform3D transtrans3d = new TranslateTransform3D(0, 0, scene.touchPoint.Z);
                     gm3d_Active.Transform = transtrans3d;
                     transtrans3d.BeginAnimation(TranslateTransform3D.OffsetYProperty, day);
