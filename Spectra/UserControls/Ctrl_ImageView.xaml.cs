@@ -1,20 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace Spectra
 {
@@ -23,92 +14,53 @@ namespace Spectra
     /// </summary>
     public partial class Ctrl_ImageView : UserControl
     {
-        /// <summary>
-        /// 图片名称
-        /// </summary>
         public string Title;
-        public int ScreenIndex;
         public int SubWinIndex;
         public enum DisplayContent { Single,Pick,Sync};
-        public int SpecNum;
-        public int[] RgbSpec=new int[3];
-        public int ImgW;
-        public int ImgH;
+
+        public int ScreenIndex;
+        public int ImgW,ImgH;
+        public ColorRenderMode colorMode = ColorRenderMode.Grayscale;
+        public UInt16[] colorBand = { 40, 40, 40 };
+        public UInt16[] colorWave = { 698, 698, 698};
 
         public System.Windows.Point MousePoint;     //鼠标在窗体的位置
         public double realRatio;                    //图像显示的真实比例（scale为1时）
         public double realX, realY;                 //IMG1在窗体的真实位置
         public double curXinImg, curYinImg;         //当前鼠标值IMG1的位置
-        public Coord coo;                           //点位置的经纬
+        public Coord coo = new Coord(0,0);          //点位置的经纬
 
         public Ctrl_ImageView()
         {
             InitializeComponent();
         }
-
-        public Ctrl_ImageView(string title)
-        {
-            InitializeComponent();
-        }
-
-        public Ctrl_ImageView(string title,Bitmap bmp)
-        {
-            InitializeComponent();
-           // this.IMG1.Source = bmp;
-        }
-
-        public async void Refresh(int sub,int band,ColorRenderMode cMode,string path)
+        
+        public async void RefreshPseudoColor(int sub, string path,UInt16 gain,UInt16[] band, ColorRenderMode cMode)
         {
             this.Busy.isBusy = true;
 
             SubWinIndex = sub;
-            Bitmap bmp;
-            switch(cMode)
-            {
-                case ColorRenderMode.Grayscale:
-                    bmp = await DataProc.GetBmp(path,band-1, cMode);
-                    break;
-                case ColorRenderMode.ArtColor:
-                    bmp = await DataProc.GetBmp(path, band - 1, cMode);
-                    break;
-                case ColorRenderMode.TrueColor:
-                    bmp = await DataProc.GetRealColorBmp(path);
-                    break;
-                default:
-                    bmp = await DataProc.GetBmp(path,band-1, cMode);
-                    break;
-            }
+            colorBand = band;
+            colorMode = cMode;
+            for (int i = 0; i < 3; i++)
+                colorWave[i] = (UInt16)ImageInfo.getWave(colorBand[i]);
+
+            Bitmap bmp = await BmpOper.MakePseudoColor(path, band, gain);
             if (bmp == null) return;
             bmp.RotateFlip(RotateFlipType.Rotate90FlipX);
-            //bmp.Save("E:\\rgb.bmp");
             MemoryStream ms = new MemoryStream();
             bmp.Save(ms, System.Drawing.Imaging.ImageFormat.Bmp);
             ImgW = bmp.Width;
             ImgH = bmp.Height;
-            
-            BitmapImage bmpSource = new BitmapImage();
-            bmpSource.BeginInit();
-            bmpSource.StreamSource = ms;
-            bmpSource.EndInit();
-            this.IMG1.Source = bmpSource;
-            
-            SpecNum = band;
-            Band.Text = $"{SpecNum}";
-            Wave.Text = ImageInfo.getWave(SpecNum).ToString("F0");
-            ImageWidth.Text = ImageInfo.imgWidth.ToString();
-            this.Busy.isBusy = false;
-        }
 
-        public Ctrl_ImageView(Bitmap bmp)
-        {
-            InitializeComponent();
-            MemoryStream ms = new MemoryStream();
-            bmp.Save(ms, System.Drawing.Imaging.ImageFormat.Bmp);
             BitmapImage bmpSource = new BitmapImage();
             bmpSource.BeginInit();
             bmpSource.StreamSource = ms;
             bmpSource.EndInit();
             this.IMG1.Source = bmpSource;
+            viewSet();
+
+            this.Busy.isBusy = false;
         }
 
         private bool mouseDown;
@@ -145,28 +97,54 @@ namespace Spectra
         }
 
         //鼠标滑过IMG控件
-        private void IMG1_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+        private void IMG1_MouseMove(object sender, MouseEventArgs e)
         {
-            var img = sender as ContentControl;
-            if (img == null)
-                return;
-            if (mouseDown)
+            try
             {
-                Domousemove(img, e);
+                var img = sender as ContentControl;
+                if (img == null)
+                    return;
+                if (mouseDown)
+                {
+                    Domousemove(img, e);
+                }
+                else
+                {
+                    System.Windows.Point p = Mouse.GetPosition(e.Source as FrameworkElement);
+                    p.X = (p.X / IMG1.ActualWidth);
+                    p.Y = (p.Y / IMG1.ActualHeight);
+                    curXinImg = p.X * ImgW;
+                    curYinImg = p.Y * ImgH;
+                    coo = new Coord(Convert.ToDouble(ImageInfo.dtImgInfo.Rows[(int)curXinImg][3]), Convert.ToDouble(ImageInfo.dtImgInfo.Rows[(int)curXinImg][4]));
+                    viewSet();
+                }
             }
-            else
+            catch
+            { }
+        }
+
+        //界面显示内容
+        public void viewSet()
+        {
+            ImageWidth.Text = ImgW.ToString();
+            Col.Text = $"{Math.Floor(curXinImg)}";
+            Row.Text = $"{Math.Floor(curYinImg)}";
+            Lat.Text = coo.Lat.ToString("F4");
+            Lon.Text = coo.Lon.ToString("F4");
+            if (colorMode == ColorRenderMode.Grayscale)
             {
-                System.Windows.Point p = Mouse.GetPosition(e.Source as FrameworkElement);
-                p.X = (p.X / IMG1.ActualWidth);
-                p.Y = (p.Y / IMG1.ActualHeight);
-                curXinImg = p.X * ImgW;
-                curYinImg = p.Y * ImgH;
-                tb_3DCoord.Text = $"({Math.Floor(curXinImg)},{Math.Floor(curYinImg)},{SpecNum})";
-                Col.Text = $"{Math.Floor(curXinImg)}";
-                Row.Text = $"{Math.Floor(curYinImg)}";
-                coo = new Coord(Convert.ToDouble(ImageInfo.dtImgInfo.Rows[(int)curXinImg][3]), Convert.ToDouble(ImageInfo.dtImgInfo.Rows[(int)curXinImg][4]));
-                Lat.Text = coo.Lat.ToString("F4");
-                Lon.Text = coo.Lon.ToString("F4");
+                //tb_3DCoord.Text = $"({Math.Floor(curXinImg)},{Math.Floor(curYinImg)},{SpecNum})";
+                Band.Text = $"{colorBand[0]}";
+                Wave.Text = $"{colorWave[0]}";
+
+                lblgrayValue.Visibility = Visibility.Visible;
+                lblMinValue.Visibility = Visibility.Visible;
+                lblMaxValue.Visibility = Visibility.Visible;
+                lblMeanValue.Visibility = Visibility.Visible;
+                grayValue.Visibility = Visibility.Visible;
+                MinValue.Visibility = Visibility.Visible;
+                MaxValue.Visibility = Visibility.Visible;
+                MeanValue.Visibility = Visibility.Visible;
 
                 if (App.global_ImageBuffer[SubWinIndex] != null)
                 {
@@ -175,6 +153,20 @@ namespace Spectra
                     MaxValue.Text = App.global_ImageBuffer[SubWinIndex].max.ToString();
                     MeanValue.Text = App.global_ImageBuffer[SubWinIndex].mean.ToString();
                 }
+            }
+            else
+            {
+                Band.Text = $"{colorBand[0]},{colorBand[1]},{colorBand[2]}";
+                Wave.Text = $"{colorWave[0]},{colorWave[1]},{colorWave[2]}";
+
+                lblgrayValue.Visibility = Visibility.Collapsed;
+                lblMinValue.Visibility = Visibility.Collapsed;
+                lblMaxValue.Visibility = Visibility.Collapsed;
+                lblMeanValue.Visibility = Visibility.Collapsed;
+                grayValue.Visibility = Visibility.Collapsed;
+                MinValue.Visibility = Visibility.Collapsed;
+                MaxValue.Visibility = Visibility.Collapsed;
+                MeanValue.Visibility = Visibility.Collapsed;
             }
         }
 
@@ -254,29 +246,43 @@ namespace Spectra
         //右键点击显示曲线
         private void IMG1_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
-            System.Windows.Point p = new System.Windows.Point((int)curXinImg, (int)curYinImg);
-            if (((MultiFuncWindow)App.global_Windows[5]).UserControls[0] != null)
+            try
             {
-                if (ImageInfo.chartMode)
+                System.Windows.Point p = new System.Windows.Point((int)curXinImg, (int)curYinImg);
+                if (((MultiFuncWindow)App.global_Windows[5]).UserControls[0] != null)
                 {
-                    if (ImageInfo.chartShowCnt % ImageInfo.chartShowSum == 0)
-                        ((MultiFuncWindow)App.global_Windows[5]).Refresh(null, 0, WinFunc.Curve);
-                    ((Ctrl_SpecCurv)((MultiFuncWindow)App.global_Windows[5]).UserControls[0]).Draw1(p, coo, ImageInfo.chartShowCnt % ImageInfo.chartShowSum);
+                    if (ImageInfo.chartMode)
+                    {
+                        if (ImageInfo.chartShowCnt % ImageInfo.chartShowSum == 0)
+                            ((MultiFuncWindow)App.global_Windows[5]).Refresh(null, 0, WinFunc.Curve);
+                        ((Ctrl_SpecCurv)((MultiFuncWindow)App.global_Windows[5]).UserControls[0]).Draw1(p, coo, ImageInfo.chartShowCnt % ImageInfo.chartShowSum);
+                    }
+                    else
+                        ((Ctrl_SpecCurv)((MultiFuncWindow)App.global_Windows[5]).UserControls[ImageInfo.chartShowCnt % 4]).Draw4(p, coo);
                 }
-                else
-                    ((Ctrl_SpecCurv)((MultiFuncWindow)App.global_Windows[5]).UserControls[ImageInfo.chartShowCnt % 4]).Draw4(p, coo);
+                if (++ImageInfo.chartShowCnt == 25200)
+                    ImageInfo.chartShowCnt = 0;
+                if (ImageSection.beginSection)
+                {
+                    borderSection.Visibility = Visibility.Visible;
+                    ImageSection.endFrm = (int)curXinImg;
+                    Thickness mov = new Thickness();
+                    mov = borderSection.Margin;
+                    mov.Right = ActualWidth - MousePoint.X + 1;
+                    borderSection.Margin = mov;
+                }
             }
-            if (++ImageInfo.chartShowCnt == 25200)
-                ImageInfo.chartShowCnt = 0;
-            if (ImageSection.beginSection)
-            {
-                borderSection.Visibility = Visibility.Visible;
-                ImageSection.endFrm = (int)curXinImg;
-                Thickness mov = new Thickness();
-                mov = borderSection.Margin;
-                mov.Right = ActualWidth - MousePoint.X + 1;
-                borderSection.Margin = mov;
-            }
+            catch
+            { }
+        }
+
+        private bool isFirst = true;    //防止第一次界面打开时刷新图像
+        private void sldLow_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (isFirst)
+                isFirst = false;
+            else
+                RefreshPseudoColor(SubWinIndex, ImageInfo.strFilesPath, (UInt16)sldLow.Value,colorBand,colorMode);
         }
 
         //双击后放大到16:1像元大小

@@ -546,7 +546,6 @@
                         <Image x:Name="imgToday"
                                    Width="44"
                                    Height="34"
-                                   Source="/Image/Today.png"
                                    VerticalAlignment="Top"
                                    HorizontalAlignment="Left"
                                    Visibility="Hidden" />

@@ -35,6 +35,34 @@ namespace Spectra
         public static DateTime endTime;
         public static Coord startCoord = new Coord(0, 0);
         public static Coord endCoord = new Coord(0, 0);
+
+        [DllImport("DLL\\DataOperation.dll", EntryPoint = "preProcess_File")]
+        static extern int preProcess_File(string pathName, int len);
+        public static string preProcessFile(bool isUpk,int packLen)
+        {
+            string path = "";
+            if (isUpk)
+            {
+                if (preProcess_File(FileInfo.upkFilePathName, packLen) == -1)
+                {
+                    MessageBox.Show("输入文件错误", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return path;
+                }
+                string[] s = FileInfo.upkFilePathName.Split('.');
+                path = s[0] + "_p." + s[1];
+            }
+            else
+            {
+                if (preProcess_File(FileInfo.srcFilePathName, packLen) == -1)
+                {
+                    MessageBox.Show("输入文件错误", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return path;
+                }
+                string[] s = FileInfo.srcFilePathName.Split('.');
+                path = s[0] + "_p." + s[1];
+            }
+            return path;
+        }
     }
 
     public static class Variables
@@ -113,6 +141,7 @@ namespace Spectra
     { 
         [DllImport("DLL\\DataOperation.dll", EntryPoint = "Split_Chanel")]
         static extern void Split_Chanel(string path, string outpath, int sum, string[] file);
+
         public static int WindowsCnt = 0;               //应用样式的窗口数量
         public static DataTable dtModelList;            //应用样式列表
         public static DataTable dtWinShowInfo;          //应用样式细则
@@ -122,6 +151,9 @@ namespace Spectra
         public static Coord Coord_DR = new Coord(0, 0); //右下角坐标
         public static int imgWidth=0;                   //像宽(行数)
         public static DataTable dtImgInfo;              //应用样式细则
+        public static bool isMakeImage;                 //是否已生成图像
+        public static string strFilesPath;              //文件存储的路径
+        public static string MD5;                       //MD5
 
         public static int MakeImage()
         {
@@ -131,15 +163,17 @@ namespace Spectra
             string[] strFileName = new string[imgWidth];
             for (int i = 0; i < imgWidth; i++)
                 strFileName[i] = $"{(Convert.ToUInt32(dtImgInfo.Rows[i][2])).ToString("D10")}_{(Convert.ToUInt32(dtImgInfo.Rows[i][17])).ToString("D10")}_";
-            Split_Chanel($"{Environment.CurrentDirectory}\\channelFiles\\", $"{Environment.CurrentDirectory}\\showFiles\\", imgWidth, strFileName);
+            Split_Chanel($"{Environment.CurrentDirectory}\\channelFiles\\", strFilesPath, imgWidth, strFileName);
             return 1;
         }
     }
 
     public class MapInfo : DependencyObject
     {
-        public static string RoadMapPath = @"D:\Amap\roadmap";
-        public static string TerrainMapPath = "";
+        public static string MapPath = @"C:\Program Files\GMap\satellite";
+        public static string MapType = "jpg";
+        public static Coord LT_Coord = new Coord(0, 0);
+        public static Coord RB_Coord = new Coord(0, 0);
     }
 
     public class ImageInfo : DependencyObject
@@ -287,7 +321,7 @@ namespace Spectra
         /// </summary>
         /// <param name="wave">波长</param>
         /// <returns>谱段</returns>
-        public static int getBand(double wave)
+        public static UInt16 getBand(double wave)
         {
             double min = 2000;
             int index = 0;
@@ -296,10 +330,10 @@ namespace Spectra
                 if (Math.Abs(wave - Convert.ToDouble(dtBandWave.Rows[i][1])) < min)
                 {
                     index = i;
-                    min = wave - Convert.ToDouble(dtBandWave.Rows[i][1]);
+                    min = Math.Abs(wave - Convert.ToDouble(dtBandWave.Rows[i][1]));
                 }
             }
-            return Convert.ToInt32(dtBandWave.Rows[index][0]);
+            return Convert.ToUInt16(dtBandWave.Rows[index][0]);
         }
 
         /// <summary>

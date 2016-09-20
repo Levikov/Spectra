@@ -112,7 +112,7 @@
                             <Button x:Name="btnOpenFile" Margin="0,0,30,0" Content="打开" Template="{DynamicResource ButtonDefault}" Click="btnOpenFile_Click" Width="160" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                         </Grid>
                         <DockPanel Margin="30,0">
-                            <CheckBox x:Name="cb280" Content="280" Margin="28,0,0,0" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
+                            <CheckBox x:Name="cb280" Content="280" Margin="28,0,0,0" VerticalAlignment="Center" VerticalContentAlignment="Center" IsChecked="True"/>
                             <ProgressBar x:Name="prog_Import" Height="30" Margin="35,0,0,0" BorderBrush="{StaticResource ButtonBack}"/>
                         </DockPanel>
                         <DockPanel Margin="10,0" LastChildFill="False" Height="60" HorizontalAlignment="Center">
@@ -267,7 +267,10 @@
                             </Grid.ColumnDefinitions>
                             <Label Content="当前选定:" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                             <TextBox x:Name="txtCurrentFile" Grid.Column="1" Margin="10,0" VerticalAlignment="Center" Height="30"/>
-                            <Button Grid.Row="1" Grid.ColumnSpan="2" x:Name="btnSelectFile" Content="选定文件" Template="{DynamicResource ButtonDefault}" Width="160" Click="btnSelectFile_Click" VerticalAlignment="Center"/>
+                            <StackPanel Margin="0" Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center">
+                                <Button x:Name="btnSelectFile" Content="选定文件" Template="{DynamicResource ButtonDefault}" Width="120" Click="btnSelectFile_Click" VerticalAlignment="Center"/>
+                                <Button x:Name="btnNoSelectFile" Content="清除选定" Template="{DynamicResource ButtonDefault}" Width="120" Click="btnNoSelectFile_Click" VerticalAlignment="Center" Margin="40,0,0,0"/>
+                            </StackPanel>
                         </Grid>
                     </GroupBox>
                     <GroupBox Grid.Row="1" Header="文件检索" FontSize="18" Margin="0,10,0,0">
@@ -356,9 +359,9 @@
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
                         <Label Grid.Row="0" Grid.Column="0" Content="起始时刻:" VerticalAlignment="Center" HorizontalAlignment="Right"/>
-                        <TextBox Grid.Row="0" Grid.Column="2" x:Name="dtp_Start" Height="30" TextWrapping="Wrap" Text="{Binding SelectedDate, ElementName=calStart}" VerticalAlignment="Center" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" GotFocus="DateGotFocus" TextChanged="dtp_TextChanged"/>
+                        <TextBox Grid.Row="0" Grid.Column="2" x:Name="dtp_Start" Height="30" TextWrapping="Wrap" VerticalAlignment="Center" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" TextChanged="dtp_TextChanged"/>
                         <Label Grid.Row="1" Grid.Column="0" Content="终止时刻:" VerticalAlignment="Center" HorizontalAlignment="Right"/>
-                        <TextBox Grid.Row="1" Grid.Column="2" x:Name="dtp_End" Height="30" TextWrapping="Wrap" Text="{Binding SelectedDate, ElementName=calEnd}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" GotFocus="DateGotFocus" TextChanged="dtp_TextChanged"/>
+                        <TextBox Grid.Row="1" Grid.Column="2" x:Name="dtp_End" Height="30" TextWrapping="Wrap" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" TextChanged="dtp_TextChanged"/>
                     </Grid>
                 </GroupBox>
                 <GroupBox Grid.Row="0" Grid.Column="3" Grid.RowSpan="2" Margin="5,40,5,5" FontSize="18">
@@ -378,13 +381,13 @@
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
                         <Label Grid.Row="0" Grid.Column="0" Content="左上经度:" VerticalAlignment="Center" HorizontalAlignment="Right"/>
-                        <TextBox Grid.Row="0" Grid.Column="2" x:Name="LT_Lon" Margin="5" Height="30" TextWrapping="Wrap" VerticalAlignment="Center" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" GotFocus="DateGotFocus" TextChanged="Coord_TextChanged"/>
+                        <TextBox Grid.Row="0" Grid.Column="2" x:Name="LT_Lon" Margin="5" Height="30" TextWrapping="Wrap" VerticalAlignment="Center" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" TextChanged="Coord_TextChanged"/>
                         <Label Grid.Row="1" Grid.Column="0" Content="左上纬度:" VerticalAlignment="Center" HorizontalAlignment="Right"/>
-                        <TextBox Grid.Row="1" Grid.Column="2" x:Name="LT_Lat" Margin="5" Height="30" TextWrapping="Wrap" VerticalAlignment="Center" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" GotFocus="DateGotFocus" TextChanged="Coord_TextChanged"/>
+                        <TextBox Grid.Row="1" Grid.Column="2" x:Name="LT_Lat" Margin="5" Height="30" TextWrapping="Wrap" VerticalAlignment="Center" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" TextChanged="Coord_TextChanged"/>
                         <Label Grid.Row="2" Grid.Column="0" Content="右下经度:" VerticalAlignment="Center" HorizontalAlignment="Right"/>
-                        <TextBox Grid.Row="2" Grid.Column="2" x:Name="RB_Lon" Margin="5" Height="30" TextWrapping="Wrap" VerticalAlignment="Center" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" GotFocus="DateGotFocus" TextChanged="Coord_TextChanged"/>
+                        <TextBox Grid.Row="2" Grid.Column="2" x:Name="RB_Lon" Margin="5" Height="30" TextWrapping="Wrap" VerticalAlignment="Center" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" TextChanged="Coord_TextChanged"/>
                         <Label Grid.Row="3" Grid.Column="0" Content="右下纬度:" VerticalAlignment="Center" HorizontalAlignment="Right"/>
-                        <TextBox Grid.Row="3" Grid.Column="2" x:Name="RB_Lat" Margin="5" Height="30" TextWrapping="Wrap" VerticalAlignment="Center" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" GotFocus="DateGotFocus" TextChanged="Coord_TextChanged"/>
+                        <TextBox Grid.Row="3" Grid.Column="2" x:Name="RB_Lat" Margin="5" Height="30" TextWrapping="Wrap" VerticalAlignment="Center" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" TextChanged="Coord_TextChanged"/>
                     </Grid>
                 </GroupBox>
                 <GroupBox Grid.Row="1" Grid.Column="1" Margin="0,5,0,5" FontSize="18">
@@ -400,9 +403,9 @@
                             <ColumnDefinition Width="1*"/>
                         </Grid.ColumnDefinitions>
                         <Label Grid.Column="0" Content="起始帧号:" VerticalAlignment="Center" HorizontalAlignment="Right"/>
-                        <TextBox Grid.Column="2" x:Name="tb_start_frm" Margin="5,0" Height="30" TextWrapping="Wrap" VerticalAlignment="Center" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" GotFocus="DateGotFocus" TextChanged="tb_frm_TextChanged"/>
+                        <TextBox Grid.Column="2" x:Name="tb_start_frm" Margin="5,0" Height="30" TextWrapping="Wrap" VerticalAlignment="Center" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" TextChanged="tb_frm_TextChanged"/>
                         <Label Grid.Column="3" Content="—" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0"></Label>
-                        <TextBox Grid.Column="4" x:Name="tb_end_frm" Margin="5,0" Height="30" TextWrapping="Wrap" VerticalAlignment="Center" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" GotFocus="DateGotFocus" TextChanged="tb_frm_TextChanged"/>
+                        <TextBox Grid.Column="4" x:Name="tb_end_frm" Margin="5,0" Height="30" TextWrapping="Wrap" VerticalAlignment="Center" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" TextChanged="tb_frm_TextChanged"/>
                     </Grid>
                 </GroupBox>
                 <Grid Grid.Row="0" Grid.Column="4" Grid.RowSpan="2">
@@ -439,12 +442,12 @@
                         </DataGrid.Columns>
                     </DataGrid>
                 </GroupBox>
-                <Calendar x:Name="calStart" Grid.Column="1" Grid.RowSpan="3" Margin="125,120,10,0" MinHeight="320" Height="{Binding Width, ElementName=dtp_Start}" HorizontalAlignment="Left" VerticalAlignment="Top" SelectedDatesChanged="calStart_SelectedDatesChanged" Visibility="Collapsed"
+                <Calendar x:Name="calStart" Grid.Column="1" Grid.RowSpan="3" Margin="125,120,10,0" MinHeight="320" Height="{Binding Width, ElementName=dtp_Start}" HorizontalAlignment="Left" VerticalAlignment="Top" Visibility="Collapsed"
                             Style="{DynamicResource CalendarStyle1}" 
                             CalendarItemStyle="{DynamicResource CalendarItemStyle1}" 
                             CalendarDayButtonStyle="{DynamicResource CalendarDayButtonStyle1}" 
                             CalendarButtonStyle="{DynamicResource CalendarButtonStyle1}"/>
-                <Calendar x:Name="calEnd" Grid.Column="1" Grid.RowSpan="3" Margin="125,190,10,0" MinHeight="320" Height="{Binding Width, ElementName=dtp_Start}" HorizontalAlignment="Left" VerticalAlignment="Top" SelectedDatesChanged="calStart_SelectedDatesChanged" Visibility="Collapsed"
+                <Calendar x:Name="calEnd" Grid.Column="1" Grid.RowSpan="3" Margin="125,190,10,0" MinHeight="320" Height="{Binding Width, ElementName=dtp_Start}" HorizontalAlignment="Left" VerticalAlignment="Top" Visibility="Collapsed"
                             Style="{DynamicResource CalendarStyle1}" 
                             CalendarItemStyle="{DynamicResource CalendarItemStyle1}" 
                             CalendarDayButtonStyle="{DynamicResource CalendarDayButtonStyle1}" 
@@ -518,7 +521,8 @@
                                 <RowDefinition Height="5"/>
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="2*"/>
                                 <ColumnDefinition Width="1*"/>
                             </Grid.ColumnDefinitions>
                             <Grid Grid.Row="1" Grid.ColumnSpan="2" IsEnabled="{Binding ElementName=rb1Single,Path=IsChecked}">
@@ -537,8 +541,9 @@
                                 <Label Content="B:" Grid.Column="4" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                 <TextBox x:Name="txtSingleB" Text="127" Grid.Column="5" Margin="5,0" Height="30" VerticalAlignment="Center" />
                             </Grid>
+                            <Button x:Name="btnDefaultValue" Grid.Row="1" Grid.Column="2" Content="默认值" Width="120" Template="{DynamicResource ButtonDefault}" Margin="10,0" VerticalAlignment="Center" HorizontalAlignment="Center" Click="btnDefaultValue_Click"/>
                             <TextBox x:Name="txtSingleGray" Grid.Row="2" Grid.Column="0" Text="40" Margin="10,0" VerticalAlignment="Center" IsEnabled="{Binding ElementName=rb2Single,Path=IsChecked}" Height="30"/>
-                            <Button x:Name="btnSingleSet" Grid.Row="2" Grid.Column="1" Content="设置" Width="150" Template="{DynamicResource ButtonDefault}" Margin="10,0" Click="btnSingleSet_Click" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                            <Button x:Name="btnSingleSet" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Content="设置" Width="150" Template="{DynamicResource ButtonDefault}" Margin="10,0" Click="btnSingleSet_Click" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                         </Grid>
                     </Grid>
                 </GroupBox>
@@ -628,19 +633,19 @@
             </Grid.ColumnDefinitions>
             <GridSplitter Margin="0,50" Width="1" Background="{StaticResource ButtonBack}"/>
             <StackPanel>
-                <RadioButton x:Name="btnLeftC1" Content="异常检测" Template="{DynamicResource ButtonIcon2nd}" Margin="0,50,0,0" Height="70" VerticalAlignment="Top" IsChecked="True">
+                <RadioButton x:Name="btnLeftC1" Content="异常检测" Template="{DynamicResource ButtonIcon2nd}" Margin="0,50,0,0" Height="50" VerticalAlignment="Top" IsChecked="True">
                     <RadioButton.Background>
-                        <ImageBrush ImageSource="image/ICON/1.ico"/>
+                        <ImageBrush ImageSource="image/GRAY/14.png"/>
                     </RadioButton.Background>
                 </RadioButton>
-                <RadioButton x:Name="btnLeftC2" Content="应用示范" Template="{DynamicResource ButtonIcon2nd}" Margin="0,0,0,0" Height="70" VerticalAlignment="Top">
+                <RadioButton x:Name="btnLeftC2" Content="应用示范" Template="{DynamicResource ButtonIcon2nd}" Margin="0,0,0,0" Height="50" VerticalAlignment="Top">
                     <RadioButton.Background>
-                        <ImageBrush ImageSource="image/ICON/2.ico"/>
+                        <ImageBrush ImageSource="image/GRAY/17.png"/>
                     </RadioButton.Background>
                 </RadioButton>
-                <RadioButton x:Name="btnLeftC3" Content="3D演示" Template="{DynamicResource ButtonIcon2nd}" Margin="0,0,0,0" Height="70" VerticalAlignment="Top">
+                <RadioButton x:Name="btnLeftC3" Content="3D演示" Template="{DynamicResource ButtonIcon2nd}" Margin="0,0,0,0" Height="50" VerticalAlignment="Top">
                     <RadioButton.Background>
-                        <ImageBrush ImageSource="image/ICON/5.ico"/>
+                        <ImageBrush ImageSource="image/GRAY/15.png"/>
                     </RadioButton.Background>
                 </RadioButton>
             </StackPanel>
@@ -821,13 +826,15 @@
                                 <DataGridTextColumn Header ="结束经度" Binding="{Binding 结束经度}"/>
                                 <DataGridTextColumn Header ="起始纬度" Binding="{Binding 起始纬度}"/>
                                 <DataGridTextColumn Header ="结束纬度" Binding="{Binding 结束纬度}"/>
+                                <DataGridTextColumn Header ="是否已生成图像" Binding="{Binding 是否已生成图像}"/>
+                                <DataGridTextColumn Header ="文件路径" Binding="{Binding 文件路径}"/>
                                 <DataGridTextColumn Header ="备注" Binding="{Binding 备注}"/>
                             </DataGrid.Columns>
                         </DataGrid>
                         <DockPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center">
                             <Button x:Name="btnModelDel" Content="删除" Margin="30,0" Template="{DynamicResource ButtonDefault}" VerticalAlignment="Center" HorizontalAlignment="Center" Width="120" Click="btnModelDel_Click"/>
                             <Button x:Name="btnModelRefresh" Content="刷新列表" Margin="30,0" Template="{DynamicResource ButtonDefault}" VerticalAlignment="Center" HorizontalAlignment="Center" Width="120" Click="btnModelRefresh_Click"/>
-                            <Button x:Name="btnModelMakeImage" Content="准备图像" Margin="30,0" Template="{DynamicResource ButtonDefault}" VerticalAlignment="Center" HorizontalAlignment="Center" Width="120" Click="btnModelMakeImage_Click"/>
+                            <Button x:Name="btnModelMakeImage" Content="准备图像" Margin="30,0" Template="{DynamicResource ButtonDefault}" VerticalAlignment="Center" HorizontalAlignment="Center" Width="120" Click="btnModelMakeImage_Click" IsEnabled="False"/>
                             <Button x:Name="btnModelShow" Content="显示应用" Margin="30,0" Template="{DynamicResource ButtonDefault}" VerticalAlignment="Center" HorizontalAlignment="Center" Width="120" Click="btnModelShow_Click"/>
                         </DockPanel>
                     </Grid>
@@ -896,19 +903,19 @@
             </Grid.ColumnDefinitions>
             <GridSplitter Margin="0,50" Width="1" Background="{StaticResource ButtonBack}"/>
             <StackPanel>
-                <RadioButton x:Name="btnLeftD1" Content="显示设置" Template="{DynamicResource ButtonIcon2nd}" Margin="0,50,0,0" Height="70" VerticalAlignment="Top" IsChecked="True">
+                <RadioButton x:Name="btnLeftD1" Content="显示设置" Template="{DynamicResource ButtonIcon2nd}" Margin="0,50,0,0" Height="50" VerticalAlignment="Top" IsChecked="True">
                     <RadioButton.Background>
-                        <ImageBrush ImageSource="image/ICON/1.ico"/>
+                        <ImageBrush ImageSource="image/GRAY/7.png"/>
                     </RadioButton.Background>
                 </RadioButton>
-                <RadioButton x:Name="btnLeftD2" Content="数据设置" Template="{DynamicResource ButtonIcon2nd}" Margin="0,0,0,0" Height="70" VerticalAlignment="Top" Visibility="Collapsed">
+                <RadioButton x:Name="btnLeftD2" Content="数据设置" Template="{DynamicResource ButtonIcon2nd}" Margin="0,0,0,0" Height="50" VerticalAlignment="Top" Visibility="Collapsed">
                     <RadioButton.Background>
-                        <ImageBrush ImageSource="image/ICON/2.ico"/>
+                        <ImageBrush ImageSource="image/GRAY/2.png"/>
                     </RadioButton.Background>
                 </RadioButton>
-                <RadioButton x:Name="btnLeftD3" Content="关于我们" Template="{DynamicResource ButtonIcon2nd}" Margin="0,0,0,0" Height="70" VerticalAlignment="Top">
+                <RadioButton x:Name="btnLeftD3" Content="关于我们" Template="{DynamicResource ButtonIcon2nd}" Margin="0,0,0,0" Height="50" VerticalAlignment="Top">
                     <RadioButton.Background>
-                        <ImageBrush ImageSource="image/ICON/5.ico"/>
+                        <ImageBrush ImageSource="image/GRAY/12.png"/>
                     </RadioButton.Background>
                 </RadioButton>
             </StackPanel>

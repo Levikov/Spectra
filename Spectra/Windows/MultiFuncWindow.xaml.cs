@@ -70,6 +70,7 @@ namespace Spectra
             DisplayMode = GridMode.Two;
         }
 
+        //该函数不再用于显示图像内容
         public void Refresh(string path, int SubGridInedex, WinFunc setWinFunc)
         {
             SubGrid[SubGridInedex].Children.Clear();
@@ -77,10 +78,6 @@ namespace Spectra
 
             switch (setWinFunc)
             {
-                case Spectra.WinFunc.Image:
-                    UserControls[SubGridInedex] = new Ctrl_ImageView();
-                    ((Ctrl_ImageView)(UserControls[SubGridInedex])).Refresh(SubGridInedex, 120, ColorRenderMode.Grayscale,path);
-                    break;
                 case Spectra.WinFunc.Curve:
                     UserControls[SubGridInedex] = new Ctrl_SpecCurv();
                     break;
@@ -95,6 +92,18 @@ namespace Spectra
                 default:
                     break;
             }
+            SubGrid[SubGridInedex].Children.Add(UserControls[SubGridInedex]);
+        }
+
+        //该函数仅用于显示图像内容
+        public void RefreshImage(string path, int SubGridInedex, WinFunc setWinFunc ,UInt16[] band ,ColorRenderMode mode)
+        {
+            SubGrid[SubGridInedex].Children.Clear();
+            WinFunc[SubGridInedex] = setWinFunc;
+            
+            UserControls[SubGridInedex] = new Ctrl_ImageView();
+            ((Ctrl_ImageView)(UserControls[SubGridInedex])).RefreshPseudoColor(SubGridInedex,ImageInfo.strFilesPath, 4, band, mode);
+
             SubGrid[SubGridInedex].Children.Add(UserControls[SubGridInedex]);
         }
 

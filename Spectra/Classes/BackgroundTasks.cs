@@ -167,6 +167,13 @@ namespace Spectra
         {
             return Task.Run(()=> {
 
+                string cmdline = "";
+                string srcPath = FileInfo.preProcessFile(FileInfo.isUnpack, PACK_LEN);   //预处理
+                if (srcPath == "")
+                    return "输入文件错误";
+                else
+                    cmdline = "文件预处理完成!";
+
                 IntPtr hModule = LoadLibrary("DLL\\DataOperation.dll");
                 IntPtr hVariable = GetProcAddress(hModule, "progress");
                 SQLiteDatabase sqlExcute = new SQLiteDatabase(Variables.dbPath);
@@ -182,12 +189,10 @@ namespace Spectra
                     Directory.CreateDirectory($"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\result");
                 }
 
-                string cmdline = "";
-
                 //分包并解压
                 Parallel.For(0, 4, i =>
                 {
-                    FileStream fs_split = new FileStream(FileInfo.srcFilePathName, FileMode.Open, FileAccess.Read, FileShare.Read);  //打开源文件
+                    FileStream fs_split = new FileStream(srcPath, FileMode.Open, FileAccess.Read, FileShare.Read);  //打开源文件
                     FileStream fs_out = new FileStream($"test_{i}", FileMode.Create);
                     AuxDataRow adr_last = new AuxDataRow(new byte[PACK_LEN], 0);                                                     //最近一包的行结构，新建时为0
                     byte[] buf_split = new byte[PACK_LEN];                                                                           //一包数据
@@ -268,7 +273,8 @@ namespace Spectra
                         {
                             new SQLiteParameter("MD5",FileInfo.md5)
                         });
-                FileStream fs_chanel = new FileStream(FileInfo.srcFilePathName, FileMode.Open, FileAccess.Read, FileShare.Read);
+                sqlExcute.BeginInsert();
+                FileStream fs_chanel = new FileStream(srcPath, FileMode.Open, FileAccess.Read, FileShare.Read);
                 byte[] buf_row1 = new byte[PACK_LEN * 1024 * 1024];
                 bool isErrWrDB = true;
                 while (fs_chanel.Position < fs_chanel.Length)
@@ -301,8 +307,8 @@ namespace Spectra
                 List.Report($"{DateTime.Now.ToString("HH:mm:ss")} 写数据库完成");
 
                 //下面这两句会报错,不知为什么
-                //sqlExcute.EndInsert();
-                //sqlExcute.cnn.Open();
+                sqlExcute.EndInsert();
+                sqlExcute.cnn.Open();
 
                 //更新文件信息
                 FileInfo.frmSum = (long)sqlExcute.ExecuteScalar($"SELECT COUNT(*) FROM AuxData WHERE MD5='{FileInfo.md5}'");                                    //帧总数
@@ -334,6 +340,7 @@ namespace Spectra
                     a.Report(GetCurrentPosition());
                 }, Prog, 0, 10);
                 DataProc.Split_Chanel($"{Environment.CurrentDirectory}\\channelFiles\\", $"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\result\\", dtGST.Rows.Count, strGST);
+                Prog.Report(1);
 
                 return "成功！";
             });
@@ -353,17 +360,21 @@ namespace Spectra
         {
             return Task.Run(() =>
             {
-                int Height = DataQuery.QueryResult.Rows.Count;
+                int Height = ImageInfo.dtImgInfo.Rows.Count;
                 int Width = 2048;
+                int chanel = 1;
                 if (v == 161 || v == 162) Height = 128;
                 if (v == 163 || v == 164) Width = 128;
+                if (cMode ==ColorRenderMode.RealColor) chanel = 3; 
 
                 byte[] buf_full = new byte[Width * Height * 3];
-                byte[] buf_band = new byte[Width * Height * 2];
+                byte[] buf_band;
+                buf_band = new byte[Width * Height * 2*chanel];
+
                 if (!File.Exists($"{path}{v}.raw") || Height < 1) return null;
                 FileStream fs = new FileStream($"{path}{v}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
                 if (fs == null) return null;
-                fs.Read(buf_band, 0, Width * Height * 2);
+                fs.Read(buf_band, 0, Width * Height * 2*chanel);
                 Parallel.For(0, Width * Height, i =>
                 {
                     switch (cMode)
@@ -390,6 +401,18 @@ namespace Spectra
                             }
                             
                             break;
+                        case ColorRenderMode.RealColor:
+                            {
+                                double R = (double)(readU16_PIC(buf_band, i * 6+4)) / 4096  * 256;
+                                double G = (double)(readU16_PIC(buf_band, i * 6+2)) / 4096  * 256;
+                                double B = (double)(readU16_PIC(buf_band, i * 6)) / 4096  * 256;
+
+                                buf_full[3 * i + 2] = (byte)(Math.Floor(R));
+                                buf_full[3 * i + 1] = (byte)(Math.Floor(G));
+                                buf_full[3 * i + 0] = (byte)(Math.Floor(B));
+                            }
+
+                            break;
                         case ColorRenderMode.ArtColorSide:
                             {
 
@@ -409,6 +432,10 @@ namespace Spectra
                             break;
                         case ColorRenderMode.TrueColor:
                             {
+                                int band = v;
+                                if (v == 165) v = 27;
+                                if (v == 166) v = 154;
+
                                 double fR = 0;
                                 double fG = 0;
                                 double fB = 0;
@@ -439,7 +466,7 @@ namespace Spectra
         {
             return Task.Run(() =>
             {
-                int Height = DataQuery.QueryResult.Rows.Count;
+                int Height = ImageInfo.dtImgInfo.Rows.Count;
                 int Width = 2048;
 
                 byte[] buf_full = new byte[Width * Height * 2 * 3];
@@ -465,10 +492,10 @@ namespace Spectra
             return Task.Run(async () =>
             {
                 Bitmap[] r = new Bitmap[6];
-                r[0] = await GetBmp(path, 27, ColorRenderMode.TrueColor);
-                r[1] = await GetBmp(path, 154, ColorRenderMode.TrueColor);
-                r[2] = await GetBmp(path, 161, ColorRenderMode.ArtColor);
-                r[3] = await GetBmp(path, 162, ColorRenderMode.ArtColor);
+                r[0] = await BmpOper.MakePseudoColor(path, new UInt16[] { 40, 77, 127 }, 4);
+                r[1] = await BmpOper.MakePseudoColor(path, new UInt16[] { 40, 40, 40 }, 4);
+                r[3] = await GetBmp(path, 161, ColorRenderMode.ArtColor);
+                r[2] = await GetBmp(path, 162, ColorRenderMode.ArtColor);
                 r[4] = await GetBmp(path, 163, ColorRenderMode.ArtColorSide);
                 r[5] = await GetBmp(path, 164, ColorRenderMode.ArtColorSide);
                 return r;
@@ -496,7 +523,7 @@ namespace Spectra
                 SQLiteCommand cmmd = new SQLiteCommand("", conn);
 
                 string command;
-                if(md5!=null)
+                if (md5 != null && md5 != "")
                     command = $"SELECT * FROM AuxData WHERE Chanel=1 AND MD5='{md5}'";
                 else
                     command = $"SELECT * FROM AuxData WHERE Chanel=1";
@@ -955,6 +982,8 @@ namespace Spectra
     }
 
     #endregion
-    public enum ColorRenderMode { Grayscale, ArtColor, TrueColor,ArtColorSide }
+    public enum ColorRenderMode { Grayscale, ArtColor, TrueColor,ArtColorSide,
+        RealColor
+    }
 
 }

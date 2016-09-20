@@ -57,7 +57,9 @@
             this.ClientSize = new System.Drawing.Size(1584, 861);
             this.Controls.Add(this.pictureBox1);
             this.Name = "DynamicImagingWindow_Win32";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "DynamicImagingWindow_Win32";
+            this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.Shown += new System.EventHandler(this.DynamicImagingWindow_Win32_Shown);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);

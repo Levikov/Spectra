@@ -17,6 +17,7 @@ using Mapsui.Providers;
 using Mapsui.Samples.Common;
 using Mapsui.Samples.Common.Desktop;
 using Mapsui.UI.Xaml;
+using Mapsui.Geometries;
 using BruTile;
 using BruTile.Predefined;
 using BruTile.FileSystem;
@@ -30,6 +31,11 @@ namespace Spectra
     /// </summary>
     public partial class Ctrl_Map : UserControl
     {
+        public Mapsui.Geometries.Point TopLeft = new Mapsui.Geometries.Point(0,0);
+        public Mapsui.Geometries.Point BottomRight = new Mapsui.Geometries.Point(0,0);
+        public System.Windows.Point TopLeftScreen = new System.Windows.Point(0, 0);
+        public System.Windows.Point BottomRightScreen = new System.Windows.Point(0, 0);
+        public bool selectionMode = false;
         public Ctrl_Map()
         {
             InitializeComponent();
@@ -39,9 +45,129 @@ namespace Spectra
             MapControl.Refresh();
         }
 
+        public void ZoomToBox(System.Windows.Point start, System.Windows.Point End)
+        {
+            this.MapControl.ZoomToBox(Mapsui.Projection.SphericalMercator.FromLonLat(start.X,start.Y),Mapsui.Projection.SphericalMercator.FromLonLat(End.X,End.Y));
+            this.MapControl.Refresh();
+        }
+
         internal void Refresh()
         {
-            
+        }
+
+        private void userControl_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            Mapsui.Geometries.Point p = this.MapControl.Map.Viewport.ScreenToWorld(e.GetPosition(MapControl).X, e.GetPosition(MapControl).Y);
+            if (selectionMode == false)
+            {
+                this.TopLeftScreen = e.GetPosition(this.MapControl);
+                this.MapControl.ZoomLocked = true;
+                this.TopLeft = Mapsui.Projection.SphericalMercator.ToLonLat(p.X, p.Y);
+                this.selectionNotice.Visibility = Visibility.Visible;
+                this.selectionMode = true;
+                lcLat.Visibility = Visibility.Collapsed;
+                lcLon.Visibility = Visibility.Collapsed;
+                cLT.Visibility = Visibility.Collapsed;
+                cRB.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                this.BottomRightScreen = e.GetPosition(this.MapControl);
+                this.SelectionArea.Margin = new Thickness(TopLeftScreen.X<=BottomRightScreen.X?TopLeftScreen.X:BottomRightScreen.X,TopLeftScreen.Y<=BottomRightScreen.Y?TopLeftScreen.Y:BottomRightScreen.Y,0,0);
+                this.SelectionArea.Width = Math.Abs(BottomRightScreen.X - TopLeftScreen.X);
+                this.SelectionArea.Height = Math.Abs(BottomRightScreen.Y - TopLeftScreen.Y);
+                this.BottomRight = Mapsui.Projection.SphericalMercator.ToLonLat(p.X, p.Y);
+                this.MapControl.ZoomLocked = false;
+                this.selectionNotice.Visibility = Visibility.Collapsed;
+                this.SelectionArea.Visibility = Visibility.Visible;
+                this.selectionMode = false;
+                MapInfo.LT_Coord.Lat = this.TopLeft.Y >= this.BottomRight.Y ? this.TopLeft.Y : this.BottomRight.Y;
+                MapInfo.LT_Coord.Lon = this.TopLeft.X <= this.BottomRight.X ? this.TopLeft.X : this.BottomRight.X;
+                MapInfo.RB_Coord.Lat = this.TopLeft.Y < this.BottomRight.Y ? this.TopLeft.Y : this.BottomRight.Y;
+                MapInfo.RB_Coord.Lon = this.TopLeft.X > this.BottomRight.X ? this.TopLeft.X : this.BottomRight.X;
+                lcLat.Visibility = Visibility.Visible;
+                lcLon.Visibility = Visibility.Visible;
+                cLT.Visibility = Visibility.Visible;
+                cRB.Visibility = Visibility.Visible;
+                cLT.Content = $"({MapInfo.LT_Coord.Lon},{MapInfo.LT_Coord.Lat})";
+                cRB.Content = $"({MapInfo.RB_Coord.Lon},{MapInfo.RB_Coord.Lat})";
+            }
+        }
+
+        private void MapControl_ViewChanged(object sender, ViewChangedEventArgs e)
+        {
+            this.SelectionArea.Visibility = Visibility.Collapsed;
+            lcLat.Visibility = Visibility.Collapsed;
+            lcLon.Visibility = Visibility.Collapsed;
+            cLT.Visibility = Visibility.Collapsed;
+            cRB.Visibility = Visibility.Collapsed;
+            setMaker();
+        }
+
+        private void userControl_MouseMove(object sender, MouseEventArgs e)
+        {
+            Mapsui.Geometries.Point p = this.MapControl.Map.Viewport.ScreenToWorld(e.GetPosition(MapControl).X, e.GetPosition(MapControl).Y);
+            Mapsui.Geometries.Point pLonLat = new Mapsui.Geometries.Point(0, 0);
+            pLonLat.X = Mapsui.Projection.SphericalMercator.ToLonLat(p.X, p.Y).X;
+            pLonLat.Y = Mapsui.Projection.SphericalMercator.ToLonLat(p.X, p.Y).Y;
+
+            this.pLon.Content = pLonLat.X.ToString();
+            this.pLat.Content = pLonLat.Y.ToString();
+
+            setMaker();
+            //Mapsui.Geometries.Point pWldPosi = Mapsui.Projection.SphericalMercator.FromLonLat(pLonLat.X, pLonLat.Y);
+            //Mapsui.Geometries.Point pWinPosi = MapControl.Map.Viewport.WorldToScreen(pWldPosi);
+            ////iconMaker.Margin = new Thickness(pWinPosi.X - 20, pWinPosi.Y - 40, 0, 0);
+            //setMaker(pWinPosi);
+        }
+
+        public void setMaker()
+        {
+            Mapsui.Geometries.Point pWldPosi = Mapsui.Projection.SphericalMercator.FromLonLat((ImageInfo.startCoord.Lon + ImageInfo.endCoord.Lon) / 2, (ImageInfo.startCoord.Lat + ImageInfo.endCoord.Lat) / 2);
+            Mapsui.Geometries.Point pWinPosi = MapControl.Map.Viewport.WorldToScreen(pWldPosi);
+            iconMaker.Margin = new Thickness(pWinPosi.X-20, pWinPosi.Y-40, 0,0);
+            Mapsui.Geometries.Point pLB = MapControl.Map.Viewport.WorldToScreen(Mapsui.Projection.SphericalMercator.FromLonLat(ImageInfo.startCoord.Lon, ImageInfo.startCoord.Lat));
+            Mapsui.Geometries.Point pRT = MapControl.Map.Viewport.WorldToScreen(Mapsui.Projection.SphericalMercator.FromLonLat(ImageInfo.endCoord.Lon, ImageInfo.endCoord.Lat));
+
+            double len0 = 5;
+            double len1 = Math.Sqrt(Math.Pow((pLB.X- pRT.X),2)+ Math.Pow((pLB.Y - pRT.Y), 2));
+            double len2 = Math.Sqrt(Math.Pow(len0,2)+ Math.Pow(len1, 2));
+            double lenx = len0 * len0 / len2;
+            double leny = len0 * len1 / len2;
+
+            var pathFigure = new PathFigure { StartPoint = new System.Windows.Point(pLB.X - lenx, pLB.Y - leny) };
+            var l1 = new LineSegment { Point = new System.Windows.Point(pLB.X + lenx, pLB.Y + leny) };
+            var l2 = new LineSegment { Point = new System.Windows.Point(pRT.X + lenx, pRT.Y + leny) };
+            var l3 = new LineSegment { Point = new System.Windows.Point(pRT.X - lenx, pRT.Y - leny) };
+            pathFigure.Segments.Add(l1);
+            pathFigure.Segments.Add(l2);
+            pathFigure.Segments.Add(l3);
+            var pathGeometry = new PathGeometry();
+            pathGeometry.Figures.Add(pathFigure);
+            pathOrbit.Data = pathGeometry;
+        }
+
+        private void rdbMapModeRoad_Checked(object sender, RoutedEventArgs e)
+        {
+            MapInfo.MapPath = @"C:\Program Files\GMap\roadmap";
+            MapInfo.MapType = "png";
+            MapControl.Map.Layers.Clear();
+            MapControl.Map.Layers.Add(MapTilerSample.CreateLayer());
+            MapControl.Refresh();
+        }
+
+        private void rdbMapModeSat_Checked(object sender, RoutedEventArgs e)
+        {
+            MapInfo.MapPath = @"C:\Program Files\GMap\satellite";
+            MapInfo.MapType = "jpg";
+            MapControl.Map.Layers.Clear();
+            MapControl.Map.Layers.Add(MapTilerSample.CreateLayer());
+            MapControl.Refresh();
+        }
+
+        private void MapControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            setMaker();
         }
     }
     public static class MapTilerSample
@@ -66,12 +192,16 @@ namespace Spectra
 
         public byte[] GetTile(TileInfo tileInfo)
         {
-            return Provider.GetTile(tileInfo);
+            try
+            {
+                return Provider.GetTile(tileInfo);
+            }
+            catch { return null; }
         }
 
         public static ITileProvider GetTileProvider()
         {
-            return new FileTileProvider(new FileCache(MapInfo.RoadMapPath, "png"));
+            return new FileTileProvider(new FileCache(MapInfo.MapPath, MapInfo.MapType));
         }
 
         public static ITileSchema GetTileSchema()
@@ -104,6 +234,49 @@ namespace Spectra
         {
             return System.IO.Path.GetDirectoryName(
               System.Reflection.Assembly.GetEntryAssembly().GetModules()[0].FullyQualifiedName);
+        }
+    }
+    public class MouseTrackerDecorator : Decorator
+    {
+        static readonly DependencyProperty MousePositionProperty;
+        static MouseTrackerDecorator()
+        {
+            MousePositionProperty = DependencyProperty.Register("MousePosition", typeof(System.Windows.Point), typeof(MouseTrackerDecorator));
+        }
+
+        public override UIElement Child
+        {
+            get
+            {
+                return base.Child;
+            }
+            set
+            {
+                if (base.Child != null)
+                    base.Child.MouseMove -= _controlledObject_MouseMove;
+                base.Child = value;
+                base.Child.MouseMove += _controlledObject_MouseMove;
+            }
+        }
+
+        public System.Windows.Point MousePosition
+        {
+            get
+            {
+                return (System.Windows.Point)GetValue(MouseTrackerDecorator.MousePositionProperty);
+            }
+            set
+            {
+                SetValue(MouseTrackerDecorator.MousePositionProperty, value);
+            }
+        }
+
+        void _controlledObject_MouseMove(object sender, MouseEventArgs e)
+        {
+            System.Windows.Point p = e.GetPosition(base.Child);
+
+            // Here you can add some validation logic
+            MousePosition = p;
         }
     }
 }

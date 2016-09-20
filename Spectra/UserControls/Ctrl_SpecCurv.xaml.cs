@@ -45,7 +45,8 @@ namespace Spectra
 
         public void Draw1(Point p, Coord coo, int index)
         {
-            Point[] points = GetPoint(p);
+            Point pp = new Point(p.Y, p.X);
+            Point[] points = GetPoint(pp);
             dtsChart1st = new ObservableDataSource<System.Windows.Point>();
             foreach (System.Windows.Point point in points)
             {
@@ -56,7 +57,8 @@ namespace Spectra
 
         public void Draw4(Point p, Coord coo)
         {
-            Point[] points = GetPoint(p);
+            Point pp = new Point(p.Y, p.X);
+            Point[] points = GetPoint(pp);
             dtsChart1st = new ObservableDataSource<System.Windows.Point>();
             foreach (System.Windows.Point point in points)
             {
@@ -117,9 +119,9 @@ namespace Spectra
             byte[] buf = new byte[2];
             for (int i = 6; i < 155; i++)
             {
-                if (File.Exists($"{Environment.CurrentDirectory}\\showFiles\\{i}.raw"))
+                if (File.Exists($"{ImageInfo.strFilesPath}\\{i}.raw"))
                 {
-                    file[i - 6] = new FileStream($"{Environment.CurrentDirectory}\\showFiles\\{i}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
+                    file[i - 6] = new FileStream($"{ImageInfo.strFilesPath}\\{i}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
                     file[i - 6].Seek(((int)p.X + (int)p.Y*2048) * 2, 0);
                     file[i - 6].Read(buf,0,2);
                     file[i - 6].Close();
