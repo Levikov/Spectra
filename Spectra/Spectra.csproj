@@ -412,6 +412,7 @@
     <Resource Include="image\GRAY\5.png" />
     <Resource Include="image\GRAY\6.png" />
     <Resource Include="image\GRAY\7.png" />
+    <Resource Include="image\ICON\map-marker-icon.png" />
     <Content Include="Mapsui\BruTile.Desktop.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
