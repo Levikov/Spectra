@@ -340,6 +340,7 @@ namespace Spectra
                     a.Report(GetCurrentPosition());
                 }, Prog, 0, 10);
                 DataProc.Split_Chanel($"{Environment.CurrentDirectory}\\channelFiles\\", $"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\result\\", dtGST.Rows.Count, strGST);
+                Prog.Report(1);
 
                 return "成功！";
             });

@@ -164,10 +164,10 @@ namespace Spectra
             }
         }
 
-        //private void b_Abort_Import_Click(object sender, RoutedEventArgs e)
-        //{
-        //    cancelImport.Cancel();
-        //}
+        private void b_Abort_Import_Click(object sender, RoutedEventArgs e)
+        {
+            cancelImport.Cancel();
+        }
         #endregion
 
         #region 文件检索

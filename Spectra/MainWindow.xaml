@@ -118,7 +118,7 @@
                         <DockPanel Margin="10,0" LastChildFill="False" Height="60" HorizontalAlignment="Center">
                             <Button x:Name="btnUnpFile" Template="{DynamicResource ButtonDefault}" VerticalAlignment="Center" Margin="0" HorizontalAlignment="Center" Content="解包"  Click="btnUnpFile_Click" Width="160" IsEnabled="False"/>
                             <Button x:Name="btnDecFile" Template="{DynamicResource ButtonDefault}" VerticalAlignment="Center" Margin="100,0,0,0" HorizontalAlignment="Center" Content="解压图像"  Click="btnDecFile_Click" Width="160" IsEnabled="False"/>
-                            <!--<Button x:Name="b_Abort_Import" Template="{DynamicResource ButtonDefault}" VerticalAlignment="Center" Margin="100,0,0,0" HorizontalAlignment="Left" Content="放弃" Click="b_Abort_Import_Click" Width="160" IsEnabled="False"/>-->
+                            <Button x:Name="b_Abort_Import" Template="{DynamicResource ButtonDefault}" VerticalAlignment="Center" Margin="100,0,0,0" HorizontalAlignment="Left" Content="放弃" Click="b_Abort_Import_Click" Width="160" IsEnabled="False"/>
                         </DockPanel>
                     </StackPanel>
                 </GroupBox>
