@@ -664,6 +664,27 @@ namespace Spectra
                 System.Windows.MessageBox.Show("数据出错!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
+        /*3D设置*/
+        private void btn3Dset_Click(object sender, RoutedEventArgs e)
+        {
+            if (cb3Dfrm.IsChecked != true)
+                return;
+            if(App.global_Windows[3]!=null)
+            {
+                var w = (MultiFuncWindow)(App.global_Windows[3]);
+                if (w.UserControls[0] != null)
+                {
+                    var u = (Ctrl_3DView)(w.UserControls[0]);
+                    if (cb3Dfrm.IsChecked == true)
+                        u.showSingleFrm(Convert.ToUInt16(txt3Dfrm.Text));
+                    //if (cb3Dband.IsChecked == true)
+                    //{
+                    //    u.showSingleImage(Convert.ToUInt16(txt3Dband.Text));
+                    //    cb3Dband.IsChecked = false;
+                    //}
+                }
+            }
+        }
         #endregion
 
         #region 异常检测

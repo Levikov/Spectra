@@ -159,7 +159,7 @@ namespace Spectra
             }
         }
 
-        private BitmapImage showSingleFrm(UInt16 frm)
+        public BitmapImage showSingleFrm(UInt16 frm)
         {
             if (frm < ImageInfo.dtImgInfo.Rows.Count)
             {
