@@ -162,6 +162,80 @@ namespace Spectra
         public static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
         [DllImport("DLL\\DataOperation.dll", EntryPoint = "GetRGBFromBand")]
         public static extern void GetRGBFromBand(int band, out double R, out double G, out double B);
+        [DllImport("DLL\\DataOperation.dll", EntryPoint = "Get3DRaw")]
+        public static extern int Get3DRaw(string path, string outpath, int startFrm, int endFrm);
+
+        public static void Split_Chanel(string path, string outpath, string[] file)
+        {
+            try
+            {
+                byte[][] buffer = new byte[160][];
+                for (int i = 0; i < 160; i++)
+                {
+                    buffer[i] = new byte[file.Count()*4096];
+                }
+                Parallel.For(0, file.Count(), i => 
+                {
+                    Parallel.For(0, 4, j => 
+                    {
+                        try
+                        {
+                            byte[] buf_file = File.ReadAllBytes($"{path}{file[i]}{j + 1}.raw");
+                            for (int k = 0; k < 160; k++)
+                            {
+                                Array.Copy(buf_file, 1024 * k, buffer[k], i * 4096 + j* 1024, 1024);
+                            }
+                        }
+                        catch(Exception e)
+                        {
+
+                        }
+                    });
+                });
+                Parallel.For(0, 160, i => 
+                {
+                    File.WriteAllBytes($"{outpath}{i}.raw",buffer[i]);
+                });
+
+                Make_PseudoColor(outpath, outpath, file.Count(), new int[3] { 120, 83, 33 });
+                DataProc.Get3DRaw(outpath, outpath, 0, file.Count() - 1);
+
+                         
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+       
+        }
+
+        public static void Make_PseudoColor(string path, string outpath, int sum, int[]band)
+        {
+            byte[] buffer_RGB = new byte[sum * 4096 * 3];
+            double[][] buffer_Var = new double[3][];
+            double[] factor_RGB = new double[3];
+            Parallel.For(0,3,i=>
+            {
+                byte[] buffer_File = File.ReadAllBytes($"{path}{band[i]}.raw");
+                buffer_Var[i] = new double[sum*2048];
+                Parallel.For(0, sum*2048, j => { buffer_Var[i][j] = BitConverter.ToUInt16(buffer_File,2*j); });
+                factor_RGB[i] = buffer_Var[i].Average();
+            });
+            Parallel.For(0, 3, i =>
+            {
+                double factor = factor_RGB.Max() / factor_RGB[i];
+                Parallel.For(0, sum*2048, j => 
+                {
+                    buffer_RGB[6 * j + 2 * i] = (byte)((ushort)(factor * buffer_Var[i][j]) & 0x0f);
+                    buffer_RGB[6 * j + 2 * i+1] = (byte)((ushort)(factor * buffer_Var[i][j]) >>8);
+
+                });
+            });
+            File.WriteAllBytes($"{outpath}160.raw", buffer_RGB);
+            
+        }
+
+
 
         public static Task<string> Import_5(int PACK_LEN,IProgress<double> Prog, IProgress<string> List, CancellationToken cancel)
         {
@@ -339,7 +413,7 @@ namespace Spectra
                     IProgress<double> a = o as IProgress<double>;
                     a.Report(GetCurrentPosition());
                 }, Prog, 0, 10);
-                DataProc.Split_Chanel($"{Environment.CurrentDirectory}\\channelFiles\\", $"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\result\\", dtGST.Rows.Count, strGST);
+                DataProc.Split_Chanel($"{Environment.CurrentDirectory}\\channelFiles\\", $"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\result\\", strGST);
                 Prog.Report(1);
 
                 return "成功！";
