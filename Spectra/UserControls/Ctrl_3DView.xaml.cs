@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -149,11 +151,57 @@ namespace Spectra
                 this.Row.Text = $"{Y}";
                 this.Col.Text = $"{X}";
                 this.Band.Text = $"{Z}";
+                showSingleFrm((UInt16)Y);
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.ToString());
             }
+        }
+
+        private BitmapImage showSingleFrm(UInt16 frm)
+        {
+            if (frm < ImageInfo.dtImgInfo.Rows.Count)
+            {
+                string strFile = "";
+                strFile = $"{ImageInfo.channelFilesPath}{(Convert.ToUInt32(ImageInfo.dtImgInfo.Rows[frm][2])).ToString("D10")}_{(Convert.ToUInt32(ImageInfo.dtImgInfo.Rows[frm][17])).ToString("D10")}_";
+                byte[] frmImage = new byte[2048 * 160 * 3];
+                byte[][] pckImage = new byte[4][];
+                FileStream[] fs = new FileStream[4];
+                for (int i = 0; i < 4; i++)
+                {
+                    pckImage[i] = new byte[512 * 160 * 2];
+                    if (File.Exists($"{strFile}{i+1}.raw"))
+                    {
+                        fs[i] = new FileStream($"{strFile}{i+1}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
+                        fs[i].Read(pckImage[i], 0, 512 * 160 * 2);
+                        fs[i].Close();
+                    }
+                }
+                for (int i = 0; i < 4; i++)
+                    for(int c = 0; c < 512; c++)
+                        for (int r = 0; r < 160; r++)
+                        {
+                            frmImage[r * 2048 * 3 + i * 512 * 3 + c * 3] = frmImage[r * 2048 * 3 + i * 512 * 3 + c * 3 + 1]
+                                = frmImage[r * 2048 * 3 + i * 512 * 3 + c * 3 + 2] = pckImage[i][r * 512 * 2 + c * 2];
+                        }
+                Bitmap bmp = new Bitmap(2048, 160, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+                BitmapData bmpData = bmp.LockBits(new System.Drawing.Rectangle(0, 0, 2048, 160), ImageLockMode.WriteOnly, bmp.PixelFormat);
+                Marshal.Copy(frmImage, 0, bmpData.Scan0, 2048 * 160 * 3);
+                bmp.UnlockBits(bmpData);
+                //bmp.Save("D:\\1.bmp");
+
+                MemoryStream ms = new MemoryStream();
+                bmp.Save(ms, System.Drawing.Imaging.ImageFormat.Bmp);
+                BitmapImage bmpSource = new BitmapImage();
+                bmpSource.BeginInit();
+                bmpSource.StreamSource = ms;
+                bmpSource.EndInit();
+                ImageSingleFrm.Source = bmpSource;
+                return bmpSource;
+            }
+            ImageSingleFrm.Source = null;
+            return null;
         }
 
         private bool IsValid(ref int x, ref int y, ref int z)

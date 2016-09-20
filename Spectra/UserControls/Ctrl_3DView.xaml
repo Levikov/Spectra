@@ -85,6 +85,7 @@
         <local:Ctrl_BusyMask x:Name="Busy"></local:Ctrl_BusyMask>
         <Custom:Scene3D BorderBrush="White" Name="scene" BorderThickness="1" MouseDown="scene_MouseDown" Background="Gray" MouseRightButtonDown="scene_MouseRightButtonDown"/>
         <DockPanel Margin="20,20,0,0" Height="50" VerticalAlignment="Top" HorizontalAlignment="Left">
+            <CheckBox x:Name="cbOriShow" Margin="0,0,20,0" VerticalAlignment="Center" VerticalContentAlignment="Center" Content="显示原图" FontSize="20" Foreground="{StaticResource WinViewFore}"/>
             <Label HorizontalAlignment="Left" Content="行号:" VerticalAlignment="Center" FontSize="20" Foreground="{StaticResource WinViewFore}"/>
             <TextBlock x:Name="Row" Text="0" Width="60" FontSize="20" Foreground="{StaticResource WinViewFore}" VerticalAlignment="Center"/>
             <Label HorizontalAlignment="Left" Content="列号:" VerticalAlignment="Center" FontSize="20" Foreground="{StaticResource WinViewFore}"/>
@@ -98,5 +99,16 @@
             <Label HorizontalAlignment="Left" Content="坐标:" VerticalAlignment="Center" FontSize="20" Foreground="{StaticResource WinViewFore}"/>
             <TextBlock x:Name="tb_3DCoord" Text="(0,0,0)" VerticalAlignment="Center" FontSize="20" Foreground="{StaticResource WinViewFore}"/>
         </DockPanel>
+        <Image x:Name="ImageSingleFrm" Margin="5,5" MaxHeight="160" MaxWidth="2048" MinHeight="40" MinWidth="512" HorizontalAlignment="Left" VerticalAlignment="Bottom">
+            <Image.Resources>
+                <Style TargetType="{x:Type Image}">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsChecked, ElementName=cbOriShow}" Value="False">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Image.Resources>
+        </Image>
     </Grid>
 </UserControl>
