@@ -668,7 +668,7 @@ namespace Spectra
         /*3D设置*/
         private void btn3Dset_Click(object sender, RoutedEventArgs e)
         {
-            if (cb3Dfrm.IsChecked != true)
+            if (cb3Dfrm.IsChecked != true && cb3Dband.IsChecked != true)
                 return;
             if(App.global_Windows[3]!=null)
             {
@@ -676,13 +676,10 @@ namespace Spectra
                 if (w.UserControls[0] != null)
                 {
                     var u = (Ctrl_3DView)(w.UserControls[0]);
-                    if (cb3Dfrm.IsChecked == true)
+                    if (cb3Dfrm.IsChecked == true && txt3Dfrm.Text != "")
                         u.showSingleFrm(Convert.ToUInt16(txt3Dfrm.Text));
-                    //if (cb3Dband.IsChecked == true)
-                    //{
-                    //    u.showSingleImage(Convert.ToUInt16(txt3Dband.Text));
-                    //    cb3Dband.IsChecked = false;
-                    //}
+                    if (cb3Dband.IsChecked == true && txt3Dband.Text != "")
+                        u.pickSingleImage(Convert.ToUInt16(txt3Dband.Text));
                 }
             }
         }
@@ -891,8 +888,6 @@ namespace Spectra
                     SQLiteFunc.ExcuteSQL("update Apply_Model set 窗口数量=?,图像模式1=?,图像模式4=?,谷歌地图=?,三维立方体=?,图像地图模式=?,曲线模式='?' where 名称='?'",
                         isCheck[6], isCheck[0], isCheck[1], isCheck[2], isCheck[3], isCheck[4], strCurve, txtModelName.Text);
                 getCurApplyModel();
-                btnTopB.IsChecked = true;
-                btnLeftB1.IsChecked = true;
             }
             catch (Exception ex)
             {
@@ -1107,6 +1102,8 @@ namespace Spectra
                         isCheck[6], isCheck[0], isCheck[1], isCheck[2], isCheck[3], isCheck[4], strCurve);
                 //更新界面
                 getDefaultShow();
+                btnTopB.IsChecked = true;
+                btnLeftB1.IsChecked = true;
             }
             catch (Exception ex)
             {

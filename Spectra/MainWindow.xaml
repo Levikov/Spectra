@@ -494,10 +494,10 @@
                 <DockPanel Grid.Row="3" Grid.Column="1" Margin="35,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left">
                     <RadioButton x:Name="rbChartMode1" Content="曲线模式1" FontFamily="YouYuan" FontSize="18" VerticalContentAlignment="Center" IsChecked="True" Checked="rbChartMode_Checked"/>
                     <RadioButton x:Name="rbChartMode4" Content="曲线模式4" FontFamily="YouYuan" FontSize="18" VerticalContentAlignment="Center" Margin="10,0" Checked="rbChartMode_Checked"/>
-                    <CheckBox x:Name="cb3Dfrm" Content="帧号:" Margin="10,0" VerticalAlignment="Center" VerticalContentAlignment="Center" FontFamily="YouYuan" FontSize="18" IsChecked="True"/>
+                    <CheckBox x:Name="cb3Dfrm" Content="3D帧号:" Margin="10,0" VerticalAlignment="Center" VerticalContentAlignment="Center" FontFamily="YouYuan" FontSize="18"/>
                     <TextBox x:Name="txt3Dfrm" Width="70" Height="30" FontFamily="YouYuan" FontSize="18" IsEnabled="{Binding ElementName=cb3Dfrm,Path=IsChecked}"/>
-                    <!--<CheckBox x:Name="cb3Dband" Content="谱段:" Margin="10,0" VerticalAlignment="Center" VerticalContentAlignment="Center" FontSize="18"/>-->
-                    <!--<TextBox x:Name="txt3Dband" Width="50" Height="30" FontSize="18" IsEnabled="{Binding ElementName=cb3Dband,Path=IsChecked}"/>-->
+                    <CheckBox x:Name="cb3Dband" Content="3D谱段:" Margin="10,0" VerticalAlignment="Center" VerticalContentAlignment="Center" FontSize="18"/>
+                    <TextBox x:Name="txt3Dband" Width="50" Height="30" FontSize="18" IsEnabled="{Binding ElementName=cb3Dband,Path=IsChecked}"/>
                     <Button x:Name="btn3Dset" Content="设置" Width="80" Margin="10,0" VerticalAlignment="Center" Template="{DynamicResource ButtonDefault}" Click="btn3Dset_Click"/>
                 </DockPanel>
                 <GroupBox Grid.Row="5" Grid.Column="1" Margin="0" FontSize="18" BorderThickness="0">

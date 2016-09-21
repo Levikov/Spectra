@@ -223,7 +223,7 @@ namespace Spectra
             return true;
         }
 
-        private async void scene_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        private void scene_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
             try
             {
@@ -232,34 +232,39 @@ namespace Spectra
                     int X = (int)(scene.touchPoint.X * 10) + 1024;
                     int Y = (int)(scene.touchPoint.Y * 10 + imheight / 2);
                     UInt16 Z = (UInt16)(scene.touchPoint.Z * 10 / 4 + 80);
-
-                    UInt16[] band = { Z, Z, Z };
-                    if((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[0]).UserControls[0] != null)
-                        ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[0]).UserControls[0]).RefreshPseudoColor(0, ImageInfo.strFilesPath,4,band,ColorRenderMode.Grayscale);
-
-                    if (Z < 1 || Z > 160) return;
-                    Bitmap bmp = await DataProc.GetBmp(ImageInfo.strFilesPath, Z-1, ColorRenderMode.Grayscale);
-                    if (bmp == null) return;
-                    bmp.RotateFlip(RotateFlipType.Rotate180FlipNone);
-                    bmp.RotateFlip(RotateFlipType.Rotate180FlipY);
-                    BitmapImage bmpSource = new BitmapImage();
-                    
-                    if(!File.Exists($"bmpFiles\\{Z}.bmp"))
-                    bmp.Save($"bmpFiles\\{Z}.bmp");
-                    bmpSource = new BitmapImage(new Uri($"{Environment.CurrentDirectory}\\bmpFiles\\{Z}.bmp"));
-
-                    gm3d_Active.Material = new DiffuseMaterial(new System.Windows.Media.ImageBrush(bmpSource));
-                    DoubleAnimation day = new DoubleAnimation { From = 0, To = imheight / 10 / (imheight / 600), Duration = new Duration(TimeSpan.FromSeconds(1)) };
-                    TranslateTransform3D transtrans3d = new TranslateTransform3D(0, 0, scene.touchPoint.Z);
-                    gm3d_Active.Transform = transtrans3d;
-                    transtrans3d.BeginAnimation(TranslateTransform3D.OffsetYProperty, day);
-                    curBand.Text = Z.ToString();
+                    pickSingleImage(Z);
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.ToString());
             }
+        }
+
+        public async void pickSingleImage(UInt16 Z)
+        {
+            UInt16[] band = { Z, Z, Z };
+            if ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[0]).UserControls[0] != null)
+                ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[0]).UserControls[0]).RefreshPseudoColor(0, ImageInfo.strFilesPath, 4, band, ColorRenderMode.Grayscale);
+
+            if (Z < 1 || Z > 160) return;
+            Bitmap bmp = await DataProc.GetBmp(ImageInfo.strFilesPath, Z - 1, ColorRenderMode.Grayscale);
+            if (bmp == null) return;
+            bmp.RotateFlip(RotateFlipType.Rotate180FlipNone);
+            bmp.RotateFlip(RotateFlipType.Rotate180FlipY);
+            BitmapImage bmpSource = new BitmapImage();
+
+            if (!File.Exists($"bmpFiles\\{Z}.bmp"))
+                bmp.Save($"bmpFiles\\{Z}.bmp");
+            bmpSource = new BitmapImage(new Uri($"{Environment.CurrentDirectory}\\bmpFiles\\{Z}.bmp"));
+
+            gm3d_Active.Material = new DiffuseMaterial(new System.Windows.Media.ImageBrush(bmpSource));
+            DoubleAnimation day = new DoubleAnimation { From = 0, To = imheight / 10 / (imheight / 600), Duration = new Duration(TimeSpan.FromSeconds(1)) };
+            //TranslateTransform3D transtrans3d = new TranslateTransform3D(0, 0, scene.touchPoint.Z);
+            TranslateTransform3D transtrans3d = new TranslateTransform3D(0, 0, ((Z-80)*0.4));
+            gm3d_Active.Transform = transtrans3d;
+            transtrans3d.BeginAnimation(TranslateTransform3D.OffsetYProperty, day);
+            curBand.Text = Z.ToString();
         }
     }
 }
