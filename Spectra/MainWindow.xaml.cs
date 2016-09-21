@@ -355,6 +355,7 @@ namespace Spectra
                 //App.global_Win_Map.Show();
                 //App.global_Win_Map.DrawRectangle(new Point((double)ImageInfo.dtImgInfo.Rows[0].ItemArray[3], (double)ImageInfo.dtImgInfo.Rows[0].ItemArray[4]), new Point((double)ImageInfo.dtImgInfo.Rows[ImageInfo.dtImgInfo.Rows.Count - 1].ItemArray[3], (double)ImageInfo.dtImgInfo.Rows[ImageInfo.dtImgInfo.Rows.Count - 1].ItemArray[4]));
                 initWindows(ImageInfo.strFilesPath, WinShowInfo.WindowsCnt, WinShowInfo.dtWinShowInfo);
+                btnLeftB2.IsChecked = true;
             }
             catch
             {
@@ -890,6 +891,8 @@ namespace Spectra
                     SQLiteFunc.ExcuteSQL("update Apply_Model set 窗口数量=?,图像模式1=?,图像模式4=?,谷歌地图=?,三维立方体=?,图像地图模式=?,曲线模式='?' where 名称='?'",
                         isCheck[6], isCheck[0], isCheck[1], isCheck[2], isCheck[3], isCheck[4], strCurve, txtModelName.Text);
                 getCurApplyModel();
+                btnTopB.IsChecked = true;
+                btnLeftB1.IsChecked = true;
             }
             catch (Exception ex)
             {
