@@ -497,7 +497,7 @@ namespace Spectra
                 w = (MultiFuncWindow)App.global_Windows[3];
                 w.DisplayMode = GridMode.One;
                 if (!w.isShow)
-                    w.ScreenShow(Screen.AllScreens, 2, "光谱三维立方体");
+                    w.ScreenShow(Screen.AllScreens, 1, "光谱三维立方体");
                 w.Refresh(ImageInfo.strFilesPath, 0, WinFunc.Cube);
             }
             catch
@@ -1033,7 +1033,7 @@ namespace Spectra
             {
                 w[2].DisplayMode = GridMode.One;
                 if (!w[2].isShow)
-                    w[2].ScreenShow(Screen.AllScreens, 1, "谷歌地图");
+                    w[2].ScreenShow(Screen.AllScreens, 2, "谷歌地图");
                 w[2].Refresh(path, 0, WinFunc.Map);
             }
             //三维立方体
@@ -1041,7 +1041,7 @@ namespace Spectra
             {
                 w[3].DisplayMode = GridMode.One;
                 if (!w[3].isShow)
-                    w[3].ScreenShow(Screen.AllScreens, 2, "光谱三维立方体");
+                    w[3].ScreenShow(Screen.AllScreens, 1, "光谱三维立方体");
                 w[3].Refresh(path, 0, WinFunc.Cube);
             }
             //图像地图
@@ -1049,7 +1049,7 @@ namespace Spectra
             {
                 w[4].DisplayMode = GridMode.Two;
                 if (!w[4].isShow)
-                    w[4].ScreenShow(Screen.AllScreens, 1, "图像/地图");
+                    w[4].ScreenShow(Screen.AllScreens, 2, "图像/地图");
                 UInt16[] colorBand = { 40, 77, 127 };
                 w[4].RefreshImage(path, 0, WinFunc.Image, colorBand, ColorRenderMode.ArtColor);
                 w[4].Refresh(path, 1, WinFunc.Map);
@@ -1059,7 +1059,7 @@ namespace Spectra
             {
                 w[5].DisplayMode = GridMode.One;
                 if (!w[5].isShow)
-                    w[5].ScreenShow(Screen.AllScreens, 2, "曲线");
+                    w[5].ScreenShow(Screen.AllScreens, 1, "曲线");
                 w[5].Refresh(path, 0, WinFunc.Curve);
                 rbChartMode1.IsChecked = true;
             }
@@ -1068,7 +1068,7 @@ namespace Spectra
             {
                 w[5].DisplayMode = GridMode.Four;
                 if (!w[5].isShow)
-                    w[5].ScreenShow(Screen.AllScreens, 2, "曲线");
+                    w[5].ScreenShow(Screen.AllScreens, 1, "曲线");
                 w[5].Refresh(path, 0, WinFunc.Curve);
                 w[5].Refresh(path, 1, WinFunc.Curve);
                 w[5].Refresh(path, 2, WinFunc.Curve);
