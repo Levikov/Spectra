@@ -90,8 +90,15 @@ namespace Spectra
                 BitmapImage[] bmpSource = new BitmapImage[6];
                 for (int i = 0; i < 6; i++)
                 {
+                    if (File.Exists($"{Environment.CurrentDirectory}\\cube_{i}.bmp")) ;
+                    File.Delete($"{Environment.CurrentDirectory}\\cube_{i}.bmp");
                     bmpArray[i].Save($"cube_{i}.bmp");
-                    bmpSource[i] = new BitmapImage(new Uri($"{Environment.CurrentDirectory}\\cube_{i}.bmp"));
+                    byte[] buffer = File.ReadAllBytes($"{Environment.CurrentDirectory}\\cube_{i}.bmp");
+                    MemoryStream ms = new MemoryStream(buffer);
+                    bmpSource[i] = new BitmapImage();
+                    bmpSource[i].BeginInit();
+                    bmpSource[i].StreamSource = ms;
+                    bmpSource[i].EndInit();
                 };
 
                 gm3d_Top.Material = new DiffuseMaterial(new ImageBrush(bmpSource[0]));
@@ -100,6 +107,7 @@ namespace Spectra
                 gm3d_Down.Material = new DiffuseMaterial(new ImageBrush(bmpSource[3]));
                 gm3d_Right.Material = new DiffuseMaterial(new ImageBrush(bmpSource[4]));
                 gm3d_Left.Material = new DiffuseMaterial(new ImageBrush(bmpSource[5]));
+
             }
             catch (Exception ex)
             {
@@ -228,13 +236,15 @@ namespace Spectra
                     UInt16[] band = { Z, Z, Z };
                     if((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[0]).UserControls[0] != null)
                         ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[0]).UserControls[0]).RefreshPseudoColor(0, ImageInfo.strFilesPath,4,band,ColorRenderMode.Grayscale);
-                    
+
+                    if (Z < 1 || Z > 160) return;
                     Bitmap bmp = await DataProc.GetBmp(ImageInfo.strFilesPath, Z-1, ColorRenderMode.Grayscale);
                     if (bmp == null) return;
                     bmp.RotateFlip(RotateFlipType.Rotate180FlipNone);
                     bmp.RotateFlip(RotateFlipType.Rotate180FlipY);
                     BitmapImage bmpSource = new BitmapImage();
                     
+                    if(!File.Exists($"bmpFiles\\{Z}.bmp"))
                     bmp.Save($"bmpFiles\\{Z}.bmp");
                     bmpSource = new BitmapImage(new Uri($"{Environment.CurrentDirectory}\\bmpFiles\\{Z}.bmp"));
 

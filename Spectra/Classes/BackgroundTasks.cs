@@ -199,7 +199,7 @@ namespace Spectra
                 sum = 0;
                 Parallel.For(0, 160, i => 
                 {
-                    Prog.Report((sum++) / (double)file.Count());
+                    Prog.Report((sum++) / 160.0);
                     File.WriteAllBytes($"{outpath}{i}.raw",buffer[i]);
                 });
 
@@ -384,6 +384,8 @@ namespace Spectra
                         Prog.Report((double)fs_chanel.Position / fs_chanel.Length);
                     }
                 }
+                fs_chanel.Close();
+                File.Delete(srcPath);
                 List.Report($"{DateTime.Now.ToString("HH:mm:ss")} 写数据库完成");
 
                 //下面这两句会报错,不知为什么
