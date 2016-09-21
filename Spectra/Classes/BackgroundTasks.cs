@@ -165,17 +165,21 @@ namespace Spectra
         [DllImport("DLL\\DataOperation.dll", EntryPoint = "Get3DRaw")]
         public static extern int Get3DRaw(string path, string outpath, int startFrm, int endFrm);
 
-        public static void Split_Chanel(string path, string outpath, string[] file)
+        public static void Split_Chanel(string path, string outpath, string[] file,IProgress<double>Prog, IProgress<string> List)
         {
             try
             {
                 byte[][] buffer = new byte[160][];
+                string cmdline = $"{DateTime.Now.ToString("HH:mm:ss")} 开始分包 ";
+                List.Report(cmdline);
                 for (int i = 0; i < 160; i++)
                 {
                     buffer[i] = new byte[file.Count()*4096];
                 }
+                int sum = 0;
                 Parallel.For(0, file.Count(), i => 
                 {
+                    Prog.Report((sum++) / (double)file.Count());
                     Parallel.For(0, 4, j => 
                     {
                         try
@@ -192,8 +196,10 @@ namespace Spectra
                         }
                     });
                 });
+                sum = 0;
                 Parallel.For(0, 160, i => 
                 {
+                    Prog.Report((sum++) / (double)file.Count());
                     File.WriteAllBytes($"{outpath}{i}.raw",buffer[i]);
                 });
 
@@ -408,12 +414,7 @@ namespace Spectra
 
 
                 //512拼2048*N图
-                Timer t = new Timer((o) =>
-                {
-                    IProgress<double> a = o as IProgress<double>;
-                    a.Report(GetCurrentPosition());
-                }, Prog, 0, 10);
-                DataProc.Split_Chanel($"{Environment.CurrentDirectory}\\channelFiles\\", $"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\result\\", strGST);
+                DataProc.Split_Chanel($"{Environment.CurrentDirectory}\\channelFiles\\", $"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\result\\", strGST,Prog,List);
                 Prog.Report(1);
 
                 return "成功！";
