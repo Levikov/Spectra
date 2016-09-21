@@ -116,20 +116,18 @@ namespace Spectra
         /*显示器对象 显示器编号   窗口编号*/
         public void ScreenShow(Screen[] s, int id,string strT)
         {
-            //this.WindowState = WindowState.Maximized;
-            //this.WindowStyle = WindowStyle.None;
-            //this.Left = 1920;
-            //this.Top = 0;
-            //this.Width = 1024;
-            //this.Height = 768;
-            //this.Show();
-
-            //System.Drawing.Rectangle r2 = s[0].WorkingArea;
-            //this.Top = r2.Top;
-            //this.Left = r2.Left;
+            this.WindowState = WindowState.Normal;
+            this.WindowStartupLocation = WindowStartupLocation.Manual;
+            
+            if (id >= s.Count())
+                id = s.Count() - 1;
+            System.Drawing.Rectangle r2 = s[id].WorkingArea;
+            Top = r2.Top;
+            Left = r2.Left;
 
             this.Title = strT;
             this.Show();
+            this.WindowState = WindowState.Maximized;
             this.isShow = true;
         }
 
