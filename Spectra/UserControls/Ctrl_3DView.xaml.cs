@@ -191,7 +191,7 @@ namespace Spectra
                         for (int r = 0; r < 160; r++)
                         {
                             frmImage[r * 2048 * 3 + i * 512 * 3 + c * 3] = frmImage[r * 2048 * 3 + i * 512 * 3 + c * 3 + 1]
-                                = frmImage[r * 2048 * 3 + i * 512 * 3 + c * 3 + 2] = pckImage[i][r * 512 * 2 + c * 2];
+                                = frmImage[r * 2048 * 3 + i * 512 * 3 + c * 3 + 2] = (byte)(pckImage[i][r * 512 * 2 + c * 2]/16+ pckImage[i][r * 512 * 2 + c * 2+1]*16);
                         }
                 Bitmap bmp = new Bitmap(2048, 160, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
                 BitmapData bmpData = bmp.LockBits(new System.Drawing.Rectangle(0, 0, 2048, 160), ImageLockMode.WriteOnly, bmp.PixelFormat);
