@@ -108,8 +108,9 @@
                     <StackPanel Margin="0">
                         <Grid Height="60">
                             <Label Content="文件路径:" Margin="30,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left"></Label>
-                            <TextBox Name="tb_Path" TextWrapping="Wrap" Margin="140,0,200,0" IsReadOnly="True" Height="30"/>
-                            <Button x:Name="btnOpenFile" Margin="0,0,30,0" Content="打开" Template="{DynamicResource ButtonDefault}" Click="btnOpenFile_Click" Width="160" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                            <TextBox Name="tb_Path" TextWrapping="Wrap" Margin="140,0,360,0" IsReadOnly="True" Height="30"/>
+                            <Button x:Name="btnOpenFile" Margin="0,0,190,0" Content="打开" Template="{DynamicResource ButtonDefault}" Click="btnOpenFile_Click" Width="120" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                            <Button x:Name="btnOpenFiles" Margin="0,0,30,0" Content="批处理" Template="{DynamicResource ButtonDefault}" Click="btnOpenFiles_Click" Width="120" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                         </Grid>
                         <DockPanel Margin="30,0">
                             <CheckBox x:Name="cb280" Content="280" Margin="28,0,0,0" VerticalAlignment="Center" VerticalContentAlignment="Center" IsChecked="True"/>

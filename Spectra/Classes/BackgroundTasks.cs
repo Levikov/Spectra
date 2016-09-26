@@ -170,7 +170,7 @@ namespace Spectra
             try
             {
                 byte[][] buffer = new byte[160][];
-                string cmdline = $"{DateTime.Now.ToString("HH:mm:ss")} 开始分包 ";
+                string cmdline = $"{DateTime.Now.ToString("HH:mm:ss")} 开始合并图像 ";
                 List.Report(cmdline);
                 for (int i = 0; i < 160; i++)
                 {
@@ -315,7 +315,7 @@ namespace Spectra
                                         byte[] buf_Dynamic = new byte[512 * 2];
                                         Marshal.Copy(FreeImage.GetBits(fibmp), buf_JP2, 0, 512 * 160 * 2);
                                         Array.Copy(buf_JP2, 40 * 512 * 2, buf_Dynamic, 0, 1024);
-                                        App.global_Win_Dynamic.Update(buf_Dynamic, adr_last.FrameCount, adr_last.Chanel);
+                                        //App.global_Win_Dynamic.Update(buf_Dynamic, adr_last.FrameCount, adr_last.Chanel);
                                         FreeImage.Unload(fibmp);
                                         FileStream fs_out_raw = new FileStream($"{Environment.CurrentDirectory}\\channelFiles\\{adr_last.CapTimeS.ToString("D10")}_{adr_last.CapTimeUS.ToString("D10")}_{adr_last.Chanel}.raw", FileMode.Create);
                                         fs_out_raw.Write(buf_JP2, 0, 512 * 160 * 2);
@@ -343,7 +343,7 @@ namespace Spectra
                     fs_out.Close();
                 });
 
-                App.global_Win_Dynamic.StopTimer();
+                //App.global_Win_Dynamic.StopTimer();
 
                 //解压完成后才对数据库进行操作
                 List.Report($"{DateTime.Now.ToString("HH:mm:ss")} 开始写数据库");
@@ -385,7 +385,11 @@ namespace Spectra
                     }
                 }
                 fs_chanel.Close();
-                File.Delete(srcPath);
+                try
+                {
+                    File.Delete(srcPath);
+                }
+                catch { }
                 List.Report($"{DateTime.Now.ToString("HH:mm:ss")} 写数据库完成");
 
                 //下面这两句会报错,不知为什么
