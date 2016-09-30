@@ -359,17 +359,28 @@ namespace Spectra
         }
 
         public void getBuffer(string path,int band)
-        {
-            if (!File.Exists($"{path}{band}.raw"))
-                return;
-            FileStream file = new FileStream($"{path}{band}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
-            if (file.Length == 0) return;
-            buffer = new byte[file.Length];
-            file.Read(buffer, 0, (int)file.Length);
+        {            
+            int splitSum = (int)Math.Ceiling((double)height / 4096);
+            int splitHeight = 4096;
+
+            buffer = new byte[width * height * 2];
+            for (int i = 0; i < splitSum; i++)
+            {
+                if (i != splitSum - 1)
+                    splitHeight = 4096;
+                else
+                    splitHeight = height % 4096;
+                FileStream file = new FileStream($"{path}{i}\\{band}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
+                byte[] tBuf = new byte[splitHeight * width * 2];
+                file.Read(tBuf, 0, width * splitHeight * 2);
+                file.Close();
+                Array.Copy(tBuf, 0, buffer, i * 4096 * 2048 * 2, width * splitHeight * 2);
+            }
+
             long sum = 0;
             min = 4096;
             max = 0;
-            for (UInt32 i = 0; i < file.Length / 2; i++)
+            for (UInt32 i = 0; i < width * height; i++)
             {
                 sum += (UInt32)buffer[i * 2] + (UInt32)buffer[i * 2 + 1] * 256;
                 if ((int)buffer[i * 2] + (int)buffer[i * 2 + 1] * 256 > max)
@@ -377,7 +388,7 @@ namespace Spectra
                 if ((int)buffer[i * 2] + (int)buffer[i * 2 + 1] * 256 < min)
                     min = (int)buffer[i * 2] + (int)buffer[i * 2 + 1] * 256;
             }
-            mean = (int)(sum / (file.Length / 2));
+            mean = (int)(sum / width * height);
         }
 
         public int getValue(int row,int col)

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FreeImageAPI;
+using System;
 using System.Data;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -79,7 +80,7 @@ namespace Spectra
                     tb_Path.Text = FileInfo.srcFilePathName;
                     txtCurrentFile.Text = FileInfo.srcFileName;
                     prog_Import.Value = 0;
-                    btnUnpFile.IsEnabled = true;
+                    //btnUnpFile.IsEnabled = true;
                     btnDecFile.IsEnabled = true;
                 }
             }
@@ -130,15 +131,6 @@ namespace Spectra
                             DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), $"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\result\\", FileInfo.frmSum, FileInfo.startTime.ToString("yyyy-MM-dd HH:mm:ss"), FileInfo.endTime.ToString("yyyy-MM-dd HH:mm:ss"), FileInfo.startCoord.convertToString(), FileInfo.endCoord.convertToString(), FileInfo.md5);
                         SQLiteFunc.ExcuteSQL("update FileDetails set 是否已解压='是' where MD5='?';", FileInfo.md5);
                         FileInfo.decFilePathName = $"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\result\\";
-
-                        new Thread(() =>
-                        {
-                            Parallel.For(0, 167, i =>
-                            {
-                                File.Copy($"{FileInfo.decFilePathName}{i}.raw", $"{ImageInfo.strFilesPath}{i}.raw", true);
-                            });
-                        }).Start();
-
                     }
                     btnOpenFile.IsEnabled = true;
                     btnOpenFiles.IsEnabled = true;
@@ -175,57 +167,53 @@ namespace Spectra
         /*用于放弃操作*/
         private CancellationTokenSource cancelImport = new CancellationTokenSource();
         /*点击解压*/
-        private async void btnDecFile_Click(object sender, RoutedEventArgs e)
+        private void btnDecFile_Click(object sender, RoutedEventArgs e)
         {
-            try
-            {
-                if (FileInfo.isDecomp)
-                    if (System.Windows.MessageBox.Show("该文件已解压,是否要重新解压并覆盖?", "提示", MessageBoxButton.OKCancel, MessageBoxImage.Information) == MessageBoxResult.Cancel)
-                        return;
+            btnDecFile.IsEnabled = false;
+            DataOper dataOper = new DataOper(FileInfo.srcFilePathName,FileInfo.md5);
+            dataOper.main(FileInfo.srcFilePathName, prog_Import, tb_Console);
+            btnOpenFile.IsEnabled = true;
+            //try
+            //{
+            //    if (FileInfo.isDecomp)
+            //        if (System.Windows.MessageBox.Show("该文件已解压,是否要重新解压并覆盖?", "提示", MessageBoxButton.OKCancel, MessageBoxImage.Information) == MessageBoxResult.Cancel)
+            //            return;
 
-                //b_Abort_Import.IsEnabled = true;
-                btnOpenFile.IsEnabled = false;
-                btnDecFile.IsEnabled = false;
-                btnSelectFile.IsEnabled = false;
-                btnDelRecord.IsEnabled = false;
-                int PACK_LEN = (bool)cb280.IsChecked ? 280 : 288;
+            //    //b_Abort_Import.IsEnabled = true;
+            //    btnOpenFile.IsEnabled = false;
+            //    btnDecFile.IsEnabled = false;
+            //    btnSelectFile.IsEnabled = false;
+            //    btnDelRecord.IsEnabled = false;
+            //    int PACK_LEN = (bool)cb280.IsChecked ? 280 : 288;
 
-                IProgress<double> IProgress_Prog = new Progress<double>((ProgressValue) => { prog_Import.Value = ProgressValue * this.prog_Import.Maximum; });
-                IProgress<string> IProgress_List = new Progress<string>((ProgressString) => { this.tb_Console.Text = ProgressString + "\n" + this.tb_Console.Text; });
+            //    IProgress<double> IProgress_Prog = new Progress<double>((ProgressValue) => { prog_Import.Value = ProgressValue * this.prog_Import.Maximum; });
+            //    IProgress<string> IProgress_List = new Progress<string>((ProgressString) => { this.tb_Console.Text = ProgressString + "\n" + this.tb_Console.Text; });
 
-                //App.global_Win_Dynamic = new DynamicImagingWindow_Win32();
-                //App.global_Win_Dynamic.Show();
+            //    //App.global_Win_Dynamic = new DynamicImagingWindow_Win32();
+            //    //App.global_Win_Dynamic.Show();
 
-                await DataProc.Import_5(PACK_LEN, IProgress_Prog, IProgress_List, cancelImport.Token);
-                IProgress_List.Report(DateTime.Now.ToString("HH:mm:ss") + " 操作成功！");
-                //App.global_Win_Dynamic.Close();
+            //    await DataProc.Import_5(PACK_LEN, IProgress_Prog, IProgress_List, cancelImport.Token);
+            //    IProgress_List.Report(DateTime.Now.ToString("HH:mm:ss") + " 操作成功！");
+            //    //App.global_Win_Dynamic.Close();
 
-                SQLiteFunc.ExcuteSQL("update FileDetails_dec set 解压时间='?',解压后文件路径='?',帧数='?',起始时间='?',结束时间='?',起始经纬='?',结束经纬='?' where MD5='?'",
-                    DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), $"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\result\\", FileInfo.frmSum, FileInfo.startTime.ToString("yyyy-MM-dd HH:mm:ss"), FileInfo.endTime.ToString("yyyy-MM-dd HH:mm:ss"), FileInfo.startCoord.convertToString(), FileInfo.endCoord.convertToString(), FileInfo.md5);
-                SQLiteFunc.ExcuteSQL("update FileDetails set 是否已解压='是' where MD5='?';", FileInfo.md5);
-                FileInfo.decFilePathName = $"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\result\\";
+            //    SQLiteFunc.ExcuteSQL("update FileDetails_dec set 解压时间='?',解压后文件路径='?',帧数='?',起始时间='?',结束时间='?',起始经纬='?',结束经纬='?' where MD5='?'",
+            //        DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), $"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\result\\", FileInfo.frmSum, FileInfo.startTime.ToString("yyyy-MM-dd HH:mm:ss"), FileInfo.endTime.ToString("yyyy-MM-dd HH:mm:ss"), FileInfo.startCoord.convertToString(), FileInfo.endCoord.convertToString(), FileInfo.md5);
+            //    SQLiteFunc.ExcuteSQL("update FileDetails set 是否已解压='是' where MD5='?';", FileInfo.md5);
+            //    FileInfo.decFilePathName = $"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\result\\";
 
-                new Thread(() =>
-                {
-                    Parallel.For(0, 167, i =>
-                    {
-                        File.Copy($"{FileInfo.decFilePathName}{i}.raw", $"{ImageInfo.strFilesPath}{i}.raw", true);
-                    });
-                }).Start();
-
-                //b_Abort_Import.IsEnabled = false;
-                btnOpenFile.IsEnabled = true;
-                btnDecFile.IsEnabled = true;
-                btnSelectFile.IsEnabled = true;
-                btnDelRecord.IsEnabled = true;
-                btnTopB.IsChecked = true;
-                btnLeftB1.IsChecked = true;
-                searchList(FileInfo.md5, false, false, false);
-            }
-            catch (Exception ex)
-            {
-                System.Windows.MessageBox.Show(ex.Message);
-            }
+            //    //b_Abort_Import.IsEnabled = false;
+            //    btnOpenFile.IsEnabled = true;
+            //    btnDecFile.IsEnabled = true;
+            //    btnSelectFile.IsEnabled = true;
+            //    btnDelRecord.IsEnabled = true;
+            //    btnTopB.IsChecked = true;
+            //    btnLeftB1.IsChecked = true;
+            //    searchList(FileInfo.md5, false, false, false);
+            //}
+            //catch (Exception ex)
+            //{
+            //    System.Windows.MessageBox.Show(ex.Message);
+            //}
         }
 
         private void b_Abort_Import_Click(object sender, RoutedEventArgs e)
@@ -236,7 +224,7 @@ namespace Spectra
 
         #region 文件检索
         /*选定文件*/
-        private async void btnSelectFile_Click(object sender, RoutedEventArgs e)
+        private void btnSelectFile_Click(object sender, RoutedEventArgs e)
         {
             try
             {

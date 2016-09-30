@@ -45,7 +45,7 @@ namespace Spectra
             for (int i = 0; i < 3; i++)
                 colorWave[i] = (UInt16)ImageInfo.getWave(colorBand[i]);
 
-            Bitmap bmp = await BmpOper.MakePseudoColor(path, band, gain);
+            Bitmap bmp = await BmpOper.MakePseudoColor2(path, band, gain);
             if (bmp == null) return;
             bmp.RotateFlip(RotateFlipType.Rotate90FlipX);
             MemoryStream ms = new MemoryStream();
