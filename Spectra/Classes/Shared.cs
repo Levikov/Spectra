@@ -263,20 +263,19 @@ namespace Spectra
         /// </returns>
         public static int ImgDetectAbnormal(int v,int subWid)
         {
-            FileStream fTest;
-            try
-            {
-                fTest = new FileStream($"{FileInfo.decFilePathName}{v}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
-            }
-            catch
-            {
-                return -1;
-            }
+            FileStream fTest = null;
+            //try
+            //{
+            //    fTest = new FileStream($"{FileInfo.decFilePathName}{v}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
+            //}
+            //catch
+            //{
+            //    return -1;
+            //}
 
             /*分割大小*/
             int subLen = 2048 * subWid * 2;
-            int subLast = (int)(fTest.Length % subLen);
-            ImageInfo.imgWidth = (int)fTest.Length / 2048 / 2;   /*像宽*/
+            int subLast = (int)(imgWidth % (4096 / subWid)) * 2048 * 2;
             int subCnt = (int)Math.Ceiling(ImageInfo.imgWidth / (double)subWid); /*以subWid为单位分割图像*/
 
             SQLiteConnection conn = new SQLiteConnection(Variables.dbConString);
@@ -284,6 +283,8 @@ namespace Spectra
             
             for (int i = 0; i < subCnt - 1; i++)
             {
+                if(i % (4096 / subWid) == 0)
+                    fTest = new FileStream($"{FileInfo.decFilePathName}{i/(4096/subWid)}\\{v}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
                 byte[] buf_full = new byte[subLen];
                 fTest.Read(buf_full, 0, subLen);
                 for (int j = 0; j < subLen;)

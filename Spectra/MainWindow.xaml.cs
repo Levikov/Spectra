@@ -756,7 +756,7 @@ namespace Spectra
             {
                 for (int i = 0; i < 160; i++)
                 {
-                    if (ImageInfo.ImgDetectAbnormal(i, 100) < 0)
+                    if (ImageInfo.ImgDetectAbnormal(i, 128) < 0)
                     {
                         System.Windows.MessageBox.Show("文件不存在!");
                         return;
