@@ -15,7 +15,7 @@
             </TransformGroup>
         </Grid.Resources>
         <local:Ctrl_BusyMask x:Name="Busy"></local:Ctrl_BusyMask>
-        <Rectangle Stroke="White" StrokeThickness="1"/>
+        <!--<Rectangle Stroke="White" StrokeThickness="1"/>-->
         <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Disabled" Background="{x:Null}"   Cursor="Cross"
                   Margin="5" Focusable="False" x:Name="BackFrame">
             <ContentControl   
@@ -45,7 +45,7 @@
             <Label HorizontalAlignment="Left" Content="纬度:" VerticalAlignment="Center" Foreground="{StaticResource WinViewFore}"/>
             <TextBlock x:Name="Lat" Text="0" MinWidth="45" VerticalAlignment="Center" Foreground="{StaticResource WinViewFore}"/>
         </DockPanel>
-        <DockPanel Margin="20,0,0,20" Height="40" VerticalAlignment="Bottom" HorizontalAlignment="Left">
+        <DockPanel Margin="20,0,0,40" Height="40" VerticalAlignment="Bottom" HorizontalAlignment="Left">
             <Label HorizontalAlignment="Left" Content="像宽:" VerticalAlignment="Center" Foreground="{StaticResource WinViewFore}"/>
             <TextBlock x:Name="ImageWidth" Text="0" MinWidth="45" VerticalAlignment="Center" Foreground="{StaticResource WinViewFore}"/>
             <Label HorizontalAlignment="Left" Content="像高:" VerticalAlignment="Center" Foreground="{StaticResource WinViewFore}"/>
@@ -57,7 +57,21 @@
             <Label x:Name="lblMeanValue" HorizontalAlignment="Left" Content="平均值:" VerticalAlignment="Center" Foreground="{StaticResource WinViewFore}"/>
             <TextBlock x:Name="MeanValue" Text="0" MinWidth="45" VerticalAlignment="Center" Foreground="{StaticResource WinViewFore}"/>
         </DockPanel>
-        <Border x:Name="borderSection" BorderBrush="Yellow" BorderThickness="1" Visibility="Collapsed"/>
         <Slider x:Name="sldLow" Orientation="Vertical" SmallChange="1" Margin="20,0,0,0" Height="300" HorizontalAlignment="Left" Maximum="8" ValueChanged="sldLow_ValueChanged" FontSize="14" Value="4" Minimum="1"/>
+        <StatusBar Height="30" Margin="0" VerticalAlignment="Bottom" FontSize="12" Background="{StaticResource TitleBack}" FontWeight="Thin">
+            <StackPanel Orientation="Horizontal">
+                <Label HorizontalAlignment="Left" Content="帧号:" Foreground="{StaticResource MinFontFore}"/>
+                <Label x:Name="barFrameId" Content="0" Width="40" Foreground="{StaticResource MinFontFore}"/>
+                <Label HorizontalAlignment="Left" Content="帧频:" Foreground="{StaticResource MinFontFore}"/>
+                <Label x:Name="barFreq" Content="0" Width="35" Foreground="{StaticResource MinFontFore}"/>
+                <Label HorizontalAlignment="Left" Content="积分时间:" Foreground="{StaticResource MinFontFore}"/>
+                <Label x:Name="barIntegral" Content="0" Width="35" Foreground="{StaticResource MinFontFore}"/>
+                <Label HorizontalAlignment="Left" Content="起始行:" Foreground="{StaticResource MinFontFore}"/>
+                <Label x:Name="barStartRow" Content="0" Width="35" Foreground="{StaticResource MinFontFore}"/>
+                <Label HorizontalAlignment="Left" Content="增益:" Foreground="{StaticResource MinFontFore}"/>
+                <Label x:Name="barGain" Content="0" Width="20" Foreground="{StaticResource MinFontFore}"/>
+            </StackPanel>
+        </StatusBar>
+        <Border x:Name="borderSection" BorderBrush="Gold" BorderThickness="1" Visibility="Visible"/>
     </Grid>
 </UserControl>

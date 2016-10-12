@@ -225,8 +225,8 @@
                             <DataGridTextColumn Header="结束时间" Binding="{Binding 结束时间}" Width="auto"/>
                             <DataGridTextColumn Header="起始经纬" Binding="{Binding 起始经纬}" Width="auto"/>
                             <DataGridTextColumn Header="结束经纬" Binding="{Binding 结束经纬}" Width="auto"/>
-                            <DataGridTextColumn Header="解包时间" Binding="{Binding 解包时间}" Width="auto"/>
-                            <DataGridTextColumn Header="解包后文件路径" Binding="{Binding 解包后文件路径}" Width="auto"/>
+                            <!--<DataGridTextColumn Header="解包时间" Binding="{Binding 解包时间}" Width="auto"/>-->
+                            <!--<DataGridTextColumn Header="解包后文件路径" Binding="{Binding 解包后文件路径}" Width="auto"/>-->
                             <DataGridTextColumn Header="解压时间" Binding="{Binding 解压时间}" Width="auto"/>
                             <DataGridTextColumn Header="解压后文件路径" Binding="{Binding 解压后文件路径}" Width="auto"/>
                         </DataGrid.Columns>
@@ -237,7 +237,7 @@
                         <DataGrid.Columns>
                             <DataGridTextColumn Header ="文件名" Binding="{Binding 文件名}" Width="auto"/>
                             <DataGridTextColumn Header ="文件路径" Binding="{Binding 文件路径}" Width="auto"/>
-                            <DataGridTextColumn Header ="是否已解包" Binding="{Binding 是否已解包}" Width="auto"/>
+                            <!--<DataGridTextColumn Header ="是否已解包" Binding="{Binding 是否已解包}" Width="auto"/>-->
                             <DataGridTextColumn Header ="是否已解压" Binding="{Binding 是否已解压}" Width="auto"/>
                             <DataGridTextColumn Header ="文件大小(B)" Binding="{Binding 文件大小}" Width="auto"/>
                             <DataGridTextColumn Header ="MD5" Binding="{Binding MD5}" Width="auto"/>
@@ -426,9 +426,10 @@
                 <GroupBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="4" Margin="0,0,0,50" Header="检索结果" FontSize="18">
                     <DataGrid x:Name="dataGrid_Result" Margin="5"  LoadingRow="LoadingRowHeader">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header ="帧号" Binding="{Binding FrameId}" Width="200"/>
                             <DataGridTextColumn Header ="卫星标识" Binding="{Binding Satellite}" Width="200"/>
+                            <DataGridTextColumn Header ="帧号" Binding="{Binding FrameId}" Width="200"/>
                             <DataGridTextColumn Header="GST秒值" Binding="{Binding GST}" Width="200"/>
+                            <DataGridTextColumn Header="GST微秒值" Binding="{Binding GST_US}" Width="200"/>
                             <DataGridTextColumn Header="纬度" Binding="{Binding Lat}" Width="200"/>
                             <DataGridTextColumn Header="经度" Binding="{Binding Lon}" Width="200"/>
                             <DataGridTextColumn Header="位置坐标X" Binding="{Binding X}" Width="200"/>
@@ -440,6 +441,14 @@
                             <DataGridTextColumn Header="角速率-X" Binding="{Binding Ox}" Width="200"/>
                             <DataGridTextColumn Header="角速率-Y" Binding="{Binding Oy}" Width="200"/>
                             <DataGridTextColumn Header="角速率-Z" Binding="{Binding Oz}" Width="200"/>
+                            <DataGridTextColumn Header="姿态-1" Binding="{Binding Q1}" Width="200"/>
+                            <DataGridTextColumn Header="姿态-2" Binding="{Binding Q2}" Width="200"/>
+                            <DataGridTextColumn Header="姿态-3" Binding="{Binding Q3}" Width="200"/>
+                            <DataGridTextColumn Header="姿态-4" Binding="{Binding Q4}" Width="200"/>
+                            <DataGridTextColumn Header="帧频" Binding="{Binding Freq}" Width="200"/>
+                            <DataGridTextColumn Header="积分时间" Binding="{Binding Integral}" Width="200"/>
+                            <DataGridTextColumn Header="起始行" Binding="{Binding StartRow}" Width="200"/>
+                            <DataGridTextColumn Header="增益" Binding="{Binding Gain}" Width="200"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </GroupBox>

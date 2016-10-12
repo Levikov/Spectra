@@ -41,9 +41,11 @@ namespace Spectra
                 dtChannel = new DataTable();
                 dtChannel.Columns.Add("ID", System.Type.GetType("System.Int32"));   //第几帧图像（0计数）
                 dtChannel.Columns.Add("row", System.Type.GetType("System.Int32"));  //在第几行开始（0计数）
+                //dtChannel.Columns.Add("InternalId", System.Type.GetType("System.Int32"));
+                //dtChannel.Columns.Add("FrameSum", System.Type.GetType("System.Int32"));
                 dtChannel.Columns.Add("FrameId", System.Type.GetType("System.Int32"));
-                dtChannel.Columns.Add("Satellite", System.Type.GetType("System.String"));
                 dtChannel.Columns.Add("GST", System.Type.GetType("System.Double"));
+                dtChannel.Columns.Add("GST_US", System.Type.GetType("System.Int64"));
                 dtChannel.Columns.Add("Lat", System.Type.GetType("System.Double"));
                 dtChannel.Columns.Add("Lon", System.Type.GetType("System.Double"));
                 dtChannel.Columns.Add("X", System.Type.GetType("System.Double"));
@@ -55,21 +57,24 @@ namespace Spectra
                 dtChannel.Columns.Add("Ox", System.Type.GetType("System.Double"));
                 dtChannel.Columns.Add("Oy", System.Type.GetType("System.Double"));
                 dtChannel.Columns.Add("Oz", System.Type.GetType("System.Double"));
-                dtChannel.Columns.Add("ImportId", System.Type.GetType("System.Int32"));
-                dtChannel.Columns.Add("Chanel", System.Type.GetType("System.Int32"));
-                dtChannel.Columns.Add("MD5", System.Type.GetType("System.String"));
-                dtChannel.Columns.Add("GST_US", System.Type.GetType("System.Int64"));
                 dtChannel.Columns.Add("Q1", System.Type.GetType("System.Double"));
                 dtChannel.Columns.Add("Q2", System.Type.GetType("System.Double"));
                 dtChannel.Columns.Add("Q3", System.Type.GetType("System.Double"));
                 dtChannel.Columns.Add("Q4", System.Type.GetType("System.Double"));
+                dtChannel.Columns.Add("Freq", System.Type.GetType("System.Double"));
+                dtChannel.Columns.Add("Integral", System.Type.GetType("System.Double"));
+                dtChannel.Columns.Add("StartRow", System.Type.GetType("System.Int32"));
+                dtChannel.Columns.Add("Gain", System.Type.GetType("System.Int32"));
+                dtChannel.Columns.Add("MD5", System.Type.GetType("System.String"));
+                dtChannel.Columns.Add("Satellite", System.Type.GetType("System.String"));
                 frmS = frmE = frmC = 0;
             }
 
             public void add(int ID, int row, byte[] buf)
             {
-                double GST, Lat, Lon, X, Y, Z, Vx, Vy, Vz, Ox, Oy, Oz, Q1, Q2, Q3, Q4;
+                double GST, Lat, Lon, X, Y, Z, Vx, Vy, Vz, Ox, Oy, Oz, Q1, Q2, Q3, Q4, Freq, Integral;
                 long GST_US;
+                int StartRow, Gain;
 
                 GST = readU32(buf, 17);
                 GST_US = readU32(buf, 104);
@@ -92,7 +97,12 @@ namespace Spectra
                 Q3 = readI32(buf, 73) / (double)10000 * 57.3;
                 Q4 = readI32(buf, 77) / (double)10000 * 57.3;
 
-                dtChannel.Rows.Add(new object[] { ID, row, buf[6] * 256 + buf[7], "1", GST, Lat, Lon, X, Y, Z, Vx, Vy, Vz, Ox, Oy, Oz, 1, 1, md5, GST_US, Q1, Q2, Q3, Q4 });
+                Freq = (double)100000 / (buf[102] * 256 + buf[103]);
+                Integral = buf[108] * 256 + buf[109];
+                StartRow = buf[112] * 256 + buf[113];
+                Gain = buf[115];
+
+                dtChannel.Rows.Add(new object[] { ID, row, buf[6] * 256 + buf[7], GST, GST_US, Lat, Lon, X, Y, Z, Vx, Vy, Vz, Ox, Oy, Oz, Q1, Q2, Q3, Q4, Freq, Integral, StartRow, Gain, md5, "1" });
             }
 
             public void getInfo()
@@ -183,6 +193,10 @@ namespace Spectra
                 strSrc = await decData(await splitFile(strSrc, IProg_Bar, IProg_Cmd), IProg_Bar, IProg_Cmd);
                 new Thread(() => { sqlInsert(); }).Start();
                 await mergeImage(strSrc, IProg_Bar, IProg_Cmd);
+                IProg_Cmd.Report(DateTime.Now.ToString("HH:mm:ss") + " 开始清理冗余文件！");
+                Task.Run(() => { Directory.Delete($"{Environment.CurrentDirectory}\\channelFiles", true); }).Wait();
+                Task.Run(() => { Directory.Delete($"{Environment.CurrentDirectory}\\srcFiles",true); }).Wait();
+                new Thread(() => { Get3DRaw($"{Environment.CurrentDirectory}\\decFiles\\{md5}\\"); }).Start();
                 IProg_Cmd.Report(DateTime.Now.ToString("HH:mm:ss") + " 操作完成！");
             }
             catch (Exception ex)
@@ -447,6 +461,10 @@ namespace Spectra
                     }
                     IProg_Bar.Report((double)(i + 1) / splitSum);
                 }
+                for (int c = 0; c < 4; c++)
+                {
+                    inFileStream[c].Close();
+                }
                 IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 合并完成！");
                 IProg_Bar.Report(1);
                 return 1;
@@ -464,38 +482,43 @@ namespace Spectra
                     });
             sqlExcute.BeginInsert();
             for (int f = 0; f < dataChannel[0].frmC; f++)
-                Insert(sqlExcute, dataChannel[0].dtChannel.Rows[f]);
+                Insert(sqlExcute, f, dataChannel[0].frmC, dataChannel[0].dtChannel.Rows[f]);
             sqlExcute.EndInsert();
             updateFileInfo(sqlExcute);
         }
 
-        public void Insert(SQLiteDatabase sqlExcute, DataRow dr)
+        //插入数据库操作
+        public void Insert(SQLiteDatabase sqlExcute, int InternalId, int FrameSum, DataRow dr)
         {
-            var sql = "insert into AuxData values(@FrameId,@SatelliteId,@GST,@Lat,@Lon,@X,@Y,@Z,@Vx,@Vy,@Vz,@Ox,@Oy,@Oz,@ImportId,@Chanel,@MD5,@GST_US,@Q1,@Q2,@Q3,@Q4);";
+            var sql = "insert into AuxData values(@InternalId,@FrameSum,@FrameId,@GST,@GST_US,@Lat,@Lon,@X,@Y,@Z,@Vx,@Vy,@Vz,@Ox,@Oy,@Oz,@Q1,@Q2,@Q3,@Q4,@Freq,@Integral,@StartRow,@Gain,@MD5,@Satellite);";
             var cmdparams = new List<SQLiteParameter>()
                 {
-                    new SQLiteParameter("FrameId", dr[2]),
-                    new SQLiteParameter("SatelliteId",dr[3]),
-                    new SQLiteParameter("GST",dr[4]),
-                    new SQLiteParameter("Lat",dr[5]),
-                    new SQLiteParameter("Lon",dr[6]),
-                    new SQLiteParameter("X",dr[7]),
-                    new SQLiteParameter("Y",dr[8]),
-                    new SQLiteParameter("Z",dr[9]),
-                    new SQLiteParameter("Vx",dr[10]),
-                    new SQLiteParameter("Vy",dr[11]),
-                    new SQLiteParameter("Vz",dr[12]),
-                    new SQLiteParameter("Ox",dr[13]),
-                    new SQLiteParameter("Oy",dr[14]),
-                    new SQLiteParameter("Oz",dr[15]),
-                    new SQLiteParameter("ImportId",dr[16]),
-                    new SQLiteParameter("Chanel",dr[17]),
-                    new SQLiteParameter("MD5",dr[18]),
-                    new SQLiteParameter("GST_US",dr[19]),
-                    new SQLiteParameter("Q1",dr[20]),
-                    new SQLiteParameter("Q2",dr[21]),
-                    new SQLiteParameter("Q3",dr[22]),
-                    new SQLiteParameter("Q4",dr[23])
+                    new SQLiteParameter("InternalId", InternalId),
+                    new SQLiteParameter("FrameSum", FrameSum),
+                    new SQLiteParameter("FrameId", dr["FrameId"]),
+                    new SQLiteParameter("GST",dr["GST"]),
+                    new SQLiteParameter("GST_US",dr["GST_US"]),
+                    new SQLiteParameter("Lat",dr["Lat"]),
+                    new SQLiteParameter("Lon",dr["Lon"]),
+                    new SQLiteParameter("X",dr["X"]),
+                    new SQLiteParameter("Y",dr["Y"]),
+                    new SQLiteParameter("Z",dr["Z"]),
+                    new SQLiteParameter("Vx",dr["Vx"]),
+                    new SQLiteParameter("Vy",dr["Vy"]),
+                    new SQLiteParameter("Vz",dr["Vz"]),
+                    new SQLiteParameter("Ox",dr["Ox"]),
+                    new SQLiteParameter("Oy",dr["Oy"]),
+                    new SQLiteParameter("Oz",dr["Oz"]),
+                    new SQLiteParameter("Q1",dr["Q1"]),
+                    new SQLiteParameter("Q2",dr["Q2"]),
+                    new SQLiteParameter("Q3",dr["Q3"]),
+                    new SQLiteParameter("Q4",dr["Q4"]),
+                    new SQLiteParameter("Freq",dr["Freq"]),
+                    new SQLiteParameter("Integral",dr["Integral"]),
+                    new SQLiteParameter("StartRow",dr["StartRow"]),
+                    new SQLiteParameter("Gain",dr["Gain"]),
+                    new SQLiteParameter("MD5",dr["MD5"]),
+                    new SQLiteParameter("Satellite",dr["Satellite"])
                 };
 
             try
@@ -508,28 +531,78 @@ namespace Spectra
             }
         }
 
+        //刷新文件信息
         public void updateFileInfo(SQLiteDatabase sqlExcute)
         {
             sqlExcute.cnn.Open();
 
             //更新文件信息
-            FileInfo.frmSum = (long)sqlExcute.ExecuteScalar($"SELECT COUNT(*) FROM AuxData WHERE MD5='{FileInfo.md5}'");                                    //帧总数
+            FileInfo.frmSum = dataChannel[0].frmC;// (long)sqlExcute.ExecuteScalar($"SELECT COUNT(*) FROM AuxData WHERE MD5='{FileInfo.md5}'");                                    //帧总数
             DateTime T0 = new DateTime(2010, 12, 1, 12, 0, 0);
-            FileInfo.startTime = T0.AddSeconds((double)sqlExcute.ExecuteScalar($"SELECT GST FROM AuxData WHERE MD5='{FileInfo.md5}' ORDER BY FrameId ASC"));//起始时间
-            FileInfo.endTime = T0.AddSeconds((double)sqlExcute.ExecuteScalar($"SELECT GST FROM AuxData WHERE MD5='{FileInfo.md5}' ORDER BY FrameId DESC")); //结束时间
-            double lat = (double)sqlExcute.ExecuteScalar($"SELECT Lat FROM AuxData WHERE MD5='{FileInfo.md5}' ORDER BY FrameId ASC");
-            double lon = (double)sqlExcute.ExecuteScalar($"SELECT Lon FROM AuxData WHERE MD5='{FileInfo.md5}' ORDER BY FrameId ASC");
+            FileInfo.startTime = T0.AddSeconds((double)dataChannel[0].dtChannel.Rows[0]["GST"]);//sqlExcute.ExecuteScalar($"SELECT GST FROM AuxData WHERE MD5='{FileInfo.md5}' ORDER BY FrameId ASC"));//起始时间
+            FileInfo.endTime = T0.AddSeconds((double)dataChannel[0].dtChannel.Rows[dataChannel[0].frmC-1]["GST"]);//sqlExcute.ExecuteScalar($"SELECT GST FROM AuxData WHERE MD5='{FileInfo.md5}' ORDER BY FrameId DESC")); //结束时间
+            double lat = (double)dataChannel[0].dtChannel.Rows[0]["Lat"];//sqlExcute.ExecuteScalar($"SELECT Lat FROM AuxData WHERE MD5='{FileInfo.md5}' ORDER BY FrameId ASC");
+            double lon = (double)dataChannel[0].dtChannel.Rows[0]["Lon"];//sqlExcute.ExecuteScalar($"SELECT Lon FROM AuxData WHERE MD5='{FileInfo.md5}' ORDER BY FrameId ASC");
             FileInfo.startCoord.convertToCoord($"({lat},{lon})");                                                                                           //起始经纬
-            lat = (double)sqlExcute.ExecuteScalar($"SELECT Lat FROM AuxData WHERE MD5='{FileInfo.md5}' ORDER BY FrameId DESC");
-            lon = (double)sqlExcute.ExecuteScalar($"SELECT Lon FROM AuxData WHERE MD5='{FileInfo.md5}' ORDER BY FrameId DESC");
+            lat = (double)dataChannel[0].dtChannel.Rows[dataChannel[0].frmC - 1]["Lat"];//sqlExcute.ExecuteScalar($"SELECT Lat FROM AuxData WHERE MD5='{FileInfo.md5}' ORDER BY FrameId DESC");
+            lon = (double)dataChannel[0].dtChannel.Rows[dataChannel[0].frmC - 1]["Lon"];//sqlExcute.ExecuteScalar($"SELECT Lon FROM AuxData WHERE MD5='{FileInfo.md5}' ORDER BY FrameId DESC");
             FileInfo.endCoord.convertToCoord($"({lat},{lon})");                                                                                             //结束经纬
-            long Frm_Start = (long)sqlExcute.ExecuteScalar($"SELECT FrameId FROM AuxData WHERE MD5='{FileInfo.md5}' ORDER BY FrameId ASC");                 //帧起始
 
             SQLiteFunc.ExcuteSQL("update FileDetails_dec set 解压时间='?',解压后文件路径='?',帧数='?',起始时间='?',结束时间='?',起始经纬='?',结束经纬='?' where MD5='?'",
                 DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), $"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\", FileInfo.frmSum, FileInfo.startTime.ToString("yyyy-MM-dd HH:mm:ss"), FileInfo.endTime.ToString("yyyy-MM-dd HH:mm:ss"), FileInfo.startCoord.convertToString(), FileInfo.endCoord.convertToString(), FileInfo.md5);
             SQLiteFunc.ExcuteSQL("update FileDetails set 是否已解压='是' where MD5='?';", FileInfo.md5);
             FileInfo.decFilePathName = $"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\";
             ImageInfo.strFilesPath = FileInfo.decFilePathName;
+        }
+
+        //获得3D展示用的4张图
+        public void Get3DRaw(string pathDec)
+        {
+            int width = 2048, height = dataChannel[0].frmC;
+            byte[] buf3dUp = new byte[width * 128 * 2];
+            byte[] buf3dDown = new byte[width * 128 * 2];
+            byte[] buf3dLeft = new byte[height * 128 * 2];
+            byte[] buf3dRight = new byte[height * 128 * 2];
+            int splitSum = (int)Math.Ceiling((double)height / 4096);
+            int splitHeight = 4096;
+            for (int i = 0; i < splitSum; i++)
+            {
+                if (i == splitSum - 1)
+                    splitHeight = height % 4096;
+                for (int b = 27; b < 155; b++)
+                {
+                    FileStream inFileStream = new FileStream($"{pathDec}{i}\\{b}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
+                    byte[] bufImage = new byte[width * splitHeight * 2];
+                    inFileStream.Read(bufImage, 0, width * splitHeight * 2);
+                    inFileStream.Close();
+                    if (i == 0)
+                    {
+                        Array.Copy(bufImage, 0, buf3dUp, (b - 27) * 4096, 2048 * 2);
+                    }
+                    if (i == splitSum - 1)
+                    {
+                        Array.Copy(bufImage, (splitHeight - 1) * 4096, buf3dDown, (b - 27) * 4096, 2048 * 2);
+                    }
+                    for (int row = 0; row < splitHeight; row++)
+                    {
+                        Array.Copy(bufImage, row * 4096, buf3dLeft, (row + i*4096) * 128 * 2 + (b - 27) * 2, 2);
+                        Array.Copy(bufImage, (row + 1) * 4096 - 2, buf3dRight, (row + i * 4096) * 128 * 2 + (b - 27) * 2, 2);
+                    }
+                }
+            }
+
+            FileStream outFileStream = new FileStream($"{pathDec}161.raw", FileMode.Create);
+            outFileStream.Write(buf3dUp, 0, buf3dUp.Length);
+            outFileStream.Close();
+            outFileStream = new FileStream($"{pathDec}162.raw", FileMode.Create);
+            outFileStream.Write(buf3dDown, 0, buf3dDown.Length);
+            outFileStream.Close();
+            outFileStream = new FileStream($"{pathDec}163.raw", FileMode.Create);
+            outFileStream.Write(buf3dLeft, 0, buf3dLeft.Length);
+            outFileStream.Close();
+            outFileStream = new FileStream($"{pathDec}164.raw", FileMode.Create);
+            outFileStream.Write(buf3dRight, 0, buf3dRight.Length);
+            outFileStream.Close();
         }
     }
 }

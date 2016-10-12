@@ -114,15 +114,16 @@ namespace Spectra
 
         public Point[] GetPoint(Point p)
         {
+
             Point[] points = new Point[149];
             FileStream[] file = new FileStream[149];
             byte[] buf = new byte[2];
             for (int i = 6; i < 155; i++)
             {
-                if (File.Exists($"{ImageInfo.strFilesPath}\\{i}.raw"))
+                if (File.Exists($"{ImageInfo.strFilesPath}{(int)p.Y / 4096}\\{i}.raw"))
                 {
-                    file[i - 6] = new FileStream($"{ImageInfo.strFilesPath}\\{i}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
-                    file[i - 6].Seek(((int)p.X + (int)p.Y*2048) * 2, 0);
+                    file[i - 6] = new FileStream($"{ImageInfo.strFilesPath}{(int)p.Y / 4096}\\{i}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
+                    file[i - 6].Seek(((int)p.X + (int)p.Y % 4096 * 2048) * 2, 0);
                     file[i - 6].Read(buf,0,2);
                     file[i - 6].Close();
                     points[i - 6].X =Convert.ToDouble(ImageInfo.dtBandWave.Rows[i][1]);

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Windows;
@@ -45,7 +46,9 @@ namespace Spectra
             for (int i = 0; i < 3; i++)
                 colorWave[i] = (UInt16)ImageInfo.getWave(colorBand[i]);
 
-            Bitmap bmp = await BmpOper.MakePseudoColor2(path, band, gain);
+            band[0] -= 1; band[1] -= 1; band[2] -= 1;
+            Bitmap bmp = await BmpOper.MakePseudoColor2(sub, path, band, gain);
+            band[0] += 1; band[1] += 1; band[2] += 1;
             if (bmp == null) return;
             bmp.RotateFlip(RotateFlipType.Rotate90FlipX);
             MemoryStream ms = new MemoryStream();
@@ -115,7 +118,7 @@ namespace Spectra
                     p.Y = (p.Y / IMG1.ActualHeight);
                     curXinImg = p.X * ImgW;
                     curYinImg = p.Y * ImgH;
-                    coo = new Coord(Convert.ToDouble(ImageInfo.dtImgInfo.Rows[(int)curXinImg][3]), Convert.ToDouble(ImageInfo.dtImgInfo.Rows[(int)curXinImg][4]));
+                    coo = new Coord(Convert.ToDouble(ImageInfo.dtImgInfo.Rows[(int)curXinImg][7]), Convert.ToDouble(ImageInfo.dtImgInfo.Rows[(int)curXinImg][6]));
                     viewSet();
                 }
             }
@@ -249,6 +252,7 @@ namespace Spectra
             try
             {
                 System.Windows.Point p = new System.Windows.Point((int)curXinImg, (int)curYinImg);
+                getParams(p);
                 if (((MultiFuncWindow)App.global_Windows[5]).UserControls[0] != null)
                 {
                     if (ImageInfo.chartMode)
@@ -317,6 +321,16 @@ namespace Spectra
             }
 
             IMG1.MouseDown += IMG1_MouseDown;
+        }
+
+        private void getParams(System.Windows.Point p)
+        {
+            DataRow dr = ImageInfo.dtImgInfo.Rows[(int)p.X];
+            barFrameId.Content = Convert.ToInt32(dr["FrameId"]).ToString();
+            barFreq.Content = Convert.ToInt32(dr["Freq"]).ToString();
+            barIntegral.Content = Convert.ToInt32(dr["Integral"]).ToString();
+            barStartRow.Content = Convert.ToInt32(dr["StartRow"]).ToString();
+            barGain.Content = Convert.ToInt32(dr["Gain"]).ToString();
         }
     }
 

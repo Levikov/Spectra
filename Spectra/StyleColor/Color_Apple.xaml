@@ -32,5 +32,5 @@
     <SolidColorBrush x:Key="DgvRowMove" Color="#FFC0C0C0"/>
     <!--View-->
     <SolidColorBrush x:Key="WinViewFore" Color="#FFDDDDDD"/>
-    <SolidColorBrush x:Key="WinViewBack" Color="Gray"/>
+    <SolidColorBrush x:Key="WinViewBack" Color="Black"/>
 </ResourceDictionary>

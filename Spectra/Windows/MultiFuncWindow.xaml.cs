@@ -102,7 +102,7 @@ namespace Spectra
             WinFunc[SubGridInedex] = setWinFunc;
             
             UserControls[SubGridInedex] = new Ctrl_ImageView();
-            ((Ctrl_ImageView)(UserControls[SubGridInedex])).RefreshPseudoColor(SubGridInedex,ImageInfo.strFilesPath, 4, band, mode);
+            ((Ctrl_ImageView)(UserControls[SubGridInedex])).RefreshPseudoColor(SubGridInedex, path, 4, band, mode);
 
             SubGrid[SubGridInedex].Children.Add(UserControls[SubGridInedex]);
         }

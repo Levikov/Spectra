@@ -154,6 +154,9 @@
     <Compile Include="Classes\BmpOper.cs" />
     <Compile Include="Classes\DataOper.cs" />
     <Compile Include="Classes\ExcelHelper.cs" />
+    <Compile Include="Classes\FileInfo.cs" />
+    <Compile Include="Classes\ImageInfo.cs" />
+    <Compile Include="Classes\_3dOper.cs" />
     <Compile Include="Test3D.xaml.cs">
       <DependentUpon>Test3D.xaml</DependentUpon>
     </Compile>

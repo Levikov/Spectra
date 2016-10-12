@@ -74,13 +74,12 @@ namespace Spectra
                 {
                     FileInfo.srcFilePathName = openFile.FileName;                                                                   //文件路径名称
                     FileInfo.srcFileName = FileInfo.srcFilePathName.Substring(FileInfo.srcFilePathName.LastIndexOf('\\') + 1);      //文件名称
-                    tb_Console.Text = DataProc.checkFileState();                                                                    //检查文件状态
+                    tb_Console.Text = FileInfo.checkFileState();                                                                    //检查文件状态
                     /*窗体控件*/
-                    dataGrid_Errors.ItemsSource = SQLiteFunc.SelectDTSQL("select * from FileErrors where MD5='" + FileInfo.md5 + "'").DefaultView;  //显示错误信息
+                    //dataGrid_Errors.ItemsSource = SQLiteFunc.SelectDTSQL("select * from FileErrors where MD5='" + FileInfo.md5 + "'").DefaultView;  //显示错误信息
                     tb_Path.Text = FileInfo.srcFilePathName;
                     txtCurrentFile.Text = FileInfo.srcFileName;
                     prog_Import.Value = 0;
-                    //btnUnpFile.IsEnabled = true;
                     btnDecFile.IsEnabled = true;
                 }
             }
@@ -107,7 +106,7 @@ namespace Spectra
                     {
                         FileInfo.srcFilePathName = openFile.FileNames[fi] ;                                                                   //文件路径名称
                         FileInfo.srcFileName = FileInfo.srcFilePathName.Substring(FileInfo.srcFilePathName.LastIndexOf('\\') + 1);      //文件名称
-                        tb_Console.Text = DataProc.checkFileState();                                                                    //检查文件状态
+                        tb_Console.Text = FileInfo.checkFileState();                                                                    //检查文件状态
                                                                                                                                         /*窗体控件*/
                         dataGrid_Errors.ItemsSource = SQLiteFunc.SelectDTSQL("select * from FileErrors where MD5='" + FileInfo.md5 + "'").DefaultView;  //显示错误信息
                         tb_Path.Text = FileInfo.srcFilePathName;
@@ -173,47 +172,6 @@ namespace Spectra
             DataOper dataOper = new DataOper(FileInfo.srcFilePathName,FileInfo.md5);
             dataOper.main(FileInfo.srcFilePathName, prog_Import, tb_Console);
             btnOpenFile.IsEnabled = true;
-            //try
-            //{
-            //    if (FileInfo.isDecomp)
-            //        if (System.Windows.MessageBox.Show("该文件已解压,是否要重新解压并覆盖?", "提示", MessageBoxButton.OKCancel, MessageBoxImage.Information) == MessageBoxResult.Cancel)
-            //            return;
-
-            //    //b_Abort_Import.IsEnabled = true;
-            //    btnOpenFile.IsEnabled = false;
-            //    btnDecFile.IsEnabled = false;
-            //    btnSelectFile.IsEnabled = false;
-            //    btnDelRecord.IsEnabled = false;
-            //    int PACK_LEN = (bool)cb280.IsChecked ? 280 : 288;
-
-            //    IProgress<double> IProgress_Prog = new Progress<double>((ProgressValue) => { prog_Import.Value = ProgressValue * this.prog_Import.Maximum; });
-            //    IProgress<string> IProgress_List = new Progress<string>((ProgressString) => { this.tb_Console.Text = ProgressString + "\n" + this.tb_Console.Text; });
-
-            //    //App.global_Win_Dynamic = new DynamicImagingWindow_Win32();
-            //    //App.global_Win_Dynamic.Show();
-
-            //    await DataProc.Import_5(PACK_LEN, IProgress_Prog, IProgress_List, cancelImport.Token);
-            //    IProgress_List.Report(DateTime.Now.ToString("HH:mm:ss") + " 操作成功！");
-            //    //App.global_Win_Dynamic.Close();
-
-            //    SQLiteFunc.ExcuteSQL("update FileDetails_dec set 解压时间='?',解压后文件路径='?',帧数='?',起始时间='?',结束时间='?',起始经纬='?',结束经纬='?' where MD5='?'",
-            //        DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), $"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\result\\", FileInfo.frmSum, FileInfo.startTime.ToString("yyyy-MM-dd HH:mm:ss"), FileInfo.endTime.ToString("yyyy-MM-dd HH:mm:ss"), FileInfo.startCoord.convertToString(), FileInfo.endCoord.convertToString(), FileInfo.md5);
-            //    SQLiteFunc.ExcuteSQL("update FileDetails set 是否已解压='是' where MD5='?';", FileInfo.md5);
-            //    FileInfo.decFilePathName = $"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\result\\";
-
-            //    //b_Abort_Import.IsEnabled = false;
-            //    btnOpenFile.IsEnabled = true;
-            //    btnDecFile.IsEnabled = true;
-            //    btnSelectFile.IsEnabled = true;
-            //    btnDelRecord.IsEnabled = true;
-            //    btnTopB.IsChecked = true;
-            //    btnLeftB1.IsChecked = true;
-            //    searchList(FileInfo.md5, false, false, false);
-            //}
-            //catch (Exception ex)
-            //{
-            //    System.Windows.MessageBox.Show(ex.Message);
-            //}
         }
 
         private void b_Abort_Import_Click(object sender, RoutedEventArgs e)
@@ -485,12 +443,6 @@ namespace Spectra
         {
             try
             {
-                new Thread(() =>
-                {
-                    App.global_ImageBuffer[0] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
-                    App.global_ImageBuffer[0].getBuffer(ImageInfo.strFilesPath, 40);
-                }).Start();
-
                 MultiFuncWindow w = new MultiFuncWindow();
                 w = (MultiFuncWindow)App.global_Windows[0];
                 w.DisplayMode = GridMode.One;
@@ -509,22 +461,6 @@ namespace Spectra
         {
             try
             {
-                new Thread(() =>
-                {
-                    App.global_ImageBuffer[1] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
-                    App.global_ImageBuffer[1].getBuffer(ImageInfo.strFilesPath, 40);
-                }).Start();
-                new Thread(() =>
-                {
-                    App.global_ImageBuffer[2] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
-                    App.global_ImageBuffer[2].getBuffer(ImageInfo.strFilesPath, 77);
-                }).Start();
-                new Thread(() =>
-                {
-                    App.global_ImageBuffer[3] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
-                    App.global_ImageBuffer[3].getBuffer(ImageInfo.strFilesPath, 127);
-                }).Start();
-
                 MultiFuncWindow w = new MultiFuncWindow();
                 w = (MultiFuncWindow)App.global_Windows[1];
                 w.DisplayMode = GridMode.Four;
@@ -599,11 +535,6 @@ namespace Spectra
                         band[0] = band[1] = band[2] = ImageInfo.getBand(Convert.ToDouble(txtSingleGray.Text));
                     else
                         band[0] = band[1] = band[2] = Convert.ToUInt16(txtSingleGray.Text);
-                    new Thread(() =>
-                    {
-                        App.global_ImageBuffer[0] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
-                        App.global_ImageBuffer[0].getBuffer(ImageInfo.strFilesPath, band[0]);
-                    }).Start();
                     ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[0]).UserControls[0]).RefreshPseudoColor(0,ImageInfo.strFilesPath, 4, band, ColorRenderMode.Grayscale);
                 }
             }
@@ -638,11 +569,6 @@ namespace Spectra
                         band[0] = band[1] = band[2] = ImageInfo.getBand(Convert.ToDouble(txtCompareGray2.Text));
                     else
                         band[0] = band[1] = band[2] = Convert.ToUInt16(txtCompareGray2.Text);
-                    new Thread(() =>
-                    {
-                        App.global_ImageBuffer[1] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
-                        App.global_ImageBuffer[1].getBuffer(ImageInfo.strFilesPath, band[0]);
-                    }).Start();
                     ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[1]).UserControls[1]).RefreshPseudoColor(1,ImageInfo.strFilesPath, 4, new UInt16[] { band[0], band[1] ,band[2] }, ColorRenderMode.Grayscale);
                 }
                 if (ckb3sub.IsChecked == true)
@@ -651,11 +577,6 @@ namespace Spectra
                         band[0] = band[1] = band[2] = ImageInfo.getBand(Convert.ToDouble(txtCompareGray3.Text));
                     else
                         band[0] = band[1] = band[2] = Convert.ToUInt16(txtCompareGray3.Text);
-                    new Thread(() =>
-                    {
-                        App.global_ImageBuffer[2] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
-                        App.global_ImageBuffer[2].getBuffer(ImageInfo.strFilesPath, band[0]);
-                    }).Start();
                     ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[1]).UserControls[2]).RefreshPseudoColor(2,ImageInfo.strFilesPath, 4, new UInt16[] { band[0], band[1], band[2] }, ColorRenderMode.Grayscale);
                 }
                 if (ckb4sub.IsChecked == true)
@@ -664,11 +585,6 @@ namespace Spectra
                         band[0] = band[1] = band[2] = ImageInfo.getBand(Convert.ToDouble(txtCompareGray4.Text));
                     else
                         band[0] = band[1] = band[2] = Convert.ToUInt16(txtCompareGray4.Text);
-                    new Thread(() =>
-                    {
-                        App.global_ImageBuffer[3] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
-                        App.global_ImageBuffer[3].getBuffer(ImageInfo.strFilesPath, band[0]);
-                    }).Start();
                     ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[1]).UserControls[3]).RefreshPseudoColor(3,ImageInfo.strFilesPath, 4, new UInt16[] { band[0], band[1], band[2] }, ColorRenderMode.Grayscale);
                 }
             }
@@ -739,36 +655,52 @@ namespace Spectra
 
         #region 异常检测
         /*获取异常信息*/
+        Thread _threadAbn;
         private void btnAbnGet_Click(object sender, RoutedEventArgs e)
         {
-            try
+            if (btnAbnGet.Content.ToString() == "异常检测")
             {
-                ImageInfo.noise_value = Convert.ToUInt16(txtAbnNoise.Text);
-            }
-            catch
-            {
-                System.Windows.MessageBox.Show("请输入噪声灰度!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-            SQLiteFunc.ExcuteSQL("delete from Detect_Abnormal");
-
-            new Thread(() =>
-            {
-                for (int i = 0; i < 160; i++)
+                try
                 {
-                    if (ImageInfo.ImgDetectAbnormal(i, 128) < 0)
+                    ImageInfo.noise_value = Convert.ToUInt16(txtAbnNoise.Text);
+                }
+                catch
+                {
+                    System.Windows.MessageBox.Show("请输入噪声灰度!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+                SQLiteFunc.ExcuteSQL("delete from Detect_Abnormal");
+
+                _threadAbn = new Thread(() =>
+                {
+                    for (int i = 0; i < 160; i++)
                     {
-                        System.Windows.MessageBox.Show("文件不存在!");
-                        return;
+                        if (ImageInfo.ImgDetectAbnormal(i, 128) < 0)
+                        {
+                            System.Windows.MessageBox.Show("文件不存在!");
+                            return;
+                        }
+                        Dispatcher.Invoke(new Action(() =>
+                        {
+                            pgbDetectAbnormal.Value = i / (double)159;
+                            dataGrid_DetectAbnormal.ItemsSource = SQLiteFunc.SelectDTSQL("select * from Detect_Abnormal").DefaultView;
+                        }));
                     }
                     Dispatcher.Invoke(new Action(() =>
                     {
-                        pgbDetectAbnormal.Value = i / (double)159;
-                        dataGrid_DetectAbnormal.ItemsSource = SQLiteFunc.SelectDTSQL("select * from Detect_Abnormal").DefaultView;
+                        btnAbnGet.Content = "异常检测";
                     }));
-                }
-                System.Windows.MessageBox.Show("完成!", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
-            }).Start();
+                    System.Windows.MessageBox.Show("完成!", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+                });
+                _threadAbn.Start();
+                btnAbnGet.Content = "停止检测";
+            }
+            else
+            {
+                _threadAbn.Abort();
+                pgbDetectAbnormal.Value = 0;
+                btnAbnGet.Content = "异常检测";
+            }
         }
         /*将DataGrid导出为Excel*/
         private void btnAbnExport_Click(object sender, RoutedEventArgs e)
@@ -1042,23 +974,6 @@ namespace Spectra
         /*初始化显示窗体*/
         private void initWindows(string path, int winSum, DataTable dtShow)
         {
-            new Thread(() =>
-            {
-                App.global_ImageBuffer[0] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
-                App.global_ImageBuffer[0].getBuffer(ImageInfo.strFilesPath, 40);
-                App.global_ImageBuffer[1] = App.global_ImageBuffer[0];
-            }).Start();
-            new Thread(() =>
-            {
-                App.global_ImageBuffer[2] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
-                App.global_ImageBuffer[2].getBuffer(ImageInfo.strFilesPath, 77);
-            }).Start();
-            new Thread(() =>
-            {
-                App.global_ImageBuffer[3] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
-                App.global_ImageBuffer[3].getBuffer(ImageInfo.strFilesPath, 127);
-            }).Start();
-
             MultiFuncWindow[] w = new MultiFuncWindow[6];
             for (int i = 0; i < 6; i++)
                 w[i] = (MultiFuncWindow)App.global_Windows[i];

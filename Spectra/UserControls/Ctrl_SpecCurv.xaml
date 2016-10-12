@@ -7,10 +7,10 @@
              xmlns:d3="http://research.microsoft.com/DynamicDataDisplay/1.0"
              xmlns:Custom="WFTools3D" x:Class="Spectra.Ctrl_SpecCurv"
              mc:Ignorable="d" 
-             d:DesignHeight="768" d:DesignWidth="1024" Background="Gray">
+             d:DesignHeight="768" d:DesignWidth="1024" Background="{StaticResource WinViewBack}">
     <Grid Margin="0">
         <Rectangle Stroke="White" StrokeThickness="1"/>
-        <d3:ChartPlotter x:Name="chart1st" Margin="1,1,30,1" Opacity="1" Background="Gray" BorderBrush="White" FontSize="16" Foreground="#FF34E400">
+        <d3:ChartPlotter x:Name="chart1st" Margin="1,1,30,1" Opacity="1" Background="{StaticResource WinViewBack}" BorderBrush="White" FontSize="16" Foreground="#FF34E400">
             <d3:Header FontFamily="Arial" Content="光谱曲线" FontSize="20" Margin="0,10"/>
             <d3:HorizontalAxisTitle Content="波长/nm" FontSize="20" Margin="0,10"/>
             <d3:VerticalAxisTitle Content="灰度值" FontSize="20" Margin="10,0"/>

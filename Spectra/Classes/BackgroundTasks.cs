@@ -19,66 +19,6 @@ namespace Spectra
     public class DataProc
     {
         #region 打开&解包
-        /*检查文件状态*/
-        public static string checkFileState()
-        {
-            //检查MD5
-            string md5str;
-            using (var md5 = MD5.Create())
-            {
-                using (var stream = File.OpenRead(FileInfo.srcFilePathName))
-                {
-                    md5str = BitConverter.ToString(md5.ComputeHash(stream));
-                }
-            }
-            FileInfo.md5 = md5str;
-            /*汇报文件状态*/
-            string strReport = "";
-            DataTable fileDetail = SQLiteFunc.SelectDTSQL($"SELECT * from FileDetails where MD5='{md5str}'");
-            if (fileDetail.Rows.Count == 0)
-            {
-                FileInfo.isUnpack = false;                                                                                  //未解包
-                FileInfo.isDecomp = false;                                                                                  //未解压
-                SQLiteFunc.ExcuteSQL("insert into FileDetails (文件名,文件路径,文件大小,是否已解包,是否已解压,MD5) values ('?','?','?','?','?','?')",
-                    FileInfo.srcFileName, FileInfo.srcFilePathName, File.OpenRead(FileInfo.srcFilePathName).Length, "否", "否", FileInfo.md5);
-                SQLiteFunc.ExcuteSQL("insert into FileDetails_dec (MD5) values ('?')", FileInfo.md5);
-                strReport = DateTime.Now.ToString("HH:mm:ss") + " 文件第一次导入,未解包,未解压";
-            }
-            else
-            {
-                FileInfo.srcFileLength = Convert.ToInt64(fileDetail.Rows[0][2]);       //文件大小
-                strReport = DateTime.Now.ToString("HH:mm:ss") + " 文件";
-                if ((string)fileDetail.Rows[0][3] == "是")
-                {
-                    FileInfo.isUnpack = true;
-                    FileInfo.upkFilePathName = Convert.ToString(SQLiteFunc.SelectDTSQL($"SELECT * from FileDetails_dec where MD5='{md5str}'").Rows[0][7]);
-                    strReport += "已解包,";
-                }
-                else
-                {
-                    FileInfo.isUnpack = false;
-                    strReport += "未解包,";
-                }
-                if ((string)fileDetail.Rows[0][4] == "是")
-                {
-                    FileInfo.isDecomp = true;
-                    DataTable dt = SQLiteFunc.SelectDTSQL($"SELECT * from FileDetails_dec where MD5='{md5str}'");
-                    if (dt.Rows[0][1] != DBNull.Value)  FileInfo.frmSum = Convert.ToInt64(dt.Rows[0][1]);           //帧总数
-                    if (dt.Rows[0][2] != DBNull.Value)  FileInfo.startTime = Convert.ToDateTime(dt.Rows[0][2]);     //起始时间
-                    if (dt.Rows[0][3] != DBNull.Value)  FileInfo.endTime = Convert.ToDateTime(dt.Rows[0][3]);       //结束时间
-                    if (dt.Rows[0][4] != DBNull.Value)  FileInfo.startCoord.convertToCoord((string)dt.Rows[0][4]);  //起始经纬
-                    if (dt.Rows[0][5] != DBNull.Value)  FileInfo.endCoord.convertToCoord((string)dt.Rows[0][5]);    //结束经纬
-                    if (dt.Rows[0][9] != DBNull.Value)  FileInfo.decFilePathName = (string)dt.Rows[0][9];           //解压后路径
-                    strReport += "已解压";
-                }
-                else
-                {
-                    FileInfo.isDecomp = false;
-                    strReport += "未解压";
-                }
-            }
-            return strReport;
-        }
         /*解包*/
         public static Task<int> unpackFile(IProgress<DataView> IProg_DataView,IProgress<double> IProg_Bar,IProgress<string> IProg_Cmd)
         {
@@ -605,9 +545,9 @@ namespace Spectra
 
                 string command;
                 if (md5 != null && md5 != "")
-                    command = $"SELECT * FROM AuxData WHERE Chanel=1 AND MD5='{md5}'";
+                    command = $"SELECT * FROM AuxData WHERE MD5='{md5}'";
                 else
-                    command = $"SELECT * FROM AuxData WHERE Chanel=1";
+                    command = $"SELECT * FROM AuxData";
                 if ((bool)isChecked2)
                 {
                     command += " AND Lat>=" + (coord_DR.Lat.ToString()) + " AND Lat<=" + coord_TL.Lat.ToString() + " AND Lon>=" + (coord_TL.Lon.ToString()) + " AND Lon<=" + coord_DR.Lon.ToString();

@@ -83,9 +83,9 @@
 
     <Grid Name="grid">
         <local:Ctrl_BusyMask x:Name="Busy"></local:Ctrl_BusyMask>
-        <Custom:Scene3D BorderBrush="White" Name="scene" BorderThickness="1" MouseDown="scene_MouseDown" Background="Gray" MouseRightButtonDown="scene_MouseRightButtonDown"/>
+        <Custom:Scene3D BorderBrush="White" Name="scene" BorderThickness="1" MouseDown="scene_MouseDown" Background="{StaticResource WinViewBack}" MouseRightButtonDown="scene_MouseRightButtonDown"/>
         <DockPanel Margin="20,20,0,0" Height="50" VerticalAlignment="Top" HorizontalAlignment="Left">
-            <CheckBox x:Name="cbOriShow" Margin="0,0,20,0" VerticalAlignment="Center" VerticalContentAlignment="Center" Content="显示原图" FontSize="20" Foreground="{StaticResource WinViewFore}"/>
+            <CheckBox x:Name="cbOriShow" Margin="0,0,20,0" VerticalAlignment="Center" VerticalContentAlignment="Center" Content="显示原图" FontSize="20" Foreground="{StaticResource WinViewFore}" IsChecked="True"/>
             <Label HorizontalAlignment="Left" Content="行号:" VerticalAlignment="Center" FontSize="20" Foreground="{StaticResource WinViewFore}"/>
             <TextBlock x:Name="Row" Text="0" Width="60" FontSize="20" Foreground="{StaticResource WinViewFore}" VerticalAlignment="Center"/>
             <Label HorizontalAlignment="Left" Content="列号:" VerticalAlignment="Center" FontSize="20" Foreground="{StaticResource WinViewFore}"/>
