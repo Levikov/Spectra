@@ -155,6 +155,9 @@ namespace Spectra
             IProgress<string> IProg_Cmd = new Progress<string>((ProgressString) => { tb_Console.Text = ProgressString + "\n" + tb_Console.Text; });
             await dataOper.main(FileInfo.srcFilePathName, IProg_Bar, IProg_Cmd, cancelImport.Token);
             btnOpenFile.IsEnabled = true;
+            btnTopB.IsChecked = true;
+            btnLeftB1.IsChecked = true;
+            searchList(FileInfo.md5, false, false, false);
         }
 
         /*用于放弃操作*/

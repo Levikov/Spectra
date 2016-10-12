@@ -277,7 +277,8 @@ namespace Spectra
             {
                 if (inBuf[position] == 0xEB && inBuf[position + 1] == 0x90 && inBuf[position + 2] == 0x57 && inBuf[position + 3] == 0x16)
                 {
-                    Array.Copy(inBuf, position, outBuf, 280 * packCnt, 280);
+                    if(inBuf.Length-position>=280)
+                        Array.Copy(inBuf, position, outBuf, 280 * packCnt, 280);
                     position += 280;
                     packCnt++;
                 }
