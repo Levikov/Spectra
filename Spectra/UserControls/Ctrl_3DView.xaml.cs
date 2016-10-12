@@ -156,10 +156,10 @@ namespace Spectra
                 int Y = (int)(scene.touchPoint.Y * 10+imheight / 2) ;
                 int Z = (int)(scene.touchPoint.Z * 10 / 4+80);
                 this.tb_3DCoord.Text = $"({X},{Y},{Z})";
-                this.Row.Text = $"{Y}";
-                this.Col.Text = $"{X}";
-                this.Band.Text = $"{Z}";
-                showSingleFrm((UInt16)Y);
+                this.Col.Content = $"{X}";
+                this.Band.Content = $"{Z}";
+                if((bool)cbOriShow.IsChecked)
+                    showSingleFrm((UInt16)Y);
             }
             catch (Exception ex)
             {
@@ -169,6 +169,7 @@ namespace Spectra
 
         public BitmapImage showSingleFrm(UInt16 frm)
         {
+            this.Row.Content = $"{frm}";
             int height = ImageInfo.dtImgInfo.Rows.Count;
             if (frm < height)
             {
@@ -186,25 +187,16 @@ namespace Spectra
                     Array.Copy(buf, 0, grayImage, b * 4096, 4096);
                 }
 
-                //byte[][] pckImage = new byte[4][];
-                //FileStream[] fs = new FileStream[4];
-                //for (int i = 0; i < 4; i++)
-                //{
-                //    pckImage[i] = new byte[512 * 160 * 2];
-                //    if (File.Exists($"{strFile}{i+1}.raw"))
-                //    {
-                //        fs[i] = new FileStream($"{strFile}{i+1}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
-                //        fs[i].Read(pckImage[i], 0, 512 * 160 * 2);
-                //        fs[i].Close();
-                //    }
-                //}
-                //for (int i = 0; i < 4; i++)
-                for(int c = 0; c < 2048; c++)
-                    for (int r = 0; r < 160; r++)
+                //for (int c = 0; c < 2048; c++)
+                //    for (int r = 0; r < 160; r++)
+                Parallel.For(0, 2048, c =>
+                {
+                    Parallel.For(0, 160, r =>
                     {
                         frmImage[r * 2048 * 3 + c * 3] = frmImage[r * 2048 * 3 + c * 3 + 1]
-                            = frmImage[r * 2048 * 3 + c * 3 + 2] = (byte)(grayImage[r * 2048 * 2 + c * 2]/16+ grayImage[r * 2048 * 2 + c * 2+1]*16);
-                    }
+                            = frmImage[r * 2048 * 3 + c * 3 + 2] = (byte)(grayImage[r * 2048 * 2 + c * 2] / 16 + grayImage[r * 2048 * 2 + c * 2 + 1] * 16);
+                    });
+                });
                 int x = frmImage.Max();
                 for (int c = 0; c < 2048 * 160 * 3; c++)
                 {
@@ -266,7 +258,7 @@ namespace Spectra
 
             if (Z < 1 || Z > 160) return;
             //Bitmap bmp = await DataProc.GetBmp(ImageInfo.strFilesPath, Z - 1, ColorRenderMode.Grayscale);
-            Bitmap bmp = await BmpOper.MakePseudoColor(ImageInfo.strFilesPath, band, 4);
+            Bitmap bmp = await BmpOper.MakePseudoColor(ImageInfo.strFilesPath, band, 4,ImageInfo.imgWidth);
             if (bmp == null) return;
             bmp.RotateFlip(RotateFlipType.Rotate180FlipNone);
             bmp.RotateFlip(RotateFlipType.Rotate180FlipY);
@@ -282,7 +274,7 @@ namespace Spectra
             TranslateTransform3D transtrans3d = new TranslateTransform3D(0, 0, ((Z-80)*0.4));
             gm3d_Active.Transform = transtrans3d;
             transtrans3d.BeginAnimation(TranslateTransform3D.OffsetYProperty, day);
-            curBand.Text = Z.ToString();
+            curBand.Content = Z.ToString();
         }
     }
 }

@@ -76,7 +76,7 @@ namespace Spectra
                     FileInfo.srcFileName = FileInfo.srcFilePathName.Substring(FileInfo.srcFilePathName.LastIndexOf('\\') + 1);      //文件名称
                     tb_Console.Text = FileInfo.checkFileState();                                                                    //检查文件状态
                     /*窗体控件*/
-                    //dataGrid_Errors.ItemsSource = SQLiteFunc.SelectDTSQL("select * from FileErrors where MD5='" + FileInfo.md5 + "'").DefaultView;  //显示错误信息
+                    dataGrid_Errors.ItemsSource = SQLiteFunc.SelectDTSQL("select * from FileErrors where MD5='" + FileInfo.md5 + "'").DefaultView;  //显示错误信息
                     tb_Path.Text = FileInfo.srcFilePathName;
                     txtCurrentFile.Text = FileInfo.srcFileName;
                     prog_Import.Value = 0;
@@ -91,56 +91,38 @@ namespace Spectra
         /*批处理文件*/
         private async void btnOpenFiles_Click(object sender, RoutedEventArgs e)
         {
-            try
+            Microsoft.Win32.OpenFileDialog openFile = new Microsoft.Win32.OpenFileDialog();
+            openFile.Filter = "All Files(*.*)|*.*";
+            openFile.Multiselect = true;
+            if ((bool)openFile.ShowDialog())
             {
-                Microsoft.Win32.OpenFileDialog openFile = new Microsoft.Win32.OpenFileDialog();
-                openFile.Filter = "All Files(*.*)|*.*";
-                openFile.Multiselect = true;
-                if ((bool)openFile.ShowDialog())
+                btnOpenFile.IsEnabled = false;
+                btnOpenFiles.IsEnabled = false;
+                btnSelectFile.IsEnabled = false;
+                btnDelRecord.IsEnabled = false;
+                IProgress<double> IProg_Bar = new Progress<double>((ProgressValue) => { prog_Import.Value = ProgressValue * prog_Import.Maximum; });
+                IProgress<string> IProg_Cmd = new Progress<string>((ProgressString) => { tb_Console.Text = ProgressString + "\n" + tb_Console.Text; });
+                for (int fi = 0; fi < openFile.SafeFileNames.Length; fi++)
                 {
-                    btnOpenFile.IsEnabled = false;
-                    btnOpenFiles.IsEnabled = false;
-                    btnSelectFile.IsEnabled = false;
-                    btnDelRecord.IsEnabled = false;
-                    for (int fi = 0; fi < openFile.SafeFileNames.Length; fi++)
+                    try
                     {
-                        FileInfo.srcFilePathName = openFile.FileNames[fi] ;                                                                   //文件路径名称
+                        FileInfo.srcFilePathName = openFile.FileNames[fi];                                                                   //文件路径名称
                         FileInfo.srcFileName = FileInfo.srcFilePathName.Substring(FileInfo.srcFilePathName.LastIndexOf('\\') + 1);      //文件名称
                         tb_Console.Text = FileInfo.checkFileState();                                                                    //检查文件状态
-                                                                                                                                        /*窗体控件*/
+
+                        DataOper dataOper = new DataOper(FileInfo.srcFilePathName, FileInfo.md5);
+                        await dataOper.main(FileInfo.srcFilePathName, IProg_Bar, IProg_Cmd, cancelImport.Token);
                         dataGrid_Errors.ItemsSource = SQLiteFunc.SelectDTSQL("select * from FileErrors where MD5='" + FileInfo.md5 + "'").DefaultView;  //显示错误信息
-                        tb_Path.Text = FileInfo.srcFilePathName;
-                        txtCurrentFile.Text = FileInfo.srcFileName;
-                        prog_Import.Value = 0;
-
-                        //解压
-                        int PACK_LEN = (bool)cb280.IsChecked ? 280 : 288;
-
-                        IProgress<double> IProgress_Prog = new Progress<double>((ProgressValue) => { prog_Import.Value = ProgressValue * this.prog_Import.Maximum; });
-                        IProgress<string> IProgress_List = new Progress<string>((ProgressString) => { this.tb_Console.Text = ProgressString + "\n" + this.tb_Console.Text; });
-
-                        //App.global_Win_Dynamic = new DynamicImagingWindow_Win32();
-                        //App.global_Win_Dynamic.Show();
-
-                        await DataProc.Import_5(PACK_LEN, IProgress_Prog, IProgress_List, cancelImport.Token);
-                        IProgress_List.Report(DateTime.Now.ToString("HH:mm:ss") + " 操作成功！");
-                        //App.global_Win_Dynamic.Close();
-
-                        SQLiteFunc.ExcuteSQL("update FileDetails_dec set 解压时间='?',解压后文件路径='?',帧数='?',起始时间='?',结束时间='?',起始经纬='?',结束经纬='?' where MD5='?'",
-                            DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), $"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\result\\", FileInfo.frmSum, FileInfo.startTime.ToString("yyyy-MM-dd HH:mm:ss"), FileInfo.endTime.ToString("yyyy-MM-dd HH:mm:ss"), FileInfo.startCoord.convertToString(), FileInfo.endCoord.convertToString(), FileInfo.md5);
-                        SQLiteFunc.ExcuteSQL("update FileDetails set 是否已解压='是' where MD5='?';", FileInfo.md5);
-                        FileInfo.decFilePathName = $"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\result\\";
                     }
-                    btnOpenFile.IsEnabled = true;
-                    btnOpenFiles.IsEnabled = true;
-                    btnDecFile.IsEnabled = true;
-                    btnSelectFile.IsEnabled = true;
-                    btnDelRecord.IsEnabled = true;
+                    catch
+                    {
+                        //System.Windows.MessageBox.Show(ex.ToString());
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                System.Windows.MessageBox.Show(ex.ToString());
+                btnOpenFile.IsEnabled = true;
+                btnOpenFiles.IsEnabled = true;
+                btnSelectFile.IsEnabled = true;
+                btnDelRecord.IsEnabled = true;
             }
         }
         /*点击解包*/
@@ -156,6 +138,7 @@ namespace Spectra
                 IProgress<double> IProgress_Prog = new Progress<double>((ProgressValue) => { prog_Import.Value = ProgressValue * this.prog_Import.Maximum; });
                 IProgress<string> IProgress_List = new Progress<string>((ProgressString) => { this.tb_Console.Text = ProgressString + "\n" + this.tb_Console.Text; });
                 await DataProc.unpackFile(IProg_DataView, IProgress_Prog, IProgress_List);
+                dataGrid_Errors.ItemsSource = SQLiteFunc.SelectDTSQL("select * from FileErrors where MD5='" + FileInfo.md5 + "'").DefaultView;  //显示错误信息
             }
             catch (Exception ex)
             {
@@ -163,20 +146,22 @@ namespace Spectra
             }
         }
 
-        /*用于放弃操作*/
-        private CancellationTokenSource cancelImport = new CancellationTokenSource();
         /*点击解压*/
-        private void btnDecFile_Click(object sender, RoutedEventArgs e)
+        private async void btnDecFile_Click(object sender, RoutedEventArgs e)
         {
             btnDecFile.IsEnabled = false;
             DataOper dataOper = new DataOper(FileInfo.srcFilePathName,FileInfo.md5);
-            dataOper.main(FileInfo.srcFilePathName, prog_Import, tb_Console);
+            IProgress<double> IProg_Bar = new Progress<double>((ProgressValue) => { prog_Import.Value = ProgressValue * prog_Import.Maximum; });
+            IProgress<string> IProg_Cmd = new Progress<string>((ProgressString) => { tb_Console.Text = ProgressString + "\n" + tb_Console.Text; });
+            await dataOper.main(FileInfo.srcFilePathName, IProg_Bar, IProg_Cmd, cancelImport.Token);
             btnOpenFile.IsEnabled = true;
         }
 
+        /*用于放弃操作*/
+        public CancellationTokenSource cancelImport = new CancellationTokenSource();
         private void b_Abort_Import_Click(object sender, RoutedEventArgs e)
         {
-            cancelImport.Cancel();
+            cancelImport.Cancel(true);
         }
         #endregion
 

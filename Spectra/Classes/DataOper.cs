@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -18,9 +19,10 @@ namespace Spectra
     {
         string srcFilePathName = "";
         string srcFileName = "";
-        string md5 = "";
+        public string md5 = "";
         public DataChannel[] dataChannel = new DataChannel[4];
         public DataOperInfo realInfo = new DataOperInfo();
+        public ErrorInfo errInfo = new ErrorInfo();
 
         public struct DataOperInfo
         {
@@ -178,178 +180,170 @@ namespace Spectra
         }
 
         //主程序
-        public async void main(string inFilePathName, ProgressBar prog_Import, TextBox tb_Console)
+        public Task main(string inFilePathName, IProgress<double> IProg_Bar, IProgress<string> IProg_Cmd, CancellationToken ct)
         {
-            try
+            return Task.Run(() =>
             {
-                IProgress<double> IProg_Bar = new Progress<double>((ProgressValue) => { prog_Import.Value = ProgressValue * prog_Import.Maximum; });
-                IProgress<string> IProg_Cmd = new Progress<string>((ProgressString) => { tb_Console.Text = ProgressString + "\n" + tb_Console.Text; });
-                string strSrc = await preData(await unpackData(inFilePathName, IProg_Bar, IProg_Cmd), IProg_Bar, IProg_Cmd);
-                if (strSrc == string.Empty)
+                try
                 {
-                    IProg_Cmd.Report(DateTime.Now.ToString("HH:mm:ss") + " 文件不正确，已停止该文件操作！");
-                    return;
+                    string strSrc = preData(unpackData(inFilePathName, IProg_Bar, IProg_Cmd), IProg_Bar, IProg_Cmd);
+                    if (strSrc == string.Empty)
+                    {
+                        IProg_Cmd.Report(DateTime.Now.ToString("HH:mm:ss") + " 文件不正确，已停止该文件操作！");
+                        return;
+                    }
+                    strSrc = decData(splitFile(strSrc, IProg_Bar, IProg_Cmd), IProg_Bar, IProg_Cmd);
+                    new Thread(() => { sqlInsert(); }).Start();
+                    mergeImage(strSrc, IProg_Bar, IProg_Cmd);
+                    IProg_Cmd.Report(DateTime.Now.ToString("HH:mm:ss") + " 开始清理冗余文件！");
+                    Task.Run(() => { Directory.Delete($"{Environment.CurrentDirectory}\\channelFiles", true); }).Wait();
+                    Task.Run(() => { Directory.Delete($"{Environment.CurrentDirectory}\\srcFiles", true); }).Wait();
+                    new Thread(() => { Get3DRaw($"{Environment.CurrentDirectory}\\decFiles\\{md5}\\"); }).Start();
+                    IProg_Cmd.Report(DateTime.Now.ToString("HH:mm:ss") + " 操作完成！");
                 }
-                strSrc = await decData(await splitFile(strSrc, IProg_Bar, IProg_Cmd), IProg_Bar, IProg_Cmd);
-                new Thread(() => { sqlInsert(); }).Start();
-                await mergeImage(strSrc, IProg_Bar, IProg_Cmd);
-                IProg_Cmd.Report(DateTime.Now.ToString("HH:mm:ss") + " 开始清理冗余文件！");
-                Task.Run(() => { Directory.Delete($"{Environment.CurrentDirectory}\\channelFiles", true); }).Wait();
-                Task.Run(() => { Directory.Delete($"{Environment.CurrentDirectory}\\srcFiles",true); }).Wait();
-                new Thread(() => { Get3DRaw($"{Environment.CurrentDirectory}\\decFiles\\{md5}\\"); }).Start();
-                IProg_Cmd.Report(DateTime.Now.ToString("HH:mm:ss") + " 操作完成！");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString());
-            }
+                catch// (Exception ex)
+                {
+                    //MessageBox.Show(ex.ToString());
+                }
+            }, ct);
         }
 
         //解包
-        public Task<string> unpackData(string inFilePathName, IProgress<double> IProg_Bar, IProgress<string> IProg_Cmd)
+        public string unpackData(string inFilePathName, IProgress<double> IProg_Bar, IProgress<string> IProg_Cmd)
         {
-            return Task.Run(() =>
+            Directory.CreateDirectory($"{Environment.CurrentDirectory}\\srcFiles");
+            if (!File.Exists(inFilePathName))
+                return string.Empty;
+            FileStream inFileStream = new FileStream(inFilePathName, FileMode.Open, FileAccess.Read, FileShare.Read);
+            if (inFileStream == null)
+                return string.Empty;
+            byte[] inBuf = new byte[1024];
+            inFileStream.Read(inBuf, 0, 1024);
+            if (inBuf[0] == 0x1A && inBuf[1] == 0xCF && inBuf[2] == 0xFC && inBuf[3] == 0x1D)
             {
-                Directory.CreateDirectory($"{Environment.CurrentDirectory}\\srcFiles");
-                if (!File.Exists(inFilePathName))
-                    return string.Empty;
-                FileStream inFileStream = new FileStream(inFilePathName, FileMode.Open, FileAccess.Read, FileShare.Read);
-                if (inFileStream == null)
-                    return string.Empty;
-                byte[] inBuf = new byte[1024];
-                inFileStream.Read(inBuf, 0, 1024);
-                if (inBuf[0] == 0x1A && inBuf[1] == 0xCF && inBuf[2] == 0xFC && inBuf[3] == 0x1D)
+                IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 开始解包.");
+                IProg_Bar.Report(0);
+
+                long rowCnt = inFileStream.Length / 1024;
+                byte[] outBuf = new byte[rowCnt * 884];
+                inBuf = new byte[inFileStream.Length];
+
+                inFileStream.Read(inBuf, 0, Convert.ToInt32(inFileStream.Length));
+                inFileStream.Close();
+
+                IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 文件读取完成.");
+                for (int i = 0; i < rowCnt; i++)
                 {
-                    IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 开始解包.");
-                    IProg_Bar.Report(0);
-
-                    long rowCnt = inFileStream.Length / 1024;
-                    byte[] outBuf = new byte[rowCnt * 884];
-                    inBuf = new byte[inFileStream.Length];
-
-                    inFileStream.Read(inBuf, 0, Convert.ToInt32(inFileStream.Length));
-                    inFileStream.Close();
-
-                    IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 文件读取完成.");
-                    for (int i = 0; i < rowCnt; i++)
-                    {
-                        Array.Copy(inBuf, i * 1024 + 12, outBuf, i * 884, 884);
-                        if (i % (rowCnt / 10) == 0)
-                            IProg_Bar.Report((double)i / rowCnt);
-                    }
-
-                    IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 数据开始写入文件.");
-                    FileStream outFileStream = new FileStream($"{Environment.CurrentDirectory}\\srcFiles\\{srcFileName}_u.dat", FileMode.Create);
-                    outFileStream.Write(outBuf, 0, outBuf.Length);
-                    outFileStream.Close();
-
-                    IProg_Bar.Report(1);
-                    IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 解包完成！");
-                    return $"{Environment.CurrentDirectory}\\srcFiles\\{srcFileName}_u.dat";
+                    Array.Copy(inBuf, i * 1024 + 12, outBuf, i * 884, 884);
+                    if (i % (rowCnt / 10) == 0)
+                        IProg_Bar.Report((double)i / rowCnt);
                 }
-                else
-                {
-                    inFileStream.Close();
-                    return inFilePathName;
-                }
-            });
+
+                IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 数据开始写入文件.");
+                FileStream outFileStream = new FileStream($"{Environment.CurrentDirectory}\\srcFiles\\{srcFileName}_u.dat", FileMode.Create);
+                outFileStream.Write(outBuf, 0, outBuf.Length);
+                outFileStream.Close();
+
+                IProg_Bar.Report(1);
+                IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 解包完成！");
+                return $"{Environment.CurrentDirectory}\\srcFiles\\{srcFileName}_u.dat";
+            }
+            else
+            {
+                inFileStream.Close();
+                return inFilePathName;
+            }
         }
 
         //预处理
-        public Task<string> preData(string inFilePathName, IProgress<double> IProg_Bar, IProgress<string> IProg_Cmd)
+        public string preData(string inFilePathName, IProgress<double> IProg_Bar, IProgress<string> IProg_Cmd)
         {
-            return Task.Run(() =>
+            Directory.CreateDirectory($"{Environment.CurrentDirectory}\\srcFiles");
+            if (!File.Exists(inFilePathName))
+                return string.Empty;
+            FileStream inFileStream = new FileStream(inFilePathName, FileMode.Open, FileAccess.Read, FileShare.Read);
+            if (inFileStream == null)
+                return string.Empty;
+            IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 开始预处理.");
+            IProg_Bar.Report(0);
+            byte[] inBuf = new byte[inFileStream.Length];
+            inFileStream.Read(inBuf, 0, inBuf.Length);
+            inFileStream.Close();
+            IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 文件读取完成.");
+
+            byte[] outBuf = new byte[inBuf.Length];
+            int position = 0, packCnt = 0;
+            while (position < inBuf.Length - 4)
             {
-                Directory.CreateDirectory($"{Environment.CurrentDirectory}\\srcFiles");
-                if (!File.Exists(inFilePathName))
-                    return string.Empty;
-                FileStream inFileStream = new FileStream(inFilePathName, FileMode.Open, FileAccess.Read, FileShare.Read);
-                if (inFileStream == null)
-                    return string.Empty;
-                IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 开始预处理.");
-                IProg_Bar.Report(0);
-                byte[] inBuf = new byte[inFileStream.Length];
-                inFileStream.Read(inBuf, 0, inBuf.Length);
-                inFileStream.Close();
-                IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 文件读取完成.");
-
-                byte[] outBuf = new byte[inBuf.Length];
-                int position = 0, packCnt = 0;
-                while (position < inBuf.Length - 4)
+                if (inBuf[position] == 0xEB && inBuf[position + 1] == 0x90 && inBuf[position + 2] == 0x57 && inBuf[position + 3] == 0x16)
                 {
-                    if (inBuf[position] == 0xEB && inBuf[position + 1] == 0x90 && inBuf[position + 2] == 0x57 && inBuf[position + 3] == 0x16)
-                    {
-                        Array.Copy(inBuf, position, outBuf, 280 * packCnt, 280);
-                        position += 280;
-                        packCnt++;
-                    }
-                    else
-                        position++;
+                    Array.Copy(inBuf, position, outBuf, 280 * packCnt, 280);
+                    position += 280;
+                    packCnt++;
                 }
+                else
+                    position++;
+            }
 
-                IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 文件开始写入.");
-                FileStream outFileStream = new FileStream($"{Environment.CurrentDirectory}\\srcFiles\\{srcFileName}_p.dat", FileMode.Create);
-                outFileStream.Write(outBuf, 0, packCnt * 280);
-                outFileStream.Close();
-                IProg_Bar.Report(1);
-                IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 预处理完成！");
+            IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 文件开始写入.");
+            FileStream outFileStream = new FileStream($"{Environment.CurrentDirectory}\\srcFiles\\{srcFileName}_p.dat", FileMode.Create);
+            outFileStream.Write(outBuf, 0, packCnt * 280);
+            outFileStream.Close();
+            IProg_Bar.Report(1);
+            IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 预处理完成！");
 
-                return $"{Environment.CurrentDirectory}\\srcFiles\\{srcFileName}_p.dat";
-            });
+            return $"{Environment.CurrentDirectory}\\srcFiles\\{srcFileName}_p.dat";
         }
 
         //分包并记录
-        public Task<string> splitFile(string inFilePathName, IProgress<double> IProg_Bar, IProgress<string> IProg_Cmd)
-        {
-            return Task.Run(() =>
+        public string splitFile(string inFilePathName, IProgress<double> IProg_Bar, IProgress<string> IProg_Cmd)
+        { 
+            Directory.CreateDirectory($"{Environment.CurrentDirectory}\\srcFiles");
+            if (!File.Exists(inFilePathName))
+                return string.Empty;
+            FileStream inFileStream = new FileStream(inFilePathName, FileMode.Open, FileAccess.Read, FileShare.Read);
+            if (inFileStream == null)
+                return string.Empty;
+
+            IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 开始分包.");
+            IProg_Bar.Report(0);
+            byte[] inBuf = new byte[inFileStream.Length];
+            inFileStream.Read(inBuf, 0, inBuf.Length);
+            int packSum = (int)(inFileStream.Length / 280);
+            inFileStream.Close();
+            IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 文件读取完成.");
+
+            FileStream[] outFileStream = new FileStream[4];
+
+            //Parallel.For(0,4,c=> {
+            for (int c = 0; c < 4; c++)
             {
-                Directory.CreateDirectory($"{Environment.CurrentDirectory}\\srcFiles");
-                if (!File.Exists(inFilePathName))
-                    return string.Empty;
-                FileStream inFileStream = new FileStream(inFilePathName, FileMode.Open, FileAccess.Read, FileShare.Read);
-                if (inFileStream == null)
-                    return string.Empty;
-
-                IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 开始分包.");
-                IProg_Bar.Report(0);
-                byte[] inBuf = new byte[inFileStream.Length];
-                inFileStream.Read(inBuf, 0, inBuf.Length);
-                int packSum = (int)(inFileStream.Length / 280);
-                inFileStream.Close();
-                IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 文件读取完成.");
-
-                FileStream[] outFileStream = new FileStream[4];
-
-                //Parallel.For(0,4,c=> {
-                for (int c = 0; c < 4; c++)
+                int row = 0, ID = 0;
+                byte[] buf = new byte[280];
+                outFileStream[c] = new FileStream($"{Environment.CurrentDirectory}\\srcFiles\\{md5}_{c}.dat", FileMode.Create, FileAccess.Write, FileShare.Read);
+                for (int i = 0; i < packSum; i++)
                 {
-                    int row = 0, ID = 0;
-                    byte[] buf = new byte[280];
-                    outFileStream[c] = new FileStream($"{Environment.CurrentDirectory}\\srcFiles\\{md5}_{c}.dat", FileMode.Create, FileAccess.Write, FileShare.Read);
-                    for (int i = 0; i < packSum; i++)
+                    if (inBuf[i * 280 + 5] == c + 1)
                     {
-                        if (inBuf[i * 280 + 5] == c + 1)
+                        Array.Copy(inBuf, i * 280, buf, 0, 280);
+                        if (inBuf[i * 280 + 4] == 0x08)
                         {
-                            Array.Copy(inBuf, i * 280, buf, 0, 280);
-                            if (inBuf[i * 280 + 4] == 0x08)
-                            {
-                                dataChannel[c].add(ID, row, buf);
-                                ID++;
-                            }
-                            outFileStream[c].Write(buf, 0, 280);
-                            row++;
+                            dataChannel[c].add(ID, row, buf);
+                            ID++;
                         }
-                        if ((i + 1) % (packSum / 2) == 0)
-                            IProg_Bar.Report((double)(i + 1) / packSum + 0.25 * c);
+                        outFileStream[c].Write(buf, 0, 280);
+                        row++;
                     }
-                    outFileStream[c].Close();
+                    if ((i + 1) % (packSum / 2) == 0)
+                        IProg_Bar.Report((double)(i + 1) / packSum + 0.25 * c);
                 }
-                IProg_Bar.Report(1);
-                IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 分包完成!");
-                info();
+                outFileStream[c].Close();
+            }
+            IProg_Bar.Report(1);
+            IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 分包完成!");
+            info();
 
-                return $"{Environment.CurrentDirectory}\\srcFiles\\{md5}_";
-            });
+            return $"{Environment.CurrentDirectory}\\srcFiles\\{md5}_";
         }
 
         //获取图像的起止
@@ -366,109 +360,121 @@ namespace Spectra
         }
 
         //解压
-        public Task<string> decData(string inFilePathName, IProgress<double> IProg_Bar, IProgress<string> IProg_Cmd)
+        public string decData(string inFilePathName, IProgress<double> IProg_Bar, IProgress<string> IProg_Cmd)
         {
-            return Task.Run(() =>
+            Directory.CreateDirectory($"{Environment.CurrentDirectory}\\channelFiles");
+            IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 开始解压.");
+            IProg_Bar.Report(0);
+
+            //Parallel.For(0, 4, c =>
+            for (int c = 0; c < 4; c++)
             {
-                Directory.CreateDirectory($"{Environment.CurrentDirectory}\\channelFiles");
-                IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 开始解压.");
-                IProg_Bar.Report(0);
+                FileStream inFileStream = new FileStream($"{inFilePathName}{c}.dat", FileMode.Open, FileAccess.Read, FileShare.Read);
+                byte[] inBuf = new byte[inFileStream.Length];
+                inFileStream.Read(inBuf, 0, (int)inFileStream.Length);
+                inFileStream.Close();
+                IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 通道{c}读取完成.");
 
-                Parallel.For(0, 4, c =>
+                byte[][] channelFile = new byte[dataChannel[c].frmC][];
+                //for (int frm = 0; frm < dataChannel[c].frmC; frm++)
+                Parallel.For(0, dataChannel[c].frmC, frm =>
                 {
-                    FileStream inFileStream = new FileStream($"{inFilePathName}{c}.dat", FileMode.Open, FileAccess.Read, FileShare.Read);
-                    byte[] inBuf = new byte[inFileStream.Length];
-                    inFileStream.Read(inBuf, 0, (int)inFileStream.Length);
-                    inFileStream.Close();
-                    IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 通道{c}读取完成.");
+                    channelFile[frm] = new byte[512 * 160 * 2];
+                    int rowS = (int)dataChannel[c].dtChannel.Rows[frm]["row"];
+                    int rowC = (int)dataChannel[c].dtChannel.Rows[frm + 1]["row"] - rowS;
+                    byte[] jp2BufA = new byte[rowC * 280];
+                    byte[] jp2BufB = new byte[rowC * 256 - 256 - 16];
+                    Array.Copy(inBuf, rowS * 280, jp2BufA, 0, jp2BufA.Length);
 
-                    byte[][] channelFile = new byte[dataChannel[c].frmC][];
-                    //for (int frm = 0; frm < dataChannel[c].frmC; frm++)
-                    Parallel.For(0, dataChannel[c].frmC, frm =>
+                    Array.Copy(jp2BufA, 1 * 280 + 32, jp2BufB, 0, 240);
+                    for (int r = 2; r < rowC; r++)
+                        Array.Copy(jp2BufA, r * 280 + 16, jp2BufB, (r - 2) * 256 + 240, 256);
+                    try
                     {
-                        channelFile[frm] = new byte[512 * 160 * 2];
-                        int rowS = (int)dataChannel[c].dtChannel.Rows[frm]["row"];
-                        int rowC = (int)dataChannel[c].dtChannel.Rows[frm + 1]["row"] - rowS;
-                        byte[] jp2BufA = new byte[rowC * 280];
-                        byte[] jp2BufB = new byte[rowC * 256 - 256 - 16];
-                        Array.Copy(inBuf, rowS * 280, jp2BufA, 0, jp2BufA.Length);
+                        Stream s = new MemoryStream(jp2BufB);
+                        FIBITMAP fibmp = FreeImage.LoadFromStream(s);
+                        Marshal.Copy(FreeImage.GetBits(fibmp), channelFile[frm], 0, 512 * 160 * 2);
+                        FreeImage.Unload(fibmp);
+                    }
+                    catch
+                    {
+                        errInfo.add(frm,"解压出错");
+                    }
 
-                        Array.Copy(jp2BufA, 1 * 280 + 32, jp2BufB, 0, 240);
-                        for (int r = 2; r < rowC; r++)
-                            Array.Copy(jp2BufA, r * 280 + 16, jp2BufB, (r - 2) * 256 + 240, 256);
-                        try
-                        {
-                            Stream s = new MemoryStream(jp2BufB);
-                            FIBITMAP fibmp = FreeImage.LoadFromStream(s);
-                            Marshal.Copy(FreeImage.GetBits(fibmp), channelFile[frm], 0, 512 * 160 * 2);
-                            FreeImage.Unload(fibmp);
-                        }
-                        catch { }
-
-                        if (frm % (dataChannel[c].frmC / 100) == 0 && c == 0)
-                            IProg_Bar.Report((double)frm / dataChannel[c].frmC);
-                    });
-                    if (c == 0)
-                        IProg_Bar.Report(1);
-                    IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 通道{c}解压完成.");
-                    FileStream fs_out_raw = new FileStream($"{Environment.CurrentDirectory}\\channelFiles\\{md5}_{c}.raw", FileMode.Create);
-                    for (int frm = 0; frm < dataChannel[c].frmC; frm++)
-                        fs_out_raw.Write(channelFile[frm], 0, 512 * 160 * 2);
-                    fs_out_raw.Close();
-                    IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 通道{c}写文件完成！");
+                    //if (frm % (dataChannel[c].frmC / 100) == 0 && c == 0)
+                    if (frm % (dataChannel[c].frmC / 100) == 0)
+                        IProg_Bar.Report((double)frm / dataChannel[c].frmC);
                 });
-                return $"{Environment.CurrentDirectory}\\channelFiles\\{md5}_";
-            });
+                //if (c == 0)
+                    IProg_Bar.Report(1);
+                IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 通道{c}解压完成.");
+                FileStream fs_out_raw = new FileStream($"{Environment.CurrentDirectory}\\channelFiles\\{md5}_{c}.raw", FileMode.Create);
+                for (int frm = 0; frm < dataChannel[c].frmC; frm++)
+                    fs_out_raw.Write(channelFile[frm], 0, 512 * 160 * 2);
+                fs_out_raw.Close();
+                IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 通道{c}写文件完成！");
+            }
+            return $"{Environment.CurrentDirectory}\\channelFiles\\{md5}_";
         }
 
         //图像拼接
-        public Task<int> mergeImage(string inFilePathName, IProgress<double> IProg_Bar, IProgress<string> IProg_Cmd)
+        public int mergeImage(string inFilePathName, IProgress<double> IProg_Bar, IProgress<string> IProg_Cmd)
         {
-            return Task.Run(() =>
+            IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 开始图像合并.");
+            IProg_Bar.Report(0);
+            Directory.CreateDirectory($"{Environment.CurrentDirectory}\\decFiles\\{md5}");
+            FileStream[] inFileStream = new FileStream[4];
+            for (int c = 0; c < 4; c++)
+                inFileStream[c] = new FileStream($"{inFilePathName}{c}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
+            int splitSum = (int)Math.Ceiling((double)dataChannel[0].frmC / 4096);
+            int imageWidth = 4096;
+            for (int i = 0; i < splitSum; i++)
             {
-                IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 开始图像合并.");
-                IProg_Bar.Report(0);
-                Directory.CreateDirectory($"{Environment.CurrentDirectory}\\decFiles\\{md5}");
-                FileStream[] inFileStream = new FileStream[4];
-                for (int c = 0; c < 4; c++)
-                    inFileStream[c] = new FileStream($"{inFilePathName}{c}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
-                int splitSum = (int)Math.Ceiling((double)dataChannel[0].frmC / 4096);
-                int imageWidth = 4096;
-                for (int i = 0; i < splitSum; i++)
-                {
-                    Directory.CreateDirectory($"{Environment.CurrentDirectory}\\decFiles\\{md5}\\{i}");
-                    byte[][] channelBuf = new byte[4][];
-                    if (i == splitSum - 1)
-                        imageWidth = dataChannel[0].frmC % 4096;
-                    for (int c = 0; c < 4; c++)
-                    {
-                        channelBuf[c] = new byte[imageWidth * 512 * 160 * 2];
-                        inFileStream[c].Read(channelBuf[c], 0, imageWidth * 512 * 160 * 2);
-                    }
-                    byte[][] imgBuf = new byte[160][];
-                    for (int b = 0; b < 160; b++)
-                    //Parallel.For(0, 160, b =>
-                    {
-                        imgBuf[b] = new byte[imageWidth * 2048 * 2];
-                        //for (int c = 0; c < 4; c++)
-                        Parallel.For(0, 4, c =>
-                            //for (int f = 0; f < imageWidth; f++)
-                            Parallel.For(0, imageWidth, f =>
-                                Array.Copy(channelBuf[c], f * 512 * 160 * 2 + b * 512 * 2, imgBuf[b], 2048 * 2 * f + c * 512 * 2, 512 * 2)));
-                        FileStream outFile = new FileStream($"{Environment.CurrentDirectory}\\decFiles\\{md5}\\{i}\\{b}.raw", FileMode.Create);
-                        outFile.Write(imgBuf[b], 0, 2048 * imageWidth * 2);
-                        outFile.Close();
-                    }
-                    IProg_Bar.Report((double)(i + 1) / splitSum);
-                }
+                Directory.CreateDirectory($"{Environment.CurrentDirectory}\\decFiles\\{md5}\\{i}");
+                byte[][] channelBuf = new byte[4][];
+                if (i == splitSum - 1)
+                    imageWidth = dataChannel[0].frmC % 4096;
                 for (int c = 0; c < 4; c++)
                 {
-                    inFileStream[c].Close();
+                    channelBuf[c] = new byte[imageWidth * 512 * 160 * 2];
+                    inFileStream[c].Read(channelBuf[c], 0, imageWidth * 512 * 160 * 2);
                 }
-                IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 合并完成！");
-                IProg_Bar.Report(1);
-                return 1;
-            });
+                byte[][] imgBuf = new byte[160][];
+                for (int b = 0; b < 160; b++)
+                //Parallel.For(0, 160, b =>
+                {
+                    imgBuf[b] = new byte[imageWidth * 2048 * 2];
+                    //for (int c = 0; c < 4; c++)
+                    Parallel.For(0, 4, c =>
+                        //for (int f = 0; f < imageWidth; f++)
+                        Parallel.For(0, imageWidth, f =>
+                            Array.Copy(channelBuf[c], f * 512 * 160 * 2 + b * 512 * 2, imgBuf[b], 2048 * 2 * f + c * 512 * 2, 512 * 2)));
+                    FileStream outFile = new FileStream($"{Environment.CurrentDirectory}\\decFiles\\{md5}\\{i}\\{b}.raw", FileMode.Create);
+                    outFile.Write(imgBuf[b], 0, 2048 * imageWidth * 2);
+                    outFile.Close();
+                }
+                IProg_Bar.Report((double)(i + 1) / splitSum);
+            }
+            for (int c = 0; c < 4; c++)
+            {
+                inFileStream[c].Close();
+            }
+
+            Bitmap bmp;
+            int cnt = (int)Math.Ceiling(dataChannel[0].frmC / (double)4096);
+            for (int i = 0; i < cnt; i++)
+            {
+                int h = 4096;
+                if (i == cnt - 1)
+                    h = dataChannel[0].frmC % 4096;
+                bmp = BmpOper.MakePseudoColor($"{Environment.CurrentDirectory}\\decFiles\\{md5}\\{i}\\", new ushort[] { 39, 76, 126 }, h);
+                bmp.RotateFlip(System.Drawing.RotateFlipType.Rotate90FlipX);
+                bmp.Save($"{Environment.CurrentDirectory}\\decFiles\\{md5}\\{i}.bmp");
+            }
+
+            IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 合并完成！");
+            IProg_Bar.Report(1);
+            return 1;
         }
 
         //数据库操作
@@ -481,6 +487,13 @@ namespace Spectra
                         new SQLiteParameter("MD5",md5)
                     });
             sqlExcute.BeginInsert();
+
+            //errInfo.update(dataChannel[0].dtChannel);
+            //for (int i = 0; i < errInfo.dtErrInfo.Rows.Count; i++)
+            //{
+            //    Insert(sqlExcute, errInfo.dtErrInfo.Rows[i]);
+            //}
+
             for (int f = 0; f < dataChannel[0].frmC; f++)
                 Insert(sqlExcute, f, dataChannel[0].frmC, dataChannel[0].dtChannel.Rows[f]);
             sqlExcute.EndInsert();
@@ -525,9 +538,28 @@ namespace Spectra
             {
                 sqlExcute.ExecuteNonQuery(sql, cmdparams);
             }
-            catch (Exception e)
+            catch// (Exception e)
             {
-                MessageBox.Show(e.ToString());
+                //MessageBox.Show(e.ToString());
+            }
+        }
+        public void Insert(SQLiteDatabase sqlExcute, DataRow dr)
+        {
+            var sql = "insert into FileErrors values(@错误位置,@错误类型,@MD5);";
+            var cmdparams = new List<SQLiteParameter>()
+                {
+                    new SQLiteParameter("错误位置",dr["错误位置"]),
+                    new SQLiteParameter("错误类型",dr["错误类型"]),
+                    new SQLiteParameter("MD5",md5)
+                };
+
+            try
+            {
+                sqlExcute.ExecuteNonQuery(sql, cmdparams);
+            }
+            catch// (Exception e)
+            {
+                //MessageBox.Show(e.ToString());
             }
         }
 
@@ -603,6 +635,49 @@ namespace Spectra
             outFileStream = new FileStream($"{pathDec}164.raw", FileMode.Create);
             outFileStream.Write(buf3dRight, 0, buf3dRight.Length);
             outFileStream.Close();
+        }
+    }
+}
+
+
+//每个通道的信息
+public class ErrorInfo
+{
+    public DataTable dtErrInfo;
+
+    public ErrorInfo()
+    {
+        dtErrInfo = new DataTable();
+        dtErrInfo.Columns.Add("错误位置", System.Type.GetType("System.String"));
+        dtErrInfo.Columns.Add("错误类型", System.Type.GetType("System.String"));
+    }
+
+    public void add(int frm,string info)
+    {
+        dtErrInfo.Rows.Add(new object[] {frm.ToString(),info});
+    }
+
+    public void update(DataTable dt)
+    {
+        int cnt = dt.Rows.Count;
+        if (cnt < 1)
+            return;
+
+        int curFrm = 0,rightFrm = 0;
+        for (int i = 0; i < cnt; i++)
+        {
+            curFrm = Convert.ToInt32(dt.Rows[i]["FrameID"]);
+            if (i == 0)
+                rightFrm = curFrm;
+            else
+            {
+                if (rightFrm == 65535)
+                    rightFrm = 0;
+                else
+                    rightFrm++;
+                if(curFrm!= rightFrm)
+                    dtErrInfo.Rows.Add(new object[] { rightFrm.ToString(), "丢失" });
+            }
         }
     }
 }

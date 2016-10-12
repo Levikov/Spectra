@@ -22,14 +22,12 @@ namespace Spectra
         /// <param name="band">3个谱段值，相同则为灰度图</param>
         /// <param name="low">亮度等级1-8(4为原始图像)</param>
         /// <returns></returns>
-        public static Task<Bitmap> MakePseudoColor(string path,UInt16[] band, UInt16 gain)
+        public static Task<Bitmap> MakePseudoColor(string path,UInt16[] band, UInt16 gain, int height)
         {
             return Task.Run(() => {
                 if (band[0] > 160 || band[1] > 160 || band[2] > 160 || gain > 8)
                     return null;
-                if (ImageInfo.dtImgInfo == null)
-                    return null;
-                int height = ImageInfo.imgWidth, width = 2048;
+                int width = 2048;
                 if (height < 1)
                     return null;
 
@@ -104,14 +102,14 @@ namespace Spectra
                     (double)DataProc.readU16_PIC(bufBand[maxIndex], height * width / 2) +
                     (double)DataProc.readU16_PIC(bufBand[maxIndex], height * width) +
                     (double)DataProc.readU16_PIC(bufBand[maxIndex], height * width * 5 / 4) +
-                    (double)DataProc.readU16_PIC(bufBand[maxIndex], height * width * 2 / 3) +
+                    (double)DataProc.readU16_PIC(bufBand[maxIndex], height * width * 3 / 2) +
                     (double)DataProc.readU16_PIC(bufBand[maxIndex], height * width * 7 / 4)) /
                     (DataProc.readU16_PIC(bufBand[i], height * width / 4) +
                     DataProc.readU16_PIC(bufBand[i], height * width * 3 / 4) +
                     DataProc.readU16_PIC(bufBand[i], height * width / 2) +
                     DataProc.readU16_PIC(bufBand[i], height * width) +
                     DataProc.readU16_PIC(bufBand[i], height * width * 5 / 4) +
-                    DataProc.readU16_PIC(bufBand[i], height * width * 2 / 3) +
+                    DataProc.readU16_PIC(bufBand[i], height * width * 3 / 2) +
                     DataProc.readU16_PIC(bufBand[i], height * width * 7 / 4)
                     );
                 }
@@ -226,14 +224,14 @@ namespace Spectra
                     (double)DataProc.readU16_PIC(bufBand[maxIndex], height * width / 2) +
                     (double)DataProc.readU16_PIC(bufBand[maxIndex], height * width) +
                     (double)DataProc.readU16_PIC(bufBand[maxIndex], height * width * 5 / 4) +
-                    (double)DataProc.readU16_PIC(bufBand[maxIndex], height * width * 2 / 3) +
+                    (double)DataProc.readU16_PIC(bufBand[maxIndex], height * width * 3 / 2) +
                     (double)DataProc.readU16_PIC(bufBand[maxIndex], height * width * 7 / 4)) /
                     (DataProc.readU16_PIC(bufBand[i], height * width / 4) +
                     DataProc.readU16_PIC(bufBand[i], height * width * 3 / 4) +
                     DataProc.readU16_PIC(bufBand[i], height * width / 2) +
                     DataProc.readU16_PIC(bufBand[i], height * width) +
                     DataProc.readU16_PIC(bufBand[i], height * width * 5 / 4) +
-                    DataProc.readU16_PIC(bufBand[i], height * width * 2 / 3) +
+                    DataProc.readU16_PIC(bufBand[i], height * width * 3 / 2) +
                     DataProc.readU16_PIC(bufBand[i], height * width * 7 / 4)
                     );
 
@@ -259,6 +257,101 @@ namespace Spectra
                 bmp.UnlockBits(bmpData);
                 return bmp;
             });
+        }
+
+
+        /// <summary>
+        /// 按片生成伪彩图像
+        /// </summary>
+        /// <param name="path">文件存放位置</param>
+        /// <param name="band">3个谱段值，相同则为灰度图</param>
+        /// <param name="height">像高</param>
+        /// <returns></returns>
+        public static Bitmap MakePseudoColor(string path, UInt16[] band, int height)
+        {
+            if (band[0] > 160 || band[1] > 160 || band[2] > 160)
+                return null;
+            int width = 2048;
+            if (height < 1)
+                return null;
+                
+            byte[] bufBmp = new byte[width * height * 3];                       //RGB图像缓存
+            byte[][] bufBand = new byte[3][];                                   //16bit单谱段图像缓存
+            for (int i = 0; i < 3; i++)
+                bufBand[i] = new byte[width * height * 2];
+
+            FileStream[] fBmp = new FileStream[3];
+            if (band[0] == band[1] && band[1] == band[2])
+            {
+                try
+                {
+                    fBmp[0] = new FileStream($"{path}{band[0]}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
+                    byte[] tBuf = new byte[height * width * 2];
+                    fBmp[0].Read(tBuf, 0, width * height * 2);
+                    fBmp[0].Close();
+                    Array.Copy(tBuf, 0, bufBand[0], 0, width * height * 2);
+                }
+                catch { }
+                bufBand[1] = bufBand[2] = bufBand[0];
+            }
+            else
+            {
+                for (int b = 0; b < 3; b++)
+                {
+                    try
+                    {
+                        fBmp[b] = new FileStream($"{path}{band[b]}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
+                        byte[] tBuf = new byte[height * width * 2];
+                        fBmp[b].Read(tBuf, 0, width * height * 2);
+                        fBmp[b].Close();
+                        Array.Copy(tBuf, 0, bufBand[b], 0, width * height * 2);
+                    }
+                    catch { }
+                }
+            }
+
+            double max = 0;
+            int maxIndex = 0;
+            for (int i = 0; i < 3; i++)
+            {
+                if (DataProc.readU16_PIC(bufBand[i], height * width) > max)
+                {
+                    max = DataProc.readU16_PIC(bufBand[i], height * width);
+                    maxIndex = i;
+                }
+            }
+            double[] ratioBand = new double[3];
+            for (int i = 0; i < 3; i++)
+            {
+                ratioBand[i] =
+                ((double)DataProc.readU16_PIC(bufBand[maxIndex], height * width / 4) +
+                (double)DataProc.readU16_PIC(bufBand[maxIndex], height * width * 3 / 4) +
+                (double)DataProc.readU16_PIC(bufBand[maxIndex], height * width / 2) +
+                (double)DataProc.readU16_PIC(bufBand[maxIndex], height * width) +
+                (double)DataProc.readU16_PIC(bufBand[maxIndex], height * width * 5 / 4) +
+                (double)DataProc.readU16_PIC(bufBand[maxIndex], height * width * 3 / 2) +
+                (double)DataProc.readU16_PIC(bufBand[maxIndex], height * width * 7 / 4)) /
+                (DataProc.readU16_PIC(bufBand[i], height * width / 4) +
+                DataProc.readU16_PIC(bufBand[i], height * width * 3 / 4) +
+                DataProc.readU16_PIC(bufBand[i], height * width / 2) +
+                DataProc.readU16_PIC(bufBand[i], height * width) +
+                DataProc.readU16_PIC(bufBand[i], height * width * 5 / 4) +
+                DataProc.readU16_PIC(bufBand[i], height * width * 3 / 2) +
+                DataProc.readU16_PIC(bufBand[i], height * width * 7 / 4)
+                );
+            }
+
+            int gain = 4;
+            Parallel.For(0, width * height, i => {
+                for (int j = 0; j < 3; j++)
+                    bufBmp[i * 3 + 2 - j] = (byte)Math.Min(((int)(DataProc.readU16_PIC(bufBand[j], i * 2) * ratioBand[j]) * 4 * gain >> 6), 255);
+            });
+
+            Bitmap bmp = new Bitmap(width, height, PixelFormat.Format24bppRgb);
+            BitmapData bmpData = bmp.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.WriteOnly, bmp.PixelFormat);
+            Marshal.Copy(bufBmp, 0, bmpData.Scan0, width * height * 3);
+            bmp.UnlockBits(bmpData);
+            return bmp;
         }
     }
 }

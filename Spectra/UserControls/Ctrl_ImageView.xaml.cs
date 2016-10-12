@@ -328,9 +328,34 @@ namespace Spectra
             DataRow dr = ImageInfo.dtImgInfo.Rows[(int)p.X];
             barFrameId.Content = Convert.ToInt32(dr["FrameId"]).ToString();
             barFreq.Content = Convert.ToInt32(dr["Freq"]).ToString();
-            barIntegral.Content = Convert.ToInt32(dr["Integral"]).ToString();
+            barIntegral.Content = IntegralToLevel(Convert.ToInt32(dr["Integral"])).ToString();
             barStartRow.Content = Convert.ToInt32(dr["StartRow"]).ToString();
             barGain.Content = Convert.ToInt32(dr["Gain"]).ToString();
+        }
+
+        private int IntegralToLevel(int integral)
+        {
+            switch (integral)
+            {
+                case 50:
+                    return 0;
+                case 100:
+                    return 1;
+                case 200:
+                    return 2;
+                case 300:
+                    return 3;
+                case 400:
+                    return 4;
+                case 500:
+                    return 5;
+                case 600:
+                    return 6;
+                case 1000:
+                    return 7;
+                default:
+                    return 8;
+            }
         }
     }
 

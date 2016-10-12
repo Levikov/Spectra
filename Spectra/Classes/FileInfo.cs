@@ -54,12 +54,12 @@ namespace Spectra
                 SQLiteFunc.ExcuteSQL("insert into FileDetails (文件名,文件路径,文件大小,是否已解包,是否已解压,MD5) values ('?','?','?','?','?','?')",
                     FileInfo.srcFileName, FileInfo.srcFilePathName, File.OpenRead(FileInfo.srcFilePathName).Length, "否", "否", FileInfo.md5);
                 SQLiteFunc.ExcuteSQL("insert into FileDetails_dec (MD5) values ('?')", FileInfo.md5);
-                strReport = DateTime.Now.ToString("HH:mm:ss") + " 文件第一次导入,未解包,未解压";
+                strReport = DateTime.Now.ToString("HH:mm:ss") + " 文件"+FileInfo.srcFileName.ToString()+"第一次导入,未解包,未解压";
             }
             else
             {
                 FileInfo.srcFileLength = Convert.ToInt64(fileDetail.Rows[0][2]);       //文件大小
-                strReport = DateTime.Now.ToString("HH:mm:ss") + " 文件";
+                strReport = DateTime.Now.ToString("HH:mm:ss") + " 文件"+FileInfo.srcFileName.ToString();
                 if ((string)fileDetail.Rows[0][3] == "是")
                 {
                     FileInfo.isUnpack = true;

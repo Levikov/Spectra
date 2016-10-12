@@ -22,6 +22,12 @@
         </Label>
         <Path x:Name="pathOrbit" Data="M 50,100 L 100,100 100,50 50,50" StrokeThickness="10" Fill="Red" Opacity="0.4"/>
 
+        <DockPanel Margin="20" Height="30" VerticalAlignment="Top" HorizontalAlignment="Left" Background="Wheat">
+            <Label Content="经纬起点:" FontSize="16" VerticalAlignment="Bottom" VerticalContentAlignment="Center"/>
+            <Label x:Name="lblAllStart" FontSize="16" VerticalAlignment="Bottom" VerticalContentAlignment="Center"/>
+            <Label Content="经纬起点:" FontSize="16" VerticalAlignment="Bottom" VerticalContentAlignment="Center"/>
+            <Label x:Name="lblAllEnd" FontSize="16" VerticalAlignment="Bottom" VerticalContentAlignment="Center"/>
+        </DockPanel>
         <DockPanel Margin="20" Height="30" VerticalAlignment="Top" HorizontalAlignment="Right" Background="Wheat">
             <RadioButton x:Name="rdbMapModeRoad" Content="道路图" FontSize="16" VerticalAlignment="Bottom" Margin="10,0,10,6" Checked="rdbMapModeRoad_Checked" VerticalContentAlignment="Center"/>
             <RadioButton x:Name="rdbMapModeSat" Content="地形图" FontSize="16" VerticalAlignment="Center" Margin="10,0" Checked="rdbMapModeSat_Checked" VerticalContentAlignment="Center" IsChecked="True"/>

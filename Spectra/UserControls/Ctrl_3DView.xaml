@@ -83,23 +83,13 @@
 
     <Grid Name="grid">
         <local:Ctrl_BusyMask x:Name="Busy"></local:Ctrl_BusyMask>
-        <Custom:Scene3D BorderBrush="White" Name="scene" BorderThickness="1" MouseDown="scene_MouseDown" Background="{StaticResource WinViewBack}" MouseRightButtonDown="scene_MouseRightButtonDown"/>
-        <DockPanel Margin="20,20,0,0" Height="50" VerticalAlignment="Top" HorizontalAlignment="Left">
-            <CheckBox x:Name="cbOriShow" Margin="0,0,20,0" VerticalAlignment="Center" VerticalContentAlignment="Center" Content="显示原图" FontSize="20" Foreground="{StaticResource WinViewFore}" IsChecked="True"/>
-            <Label HorizontalAlignment="Left" Content="行号:" VerticalAlignment="Center" FontSize="20" Foreground="{StaticResource WinViewFore}"/>
-            <TextBlock x:Name="Row" Text="0" Width="60" FontSize="20" Foreground="{StaticResource WinViewFore}" VerticalAlignment="Center"/>
-            <Label HorizontalAlignment="Left" Content="列号:" VerticalAlignment="Center" FontSize="20" Foreground="{StaticResource WinViewFore}"/>
-            <TextBlock x:Name="Col" Text="0" Width="60" FontSize="20" Foreground="{StaticResource WinViewFore}" VerticalAlignment="Center"/>
-            <Label HorizontalAlignment="Left" Content="谱段:" VerticalAlignment="Center" FontSize="20" Foreground="{StaticResource WinViewFore}"/>
-            <TextBlock x:Name="Band" Text="0" Width="60" FontSize="20" Foreground="{StaticResource WinViewFore}" VerticalAlignment="Center"/>
-            <Label HorizontalAlignment="Left" Content="当前谱段:" VerticalAlignment="Center" FontSize="20" Foreground="{StaticResource WinViewFore}"/>
-            <TextBlock x:Name="curBand" Text="0" Width="60" FontSize="20" Foreground="{StaticResource WinViewFore}" VerticalAlignment="Center"/>
-        </DockPanel>
+        <Custom:Scene3D Margin="0,0,0,30" BorderBrush="White" Name="scene" BorderThickness="1" MouseDown="scene_MouseDown" Background="{StaticResource WinViewBack}" MouseRightButtonDown="scene_MouseRightButtonDown"/>
+        
         <DockPanel Margin="20,220,0,0" Height="50" VerticalAlignment="Top" HorizontalAlignment="Left" Visibility="Collapsed">
             <Label HorizontalAlignment="Left" Content="坐标:" VerticalAlignment="Center" FontSize="20" Foreground="{StaticResource WinViewFore}"/>
             <TextBlock x:Name="tb_3DCoord" Text="(0,0,0)" VerticalAlignment="Center" FontSize="20" Foreground="{StaticResource WinViewFore}"/>
         </DockPanel>
-        <Image x:Name="ImageSingleFrm" Margin="5,5" MaxHeight="160" MaxWidth="2048" MinHeight="40" MinWidth="512" HorizontalAlignment="Left" VerticalAlignment="Bottom">
+        <Image x:Name="ImageSingleFrm" Margin="5,31" MaxHeight="160" MaxWidth="2048" MinHeight="40" MinWidth="512" HorizontalAlignment="Left" VerticalAlignment="Bottom">
             <Image.Resources>
                 <Style TargetType="{x:Type Image}">
                     <Style.Triggers>
@@ -110,5 +100,19 @@
                 </Style>
             </Image.Resources>
         </Image>
+        <StatusBar Height="30" Margin="0" VerticalAlignment="Bottom" FontSize="12" Background="{StaticResource TitleBack}" FontWeight="Thin">
+            <StackPanel Orientation="Horizontal">
+                <CheckBox x:Name="cbOriShow" Margin="0,0,20,0" VerticalAlignment="Center" VerticalContentAlignment="Center" Content="显示原图" Foreground="{StaticResource WinViewFore}" IsChecked="True"/>
+                <Label HorizontalAlignment="Left" Content="帧号:" Foreground="{StaticResource MinFontFore}"/>
+                <Label x:Name="Row" Content="0" Width="45" Foreground="{StaticResource MinFontFore}"/>
+                <Label HorizontalAlignment="Left" Content="列号:" Foreground="{StaticResource MinFontFore}"/>
+                <Label x:Name="Col" Content="0" Width="40" Foreground="{StaticResource MinFontFore}"/>
+                <Label HorizontalAlignment="Left" Content="谱段:" Foreground="{StaticResource MinFontFore}"/>
+                <Label x:Name="Band" Content="0" Width="35" Foreground="{StaticResource MinFontFore}"/>
+                <Label HorizontalAlignment="Left" Content="当前谱段(抽出):" Foreground="{StaticResource MinFontFore}"/>
+                <Label x:Name="curBand" Content="0" Width="35" Foreground="{StaticResource MinFontFore}"/>
+            </StackPanel>
+        </StatusBar>
+        <Border x:Name="borderSection" BorderBrush="Gold" BorderThickness="1" Visibility="Visible"/>
     </Grid>
 </UserControl>

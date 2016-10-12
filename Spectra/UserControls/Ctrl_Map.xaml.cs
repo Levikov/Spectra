@@ -168,6 +168,8 @@ namespace Spectra
         private void MapControl_Loaded(object sender, RoutedEventArgs e)
         {
             setMaker();
+            lblAllStart.Content = $"({ImageInfo.startCoord.Lon},{ImageInfo.startCoord.Lat})";
+            lblAllEnd.Content = $"({ImageInfo.endCoord.Lon},{ImageInfo.endCoord.Lat})";
         }
     }
     public static class MapTilerSample
