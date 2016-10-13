@@ -338,7 +338,7 @@ namespace Spectra
 
                 //更新文件信息
                 FileInfo.frmSum = (long)sqlExcute.ExecuteScalar($"SELECT COUNT(*) FROM AuxData WHERE MD5='{FileInfo.md5}'");                                    //帧总数
-                DateTime T0 = new DateTime(2010, 12, 1, 12, 0, 0);
+                DateTime T0 = new DateTime(2012, 1, 1, 0, 0, 0);
                 FileInfo.startTime = T0.AddSeconds((double)sqlExcute.ExecuteScalar($"SELECT GST FROM AuxData WHERE MD5='{FileInfo.md5}' ORDER BY FrameId ASC"));//起始时间
                 FileInfo.endTime = T0.AddSeconds((double)sqlExcute.ExecuteScalar($"SELECT GST FROM AuxData WHERE MD5='{FileInfo.md5}' ORDER BY FrameId DESC")); //结束时间
                 double lat = (double)sqlExcute.ExecuteScalar($"SELECT Lat FROM AuxData WHERE MD5='{FileInfo.md5}' ORDER BY FrameId ASC");
@@ -556,7 +556,7 @@ namespace Spectra
                 {
                     DateTime selectedStartDate = start_time;
                     DateTime selectedEndDate = end_time;
-                    DateTime T0 = new DateTime(2010, 12, 1, 12, 0, 0);
+                    DateTime T0 = new DateTime(2012, 1, 1, 0, 0, 0);
                     TimeSpan ts_Start = selectedStartDate.Subtract(T0);
                     TimeSpan ts_End = selectedEndDate.Subtract(T0);
                     command += " AND GST>=" + (ts_Start.TotalSeconds.ToString()) + " AND GST<=" + ts_End.TotalSeconds.ToString();

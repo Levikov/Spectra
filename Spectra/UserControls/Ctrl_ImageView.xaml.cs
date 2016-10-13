@@ -2,6 +2,7 @@
 using System.Data;
 using System.Drawing;
 using System.IO;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -326,11 +327,22 @@ namespace Spectra
         private void getParams(System.Windows.Point p)
         {
             DataRow dr = ImageInfo.dtImgInfo.Rows[(int)p.X];
-            barFrameId.Content = Convert.ToInt32(dr["FrameId"]).ToString();
-            barFreq.Content = Convert.ToInt32(dr["Freq"]).ToString();
-            barIntegral.Content = IntegralToLevel(Convert.ToInt32(dr["Integral"])).ToString();
-            barStartRow.Content = Convert.ToInt32(dr["StartRow"]).ToString();
-            barGain.Content = Convert.ToInt32(dr["Gain"]).ToString();
+
+            int frm = Convert.ToInt32(dr["FrameId"]);
+            int freq = Convert.ToInt32(dr["Freq"]);
+            int integral = IntegralToLevel(Convert.ToInt32(dr["Integral"]));
+            int startRow = Convert.ToInt32(dr["StartRow"]);
+            int gain = Convert.ToInt32(dr["Gain"]);
+
+            barFrameId.Content = frm.ToString();
+            barFreq.Content = freq.ToString();
+            barIntegral.Content = integral.ToString();
+            barStartRow.Content = startRow.ToString();
+            barGain.Content = gain.ToString();
+            
+            if (App.global_FrmImgWindow == null)
+                App.global_FrmImgWindow = new FrmImgWindow();
+            App.global_FrmImgWindow.imgShow(frm, freq, integral, startRow, gain);
         }
 
         private int IntegralToLevel(int integral)

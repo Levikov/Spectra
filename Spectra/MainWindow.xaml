@@ -185,12 +185,12 @@
                             <Label Grid.Column="1" Content="—" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             <TextBox x:Name="txtSectionEndFrm" Text="0" Grid.Column="2" Height="30"/>
                         </Grid>
-                        <Button x:Name="btnSectionBegin" Grid.Row="1" Grid.Column="2" Content="开始选择" Template="{DynamicResource ButtonDefault}" Width="160" Click="btnSectionBegin_Click" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        <Button x:Name="btnSectionBegin" Grid.Row="1" Grid.Column="2" Content="开始选择" Template="{DynamicResource ButtonDefault}" Width="160" Click="btnSectionBegin_Click" HorizontalAlignment="Center" VerticalAlignment="Center" IsEnabled="False"/>
                         <Label Grid.Row="2" Grid.Column="0" Content="文件存储路径:" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         <TextBox x:Name="txtSaveFilesPath" Grid.Row="2" Grid.Column="1" IsReadOnly="True" Height="30"/>
-                        <Button x:Name="btnSaveFilesPath" Grid.Row="2" Grid.Column="2" Content="选择存储路径" Template="{DynamicResource ButtonDefault}" Width="160" Click="btnSaveFilesPath_Click" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                        <Button x:Name="btnSaveFilesPath" Grid.Row="2" Grid.Column="2" Content="选择存储路径" Template="{DynamicResource ButtonDefault}" Width="160" Click="btnSaveFilesPath_Click" VerticalAlignment="Center" HorizontalAlignment="Center"  IsEnabled="False"/>
                         <ProgressBar Grid.Row="3" Grid.Column="1" Height="30" BorderBrush="{StaticResource ButtonBack}"/>
-                        <Button x:Name="btnSaveFiles" Grid.Row="3" Grid.Column="2" Content="开始存储" Template="{DynamicResource ButtonDefault}" Width="160" Click="btnSaveFiles_Click" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        <Button x:Name="btnSaveFiles" Grid.Row="3" Grid.Column="2" Content="开始存储" Template="{DynamicResource ButtonDefault}" Width="160" Click="btnSaveFiles_Click" HorizontalAlignment="Center" VerticalAlignment="Center"  IsEnabled="False"/>
                     </Grid>
                 </GroupBox>
             </Grid>
@@ -431,19 +431,19 @@
                             <DataGridTextColumn Header="GST微秒值" Binding="{Binding GST_US}" Width="200"/>
                             <DataGridTextColumn Header="纬度" Binding="{Binding Lat}" Width="200"/>
                             <DataGridTextColumn Header="经度" Binding="{Binding Lon}" Width="200"/>
-                            <DataGridTextColumn Header="位置坐标X" Binding="{Binding X}" Width="200"/>
-                            <DataGridTextColumn Header="位置坐标Y" Binding="{Binding Y}" Width="200"/>
-                            <DataGridTextColumn Header="位置坐标Z" Binding="{Binding Z}" Width="200"/>
-                            <DataGridTextColumn Header="速度-X" Binding="{Binding Vx}" Width="200"/>
-                            <DataGridTextColumn Header="速度-Y" Binding="{Binding Vy}" Width="200"/>
-                            <DataGridTextColumn Header="速度-Z" Binding="{Binding Vz}" Width="200"/>
-                            <DataGridTextColumn Header="角速率-X" Binding="{Binding Ox}" Width="200"/>
-                            <DataGridTextColumn Header="角速率-Y" Binding="{Binding Oy}" Width="200"/>
-                            <DataGridTextColumn Header="角速率-Z" Binding="{Binding Oz}" Width="200"/>
-                            <DataGridTextColumn Header="姿态-1" Binding="{Binding Q1}" Width="200"/>
-                            <DataGridTextColumn Header="姿态-2" Binding="{Binding Q2}" Width="200"/>
-                            <DataGridTextColumn Header="姿态-3" Binding="{Binding Q3}" Width="200"/>
-                            <DataGridTextColumn Header="姿态-4" Binding="{Binding Q4}" Width="200"/>
+                            <DataGridTextColumn Header="位置坐标X(公里)" Binding="{Binding X}" Width="200"/>
+                            <DataGridTextColumn Header="位置坐标Y(公里)" Binding="{Binding Y}" Width="200"/>
+                            <DataGridTextColumn Header="位置坐标Z(公里)" Binding="{Binding Z}" Width="200"/>
+                            <DataGridTextColumn Header="速度-X(公里/秒)" Binding="{Binding Vx}" Width="200"/>
+                            <DataGridTextColumn Header="速度-Y(公里/秒)" Binding="{Binding Vy}" Width="200"/>
+                            <DataGridTextColumn Header="速度-Z(公里/秒)" Binding="{Binding Vz}" Width="200"/>
+                            <DataGridTextColumn Header="角速率-X(度/秒)" Binding="{Binding Ox}" Width="200"/>
+                            <DataGridTextColumn Header="角速率-Y(度/秒)" Binding="{Binding Oy}" Width="200"/>
+                            <DataGridTextColumn Header="角速率-Z(度/秒)" Binding="{Binding Oz}" Width="200"/>
+                            <DataGridTextColumn Header="姿态-1(度)" Binding="{Binding Q1}" Width="200"/>
+                            <DataGridTextColumn Header="姿态-2(度)" Binding="{Binding Q2}" Width="200"/>
+                            <DataGridTextColumn Header="姿态-3(度)" Binding="{Binding Q3}" Width="200"/>
+                            <DataGridTextColumn Header="姿态-4(度)" Binding="{Binding Q4}" Width="200"/>
                             <DataGridTextColumn Header="帧频" Binding="{Binding Freq}" Width="200"/>
                             <DataGridTextColumn Header="积分时间" Binding="{Binding Integral}" Width="200"/>
                             <DataGridTextColumn Header="起始行" Binding="{Binding StartRow}" Width="200"/>

@@ -62,7 +62,7 @@ namespace Spectra
             startCoord.Lon = Convert.ToDouble(dtImgInfo.Compute("min(Lon)", ""));
             endCoord.Lat = Convert.ToDouble(dtImgInfo.Compute("max(Lat)", ""));
             endCoord.Lon = Convert.ToDouble(dtImgInfo.Compute("max(Lon)", ""));
-            DateTime T0 = new DateTime(2010, 12, 1, 12, 0, 0);
+            DateTime T0 = new DateTime(2012, 1, 1, 0, 0, 0);
             startTime = T0.AddSeconds(startSec);
             endTime = T0.AddSeconds(endSec);
         }

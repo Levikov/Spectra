@@ -187,6 +187,9 @@
     <Compile Include="Windows\DynamicImagingWindow_Win32.Designer.cs">
       <DependentUpon>DynamicImagingWindow_Win32.cs</DependentUpon>
     </Compile>
+    <Compile Include="Windows\FrmImgWindow.xaml.cs">
+      <DependentUpon>FrmImgWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Windows\MapWindow.xaml.cs">
       <DependentUpon>MapWindow.xaml</DependentUpon>
     </Compile>
@@ -301,6 +304,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Windows\3DWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\FrmImgWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

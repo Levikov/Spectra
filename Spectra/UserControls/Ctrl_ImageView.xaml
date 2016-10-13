@@ -66,9 +66,9 @@
                 <Label x:Name="barFreq" Content="0" Width="35" Foreground="{StaticResource MinFontFore}"/>
                 <Label HorizontalAlignment="Left" Content="起始行:" Foreground="{StaticResource MinFontFore}"/>
                 <Label x:Name="barStartRow" Content="0" Width="35" Foreground="{StaticResource MinFontFore}"/>
-                <Label HorizontalAlignment="Left" Content="积分档:" Foreground="{StaticResource MinFontFore}"/>
+                <Label HorizontalAlignment="Left" Content="积分设置:" Foreground="{StaticResource MinFontFore}"/>
                 <Label x:Name="barIntegral" Content="0" Width="20" Foreground="{StaticResource MinFontFore}"/>
-                <Label HorizontalAlignment="Left" Content="增益档:" Foreground="{StaticResource MinFontFore}"/>
+                <Label HorizontalAlignment="Left" Content="增益设置:" Foreground="{StaticResource MinFontFore}"/>
                 <Label x:Name="barGain" Content="0" Width="20" Foreground="{StaticResource MinFontFore}"/>
             </StackPanel>
         </StatusBar>

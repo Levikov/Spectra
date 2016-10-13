@@ -91,16 +91,16 @@ namespace Spectra
                 Vx = readI32(buf, 44) / (double)1000;
                 Vy = readI32(buf, 48) / (double)1000;
                 Vz = readI32(buf, 52) / (double)1000;
-                Ox = readI32(buf, 81) / (double)10000 * 57.3;
-                Oy = readI32(buf, 85) / (double)10000 * 57.3;
-                Oz = readI32(buf, 89) / (double)10000 * 57.3;
+                Ox = readI32(buf, 81) * 57.3;
+                Oy = readI32(buf, 85) * 57.3;
+                Oz = readI32(buf, 89) * 57.3;
                 Q1 = readI32(buf, 65) / (double)10000 * 57.3;
                 Q2 = readI32(buf, 69) / (double)10000 * 57.3;
                 Q3 = readI32(buf, 73) / (double)10000 * 57.3;
                 Q4 = readI32(buf, 77) / (double)10000 * 57.3;
 
                 Freq = (double)100000 / (buf[102] * 256 + buf[103]);
-                Integral = buf[108] * 256 + buf[109];
+                Integral = IntegralToLevel(buf[108] * 256 + buf[109]);
                 StartRow = buf[112] * 256 + buf[113];
                 Gain = buf[115];
 
@@ -135,10 +135,16 @@ namespace Spectra
                 return BitConverter.ToUInt32(conv, 0);
             }
 
-            public Int32 readI32(byte[] buf, int addr)
+            public float readI32(byte[] buf, int addr)
             {
-                byte[] conv = new byte[4] { buf[addr + 3], buf[addr + 2], buf[addr + 1], buf[addr] };
-                return BitConverter.ToInt32(conv, 0);
+                byte[] mathBuf = new byte[4];
+                mathBuf[0] = buf[addr + 3];
+                mathBuf[1] = buf[addr + 2];
+                mathBuf[2] = buf[addr + 1];
+                mathBuf[3] = buf[addr + 0];
+                return BitConverter.ToSingle(mathBuf, 0);
+                //byte[] conv = new byte[4] { buf[addr + 3], buf[addr + 2], buf[addr + 1], buf[addr] };
+                //return BitConverter.ToInt32(conv, 0);
             }
 
             public static double[] CalEarthLonLat(double[] cuR, double fgst)
@@ -166,6 +172,31 @@ namespace Spectra
                 else { }
                 clonlat[0] = lon;                                       //经度
                 return clonlat;
+            }
+
+            public int IntegralToLevel(int integral)
+            {
+                switch (integral)
+                {
+                    case 50:
+                        return 0;
+                    case 100:
+                        return 1;
+                    case 200:
+                        return 2;
+                    case 300:
+                        return 3;
+                    case 400:
+                        return 4;
+                    case 500:
+                        return 5;
+                    case 600:
+                        return 6;
+                    case 1000:
+                        return 7;
+                    default:
+                        return 8;
+                }
             }
         }
 
@@ -277,8 +308,9 @@ namespace Spectra
             {
                 if (inBuf[position] == 0xEB && inBuf[position + 1] == 0x90 && inBuf[position + 2] == 0x57 && inBuf[position + 3] == 0x16)
                 {
-                    if(inBuf.Length-position>=280)
-                        Array.Copy(inBuf, position, outBuf, 280 * packCnt, 280);
+                    if (inBuf.Length - position < 280)
+                        break;
+                    Array.Copy(inBuf, position, outBuf, 280 * packCnt, 280);
                     position += 280;
                     packCnt++;
                 }
@@ -571,7 +603,7 @@ namespace Spectra
 
             //更新文件信息
             FileInfo.frmSum = dataChannel[0].frmC;// (long)sqlExcute.ExecuteScalar($"SELECT COUNT(*) FROM AuxData WHERE MD5='{FileInfo.md5}'");                                    //帧总数
-            DateTime T0 = new DateTime(2010, 12, 1, 12, 0, 0);
+            DateTime T0 = new DateTime(2012, 1, 1, 0, 0, 0);
             FileInfo.startTime = T0.AddSeconds((double)dataChannel[0].dtChannel.Rows[0]["GST"]);//sqlExcute.ExecuteScalar($"SELECT GST FROM AuxData WHERE MD5='{FileInfo.md5}' ORDER BY FrameId ASC"));//起始时间
             FileInfo.endTime = T0.AddSeconds((double)dataChannel[0].dtChannel.Rows[dataChannel[0].frmC-1]["GST"]);//sqlExcute.ExecuteScalar($"SELECT GST FROM AuxData WHERE MD5='{FileInfo.md5}' ORDER BY FrameId DESC")); //结束时间
             double lat = (double)dataChannel[0].dtChannel.Rows[0]["Lat"];//sqlExcute.ExecuteScalar($"SELECT Lat FROM AuxData WHERE MD5='{FileInfo.md5}' ORDER BY FrameId ASC");
@@ -638,46 +670,45 @@ namespace Spectra
             outFileStream.Close();
         }
     }
-}
 
-
-//每个通道的信息
-public class ErrorInfo
-{
-    public DataTable dtErrInfo;
-
-    public ErrorInfo()
+    //每个通道的信息
+    public class ErrorInfo
     {
-        dtErrInfo = new DataTable();
-        dtErrInfo.Columns.Add("错误位置", System.Type.GetType("System.String"));
-        dtErrInfo.Columns.Add("错误类型", System.Type.GetType("System.String"));
-    }
+        public DataTable dtErrInfo;
 
-    public void add(int frm,string info)
-    {
-        dtErrInfo.Rows.Add(new object[] {frm.ToString(),info});
-    }
-
-    public void update(DataTable dt)
-    {
-        int cnt = dt.Rows.Count;
-        if (cnt < 1)
-            return;
-
-        int curFrm = 0,rightFrm = 0;
-        for (int i = 0; i < cnt; i++)
+        public ErrorInfo()
         {
-            curFrm = Convert.ToInt32(dt.Rows[i]["FrameID"]);
-            if (i == 0)
-                rightFrm = curFrm;
-            else
+            dtErrInfo = new DataTable();
+            dtErrInfo.Columns.Add("错误位置", System.Type.GetType("System.String"));
+            dtErrInfo.Columns.Add("错误类型", System.Type.GetType("System.String"));
+        }
+
+        public void add(int frm,string info)
+        {
+            dtErrInfo.Rows.Add(new object[] {frm.ToString(),info});
+        }
+
+        public void update(DataTable dt)
+        {
+            int cnt = dt.Rows.Count;
+            if (cnt < 1)
+                return;
+
+            int curFrm = 0,rightFrm = 0;
+            for (int i = 0; i < cnt; i++)
             {
-                if (rightFrm == 65535)
-                    rightFrm = 0;
+                curFrm = Convert.ToInt32(dt.Rows[i]["FrameID"]);
+                if (i == 0)
+                    rightFrm = curFrm;
                 else
-                    rightFrm++;
-                if(curFrm!= rightFrm)
-                    dtErrInfo.Rows.Add(new object[] { rightFrm.ToString(), "丢失" });
+                {
+                    if (rightFrm == 65535)
+                        rightFrm = 0;
+                    else
+                        rightFrm++;
+                    if(curFrm!= rightFrm)
+                        dtErrInfo.Rows.Add(new object[] { rightFrm.ToString(), "丢失" });
+                }
             }
         }
     }
