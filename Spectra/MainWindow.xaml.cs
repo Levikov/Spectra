@@ -1096,6 +1096,9 @@ namespace Spectra
         /*开始截取*/
         private async void btnSectionBegin_Click(object sender, RoutedEventArgs e)
         {
+            QuickViewWindow qvw = new QuickViewWindow(22);
+            qvw.Show();
+            return;
             try
             {
                 if (ImageInfo.dtImgInfo == null && FileInfo.md5 == null)

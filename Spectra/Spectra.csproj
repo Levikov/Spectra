@@ -196,6 +196,9 @@
     <Compile Include="Windows\MultiFuncWindow.xaml.cs">
       <DependentUpon>MultiFuncWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Windows\QuickViewWindow.xaml.cs">
+      <DependentUpon>QuickViewWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Windows\SpecCurvWindow.xaml.cs">
       <DependentUpon>SpecCurvWindow.xaml</DependentUpon>
     </Compile>
@@ -316,6 +319,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Windows\MultiFuncWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\QuickViewWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -71,10 +71,10 @@
             </Grid.ColumnDefinitions>
             <GridSplitter x:Name="splitA" Grid.RowSpan="1" Margin="0,50" Width="1" Background="{StaticResource ButtonBack}"/>
             <StackPanel>
-                <RadioButton x:Name="btnLeftA1" Content="数据处理" Template="{DynamicResource ButtonIcon2nd}" Margin="0,50,0,0" Height="50" IsChecked="True">
+                <RadioButton x:Name="btnLeftA1" Content="数据处理" Template="{DynamicResource ButtonIcon2nd}" Margin="0,50,0,0" Height="50">
                     <RadioButton.Background><ImageBrush ImageSource="image/GRAY/18.png"/></RadioButton.Background>
                 </RadioButton>
-                <RadioButton x:Name="btnLeftA2" Content="数据存储" Template="{DynamicResource ButtonIcon2nd}" Height="50">
+                <RadioButton x:Name="btnLeftA2" Content="数据存储" Template="{DynamicResource ButtonIcon2nd}" Height="50" IsChecked="True">
                     <RadioButton.Background><ImageBrush ImageSource="image/GRAY/17.png"/></RadioButton.Background>
                 </RadioButton>
                 <RadioButton x:Name="btnLeftA3" Content="文件检索" Template="{DynamicResource ButtonIcon2nd}" Height="50">
@@ -185,7 +185,7 @@
                             <Label Grid.Column="1" Content="—" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             <TextBox x:Name="txtSectionEndFrm" Text="0" Grid.Column="2" Height="30"/>
                         </Grid>
-                        <Button x:Name="btnSectionBegin" Grid.Row="1" Grid.Column="2" Content="开始选择" Template="{DynamicResource ButtonDefault}" Width="160" Click="btnSectionBegin_Click" HorizontalAlignment="Center" VerticalAlignment="Center" IsEnabled="False"/>
+                        <Button x:Name="btnSectionBegin" Grid.Row="1" Grid.Column="2" Content="开始选择" Template="{DynamicResource ButtonDefault}" Width="160" Click="btnSectionBegin_Click" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         <Label Grid.Row="2" Grid.Column="0" Content="文件存储路径:" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         <TextBox x:Name="txtSaveFilesPath" Grid.Row="2" Grid.Column="1" IsReadOnly="True" Height="30"/>
                         <Button x:Name="btnSaveFilesPath" Grid.Row="2" Grid.Column="2" Content="选择存储路径" Template="{DynamicResource ButtonDefault}" Width="160" Click="btnSaveFilesPath_Click" VerticalAlignment="Center" HorizontalAlignment="Center"  IsEnabled="False"/>
