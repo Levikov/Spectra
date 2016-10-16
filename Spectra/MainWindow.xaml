@@ -1,9 +1,14 @@
 ﻿<Window
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:System="clr-namespace:System;assembly=mscorlib" mc:Ignorable="d" x:Name="WindowMain" x:Class="Spectra.MainWindow"
-        Title="光谱微纳卫星数据分析系统" Height="768" Width="1366" MinHeight="430" MinWidth="800"
-        WindowStartupLocation="CenterScreen" MouseLeftButtonDown="WindowMain_MouseLeftButtonDown" Icon="image/ICON/14.ico" WindowStyle="None" WindowState="Normal">
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:System="clr-namespace:System;assembly=mscorlib"
+    xmlns:my="clr-namespace:TestTreeView"
+    mc:Ignorable="d" x:Name="WindowMain"
+    x:Class="Spectra.MainWindow"
+    Title="光谱微纳卫星数据分析系统" Height="768" Width="1366" MinHeight="430" MinWidth="800"
+    WindowStartupLocation="CenterScreen" MouseLeftButtonDown="WindowMain_MouseLeftButtonDown" Icon="image/ICON/14.ico" WindowStyle="None" WindowState="Normal">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
     </Window.Resources>
@@ -74,7 +79,7 @@
                 <RadioButton x:Name="btnLeftA1" Content="数据处理" Template="{DynamicResource ButtonIcon2nd}" Margin="0,50,0,0" Height="50">
                     <RadioButton.Background><ImageBrush ImageSource="image/GRAY/18.png"/></RadioButton.Background>
                 </RadioButton>
-                <RadioButton x:Name="btnLeftA2" Content="数据存储" Template="{DynamicResource ButtonIcon2nd}" Height="50" IsChecked="True">
+                <RadioButton x:Name="btnLeftA2" Content="数据存储" Template="{DynamicResource ButtonIcon2nd}" Height="50" IsChecked="True" Click="btnLeftA2_Click">
                     <RadioButton.Background><ImageBrush ImageSource="image/GRAY/17.png"/></RadioButton.Background>
                 </RadioButton>
                 <RadioButton x:Name="btnLeftA3" Content="文件检索" Template="{DynamicResource ButtonIcon2nd}" Height="50">
@@ -171,7 +176,8 @@
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="150"/>
-                            <ColumnDefinition Width="2*"/>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="150"/>
                             <ColumnDefinition Width="1*"/>
                         </Grid.ColumnDefinitions>
                         <Label Grid.Row="1" Content="图像起止:" HorizontalAlignment="Center" VerticalAlignment="Center"/>
@@ -191,6 +197,7 @@
                         <Button x:Name="btnSaveFilesPath" Grid.Row="2" Grid.Column="2" Content="选择存储路径" Template="{DynamicResource ButtonDefault}" Width="160" Click="btnSaveFilesPath_Click" VerticalAlignment="Center" HorizontalAlignment="Center"  IsEnabled="False"/>
                         <ProgressBar Grid.Row="3" Grid.Column="1" Height="30" BorderBrush="{StaticResource ButtonBack}"/>
                         <Button x:Name="btnSaveFiles" Grid.Row="3" Grid.Column="2" Content="开始存储" Template="{DynamicResource ButtonDefault}" Width="160" Click="btnSaveFiles_Click" HorizontalAlignment="Center" VerticalAlignment="Center"  IsEnabled="False"/>
+                        <my:ZsmTreeView x:Name="treeQuickView" Grid.Column="3" Margin="10" Grid.Row="1" Grid.RowSpan="4"/>
                     </Grid>
                 </GroupBox>
             </Grid>

@@ -157,6 +157,10 @@
     <Compile Include="Classes\FileInfo.cs" />
     <Compile Include="Classes\ImageInfo.cs" />
     <Compile Include="Classes\_3dOper.cs" />
+    <Compile Include="StyleTreeView\TreeModel.cs" />
+    <Compile Include="StyleTreeView\ZsmTreeView.xaml.cs">
+      <DependentUpon>ZsmTreeView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Test3D.xaml.cs">
       <DependentUpon>Test3D.xaml</DependentUpon>
     </Compile>
@@ -275,6 +279,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="StyleTextBox\TextBoxDefault.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="StyleTreeView\ZsmTreeView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -431,6 +439,12 @@
     <Resource Include="image\GRAY\6.png" />
     <Resource Include="image\GRAY\7.png" />
     <Resource Include="image\ICON\map-marker-icon.png" />
+    <Resource Include="image\16_16\delete.png" />
+    <Resource Include="image\16_16\emoticon_smile.png" />
+    <Resource Include="image\16_16\folder_close_arrow.png" />
+    <Resource Include="image\16_16\folder_go.png" />
+    <Resource Include="image\16_16\folder_open_arrow.png" />
+    <Resource Include="image\16_16\tick.png" />
     <Content Include="Mapsui\BruTile.Desktop.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

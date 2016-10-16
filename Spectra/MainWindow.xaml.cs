@@ -4,11 +4,12 @@ using System.Data;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Windows.Threading;
+using System.Collections.Generic;
+using System.Text;
 
 namespace Spectra
 {
@@ -1093,9 +1094,24 @@ namespace Spectra
         #endregion
 
         #region 数据存储
+        /*获取选中ID*/
+        private string GetIds(IList<TestTreeView.Model.TreeModel> treeList)
+        {
+            StringBuilder ids = new StringBuilder();
+
+            foreach (TestTreeView.Model.TreeModel tree in treeList)
+            {
+                ids.Append(tree.Id).Append("\n");
+            }
+            return ids.ToString();
+        }
         /*开始截取*/
         private async void btnSectionBegin_Click(object sender, RoutedEventArgs e)
         {
+            IList<TestTreeView.Model.TreeModel> treeList = treeQuickView.CheckedItemsIgnoreRelation();
+
+            System.Windows.MessageBox.Show(GetIds(treeList));
+
             QuickViewWindow qvw = new QuickViewWindow(22);
             qvw.Show();
             return;
@@ -1195,5 +1211,35 @@ namespace Spectra
             }
         }
         #endregion
+
+        private void btnLeftA2_Click(object sender, RoutedEventArgs e)
+        {
+            IList<TestTreeView.Model.TreeModel> treeList = new List<TestTreeView.Model.TreeModel>();
+
+            DataTable dtFirst = SQLiteFunc.SelectDTSQL("SELECT * from FileDetails");
+            int cntFirst = dtFirst.Rows.Count;
+            for (int i = 0; i < cntFirst; i++)
+            {
+                TestTreeView.Model.TreeModel tree = new TestTreeView.Model.TreeModel();
+                tree.Id = dtFirst.Rows[i]["MD5"].ToString();
+                tree.Name = dtFirst.Rows[i]["文件名"].ToString();
+                tree.IsExpanded = true;
+                
+                DataTable dtSecond = SQLiteFunc.SelectDTSQL($"SELECT * from FileQuickView where MD5='{dtFirst.Rows[i]["MD5"].ToString()}' order by SubId");
+                int cntSecond = dtSecond.Rows.Count;
+                TreeViewItem[] tviSecond = new TreeViewItem[cntSecond];
+                for (int j = 0; j < cntSecond; j++)
+                {
+                    TestTreeView.Model.TreeModel child = new TestTreeView.Model.TreeModel();
+                    child.Id = tree.Id + "-" + j;
+                    child.Name = j.ToString();
+                    child.Parent = tree;
+                    tree.Children.Add(child);
+                }
+                treeList.Add(tree);
+            }
+            
+            treeQuickView.ItemsSourceData = treeList;
+        }
     }
 }

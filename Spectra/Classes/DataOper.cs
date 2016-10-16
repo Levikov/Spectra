@@ -527,6 +527,28 @@ namespace Spectra
             //    Insert(sqlExcute, errInfo.dtErrInfo.Rows[i]);
             //}
 
+            //快视用数据库
+            int splitSum = (int)Math.Ceiling((double)dataChannel[0].frmC/4096);
+            int splitCur = 4096;
+            for (int split = 0; split < splitSum; split++)
+            {
+                if (split == splitSum - 1)
+                    splitCur = dataChannel[0].frmC % 4096;
+                DateTime T0 = new DateTime(2012, 1, 1, 0, 0, 0);
+                DateTime StartTime = T0.AddSeconds((double)dataChannel[0].dtChannel.Rows[split * 4096]["GST"]);
+                DateTime EndTime = T0.AddSeconds((double)dataChannel[0].dtChannel.Rows[split * 4096 + splitCur - 1]["GST"]);
+                Coord StartCoord = new Coord(0,0), EndCoord = new Coord(0,0);
+                StartCoord.Lon = (double)dataChannel[0].dtChannel.Rows[split * 4096]["Lon"];
+                StartCoord.Lat = (double)dataChannel[0].dtChannel.Rows[split * 4096]["Lat"];
+                EndCoord.Lon = (double)dataChannel[0].dtChannel.Rows[split * 4096 + splitCur - 1]["Lon"];
+                EndCoord.Lat = (double)dataChannel[0].dtChannel.Rows[split * 4096 + splitCur - 1]["Lat"];
+                string strStartCoord, strEndCoord;
+                strStartCoord = $"({StartCoord.Lat},{StartCoord.Lon})";
+                strEndCoord = $"({EndCoord.Lat},{EndCoord.Lon})";
+                Insert(sqlExcute,split,splitCur,StartTime,EndTime,strStartCoord,strEndCoord);
+            }
+
+
             for (int f = 0; f < dataChannel[0].frmC; f++)
                 Insert(sqlExcute, f, dataChannel[0].frmC, dataChannel[0].dtChannel.Rows[f]);
             sqlExcute.EndInsert();
@@ -576,6 +598,32 @@ namespace Spectra
                 //MessageBox.Show(e.ToString());
             }
         }
+
+        public void Insert(SQLiteDatabase sqlExcute, int SubId, int FrameSum, DateTime StartTime,DateTime EndTime,string StartCoord,string EndCoord)
+        {
+            var sql = "insert into FileQuickView values(@MD5,@SubId,@FrameSum,@SavePath,@StartTime,@EndTime,@StartCoord,@EndCoord);";
+            var cmdparams = new List<SQLiteParameter>()
+                {
+                    new SQLiteParameter("MD5",md5),
+                    new SQLiteParameter("SubId",SubId),
+                    new SQLiteParameter("FrameSum",FrameSum),
+                    new SQLiteParameter("SavePath",$"{Environment.CurrentDirectory}\\decFiles\\{md5}\\{SubId}"),
+                    new SQLiteParameter("StartTime",StartTime),
+                    new SQLiteParameter("EndTime",EndTime),
+                    new SQLiteParameter("StartCoord",StartCoord),
+                    new SQLiteParameter("EndCoord",EndCoord)
+                };
+
+            try
+            {
+                sqlExcute.ExecuteNonQuery(sql, cmdparams);
+            }
+            catch// (Exception e)
+            {
+                //MessageBox.Show(e.ToString());
+            }
+        }
+
         public void Insert(SQLiteDatabase sqlExcute, DataRow dr)
         {
             var sql = "insert into FileErrors values(@错误位置,@错误类型,@MD5);";
