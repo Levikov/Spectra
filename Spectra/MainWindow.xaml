@@ -76,10 +76,10 @@
             </Grid.ColumnDefinitions>
             <GridSplitter x:Name="splitA" Grid.RowSpan="1" Margin="0,50" Width="1" Background="{StaticResource ButtonBack}"/>
             <StackPanel>
-                <RadioButton x:Name="btnLeftA1" Content="数据处理" Template="{DynamicResource ButtonIcon2nd}" Margin="0,50,0,0" Height="50">
+                <RadioButton x:Name="btnLeftA1" Content="数据处理" Template="{DynamicResource ButtonIcon2nd}" Margin="0,50,0,0" Height="50" IsChecked="True">
                     <RadioButton.Background><ImageBrush ImageSource="image/GRAY/18.png"/></RadioButton.Background>
                 </RadioButton>
-                <RadioButton x:Name="btnLeftA2" Content="数据存储" Template="{DynamicResource ButtonIcon2nd}" Height="50" IsChecked="True" Click="btnLeftA2_Click">
+                <RadioButton x:Name="btnLeftA2" Content="数据存储" Template="{DynamicResource ButtonIcon2nd}" Height="50" Click="btnLeftA2_Click">
                     <RadioButton.Background><ImageBrush ImageSource="image/GRAY/17.png"/></RadioButton.Background>
                 </RadioButton>
                 <RadioButton x:Name="btnLeftA3" Content="文件检索" Template="{DynamicResource ButtonIcon2nd}" Height="50">
@@ -197,7 +197,7 @@
                         <Button x:Name="btnSaveFilesPath" Grid.Row="2" Grid.Column="2" Content="选择存储路径" Template="{DynamicResource ButtonDefault}" Width="160" Click="btnSaveFilesPath_Click" VerticalAlignment="Center" HorizontalAlignment="Center"  IsEnabled="False"/>
                         <ProgressBar Grid.Row="3" Grid.Column="1" Height="30" BorderBrush="{StaticResource ButtonBack}"/>
                         <Button x:Name="btnSaveFiles" Grid.Row="3" Grid.Column="2" Content="开始存储" Template="{DynamicResource ButtonDefault}" Width="160" Click="btnSaveFiles_Click" HorizontalAlignment="Center" VerticalAlignment="Center"  IsEnabled="False"/>
-                        <my:ZsmTreeView x:Name="treeQuickView" Grid.Column="3" Margin="10" Grid.Row="1" Grid.RowSpan="4"/>
+                        <my:ZsmTreeView x:Name="treeQuickView" Grid.Column="3" Margin="10" Grid.Row="1" Grid.RowSpan="4" Background="White"/>
                     </Grid>
                 </GroupBox>
             </Grid>

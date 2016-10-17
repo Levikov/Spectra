@@ -37,6 +37,7 @@ namespace Spectra
 
         public BitmapImage showSingleFrm(UInt16 frm)
         {
+            txtSetFrame.Text = frm.ToString();
             int height = ImageInfo.dtImgInfo.Rows.Count;
             if (frm < height)
             {
@@ -91,6 +92,12 @@ namespace Spectra
             isShow = false;
             this.Hide();
             e.Cancel = true;
+        }
+
+        private void txtSetFrame_KeyUp(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == System.Windows.Input.Key.Enter)
+                showSingleFrm(Convert.ToUInt16(txtSetFrame.Text));
         }
     }
 }

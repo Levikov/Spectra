@@ -29,7 +29,11 @@ namespace Spectra
                 Image img = new Image();
                 img.Margin = new Thickness(1, 1, 0, 0);
                 //img.Source = new BitmapImage(new Uri($"{Environment.CurrentDirectory}\\decFiles\\BF-22-A9-CE-42-2C-B6-1A-E7-D5-A3-3F-F4-22-9A-A6\\0.bmp"));
-                img.Source = new BitmapImage(new Uri("C:\\Users\\wennyoyo\\Downloads\\1.jpg"));
+                try
+                {
+                    img.Source = new BitmapImage(new Uri("C:\\Users\\wennyoyo\\Downloads\\1.jpg"));
+                }
+                catch { }
                 AddInfo(img,subCnt.ToString());
                 DynamicAdd(panelBack, img);
             }
