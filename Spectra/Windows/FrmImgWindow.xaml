@@ -9,7 +9,7 @@
         Topmost="{Binding ElementName=cbIsTop,Path=IsChecked}"
         >
     <Grid>
-        <Image x:Name="ImageSingleFrm" Margin="0,0,0,30" Height="160" Width="2048" MinHeight="40" MinWidth="512" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
+        <Image x:Name="ImageSingleFrm" Margin="0,0,0,30" HorizontalAlignment="Left" VerticalAlignment="Bottom" Stretch="Fill"/>
         <StatusBar Height="30" Margin="0" VerticalAlignment="Bottom" FontSize="12" Background="{StaticResource TitleBack}" FontWeight="Thin">
             <StackPanel Orientation="Horizontal">
                 <CheckBox x:Name="cbIsTop" Content="始终置顶" Foreground="{StaticResource MinFontFore}" VerticalAlignment="Center" VerticalContentAlignment="Center" Margin="0,0,10,0" IsChecked="True"/>

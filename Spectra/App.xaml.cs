@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using System.Windows;
 
 namespace Spectra
@@ -14,25 +8,34 @@ namespace Spectra
     /// </summary>
     public partial class App : Application
     {
-        public static MapWindow global_Win_Map;
+        /// <summary>
+        /// 动态显示图像
+        /// </summary>
         public static DynamicImagingWindow_Win32 global_Win_Dynamic;
+        /// <summary>
+        /// 单帧图像提取
+        /// </summary>
         public static FrmImgWindow global_FrmImgWindow;
+        /// <summary>
+        /// 快视窗体
+        /// </summary>
+        public static QuickViewWindow global_QuickViewWindow;
+        /// <summary>
+        /// 6个展示窗体
+        /// </summary>
         public static List<Window> global_Windows = new List<Window>();
+        /// <summary>
+        /// 4个子窗体图像的缓存
+        /// </summary>
         public static ImageBuffer[] global_ImageBuffer = new ImageBuffer[4];
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {
+            global_FrmImgWindow = new FrmImgWindow();
+            global_QuickViewWindow = new QuickViewWindow();
             //固定总共6个窗体(使用时只需要刷新和显示即可,窗体内容和数据库对应)
-            for(int i=0;i<6;i++)
+            for (int i=0;i<6;i++)
                 global_Windows.Add(new MultiFuncWindow());
-            Variables.Screen_Locations = new Rectangle[4];
-            #region 设定屏幕属性
-            //foreach (System.Windows.Forms.Screen s in System.Windows.Forms.Screen.AllScreens)
-            //{
-            //    Variables.Screens.Add(new ScreenParams(s.WorkingArea, s.DeviceName, s.Primary));
-            //    if (s.WorkingArea.Width == 3840) Variables.Screen_Locations[1] = s.WorkingArea;
-            //}
-            #endregion
         }
     }
 }

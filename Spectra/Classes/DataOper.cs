@@ -601,9 +601,10 @@ namespace Spectra
 
         public void Insert(SQLiteDatabase sqlExcute, int SubId, int FrameSum, DateTime StartTime,DateTime EndTime,string StartCoord,string EndCoord)
         {
-            var sql = "insert into FileQuickView values(@MD5,@SubId,@FrameSum,@SavePath,@StartTime,@EndTime,@StartCoord,@EndCoord);";
+            var sql = "insert into FileQuickView values(@Name,@MD5,@SubId,@FrameSum,@SavePath,@StartTime,@EndTime,@StartCoord,@EndCoord);";
             var cmdparams = new List<SQLiteParameter>()
                 {
+                    new SQLiteParameter("Name",srcFilePathName.Substring(srcFilePathName.LastIndexOf('\\')+1)),
                     new SQLiteParameter("MD5",md5),
                     new SQLiteParameter("SubId",SubId),
                     new SQLiteParameter("FrameSum",FrameSum),

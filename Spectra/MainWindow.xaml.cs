@@ -41,7 +41,11 @@ namespace Spectra
         /*程序退出*/
         private void btnExit_Click(object sender, RoutedEventArgs e)
         {
-            Environment.Exit(0);
+            try
+            {
+                Environment.Exit(0);
+            }
+            catch { }
         }
 
         private void btnMax_Click(object sender, RoutedEventArgs e)
@@ -126,26 +130,6 @@ namespace Spectra
                 btnDelRecord.IsEnabled = true;
             }
         }
-        /*点击解包*/
-        private async void btnUnpFile_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                if (FileInfo.isUnpack)
-                    if (System.Windows.MessageBox.Show("该文件已解包,是否要重新解包并覆盖?", "提示", MessageBoxButton.OKCancel, MessageBoxImage.Information) == MessageBoxResult.Cancel)
-                        return;
-
-                IProgress<DataView> IProg_DataView = new Progress<DataView>((Prog_DataView) => { dataGrid_Errors.ItemsSource = Prog_DataView; });
-                IProgress<double> IProgress_Prog = new Progress<double>((ProgressValue) => { prog_Import.Value = ProgressValue * this.prog_Import.Maximum; });
-                IProgress<string> IProgress_List = new Progress<string>((ProgressString) => { this.tb_Console.Text = ProgressString + "\n" + this.tb_Console.Text; });
-                await DataProc.unpackFile(IProg_DataView, IProgress_Prog, IProgress_List);
-                dataGrid_Errors.ItemsSource = SQLiteFunc.SelectDTSQL("select * from FileErrors where MD5='" + FileInfo.md5 + "'").DefaultView;  //显示错误信息
-            }
-            catch (Exception ex)
-            {
-                System.Windows.MessageBox.Show(ex.ToString());
-            }
-        }
 
         /*点击解压*/
         private async void btnDecFile_Click(object sender, RoutedEventArgs e)
@@ -166,6 +150,75 @@ namespace Spectra
         private void b_Abort_Import_Click(object sender, RoutedEventArgs e)
         {
             cancelImport.Cancel(true);
+        }
+        #endregion
+
+        #region 数据存储
+        /*显示列表*/
+        private void btnLeftA2_Click(object sender, RoutedEventArgs e)
+        {
+            IList<TestTreeView.Model.TreeModel> treeList = new List<TestTreeView.Model.TreeModel>();
+
+            DataTable dtFirst = SQLiteFunc.SelectDTSQL("SELECT * from FileDetails");
+            int cntFirst = dtFirst.Rows.Count;
+            for (int i = 0; i < cntFirst; i++)
+            {
+                TestTreeView.Model.TreeModel tree = new TestTreeView.Model.TreeModel();
+                tree.Id = dtFirst.Rows[i]["MD5"].ToString();
+                tree.Name = dtFirst.Rows[i]["文件名"].ToString();
+                tree.IsExpanded = true;
+
+                DataTable dtSecond = SQLiteFunc.SelectDTSQL($"SELECT * from FileQuickView where MD5='{dtFirst.Rows[i]["MD5"].ToString()}' order by SubId");
+                int cntSecond = dtSecond.Rows.Count;
+                TreeViewItem[] tviSecond = new TreeViewItem[cntSecond];
+                for (int j = 0; j < cntSecond; j++)
+                {
+                    TestTreeView.Model.TreeModel child = new TestTreeView.Model.TreeModel();
+                    child.Id = tree.Id + "_" + j;
+                    child.Name = j.ToString();
+                    child.Parent = tree;
+                    tree.Children.Add(child);
+                }
+                treeList.Add(tree);
+            }
+
+            treeQuickView.ItemsSourceData = treeList;
+        }
+        /*开始截取*/
+        private void btnSectionBegin_Click(object sender, RoutedEventArgs e)
+        {
+            IList<TestTreeView.Model.TreeModel> treeList = treeQuickView.CheckedItemsIgnoreRelation();
+            DataTable dtTreeView = new DataTable();
+            dtTreeView.Columns.Add("MD5",Type.GetType("System.String"));
+            dtTreeView.Columns.Add("ID");
+            foreach (TestTreeView.Model.TreeModel tree in treeList)
+            {
+                if (tree.Id.Contains("_"))
+                    dtTreeView.Rows.Add(new object[] { tree.Id.Substring(0, tree.Id.IndexOf('_')), tree.Id.Substring(tree.Id.IndexOf('_') + 1, 1) });
+            }
+
+            if (App.global_QuickViewWindow == null)
+                App.global_QuickViewWindow = new QuickViewWindow();
+            App.global_QuickViewWindow.ShowView(dtTreeView);
+            return;
+        }
+        /*存储路径*/
+        private void btnSaveFilesPath_Click(object sender, RoutedEventArgs e)
+        {
+            FolderBrowserDialog fbd = new FolderBrowserDialog();
+            if (fbd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                txtSaveFilesPath.Text = fbd.SelectedPath;
+                btnSaveFiles.IsEnabled = true;
+            }
+        }
+        /*开始存储*/
+        private async void btnSaveFiles_Click(object sender, RoutedEventArgs e)
+        {
+            progSaveAs.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(Convert.ToByte(255), Convert.ToByte(6), Convert.ToByte(176), Convert.ToByte(37)));
+            var iprog_Prog = new Progress<double>((curPosi) => { progSaveAs.Value = curPosi; });
+            await App.global_QuickViewWindow.SaveFiles(App.global_QuickViewWindow.getSelects(), txtSaveFilesPath.Text, iprog_Prog);
+            progSaveAs.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(Convert.ToByte(255), Convert.ToByte(253), Convert.ToByte(94), Convert.ToByte(188)));
         }
         #endregion
 
@@ -1092,154 +1145,5 @@ namespace Spectra
             }
         }
         #endregion
-
-        #region 数据存储
-        /*获取选中ID*/
-        private string GetIds(IList<TestTreeView.Model.TreeModel> treeList)
-        {
-            StringBuilder ids = new StringBuilder();
-
-            foreach (TestTreeView.Model.TreeModel tree in treeList)
-            {
-                ids.Append(tree.Id).Append("\n");
-            }
-            return ids.ToString();
-        }
-        /*开始截取*/
-        private async void btnSectionBegin_Click(object sender, RoutedEventArgs e)
-        {
-            IList<TestTreeView.Model.TreeModel> treeList = treeQuickView.CheckedItemsIgnoreRelation();
-
-            System.Windows.MessageBox.Show(GetIds(treeList));
-
-            QuickViewWindow qvw = new QuickViewWindow(22);
-            qvw.Show();
-            return;
-            try
-            {
-                if (ImageInfo.dtImgInfo == null && FileInfo.md5 == null)
-                {
-                    System.Windows.MessageBox.Show("先选择文件或数据!","警告",MessageBoxButton.OK,MessageBoxImage.Warning);
-                    return;
-                }
-                if(ImageInfo.dtImgInfo==null)
-                    ImageInfo.dtImgInfo = await DataProc.QueryResult(FileInfo.md5, false, false, false,
-                        start_time, end_time, start_FrmCnt, end_FrmCnt, Coord_TL, Coord_DR);
-                MultiFuncWindow w = new MultiFuncWindow();
-                w = (MultiFuncWindow)App.global_Windows[0];
-                w.DisplayMode = GridMode.One;
-                if (!w.isShow)
-                    w.ScreenShow(Screen.AllScreens, 0, "单谱段图像");
-
-                //UInt16[] colorBand;
-                //if (ImageInfo.dtImgInfo.Rows.Count <= 2048)
-                //{
-                //    colorBand = new UInt16[] { 40, 77, 127 };
-                //    w.RefreshImage(ImageInfo.strFilesPath, 0, WinFunc.Image, colorBand, ColorRenderMode.ArtColor);
-                //}
-                //else
-                //{
-                //    colorBand = new UInt16[] { 40, 40, 40 };
-                //    w.RefreshImage(ImageInfo.strFilesPath, 0, WinFunc.Image, colorBand, ColorRenderMode.Grayscale);
-                //}
-
-                //App.global_ImageBuffer[0] = new ImageBuffer(ImageInfo.imgWidth, ImageInfo.imgHeight);
-                //App.global_ImageBuffer[0].getBuffer(ImageInfo.strFilesPath, 120);
-
-                ImageSection.beginSection = true;
-
-                timerSection.Interval = TimeSpan.FromSeconds(0.1);
-                timerSection.Tick += timerSection_Tick;
-                timerSection.Start();
-            }
-            catch
-            {
-                System.Windows.MessageBox.Show("无数据!","警告",MessageBoxButton.OK,MessageBoxImage.Warning);
-            }
-        }
-
-        DispatcherTimer timerSection = new DispatcherTimer();
-
-        private void timerSection_Tick(object sender, EventArgs e)
-        {
-            if (ImageSection.startFrm > ImageSection.endFrm)
-                return;
-            txtSectionStartFrm.Text = ImageSection.startFrm.ToString();
-            txtSectionEndFrm.Text = ImageSection.endFrm.ToString();
-        }
-        /*存储路径*/
-        private void btnSaveFilesPath_Click(object sender, RoutedEventArgs e)
-        {
-            FolderBrowserDialog fbd = new FolderBrowserDialog();
-            if (fbd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            {
-                txtSaveFilesPath.Text = fbd.SelectedPath + "\\";
-            }
-        }
-        /*开始存储*/
-        [DllImport("DLL\\DataOperation.dll", EntryPoint = "Save_Files")]
-        static extern int Save_Files(string path, string outpath, int startFrm, int endFrm);
-        private void btnSaveFiles_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                ImageSection.beginSection = false;
-                timerSection.Stop();
-                if (ImageSection.startFrm >= ImageSection.endFrm)
-                {
-                    System.Windows.MessageBox.Show("无选中区域!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-                if (txtSaveFilesPath.Text == "")
-                {
-                    System.Windows.MessageBox.Show("选择输出路径!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-                int i;
-                if(FileInfo.md5==null|| FileInfo.md5=="")
-                    i = Save_Files(ImageInfo.strFilesPath, txtSaveFilesPath.Text, ImageSection.startFrm, ImageSection.endFrm);
-                else
-                    i = Save_Files(FileInfo.decFilePathName, txtSaveFilesPath.Text, ImageSection.startFrm, ImageSection.endFrm);
-                if (i == 1)
-                    System.Windows.MessageBox.Show("完成!", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
-                else
-                    System.Windows.MessageBox.Show("存储过程出错!", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-            catch(Exception ex)
-            {
-                System.Windows.MessageBox.Show(ex.ToString(), "提示", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-        }
-        #endregion
-
-        private void btnLeftA2_Click(object sender, RoutedEventArgs e)
-        {
-            IList<TestTreeView.Model.TreeModel> treeList = new List<TestTreeView.Model.TreeModel>();
-
-            DataTable dtFirst = SQLiteFunc.SelectDTSQL("SELECT * from FileDetails");
-            int cntFirst = dtFirst.Rows.Count;
-            for (int i = 0; i < cntFirst; i++)
-            {
-                TestTreeView.Model.TreeModel tree = new TestTreeView.Model.TreeModel();
-                tree.Id = dtFirst.Rows[i]["MD5"].ToString();
-                tree.Name = dtFirst.Rows[i]["文件名"].ToString();
-                tree.IsExpanded = true;
-                
-                DataTable dtSecond = SQLiteFunc.SelectDTSQL($"SELECT * from FileQuickView where MD5='{dtFirst.Rows[i]["MD5"].ToString()}' order by SubId");
-                int cntSecond = dtSecond.Rows.Count;
-                TreeViewItem[] tviSecond = new TreeViewItem[cntSecond];
-                for (int j = 0; j < cntSecond; j++)
-                {
-                    TestTreeView.Model.TreeModel child = new TestTreeView.Model.TreeModel();
-                    child.Id = tree.Id + "-" + j;
-                    child.Name = j.ToString();
-                    child.Parent = tree;
-                    tree.Children.Add(child);
-                }
-                treeList.Add(tree);
-            }
-            
-            treeQuickView.ItemsSourceData = treeList;
-        }
     }
 }

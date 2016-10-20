@@ -76,10 +76,10 @@
             </Grid.ColumnDefinitions>
             <GridSplitter x:Name="splitA" Grid.RowSpan="1" Margin="0,50" Width="1" Background="{StaticResource ButtonBack}"/>
             <StackPanel>
-                <RadioButton x:Name="btnLeftA1" Content="数据处理" Template="{DynamicResource ButtonIcon2nd}" Margin="0,50,0,0" Height="50" IsChecked="True">
+                <RadioButton x:Name="btnLeftA1" Content="数据处理" Template="{DynamicResource ButtonIcon2nd}" Margin="0,50,0,0" Height="50">
                     <RadioButton.Background><ImageBrush ImageSource="image/GRAY/18.png"/></RadioButton.Background>
                 </RadioButton>
-                <RadioButton x:Name="btnLeftA2" Content="数据存储" Template="{DynamicResource ButtonIcon2nd}" Height="50" Click="btnLeftA2_Click">
+                <RadioButton x:Name="btnLeftA2" Content="数据存储" Template="{DynamicResource ButtonIcon2nd}" Height="50" Click="btnLeftA2_Click" IsChecked="True">
                     <RadioButton.Background><ImageBrush ImageSource="image/GRAY/17.png"/></RadioButton.Background>
                 </RadioButton>
                 <RadioButton x:Name="btnLeftA3" Content="文件检索" Template="{DynamicResource ButtonIcon2nd}" Height="50">
@@ -175,29 +175,24 @@
                             <RowDefinition Height="1*"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="150"/>
-                            <ColumnDefinition Width="150"/>
-                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="180"/>
                             <ColumnDefinition Width="1*"/>
+                            <ColumnDefinition Width="300"/>
                         </Grid.ColumnDefinitions>
-                        <Label Grid.Row="1" Content="图像起止:" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         <Grid Grid.Row="1" Grid.Column="1">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="1*"/>
                                 <ColumnDefinition Width="30"/>
                                 <ColumnDefinition Width="1*"/>
                             </Grid.ColumnDefinitions>
-                            <TextBox x:Name="txtSectionStartFrm" Text="0" Grid.Column="0" Height="30"/>
-                            <Label Grid.Column="1" Content="—" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            <TextBox x:Name="txtSectionEndFrm" Text="0" Grid.Column="2" Height="30"/>
                         </Grid>
-                        <Button x:Name="btnSectionBegin" Grid.Row="1" Grid.Column="2" Content="开始选择" Template="{DynamicResource ButtonDefault}" Width="160" Click="btnSectionBegin_Click" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        <Label Grid.Row="2" Grid.Column="0" Content="文件存储路径:" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        <TextBox x:Name="txtSaveFilesPath" Grid.Row="2" Grid.Column="1" IsReadOnly="True" Height="30"/>
-                        <Button x:Name="btnSaveFilesPath" Grid.Row="2" Grid.Column="2" Content="选择存储路径" Template="{DynamicResource ButtonDefault}" Width="160" Click="btnSaveFilesPath_Click" VerticalAlignment="Center" HorizontalAlignment="Center"  IsEnabled="False"/>
-                        <ProgressBar Grid.Row="3" Grid.Column="1" Height="30" BorderBrush="{StaticResource ButtonBack}"/>
-                        <Button x:Name="btnSaveFiles" Grid.Row="3" Grid.Column="2" Content="开始存储" Template="{DynamicResource ButtonDefault}" Width="160" Click="btnSaveFiles_Click" HorizontalAlignment="Center" VerticalAlignment="Center"  IsEnabled="False"/>
-                        <my:ZsmTreeView x:Name="treeQuickView" Grid.Column="3" Margin="10" Grid.Row="1" Grid.RowSpan="4" Background="White"/>
+                        <Button x:Name="btnSectionBegin" Grid.Row="3" Grid.Column="2" Content="开始选择" Template="{DynamicResource ButtonDefault}" Width="160" Click="btnSectionBegin_Click" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <Label Grid.Row="1" Grid.Column="0" Content="文件存储路径:" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <TextBox x:Name="txtSaveFilesPath" Grid.Row="1" Grid.Column="1" IsReadOnly="True" Height="30"/>
+                        <Button x:Name="btnSaveFilesPath" Grid.Row="1" Grid.Column="2" Content="选择存储路径" Template="{DynamicResource ButtonDefault}" Width="160" Click="btnSaveFilesPath_Click" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        <ProgressBar x:Name="progSaveAs" Grid.Row="2" Grid.ColumnSpan="2" Height="30" BorderBrush="{StaticResource ButtonBack}" Maximum="1" SmallChange="0.001" Margin="40,0,0,0"/>
+                        <Button x:Name="btnSaveFiles" Grid.Row="2" Grid.Column="2" Content="开始存储" Template="{DynamicResource ButtonDefault}" Width="160" Click="btnSaveFiles_Click" HorizontalAlignment="Center" VerticalAlignment="Center"  IsEnabled="False"/>
+                        <my:ZsmTreeView x:Name="treeQuickView" Grid.ColumnSpan="2" Margin="40,0,0,0" Grid.Row="3" Grid.RowSpan="2" Background="White"/>
                     </Grid>
                 </GroupBox>
             </Grid>

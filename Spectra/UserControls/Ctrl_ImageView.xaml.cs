@@ -340,8 +340,6 @@ namespace Spectra
             barStartRow.Content = startRow.ToString();
             barGain.Content = gain.ToString();
             
-            if (App.global_FrmImgWindow == null)
-                App.global_FrmImgWindow = new FrmImgWindow();
             App.global_FrmImgWindow.imgShow(frm, freq, integral, startRow, gain);
         }
     }

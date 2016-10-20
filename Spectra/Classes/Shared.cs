@@ -18,9 +18,6 @@ namespace Spectra
 
     public static class Variables
     {
-        public static List<ScreenParams> Screens = new List<ScreenParams>();
-        public static Rectangle[] Screen_Locations;
-
         /*-------------------------------------------------数据库------------------------------------------------------*/
         public static string dbPath = Environment.CurrentDirectory + "\\DataBase\\db.sqlite";   //数据库文件地址
         public static string dbConString = "Data Source=" + dbPath;                             //数据库连接字符串        
