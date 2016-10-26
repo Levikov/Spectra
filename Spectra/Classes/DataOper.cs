@@ -58,9 +58,9 @@ namespace Spectra
         /// <summary>
         /// 数据解压主程序
         /// </summary>
-        /// <param name="IProg_Bar"></param>
-        /// <param name="IProg_Cmd"></param>
-        /// <returns></returns>
+        /// <param name="IProg_Bar">进度条</param>
+        /// <param name="IProg_Cmd">控制台</param>
+        /// <returns>Task</returns>
         public Task main(IProgress<double> IProg_Bar, IProgress<string> IProg_Cmd)
         {
             return Task.Run(() =>
@@ -77,22 +77,24 @@ namespace Spectra
                     new Thread(() => { sqlInsert(); }).Start();
                     mergeImage(strSrc, IProg_Bar, IProg_Cmd);
                     IProg_Cmd.Report(DateTime.Now.ToString("HH:mm:ss") + " 开始清理冗余文件！");
-                    Task.Run(() => { Directory.Delete($"{Environment.CurrentDirectory}\\channelFiles", true); }).Wait();
-                    Task.Run(() => { Directory.Delete($"{Environment.CurrentDirectory}\\srcFiles", true); }).Wait();
-                    new Thread(() => { Get3DRaw($"{Environment.CurrentDirectory}\\decFiles\\{md5}\\"); }).Start();
+                    Task.Run(() => { Directory.Delete("tempFiles", true); }).Wait();
+                    new Thread(() => { Get3DRaw($"{Global.pathDecFiles}{md5}\\"); }).Start();
                     IProg_Cmd.Report(DateTime.Now.ToString("HH:mm:ss") + " 操作完成！");
                 }
-                catch// (Exception ex)
-                {
-                    //MessageBox.Show(ex.ToString());
-                }
+                catch{}
             });
         }
 
-        //解包
+        /// <summary>
+        /// 解包数据，将1024格式数据解为288/280格式
+        /// </summary>
+        /// <param name="inFilePathName">源文件全路径名称</param>
+        /// <param name="IProg_Bar">进度条</param>
+        /// <param name="IProg_Cmd">控制台</param>
+        /// <returns>输出文件的全路径名称</returns>
         public string unpackData(string inFilePathName, IProgress<double> IProg_Bar, IProgress<string> IProg_Cmd)
         {
-            Directory.CreateDirectory($"{Environment.CurrentDirectory}\\srcFiles");
+            Directory.CreateDirectory("tempFiles");
             if (!File.Exists(inFilePathName))
                 return string.Empty;
             FileStream inFileStream = new FileStream(inFilePathName, FileMode.Open, FileAccess.Read, FileShare.Read);
@@ -121,13 +123,13 @@ namespace Spectra
                 }
 
                 IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 数据开始写入文件.");
-                FileStream outFileStream = new FileStream($"{Environment.CurrentDirectory}\\srcFiles\\{srcFileName}_u.dat", FileMode.Create);
+                FileStream outFileStream = new FileStream($"tempFiles\\{srcFileName}_u.dat", FileMode.Create);
                 outFileStream.Write(outBuf, 0, outBuf.Length);
                 outFileStream.Close();
 
                 IProg_Bar.Report(1);
                 IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 解包完成！");
-                return $"{Environment.CurrentDirectory}\\srcFiles\\{srcFileName}_u.dat";
+                return $"tempFiles\\{srcFileName}_u.dat";
             }
             else
             {
@@ -136,10 +138,15 @@ namespace Spectra
             }
         }
 
-        //预处理
+        /// <summary>
+        /// 预处理操作，将不是EB905716开头的数据全部剔除，将288长度的数据变为280长度。
+        /// </summary>
+        /// <param name="inFilePathName">源文件全路径名称</param>
+        /// <param name="IProg_Bar">进度条</param>
+        /// <param name="IProg_Cmd">控制台</param>
+        /// <returns>输出文件的全路径名称</returns>
         public string preData(string inFilePathName, IProgress<double> IProg_Bar, IProgress<string> IProg_Cmd)
         {
-            Directory.CreateDirectory($"{Environment.CurrentDirectory}\\srcFiles");
             if (!File.Exists(inFilePathName))
                 return string.Empty;
             FileStream inFileStream = new FileStream(inFilePathName, FileMode.Open, FileAccess.Read, FileShare.Read);
@@ -169,19 +176,24 @@ namespace Spectra
             }
 
             IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 文件开始写入.");
-            FileStream outFileStream = new FileStream($"{Environment.CurrentDirectory}\\srcFiles\\{srcFileName}_p.dat", FileMode.Create);
+            FileStream outFileStream = new FileStream($"tempFiles\\{srcFileName}_p.dat", FileMode.Create);
             outFileStream.Write(outBuf, 0, packCnt * 280);
             outFileStream.Close();
             IProg_Bar.Report(1);
             IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 预处理完成！");
 
-            return $"{Environment.CurrentDirectory}\\srcFiles\\{srcFileName}_p.dat";
+            return $"tempFiles\\{srcFileName}_p.dat";
         }
 
-        //分包并记录
+        /// <summary>
+        /// 分包并记录图像开始位置，将文件分为4个通道文件。
+        /// </summary>
+        /// <param name="inFilePathName">源文件全路径名称</param>
+        /// <param name="IProg_Bar">进度条</param>
+        /// <param name="IProg_Cmd">控制台</param>
+        /// <returns>输出文件的全路径名称(不含尾号)</returns>
         public string splitFile(string inFilePathName, IProgress<double> IProg_Bar, IProgress<string> IProg_Cmd)
         { 
-            Directory.CreateDirectory($"{Environment.CurrentDirectory}\\srcFiles");
             if (!File.Exists(inFilePathName))
                 return string.Empty;
             FileStream inFileStream = new FileStream(inFilePathName, FileMode.Open, FileAccess.Read, FileShare.Read);
@@ -197,13 +209,12 @@ namespace Spectra
             IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 文件读取完成.");
 
             FileStream[] outFileStream = new FileStream[4];
-
-            //Parallel.For(0,4,c=> {
+            
             for (int c = 0; c < 4; c++)
             {
                 int row = 0, ID = 0;
                 byte[] buf = new byte[280];
-                outFileStream[c] = new FileStream($"{Environment.CurrentDirectory}\\srcFiles\\{md5}_{c}.dat", FileMode.Create, FileAccess.Write, FileShare.Read);
+                outFileStream[c] = new FileStream($"tempFiles\\S{md5}_{c}.dat", FileMode.Create, FileAccess.Write, FileShare.Read);
                 for (int i = 0; i < packSum; i++)
                 {
                     if (inBuf[i * 280 + 5] == c + 1)
@@ -226,10 +237,12 @@ namespace Spectra
             IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 分包完成!");
             info();
 
-            return $"{Environment.CurrentDirectory}\\srcFiles\\{md5}_";
+            return $"tempFiles\\S{md5}_";
         }
 
-        //获取图像的起止
+        /// <summary>
+        /// 将图像的起始帧号确定，并将每个通道进行修正，即删除超出的帧。
+        /// </summary>
         public void info()
         {
             for (int c = 0; c < 4; c++)
@@ -242,14 +255,18 @@ namespace Spectra
                 dataChannel[c].modify(S, E);
         }
 
-        //解压
+        /// <summary>
+        /// 通道串行按帧并行解压文件，解压后文件为4个大文件
+        /// </summary>
+        /// <param name="inFilePathName">源文件全路径名称</param>
+        /// <param name="IProg_Bar">进度条</param>
+        /// <param name="IProg_Cmd">控制台</param>
+        /// <returns>输出文件的全路径名称(不含尾号)</returns>
         public string decData(string inFilePathName, IProgress<double> IProg_Bar, IProgress<string> IProg_Cmd)
         {
-            Directory.CreateDirectory($"{Environment.CurrentDirectory}\\channelFiles");
             IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 开始解压.");
             IProg_Bar.Report(0);
 
-            //Parallel.For(0, 4, c =>
             for (int c = 0; c < 4; c++)
             {
                 FileStream inFileStream = new FileStream($"{inFilePathName}{c}.dat", FileMode.Open, FileAccess.Read, FileShare.Read);
@@ -259,7 +276,6 @@ namespace Spectra
                 IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 通道{c}读取完成.");
 
                 byte[][] channelFile = new byte[dataChannel[c].frmC][];
-                //for (int frm = 0; frm < dataChannel[c].frmC; frm++)
                 Parallel.For(0, dataChannel[c].frmC, frm =>
                 {
                     channelFile[frm] = new byte[512 * 160 * 2];
@@ -281,31 +297,34 @@ namespace Spectra
                     }
                     catch
                     {
-                        errInfo.add(frm,"解压出错");
+                        errInfo.add(frm,$"{c}通道解压出错");
                     }
-
-                    //if (frm % (dataChannel[c].frmC / 100) == 0 && c == 0)
+                    
                     if (frm % (dataChannel[c].frmC / 100) == 0)
                         IProg_Bar.Report((double)frm / dataChannel[c].frmC);
                 });
-                //if (c == 0)
-                    IProg_Bar.Report(1);
+                IProg_Bar.Report(1);
                 IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 通道{c}解压完成.");
-                FileStream fs_out_raw = new FileStream($"{Environment.CurrentDirectory}\\channelFiles\\{md5}_{c}.raw", FileMode.Create);
+                FileStream fs_out_raw = new FileStream($"tempFiles\\D{md5}_{c}.raw", FileMode.Create);
                 for (int frm = 0; frm < dataChannel[c].frmC; frm++)
                     fs_out_raw.Write(channelFile[frm], 0, 512 * 160 * 2);
                 fs_out_raw.Close();
                 IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 通道{c}写文件完成！");
             }
-            return $"{Environment.CurrentDirectory}\\channelFiles\\{md5}_";
+            return $"tempFiles\\D{md5}_";
         }
 
-        //图像拼接
-        public int mergeImage(string inFilePathName, IProgress<double> IProg_Bar, IProgress<string> IProg_Cmd)
+        /// <summary>
+        /// 将图像按照4096为单元进行拼接，每个单元分别生成1张真彩图
+        /// </summary>
+        /// <param name="inFilePathName">文件存放路径</param>
+        /// <param name="IProg_Bar">进度条</param>
+        /// <param name="IProg_Cmd">控制台</param>
+        public void mergeImage(string inFilePathName, IProgress<double> IProg_Bar, IProgress<string> IProg_Cmd)
         {
             IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 开始图像合并.");
             IProg_Bar.Report(0);
-            Directory.CreateDirectory($"{Environment.CurrentDirectory}\\decFiles\\{md5}");
+            Directory.CreateDirectory($"{Global.pathDecFiles}{md5}");
             FileStream[] inFileStream = new FileStream[4];
             for (int c = 0; c < 4; c++)
                 inFileStream[c] = new FileStream($"{inFilePathName}{c}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
@@ -313,7 +332,7 @@ namespace Spectra
             int imageWidth = 4096;
             for (int i = 0; i < splitSum; i++)
             {
-                Directory.CreateDirectory($"{Environment.CurrentDirectory}\\decFiles\\{md5}\\{i}");
+                Directory.CreateDirectory($"{Global.pathDecFiles}{md5}\\{i}");
                 byte[][] channelBuf = new byte[4][];
                 if (i == splitSum - 1)
                     imageWidth = dataChannel[0].frmC % 4096;
@@ -324,18 +343,16 @@ namespace Spectra
                 }
                 byte[][] imgBuf = new byte[160][];
                 for (int b = 0; b < 160; b++)
-                //Parallel.For(0, 160, b =>
                 {
                     imgBuf[b] = new byte[imageWidth * 2048 * 2];
-                    //for (int c = 0; c < 4; c++)
                     Parallel.For(0, 4, c =>
-                        //for (int f = 0; f < imageWidth; f++)
                         Parallel.For(0, imageWidth, f =>
                             Array.Copy(channelBuf[c], f * 512 * 160 * 2 + b * 512 * 2, imgBuf[b], 2048 * 2 * f + c * 512 * 2, 512 * 2)));
-                    FileStream outFile = new FileStream($"{Environment.CurrentDirectory}\\decFiles\\{md5}\\{i}\\{b}.raw", FileMode.Create);
+                    FileStream outFile = new FileStream($"{Global.pathDecFiles}{md5}\\{i}\\{b}.raw", FileMode.Create);
                     outFile.Write(imgBuf[b], 0, 2048 * imageWidth * 2);
                     outFile.Close();
                 }
+                IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} {i}图像合并完成.");
                 IProg_Bar.Report((double)(i + 1) / splitSum);
             }
             for (int c = 0; c < 4; c++)
@@ -343,39 +360,38 @@ namespace Spectra
                 inFileStream[c].Close();
             }
 
+            //生成真彩图
             Bitmap bmp;
-            int cnt = (int)Math.Ceiling(dataChannel[0].frmC / (double)4096);
-            for (int i = 0; i < cnt; i++)
+            for (int i = 0; i < splitSum; i++)
             {
                 int h = 4096;
-                if (i == cnt - 1)
+                if (i == splitSum - 1)
                     h = dataChannel[0].frmC % 4096;
-                bmp = BmpOper.MakePseudoColor($"{Environment.CurrentDirectory}\\decFiles\\{md5}\\{i}\\", new ushort[] { 39, 76, 126 }, h);
+                bmp = BmpOper.MakePseudoColor($"{Global.pathDecFiles}{md5}\\{i}\\", new ushort[] { 39, 76, 126 }, h);
                 bmp.RotateFlip(System.Drawing.RotateFlipType.Rotate90FlipX);
-                bmp.Save($"{Environment.CurrentDirectory}\\decFiles\\{md5}\\{i}.bmp");
+                bmp.Save($"{Global.pathDecFiles}{md5}\\{i}.bmp");
             }
 
             IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 合并完成！");
             IProg_Bar.Report(1);
-            return 1;
         }
 
-        //数据库操作
-        public void sqlInsert()
+        /// <summary>
+        /// 数据库操作，包括插入辅助数据、插入文件信息、插入快视信息、插入错误信息
+        /// </summary>
+        private void sqlInsert()
         {
             SQLiteDatabase sqlExcute = new SQLiteDatabase(Global.dbPath);
-            sqlExcute.ExecuteNonQuery("delete from AuxData where MD5=@MD5",
-                new List<SQLiteParameter>()
-                    {
-                        new SQLiteParameter("MD5",md5)
-                    });
+            removeData("AuxData", md5, sqlExcute);
+            removeData("FileErrors", md5, sqlExcute);
+            removeData("FileQuickView", md5, sqlExcute);
             sqlExcute.BeginInsert();
 
-            //errInfo.update(dataChannel[0].dtChannel);
-            //for (int i = 0; i < errInfo.dtErrInfo.Rows.Count; i++)
-            //{
-            //    Insert(sqlExcute, errInfo.dtErrInfo.Rows[i]);
-            //}
+            errInfo.update(dataChannel[0].dtChannel);
+            for (int i = 0; i < errInfo.dtErrInfo.Rows.Count; i++)
+            {
+                Insert(sqlExcute, errInfo.dtErrInfo.Rows[i]);
+            }
 
             //快视用数据库
             int splitSum = (int)Math.Ceiling((double)dataChannel[0].frmC/4096);
@@ -398,15 +414,37 @@ namespace Spectra
                 Insert(sqlExcute,split,splitCur,StartTime,EndTime,strStartCoord,strEndCoord);
             }
 
-
+            //插入辅助信息
             for (int f = 0; f < dataChannel[0].frmC; f++)
                 Insert(sqlExcute, f, dataChannel[0].frmC, dataChannel[0].dtChannel.Rows[f]);
             sqlExcute.EndInsert();
+            //更新文件信息
             updateFileInfo(sqlExcute);
         }
 
-        //插入数据库操作
-        public void Insert(SQLiteDatabase sqlExcute, int InternalId, int FrameSum, DataRow dr)
+        /// <summary>
+        /// 从table中移除所有m相关数据
+        /// </summary>
+        /// <param name="t">表格</param>
+        /// <param name="m">MD5</param>
+        /// <param name="sqlExcute">数据库对象</param>
+        public void removeData(string t, string m, SQLiteDatabase sqlExcute)
+        {
+            sqlExcute.ExecuteNonQuery($"delete from {t} where MD5=@MD5",
+                new List<SQLiteParameter>()
+                    {
+                        new SQLiteParameter("MD5",m)
+                    });
+        }
+
+        /// <summary>
+        /// 辅助数据插入数据库操作
+        /// </summary>
+        /// <param name="sqlExcute">数据库对象</param>
+        /// <param name="InternalId">内部编号</param>
+        /// <param name="FrameSum">总帧数</param>
+        /// <param name="dr">辅助数据列表</param>
+        private void Insert(SQLiteDatabase sqlExcute, int InternalId, int FrameSum, DataRow dr)
         {
             var sql = "insert into AuxData values(@InternalId,@FrameSum,@FrameId,@GST,@GST_US,@Lat,@Lon,@X,@Y,@Z,@Vx,@Vy,@Vz,@Ox,@Oy,@Oz,@Q1,@Q2,@Q3,@Q4,@Freq,@Integral,@StartRow,@Gain,@MD5,@Satellite);";
             var cmdparams = new List<SQLiteParameter>()
@@ -443,13 +481,20 @@ namespace Spectra
             {
                 sqlExcute.ExecuteNonQuery(sql, cmdparams);
             }
-            catch// (Exception e)
-            {
-                //MessageBox.Show(e.ToString());
-            }
+            catch { }
         }
 
-        public void Insert(SQLiteDatabase sqlExcute, int SubId, int FrameSum, DateTime StartTime,DateTime EndTime,string StartCoord,string EndCoord)
+        /// <summary>
+        /// 快视数据插入数据库
+        /// </summary>
+        /// <param name="sqlExcute"></param>
+        /// <param name="SubId"></param>
+        /// <param name="FrameSum"></param>
+        /// <param name="StartTime"></param>
+        /// <param name="EndTime"></param>
+        /// <param name="StartCoord"></param>
+        /// <param name="EndCoord"></param>
+        private void Insert(SQLiteDatabase sqlExcute, int SubId, int FrameSum, DateTime StartTime,DateTime EndTime,string StartCoord,string EndCoord)
         {
             var sql = "insert into FileQuickView values(@Name,@MD5,@SubId,@FrameSum,@SavePath,@StartTime,@EndTime,@StartCoord,@EndCoord);";
             var cmdparams = new List<SQLiteParameter>()
@@ -469,13 +514,15 @@ namespace Spectra
             {
                 sqlExcute.ExecuteNonQuery(sql, cmdparams);
             }
-            catch// (Exception e)
-            {
-                //MessageBox.Show(e.ToString());
-            }
+            catch { }
         }
 
-        public void Insert(SQLiteDatabase sqlExcute, DataRow dr)
+        /// <summary>
+        /// 将错误信息插入数据库
+        /// </summary>
+        /// <param name="sqlExcute">数据库对象</param>
+        /// <param name="dr">数据行</param>
+        private void Insert(SQLiteDatabase sqlExcute, DataRow dr)
         {
             var sql = "insert into FileErrors values(@错误位置,@错误类型,@MD5);";
             var cmdparams = new List<SQLiteParameter>()
@@ -489,17 +536,15 @@ namespace Spectra
             {
                 sqlExcute.ExecuteNonQuery(sql, cmdparams);
             }
-            catch// (Exception e)
-            {
-                //MessageBox.Show(e.ToString());
-            }
+            catch { }
         }
 
-        //刷新文件信息
-        public void updateFileInfo(SQLiteDatabase sqlExcute)
+        /// <summary>
+        /// 文件信息插入数据库，将首帧、末帧作为文件图像的起始和结束
+        /// </summary>
+        /// <param name="sqlExcute">数据库对象</param>
+        private void updateFileInfo(SQLiteDatabase sqlExcute)
         {
-            sqlExcute.cnn.Open();
-
             //更新文件信息
             FileInfo.frmSum = dataChannel[0].frmC;// (long)sqlExcute.ExecuteScalar($"SELECT COUNT(*) FROM AuxData WHERE MD5='{FileInfo.md5}'");                                    //帧总数
             DateTime T0 = new DateTime(2012, 1, 1, 0, 0, 0);
@@ -513,14 +558,16 @@ namespace Spectra
             FileInfo.endCoord.convertToCoord($"({lat},{lon})");                                                                                             //结束经纬
 
             SQLiteFunc.ExcuteSQL("update FileDetails_dec set 解压时间='?',解压后文件路径='?',帧数='?',起始时间='?',结束时间='?',起始经纬='?',结束经纬='?' where MD5='?'",
-                DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), $"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\", FileInfo.frmSum, FileInfo.startTime.ToString("yyyy-MM-dd HH:mm:ss"), FileInfo.endTime.ToString("yyyy-MM-dd HH:mm:ss"), FileInfo.startCoord.convertToString(), FileInfo.endCoord.convertToString(), FileInfo.md5);
+                DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), $"{Global.pathDecFiles}{FileInfo.md5}\\", FileInfo.frmSum, FileInfo.startTime.ToString("yyyy-MM-dd HH:mm:ss"), FileInfo.endTime.ToString("yyyy-MM-dd HH:mm:ss"), FileInfo.startCoord.convertToString(), FileInfo.endCoord.convertToString(), FileInfo.md5);
             SQLiteFunc.ExcuteSQL("update FileDetails set 是否已解压='是' where MD5='?';", FileInfo.md5);
-            FileInfo.decFilePathName = $"{Environment.CurrentDirectory}\\decFiles\\{FileInfo.md5}\\";
-            ImageInfo.strFilesPath = FileInfo.decFilePathName;
+            ImageInfo.strFilesPath = FileInfo.decFilePathName = $"{Global.pathDecFiles}{FileInfo.md5}\\";
         }
 
-        //获得3D展示用的4张图
-        public void Get3DRaw(string pathDec)
+        /// <summary>
+        /// 获得3D展示用的4张图
+        /// </summary>
+        /// <param name="pathDec">解压后文件存放路径</param>
+        private void Get3DRaw(string pathDec)
         {
             int width = 2048, height = dataChannel[0].frmC;
             byte[] buf3dUp = new byte[width * 128 * 2];
@@ -570,7 +617,9 @@ namespace Spectra
         }
     }
     
-    //每个通道的信息
+    /// <summary>
+    /// 每个通道的信息，包含列表、帧起始、帧结束、总帧数
+    /// </summary>
     public class DataChannel
     {
         public DataTable dtChannel;
@@ -743,11 +792,19 @@ namespace Spectra
         }
     }
 
-    //错误信息
+    /// <summary>
+    /// 错误信息类
+    /// </summary>
     public class ErrorInfo
     {
+        /// <summary>
+        /// 存放错误信息的列表
+        /// </summary>
         public DataTable dtErrInfo;
 
+        /// <summary>
+        /// 构造函数，确认列表内容
+        /// </summary>
         public ErrorInfo()
         {
             dtErrInfo = new DataTable();
@@ -755,11 +812,20 @@ namespace Spectra
             dtErrInfo.Columns.Add("错误类型", System.Type.GetType("System.String"));
         }
 
+        /// <summary>
+        /// 列表增加一行内容
+        /// </summary>
+        /// <param name="frm">帧号</param>
+        /// <param name="info">错误信息</param>
         public void add(int frm,string info)
         {
             dtErrInfo.Rows.Add(new object[] {frm.ToString(),info});
         }
 
+        /// <summary>
+        /// 对文件图像的帧号进行判断是否连续，不连续则报错
+        /// </summary>
+        /// <param name="dt">文件图像辅助数据列表</param>
         public void update(DataTable dt)
         {
             int cnt = dt.Rows.Count;
@@ -778,8 +844,11 @@ namespace Spectra
                         rightFrm = 0;
                     else
                         rightFrm++;
-                    if(curFrm!= rightFrm)
+                    if (curFrm != rightFrm)
+                    {
                         dtErrInfo.Rows.Add(new object[] { rightFrm.ToString(), "丢失" });
+                        rightFrm = curFrm;
+                    }
                 }
             }
         }

@@ -136,10 +136,13 @@ namespace Spectra
         private async void btnDecFile_Click(object sender, RoutedEventArgs e)
         {
             btnDecFile.IsEnabled = false;
+
             DataOper dataOper = new DataOper(FileInfo.srcFilePathName,FileInfo.md5);
             IProgress<double> IProg_Bar = new Progress<double>((ProgressValue) => { prog_Import.Value = ProgressValue * prog_Import.Maximum; });
             IProgress<string> IProg_Cmd = new Progress<string>((ProgressString) => { tb_Console.Text = ProgressString + "\n" + tb_Console.Text; });
             await dataOper.main(IProg_Bar, IProg_Cmd);
+            dataGrid_Errors.ItemsSource = SQLiteFunc.SelectDTSQL("select * from FileErrors where MD5='" + FileInfo.md5 + "'").DefaultView;  //显示错误信息
+
             btnOpenFile.IsEnabled = true;
             btnTopB.IsChecked = true;
             btnLeftB1.IsChecked = true;
@@ -279,6 +282,15 @@ namespace Spectra
         {
             dataGrid_srcFile.ItemsSource = SQLiteFunc.SelectDTSQL("SELECT * from FileDetails").DefaultView;
         }
+        /*打开解压文件夹*/
+        private void decFileOpen_Click(object sender, RoutedEventArgs e)
+        {
+            if (dataGrid_decFile.Items.Count > 0)
+            {
+                string path = ((DataRowView)(dataGrid_decFile.Items[0])).Row[9].ToString();
+                System.Diagnostics.Process.Start("explorer.exe", path);
+            }
+        }
         /*删除文件记录*/
         private void btnDelRecord_Click(object sender, RoutedEventArgs e)
         {
@@ -294,12 +306,9 @@ namespace Spectra
                         SQLiteFunc.ExcuteSQL("delete from FileDetails_dec where MD5='" + sel.Row[5] + "'");
                         SQLiteFunc.ExcuteSQL("delete from FileErrors where MD5='" + sel.Row[5] + "'");
                         SQLiteFunc.ExcuteSQL("delete from AuxData where MD5='" + sel.Row[5] + "'");
+                        SQLiteFunc.ExcuteSQL("delete from FileQuickView where MD5='" + sel.Row[5] + "'");
                         dataGrid_srcFile.ItemsSource = SQLiteFunc.SelectDTSQL("SELECT * from FileDetails").DefaultView;
-                    }
-                    if (System.Windows.MessageBox.Show("是否同时删除缓存文件?", "提示", MessageBoxButton.OKCancel, MessageBoxImage.Warning) == MessageBoxResult.OK)
-                    {
-                        if (Directory.Exists($"{Environment.CurrentDirectory}\\decFiles\\{sel.Row[5]}"))
-                            Directory.Delete($"{Environment.CurrentDirectory}\\decFiles\\{sel.Row[5]}", true);
+                        dataGrid_decFile.ItemsSource = null;
                     }
                 }
             }
