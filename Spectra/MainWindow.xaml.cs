@@ -32,6 +32,7 @@ namespace Spectra
             getApplyModel();
             getBandWave();
             dataGrid_srcFile.ItemsSource = SQLiteFunc.SelectDTSQL("SELECT * from FileDetails").DefaultView;
+            Global.pathDecFiles = txtSetDecPath.Text = SQLiteFunc.SelectDTSQL("SELECT * from Global where ID=1").Rows[0][1].ToString();
         }
         /*拖动界面*/
         private void WindowMain_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -67,7 +68,7 @@ namespace Spectra
         }
         #endregion
 
-        #region 数据解包解压
+        #region 数据解压
         /*点击打开文件*/
         private void btnOpenFile_Click(object sender, RoutedEventArgs e)
         {
@@ -116,7 +117,7 @@ namespace Spectra
                         tb_Console.Text = FileInfo.checkFileState();                                                                    //检查文件状态
 
                         DataOper dataOper = new DataOper(FileInfo.srcFilePathName, FileInfo.md5);
-                        await dataOper.main(FileInfo.srcFilePathName, IProg_Bar, IProg_Cmd, cancelImport.Token);
+                        await dataOper.main(IProg_Bar, IProg_Cmd);
                         dataGrid_Errors.ItemsSource = SQLiteFunc.SelectDTSQL("select * from FileErrors where MD5='" + FileInfo.md5 + "'").DefaultView;  //显示错误信息
                     }
                     catch
@@ -138,7 +139,7 @@ namespace Spectra
             DataOper dataOper = new DataOper(FileInfo.srcFilePathName,FileInfo.md5);
             IProgress<double> IProg_Bar = new Progress<double>((ProgressValue) => { prog_Import.Value = ProgressValue * prog_Import.Maximum; });
             IProgress<string> IProg_Cmd = new Progress<string>((ProgressString) => { tb_Console.Text = ProgressString + "\n" + tb_Console.Text; });
-            await dataOper.main(FileInfo.srcFilePathName, IProg_Bar, IProg_Cmd, cancelImport.Token);
+            await dataOper.main(IProg_Bar, IProg_Cmd);
             btnOpenFile.IsEnabled = true;
             btnTopB.IsChecked = true;
             btnLeftB1.IsChecked = true;
@@ -1143,6 +1144,16 @@ namespace Spectra
             {
                 System.Windows.MessageBox.Show("数据出错!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
+        }
+        #endregion
+
+        #region 默认数据设置
+        //设置解压后默认存放路径
+        private void btnSetDecPath_Click(object sender, RoutedEventArgs e)
+        {
+            if (txtSetDecPath.Text.Substring(txtSetDecPath.Text.Length - 1) != "\\")
+                txtSetDecPath.Text = txtSetDecPath.Text + "\\";
+            SQLiteFunc.ExcuteSQL("update Global set Variable='?' where ID=1", txtSetDecPath.Text);
         }
         #endregion
     }

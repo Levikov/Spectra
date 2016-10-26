@@ -364,9 +364,7 @@
     <EmbeddedResource Include="Windows\DynamicImagingWindow_Win32.resx">
       <DependentUpon>DynamicImagingWindow_Win32.cs</DependentUpon>
     </EmbeddedResource>
-    <None Include="DataBase\db.sqlite">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <None Include="DataBase\db.sqlite" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -416,9 +414,7 @@
     <Resource Include="image\ICON\4.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="decFiles\decFiles.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <Content Include="decFiles\decFiles.txt" />
     <Resource Include="image\GRAY\1.png" />
     <Resource Include="image\GRAY\10.png" />
     <Resource Include="image\GRAY\12.png" />
@@ -487,9 +483,7 @@
     <Content Include="Mapsui\SQLite.Net.Platform.Win32.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="srcFiles\srcFiles.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <Content Include="srcFiles\srcFiles.txt" />
     <Resource Include="Mapsui\Newtonsoft.Json.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
@@ -499,9 +493,7 @@
     <None Include="showFiles\showFiles文件内容说明.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="channelFiles\channelFiles文件内容说明.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    <None Include="channelFiles\channelFiles文件内容说明.txt" />
     <Content Include="DLL\DataOperation.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

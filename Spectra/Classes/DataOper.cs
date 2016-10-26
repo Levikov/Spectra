@@ -5,202 +5,47 @@ using System.Data;
 using System.Data.SQLite;
 using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
 
 namespace Spectra
 {
-    class DataOper
+    /// <summary>
+    /// 数据解压类
+    /// </summary>
+    public class DataOper
     {
-        string srcFilePathName = "";
-        string srcFileName = "";
+        /// <summary>
+        /// 源文件路径全称
+        /// </summary>
+        public string srcFilePathName = "";
+
+        /// <summary>
+        /// 源文件名（不含后缀）
+        /// </summary>
+        public string srcFileName = "";
+
+        /// <summary>
+        /// 源文件MD5码
+        /// </summary>
         public string md5 = "";
+
+        /// <summary>
+        /// 每个通道的数据信息，主要包含了所有数据的列表清单以及辅助数据的计算
+        /// </summary>
         public DataChannel[] dataChannel = new DataChannel[4];
-        public DataOperInfo realInfo = new DataOperInfo();
+
+        /// <summary>
+        /// 该文件所有错误信息列表
+        /// </summary>
         public ErrorInfo errInfo = new ErrorInfo();
 
-        public struct DataOperInfo
-        {
-            public int frmS;
-            public int frmE;
-        }
-
-        //每个通道的信息
-        public class DataChannel
-        {
-            public DataTable dtChannel;
-            public int frmS, frmE, frmC;
-            public string md5;
-
-            public DataChannel(string m)
-            {
-                md5 = m;
-                dtChannel = new DataTable();
-                dtChannel.Columns.Add("ID", System.Type.GetType("System.Int32"));   //第几帧图像（0计数）
-                dtChannel.Columns.Add("row", System.Type.GetType("System.Int32"));  //在第几行开始（0计数）
-                //dtChannel.Columns.Add("InternalId", System.Type.GetType("System.Int32"));
-                //dtChannel.Columns.Add("FrameSum", System.Type.GetType("System.Int32"));
-                dtChannel.Columns.Add("FrameId", System.Type.GetType("System.Int32"));
-                dtChannel.Columns.Add("GST", System.Type.GetType("System.Double"));
-                dtChannel.Columns.Add("GST_US", System.Type.GetType("System.Int64"));
-                dtChannel.Columns.Add("Lat", System.Type.GetType("System.Double"));
-                dtChannel.Columns.Add("Lon", System.Type.GetType("System.Double"));
-                dtChannel.Columns.Add("X", System.Type.GetType("System.Double"));
-                dtChannel.Columns.Add("Y", System.Type.GetType("System.Double"));
-                dtChannel.Columns.Add("Z", System.Type.GetType("System.Double"));
-                dtChannel.Columns.Add("Vx", System.Type.GetType("System.Double"));
-                dtChannel.Columns.Add("Vy", System.Type.GetType("System.Double"));
-                dtChannel.Columns.Add("Vz", System.Type.GetType("System.Double"));
-                dtChannel.Columns.Add("Ox", System.Type.GetType("System.Double"));
-                dtChannel.Columns.Add("Oy", System.Type.GetType("System.Double"));
-                dtChannel.Columns.Add("Oz", System.Type.GetType("System.Double"));
-                dtChannel.Columns.Add("Q1", System.Type.GetType("System.Double"));
-                dtChannel.Columns.Add("Q2", System.Type.GetType("System.Double"));
-                dtChannel.Columns.Add("Q3", System.Type.GetType("System.Double"));
-                dtChannel.Columns.Add("Q4", System.Type.GetType("System.Double"));
-                dtChannel.Columns.Add("Freq", System.Type.GetType("System.Double"));
-                dtChannel.Columns.Add("Integral", System.Type.GetType("System.Double"));
-                dtChannel.Columns.Add("StartRow", System.Type.GetType("System.Int32"));
-                dtChannel.Columns.Add("Gain", System.Type.GetType("System.Int32"));
-                dtChannel.Columns.Add("MD5", System.Type.GetType("System.String"));
-                dtChannel.Columns.Add("Satellite", System.Type.GetType("System.String"));
-                frmS = frmE = frmC = 0;
-            }
-
-            public void add(int ID, int row, byte[] buf)
-            {
-                double GST, Lat, Lon, X, Y, Z, Vx, Vy, Vz, Ox, Oy, Oz, Q1, Q2, Q3, Q4, Freq, Integral;
-                long GST_US;
-                int StartRow, Gain;
-
-                GST = readU32(buf, 17);
-                GST_US = readU32(buf, 104);
-                X = readI32(buf, 32) / (double)1000;
-                Y = readI32(buf, 36) / (double)1000;
-                Z = readI32(buf, 40) / (double)1000;
-                double[] latlon = new double[2];
-                latlon = CalEarthLonLat(new double[3] { X, Y, Z }, GST);
-                Lat = double.IsNaN(latlon[1]) ? 0 : latlon[1];
-                Lon = double.IsNaN(latlon[0]) ? 0 : latlon[0];
-
-                Vx = readI32(buf, 44) / (double)1000;
-                Vy = readI32(buf, 48) / (double)1000;
-                Vz = readI32(buf, 52) / (double)1000;
-                Ox = readI32(buf, 81) * 57.3;
-                Oy = readI32(buf, 85) * 57.3;
-                Oz = readI32(buf, 89) * 57.3;
-                Q1 = readI32(buf, 65) / (double)10000 * 57.3;
-                Q2 = readI32(buf, 69) / (double)10000 * 57.3;
-                Q3 = readI32(buf, 73) / (double)10000 * 57.3;
-                Q4 = readI32(buf, 77) / (double)10000 * 57.3;
-
-                Freq = (double)100000 / (buf[102] * 256 + buf[103]);
-                Integral = IntegralToLevel(buf[108] * 256 + buf[109]);
-                StartRow = buf[112] * 256 + buf[113];
-                Gain = buf[115];
-
-                dtChannel.Rows.Add(new object[] { ID, row, buf[6] * 256 + buf[7], GST, GST_US, Lat, Lon, X, Y, Z, Vx, Vy, Vz, Ox, Oy, Oz, Q1, Q2, Q3, Q4, Freq, Integral, StartRow, Gain, md5, "1" });
-            }
-
-            public void getInfo()
-            {
-                frmS = (int)dtChannel.Rows[0]["FrameId"];
-                frmE = (int)dtChannel.Rows[dtChannel.Rows.Count - 1]["FrameId"];
-                frmC = dtChannel.Rows.Count;
-            }
-
-            public void modify(int s, int e)
-            {
-                for (int i = 0; i < frmE - e; i++)
-                {
-                    dtChannel.Rows.RemoveAt(dtChannel.Rows.Count - 1);
-                }
-                for (int i = 0; i < s - frmS; i++)
-                {
-                    dtChannel.Rows.RemoveAt(0);
-                }
-                frmS = s;
-                frmE = e;
-                frmC = dtChannel.Rows.Count - 1;
-            }
-
-            public UInt32 readU32(byte[] buf, int addr)
-            {
-                byte[] conv = new byte[4] { buf[addr + 3], buf[addr + 2], buf[addr + 1], buf[addr] };
-                return BitConverter.ToUInt32(conv, 0);
-            }
-
-            public float readI32(byte[] buf, int addr)
-            {
-                byte[] mathBuf = new byte[4];
-                mathBuf[0] = buf[addr + 3];
-                mathBuf[1] = buf[addr + 2];
-                mathBuf[2] = buf[addr + 1];
-                mathBuf[3] = buf[addr + 0];
-                return BitConverter.ToSingle(mathBuf, 0);
-                //byte[] conv = new byte[4] { buf[addr + 3], buf[addr + 2], buf[addr + 1], buf[addr] };
-                //return BitConverter.ToInt32(conv, 0);
-            }
-
-            public static double[] CalEarthLonLat(double[] cuR, double fgst)
-            {
-                double[] clonlat = new double[2];
-                double temp, sra, lon;
-                temp = Math.Sqrt(cuR[0] * cuR[0] + cuR[1] * cuR[1]);             //|R|
-                if (Math.Abs(temp) < 0.0000001F)                                //R==0
-                {
-                    clonlat[1] = Math.PI * 0.5 * cuR[2] / Math.Abs(cuR[2]);    //Recs[2]>0.0,则fLati = PI05
-                    sra = 0.0F;
-                }
-                else
-                {
-                    clonlat[1] = Math.Atan(cuR[2] / temp);             //得到纬度[-PI05 PI05]
-                    sra = Math.Atan2(cuR[1], cuR[0]);                  //得到经度[-PI PI]
-                }
-                lon = sra - fgst;
-                lon = lon - (int)(lon / Math.PI / 2) * Math.PI * 2;                       //POSE_MODF规整到给定范围
-
-                if (lon > Math.PI)
-                    lon = lon - Math.PI * 2;
-                else if (lon < -Math.PI)
-                    lon = lon + Math.PI * 2;
-                else { }
-                clonlat[0] = lon;                                       //经度
-                return clonlat;
-            }
-
-            public int IntegralToLevel(int integral)
-            {
-                switch (integral)
-                {
-                    case 50:
-                        return 0;
-                    case 100:
-                        return 1;
-                    case 200:
-                        return 2;
-                    case 300:
-                        return 3;
-                    case 400:
-                        return 4;
-                    case 500:
-                        return 5;
-                    case 600:
-                        return 6;
-                    case 1000:
-                        return 7;
-                    default:
-                        return 8;
-                }
-            }
-        }
-
-        //构造函数
+        /// <summary>
+        /// 构造函数，获取源文件路径、文件名、MD5
+        /// </summary>
+        /// <param name="s">源文件路径全称</param>
+        /// <param name="m">源文件的MD5</param>
         public DataOper(string s, string m)
         {
             md5 = m;
@@ -210,14 +55,19 @@ namespace Spectra
                 dataChannel[c] = new DataChannel(md5);
         }
 
-        //主程序
-        public Task main(string inFilePathName, IProgress<double> IProg_Bar, IProgress<string> IProg_Cmd, CancellationToken ct)
+        /// <summary>
+        /// 数据解压主程序
+        /// </summary>
+        /// <param name="IProg_Bar"></param>
+        /// <param name="IProg_Cmd"></param>
+        /// <returns></returns>
+        public Task main(IProgress<double> IProg_Bar, IProgress<string> IProg_Cmd)
         {
             return Task.Run(() =>
             {
                 try
                 {
-                    string strSrc = preData(unpackData(inFilePathName, IProg_Bar, IProg_Cmd), IProg_Bar, IProg_Cmd);
+                    string strSrc = preData(unpackData(srcFilePathName, IProg_Bar, IProg_Cmd), IProg_Bar, IProg_Cmd);
                     if (strSrc == string.Empty)
                     {
                         IProg_Cmd.Report(DateTime.Now.ToString("HH:mm:ss") + " 文件不正确，已停止该文件操作！");
@@ -236,7 +86,7 @@ namespace Spectra
                 {
                     //MessageBox.Show(ex.ToString());
                 }
-            }, ct);
+            });
         }
 
         //解包
@@ -385,11 +235,11 @@ namespace Spectra
             for (int c = 0; c < 4; c++)
                 dataChannel[c].getInfo();
 
-            realInfo.frmS = Math.Max(Math.Max(dataChannel[0].frmS, dataChannel[1].frmS), Math.Max(dataChannel[2].frmS, dataChannel[3].frmS));
-            realInfo.frmE = Math.Min(Math.Min(dataChannel[0].frmE, dataChannel[1].frmE), Math.Min(dataChannel[2].frmE, dataChannel[3].frmE));
+            int S = Math.Max(Math.Max(dataChannel[0].frmS, dataChannel[1].frmS), Math.Max(dataChannel[2].frmS, dataChannel[3].frmS));
+            int E = Math.Min(Math.Min(dataChannel[0].frmE, dataChannel[1].frmE), Math.Min(dataChannel[2].frmE, dataChannel[3].frmE));
 
             for (int c = 0; c < 4; c++)
-                dataChannel[c].modify(realInfo.frmS, realInfo.frmE);
+                dataChannel[c].modify(S, E);
         }
 
         //解压
@@ -513,7 +363,7 @@ namespace Spectra
         //数据库操作
         public void sqlInsert()
         {
-            SQLiteDatabase sqlExcute = new SQLiteDatabase(Variables.dbPath);
+            SQLiteDatabase sqlExcute = new SQLiteDatabase(Global.dbPath);
             sqlExcute.ExecuteNonQuery("delete from AuxData where MD5=@MD5",
                 new List<SQLiteParameter>()
                     {
@@ -719,8 +569,181 @@ namespace Spectra
             outFileStream.Close();
         }
     }
-
+    
     //每个通道的信息
+    public class DataChannel
+    {
+        public DataTable dtChannel;
+        public int frmS, frmE, frmC;
+        public string md5;
+
+        public DataChannel(string m)
+        {
+            md5 = m;
+            dtChannel = new DataTable();
+            dtChannel.Columns.Add("ID", System.Type.GetType("System.Int32"));   //第几帧图像（0计数）
+            dtChannel.Columns.Add("row", System.Type.GetType("System.Int32"));  //在第几行开始（0计数）
+                                                                                //dtChannel.Columns.Add("InternalId", System.Type.GetType("System.Int32"));
+                                                                                //dtChannel.Columns.Add("FrameSum", System.Type.GetType("System.Int32"));
+            dtChannel.Columns.Add("FrameId", System.Type.GetType("System.Int32"));
+            dtChannel.Columns.Add("GST", System.Type.GetType("System.Double"));
+            dtChannel.Columns.Add("GST_US", System.Type.GetType("System.Int64"));
+            dtChannel.Columns.Add("Lat", System.Type.GetType("System.Double"));
+            dtChannel.Columns.Add("Lon", System.Type.GetType("System.Double"));
+            dtChannel.Columns.Add("X", System.Type.GetType("System.Double"));
+            dtChannel.Columns.Add("Y", System.Type.GetType("System.Double"));
+            dtChannel.Columns.Add("Z", System.Type.GetType("System.Double"));
+            dtChannel.Columns.Add("Vx", System.Type.GetType("System.Double"));
+            dtChannel.Columns.Add("Vy", System.Type.GetType("System.Double"));
+            dtChannel.Columns.Add("Vz", System.Type.GetType("System.Double"));
+            dtChannel.Columns.Add("Ox", System.Type.GetType("System.Double"));
+            dtChannel.Columns.Add("Oy", System.Type.GetType("System.Double"));
+            dtChannel.Columns.Add("Oz", System.Type.GetType("System.Double"));
+            dtChannel.Columns.Add("Q1", System.Type.GetType("System.Double"));
+            dtChannel.Columns.Add("Q2", System.Type.GetType("System.Double"));
+            dtChannel.Columns.Add("Q3", System.Type.GetType("System.Double"));
+            dtChannel.Columns.Add("Q4", System.Type.GetType("System.Double"));
+            dtChannel.Columns.Add("Freq", System.Type.GetType("System.Double"));
+            dtChannel.Columns.Add("Integral", System.Type.GetType("System.Double"));
+            dtChannel.Columns.Add("StartRow", System.Type.GetType("System.Int32"));
+            dtChannel.Columns.Add("Gain", System.Type.GetType("System.Int32"));
+            dtChannel.Columns.Add("MD5", System.Type.GetType("System.String"));
+            dtChannel.Columns.Add("Satellite", System.Type.GetType("System.String"));
+            frmS = frmE = frmC = 0;
+        }
+
+        public void add(int ID, int row, byte[] buf)
+        {
+            double GST, Lat, Lon, X, Y, Z, Vx, Vy, Vz, Ox, Oy, Oz, Q1, Q2, Q3, Q4, Freq, Integral;
+            long GST_US;
+            int StartRow, Gain;
+
+            GST = readU32(buf, 17);
+            GST_US = readU32(buf, 104);
+            X = readI32(buf, 32) / (double)1000;
+            Y = readI32(buf, 36) / (double)1000;
+            Z = readI32(buf, 40) / (double)1000;
+            double[] latlon = new double[2];
+            latlon = CalEarthLonLat(new double[3] { X, Y, Z }, GST);
+            Lat = double.IsNaN(latlon[1]) ? 0 : latlon[1];
+            Lon = double.IsNaN(latlon[0]) ? 0 : latlon[0];
+
+            Vx = readI32(buf, 44) / (double)1000;
+            Vy = readI32(buf, 48) / (double)1000;
+            Vz = readI32(buf, 52) / (double)1000;
+            Ox = readI32(buf, 81) * 57.3;
+            Oy = readI32(buf, 85) * 57.3;
+            Oz = readI32(buf, 89) * 57.3;
+            Q1 = readI32(buf, 65) / (double)10000 * 57.3;
+            Q2 = readI32(buf, 69) / (double)10000 * 57.3;
+            Q3 = readI32(buf, 73) / (double)10000 * 57.3;
+            Q4 = readI32(buf, 77) / (double)10000 * 57.3;
+
+            Freq = (double)100000 / (buf[102] * 256 + buf[103]);
+            Integral = IntegralToLevel(buf[108] * 256 + buf[109]);
+            StartRow = buf[112] * 256 + buf[113];
+            Gain = buf[115];
+
+            dtChannel.Rows.Add(new object[] { ID, row, buf[6] * 256 + buf[7], GST, GST_US, Lat, Lon, X, Y, Z, Vx, Vy, Vz, Ox, Oy, Oz, Q1, Q2, Q3, Q4, Freq, Integral, StartRow, Gain, md5, "1" });
+        }
+
+        /// <summary>
+        /// 获取首帧帧号、末帧帧号及总帧数
+        /// </summary>
+        public void getInfo()
+        {
+            frmS = (int)dtChannel.Rows[0]["FrameId"];
+            frmE = (int)dtChannel.Rows[dtChannel.Rows.Count - 1]["FrameId"];
+            frmC = dtChannel.Rows.Count;
+        }
+
+        public void modify(int s, int e)
+        {
+            for (int i = 0; i < frmE - e; i++)
+            {
+                dtChannel.Rows.RemoveAt(dtChannel.Rows.Count - 1);
+            }
+            for (int i = 0; i < s - frmS; i++)
+            {
+                dtChannel.Rows.RemoveAt(0);
+            }
+            frmS = s;
+            frmE = e;
+            frmC = dtChannel.Rows.Count - 1;
+        }
+
+        public UInt32 readU32(byte[] buf, int addr)
+        {
+            byte[] conv = new byte[4] { buf[addr + 3], buf[addr + 2], buf[addr + 1], buf[addr] };
+            return BitConverter.ToUInt32(conv, 0);
+        }
+
+        public float readI32(byte[] buf, int addr)
+        {
+            byte[] mathBuf = new byte[4];
+            mathBuf[0] = buf[addr + 3];
+            mathBuf[1] = buf[addr + 2];
+            mathBuf[2] = buf[addr + 1];
+            mathBuf[3] = buf[addr + 0];
+            return BitConverter.ToSingle(mathBuf, 0);
+            //byte[] conv = new byte[4] { buf[addr + 3], buf[addr + 2], buf[addr + 1], buf[addr] };
+            //return BitConverter.ToInt32(conv, 0);
+        }
+
+        public static double[] CalEarthLonLat(double[] cuR, double fgst)
+        {
+            double[] clonlat = new double[2];
+            double temp, sra, lon;
+            temp = Math.Sqrt(cuR[0] * cuR[0] + cuR[1] * cuR[1]);             //|R|
+            if (Math.Abs(temp) < 0.0000001F)                                //R==0
+            {
+                clonlat[1] = Math.PI * 0.5 * cuR[2] / Math.Abs(cuR[2]);    //Recs[2]>0.0,则fLati = PI05
+                sra = 0.0F;
+            }
+            else
+            {
+                clonlat[1] = Math.Atan(cuR[2] / temp);             //得到纬度[-PI05 PI05]
+                sra = Math.Atan2(cuR[1], cuR[0]);                  //得到经度[-PI PI]
+            }
+            lon = sra - fgst;
+            lon = lon - (int)(lon / Math.PI / 2) * Math.PI * 2;                       //POSE_MODF规整到给定范围
+
+            if (lon > Math.PI)
+                lon = lon - Math.PI * 2;
+            else if (lon < -Math.PI)
+                lon = lon + Math.PI * 2;
+            else { }
+            clonlat[0] = lon;                                       //经度
+            return clonlat;
+        }
+
+        public int IntegralToLevel(int integral)
+        {
+            switch (integral)
+            {
+                case 50:
+                    return 0;
+                case 100:
+                    return 1;
+                case 200:
+                    return 2;
+                case 300:
+                    return 3;
+                case 400:
+                    return 4;
+                case 500:
+                    return 5;
+                case 600:
+                    return 6;
+                case 1000:
+                    return 7;
+                default:
+                    return 8;
+            }
+        }
+    }
+
+    //错误信息
     public class ErrorInfo
     {
         public DataTable dtErrInfo;

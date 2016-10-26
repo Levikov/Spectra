@@ -211,7 +211,7 @@ namespace Spectra
         {
             try
             {
-                SQLiteConnection conn = new SQLiteConnection(Variables.dbConString);
+                SQLiteConnection conn = new SQLiteConnection(Global.dbConString);
                 conn.Open();
                 SQLiteCommand cmmd = new SQLiteCommand("", conn);
                 cmmd.CommandText = sql;
@@ -233,7 +233,7 @@ namespace Spectra
         {
             try
             {
-                SQLiteConnection conn = new SQLiteConnection(Variables.dbConString);
+                SQLiteConnection conn = new SQLiteConnection(Global.dbConString);
                 conn.Open();
                 SQLiteCommand cmmd = new SQLiteCommand("", conn);
                 cmmd.CommandText = sql;

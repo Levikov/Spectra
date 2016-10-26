@@ -76,10 +76,10 @@
             </Grid.ColumnDefinitions>
             <GridSplitter x:Name="splitA" Grid.RowSpan="1" Margin="0,50" Width="1" Background="{StaticResource ButtonBack}"/>
             <StackPanel>
-                <RadioButton x:Name="btnLeftA1" Content="数据处理" Template="{DynamicResource ButtonIcon2nd}" Margin="0,50,0,0" Height="50">
+                <RadioButton x:Name="btnLeftA1" Content="数据处理" Template="{DynamicResource ButtonIcon2nd}" Margin="0,50,0,0" Height="50" IsChecked="True">
                     <RadioButton.Background><ImageBrush ImageSource="image/GRAY/18.png"/></RadioButton.Background>
                 </RadioButton>
-                <RadioButton x:Name="btnLeftA2" Content="数据存储" Template="{DynamicResource ButtonIcon2nd}" Height="50" Click="btnLeftA2_Click" IsChecked="True">
+                <RadioButton x:Name="btnLeftA2" Content="数据存储" Template="{DynamicResource ButtonIcon2nd}" Height="50" Click="btnLeftA2_Click">
                     <RadioButton.Background><ImageBrush ImageSource="image/GRAY/17.png"/></RadioButton.Background>
                 </RadioButton>
                 <RadioButton x:Name="btnLeftA3" Content="文件检索" Template="{DynamicResource ButtonIcon2nd}" Height="50">
@@ -123,7 +123,7 @@
                         </DockPanel>
                         <DockPanel Margin="10,0" LastChildFill="False" Height="60" HorizontalAlignment="Center">
                             <Button x:Name="btnDecFile" Template="{DynamicResource ButtonDefault}" VerticalAlignment="Center" Margin="0,0,0,0" HorizontalAlignment="Center" Content="解压图像"  Click="btnDecFile_Click" Width="160" IsEnabled="False"/>
-                            <Button x:Name="b_Abort_Import" Template="{DynamicResource ButtonDefault}" VerticalAlignment="Center" Margin="200,0,0,0" HorizontalAlignment="Left" Content="放弃" Click="b_Abort_Import_Click" Width="160" IsEnabled="False"/>
+                            <Button x:Name="b_Abort_Import" Template="{DynamicResource ButtonDefault}" VerticalAlignment="Center" Margin="200,0,0,0" HorizontalAlignment="Left" Content="放弃" Click="b_Abort_Import_Click" Width="160" IsEnabled="False" Visibility="Collapsed"/>
                         </DockPanel>
                     </StackPanel>
                 </GroupBox>
@@ -924,7 +924,7 @@
                         <ImageBrush ImageSource="image/GRAY/7.png"/>
                     </RadioButton.Background>
                 </RadioButton>
-                <RadioButton x:Name="btnLeftD2" Content="数据设置" Template="{DynamicResource ButtonIcon2nd}" Margin="0,0,0,0" Height="50" VerticalAlignment="Top" Visibility="Collapsed">
+                <RadioButton x:Name="btnLeftD2" Content="数据设置" Template="{DynamicResource ButtonIcon2nd}" Margin="0,0,0,0" Height="50" VerticalAlignment="Top" Visibility="Visible">
                     <RadioButton.Background>
                         <ImageBrush ImageSource="image/GRAY/2.png"/>
                     </RadioButton.Background>
@@ -1023,7 +1023,7 @@
                     <Grid Margin="10">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="10"/>
-                            <ColumnDefinition Width="260"/>
+                            <ColumnDefinition Width="200"/>
                             <ColumnDefinition Width="10*"/>
                             <ColumnDefinition Width="160"/>
                             <ColumnDefinition Width="10"/>
@@ -1031,23 +1031,11 @@
                         <Grid.RowDefinitions>
                             <RowDefinition Height="30"/>
                             <RowDefinition Height="60"/>
-                            <RowDefinition Height="60"/>
-                            <RowDefinition Height="60"/>
-                            <RowDefinition Height="60"/>
                             <RowDefinition Height="1*"/>
                         </Grid.RowDefinitions>
-                        <Label Content="星区1原始文件存放路径：" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center"></Label>
-                        <Label Content="星区1解压文件存放路径：" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center"></Label>
-                        <Label Content="星区2原始文件存放路径：" Grid.Row="3" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center"></Label>
-                        <Label Content="星区2解压文件存放路径：" Grid.Row="4" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center"></Label>
-                        <TextBox Grid.Column="2" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Center" Margin="30,0" Height="30"/>
-                        <TextBox Grid.Column="2" Grid.Row="2" TextWrapping="Wrap" VerticalAlignment="Center" Margin="30,0" Height="30"/>
-                        <TextBox Grid.Column="2" Grid.Row="3" TextWrapping="Wrap" VerticalAlignment="Center" Margin="30,0" Height="30"/>
-                        <TextBox Grid.Column="2" Grid.Row="4" TextWrapping="Wrap" VerticalAlignment="Center" Margin="30,0" Height="30"/>
-                        <Button Content="设置" Grid.Row="1" Grid.Column="3" Template="{DynamicResource ButtonDefault}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="160"></Button>
-                        <Button Content="设置" Grid.Row="2" Grid.Column="3" Template="{DynamicResource ButtonDefault}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="160"></Button>
-                        <Button Content="设置" Grid.Row="3" Grid.Column="3" Template="{DynamicResource ButtonDefault}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="160"></Button>
-                        <Button Content="设置" Grid.Row="4" Grid.Column="3" Template="{DynamicResource ButtonDefault}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="160"></Button>
+                        <Label Content="解压文件存放路径：" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        <TextBox x:Name="txtSetDecPath" Grid.Column="2" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Center" Margin="30,0" Height="30"/>
+                        <Button x:Name="btnSetDecPath" Content="设置" Grid.Row="1" Grid.Column="3" Template="{DynamicResource ButtonDefault}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="160" Click="btnSetDecPath_Click"/>
                     </Grid>
                 </GroupBox>
             </Grid>

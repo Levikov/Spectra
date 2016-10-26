@@ -114,7 +114,7 @@ namespace Spectra
             int subLast = (int)(imgWidth % (4096 / subWid)) * 2048 * 2;
             int subCnt = (int)Math.Ceiling(ImageInfo.imgWidth / (double)subWid); /*以subWid为单位分割图像*/
 
-            SQLiteConnection conn = new SQLiteConnection(Variables.dbConString);
+            SQLiteConnection conn = new SQLiteConnection(Global.dbConString);
             conn.Open();
 
             for (int i = 0; i < subCnt - 1; i++)

@@ -16,12 +16,12 @@ namespace Spectra
         public static DataTable QueryResult = new DataTable();
     }
 
-    public static class Variables
+    public static class Global
     {
         /*-------------------------------------------------数据库------------------------------------------------------*/
         public static string dbPath = Environment.CurrentDirectory + "\\DataBase\\db.sqlite";   //数据库文件地址
         public static string dbConString = "Data Source=" + dbPath;                             //数据库连接字符串        
-        public static string str_pathWork = Environment.CurrentDirectory + "\\Work";
+        public static string pathDecFiles;                                                      //默认解压文件存放路径
     }
 
     public enum WinFunc {Image,Curve,Cube,Map};

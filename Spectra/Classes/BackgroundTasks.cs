@@ -196,7 +196,7 @@ namespace Spectra
 
                 IntPtr hModule = LoadLibrary("DLL\\DataOperation.dll");
                 IntPtr hVariable = GetProcAddress(hModule, "progress");
-                SQLiteDatabase sqlExcute = new SQLiteDatabase(Variables.dbPath);
+                SQLiteDatabase sqlExcute = new SQLiteDatabase(Global.dbPath);
                 
                 long import_id = 1;
 
@@ -539,7 +539,7 @@ namespace Spectra
         {
             return Task.Run(() =>
             {
-                SQLiteConnection conn = new SQLiteConnection(Variables.dbConString);
+                SQLiteConnection conn = new SQLiteConnection(Global.dbConString);
                 conn.Open();
                 SQLiteCommand cmmd = new SQLiteCommand("", conn);
 
@@ -566,7 +566,7 @@ namespace Spectra
                     command += " AND FrameId>=" + start_FrmCnt.ToString() + " AND FrameId<=" + end_FrmCnt.ToString();
                 }
                 
-                SQLiteDatabase db = new SQLiteDatabase(Variables.dbPath);
+                SQLiteDatabase db = new SQLiteDatabase(Global.dbPath);
                 return db.GetDataTable(command);
             });
         }
@@ -729,14 +729,6 @@ namespace Spectra
             }
         }
 
-        public void Insert()
-        {
-            FileStream fs = new FileStream(Variables.str_pathWork + "\\" + ImportId.ToString() + "_" + FrameCount.ToString() + "_" + Chanel.ToString() + ".jp2", FileMode.Append, FileAccess.Write, FileShare.Write);
-            if (isHead) fs.Write(buf_Row, 32, 240);
-            else fs.Write(buf_Row, 16, 256);
-            fs.Close();
-        }
-
         public void Insert(FileStream fs)
         {
             if (isHead) fs.Write(buf_Row, 32, 240);
@@ -878,33 +870,6 @@ namespace Spectra
             if (T1.PackCount > T2.PackCount) return 1;
             else return -1;
         }
-
-        public void WriteFile()
-        {
-
-            for (int i = 0; i < 4; i++)
-            {
-
-                ThreadPool.QueueUserWorkItem(o => {
-                    FileStream fs = new FileStream(Variables.str_pathWork + "\\" + ItemList[0][0].ImportId.ToString() + "_" + this.FrmCnt.ToString() + "_" + (i + 1).ToString() + ".jp2", FileMode.Append, FileAccess.Write, FileShare.Write);
-
-                    foreach (RealDataRow rdr in ItemList[i])
-                    {
-                        if (rdr.isHead) fs.Write(rdr.buf_Row, 32, 240);
-                        else fs.Write(rdr.buf_Row, 16, 256);
-                    }
-
-                    fs.Close();
-
-                });
-            }
-
-
-        }
-
-
-
-
     }
 
     #endregion
