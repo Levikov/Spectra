@@ -29,28 +29,39 @@
         <Rectangle Stroke="{StaticResource WindowBorder}" StrokeThickness="1" Grid.RowSpan="1"/>
         <Rectangle Stroke="{StaticResource WindowBorder}" StrokeThickness="1" Grid.RowSpan="2"/>
         <StackPanel>
-            <DockPanel Height="24" FlowDirection="RightToLeft" VerticalAlignment="Top" Background="{StaticResource TitleBack}">
-                <StackPanel Height="24" Orientation="Horizontal" FlowDirection="RightToLeft" VerticalAlignment="Top" Background="{StaticResource TitleBack}">
-                    <Button x:Name="btnExit" Content="×" Template="{DynamicResource ButtonClose}" Click="btnExit_Click"/>
-                    <Button x:Name="btnMax" Content="□" Template="{DynamicResource ButtonMinMax}" Click="btnMax_Click"/>
-                    <Button x:Name="btnMin" Content="—" Template="{DynamicResource ButtonMinMax}" Click="btnMin_Click"/>
+            <DockPanel Height="34" VerticalAlignment="Top">
+                <DockPanel.Background>
+                    <ImageBrush ImageSource="image/UI/标题栏.png" Stretch="UniformToFill"/>
+                </DockPanel.Background>
+                <StackPanel Height="34" Orientation="Horizontal" FlowDirection="LeftToRight" VerticalAlignment="Center">
+                    <Label Content="光谱微纳卫星数据分析系统" Foreground="{StaticResource MinFontFore}" FontSize="15" VerticalContentAlignment="Center"/>
                 </StackPanel>
-                <StackPanel Height="24" Orientation="Horizontal" FlowDirection="LeftToRight" VerticalAlignment="Top" Background="{StaticResource TitleBack}" HorizontalAlignment="Right">
-                    <Label Content="光谱微纳卫星数据分析系统" Foreground="{StaticResource MinFontFore}"/>
+                <StackPanel Height="34" Orientation="Horizontal" FlowDirection="LeftToRight" VerticalAlignment="Center" HorizontalAlignment="Right">
+                    <Button x:Name="btnMin" Content="—" Template="{DynamicResource ButtonMinMax}" Click="btnMin_Click"/>
+                    <Button x:Name="btnMax" Content="□" Template="{DynamicResource ButtonMinMax}" Click="btnMax_Click"/>
+                    <Button x:Name="btnExit" Content="×" Template="{DynamicResource ButtonClose}" Click="btnExit_Click"/>
                 </StackPanel>
             </DockPanel>
             <DockPanel Margin="2,2,2,0" Background="{StaticResource 2ndTitleBack}">
                 <RadioButton x:Name="btnTopA" Content="数据管理" Template="{DynamicResource ButtonIcon1st}" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch" Margin="20,0,0,0" IsChecked="True">
-                    <RadioButton.Background><ImageBrush ImageSource="image/GRAY/10.PNG" Stretch="Uniform"/></RadioButton.Background>
+                    <RadioButton.Background>
+                        <ImageBrush ImageSource="image/GRAY/10.PNG" Stretch="Uniform"/>
+                    </RadioButton.Background>
                 </RadioButton>
                 <RadioButton x:Name="btnTopB" Content="光谱分析" Template="{DynamicResource ButtonIcon1st}" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch" Margin="20,0,0,0">
-                    <RadioButton.Background><ImageBrush ImageSource="image/GRAY/8.PNG" Stretch="Uniform"/></RadioButton.Background>
+                    <RadioButton.Background>
+                        <ImageBrush ImageSource="image/GRAY/8.PNG" Stretch="Uniform"/>
+                    </RadioButton.Background>
                 </RadioButton>
                 <RadioButton x:Name="btnTopC" Content="应用演示" Template="{DynamicResource ButtonIcon1st}" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch" Margin="20,0,0,0">
-                    <RadioButton.Background><ImageBrush ImageSource="image/GRAY/9.PNG" Stretch="Uniform"/></RadioButton.Background>
+                    <RadioButton.Background>
+                        <ImageBrush ImageSource="image/GRAY/9.PNG" Stretch="Uniform"/>
+                    </RadioButton.Background>
                 </RadioButton>
                 <RadioButton x:Name="btnTopD" Content="系统管理" Template="{DynamicResource ButtonIcon1st}" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch" Margin="20,0,0,0">
-                    <RadioButton.Background><ImageBrush ImageSource="image/GRAY/13.PNG" Stretch="Uniform"/></RadioButton.Background>
+                    <RadioButton.Background>
+                        <ImageBrush ImageSource="image/GRAY/13.PNG" Stretch="Uniform"/>
+                    </RadioButton.Background>
                 </RadioButton>
                 <Label x:Name="label" Template="{DynamicResource LabelIcon}"  Foreground="{StaticResource WindowBorder}" VerticalContentAlignment="Center" HorizontalAlignment="Right">
                     <Label.Background>
@@ -77,16 +88,24 @@
             <GridSplitter x:Name="splitA" Grid.RowSpan="1" Margin="0,50" Width="1" Background="{StaticResource ButtonBack}"/>
             <StackPanel>
                 <RadioButton x:Name="btnLeftA1" Content="数据处理" Template="{DynamicResource ButtonIcon2nd}" Margin="0,50,0,0" Height="50" IsChecked="True">
-                    <RadioButton.Background><ImageBrush ImageSource="image/GRAY/18.png"/></RadioButton.Background>
+                    <RadioButton.Background>
+                        <ImageBrush ImageSource="image/GRAY/18.png"/>
+                    </RadioButton.Background>
                 </RadioButton>
                 <RadioButton x:Name="btnLeftA2" Content="数据存储" Template="{DynamicResource ButtonIcon2nd}" Height="50" Click="btnLeftA2_Click">
-                    <RadioButton.Background><ImageBrush ImageSource="image/GRAY/17.png"/></RadioButton.Background>
+                    <RadioButton.Background>
+                        <ImageBrush ImageSource="image/GRAY/17.png"/>
+                    </RadioButton.Background>
                 </RadioButton>
                 <RadioButton x:Name="btnLeftA3" Content="文件检索" Template="{DynamicResource ButtonIcon2nd}" Height="50">
-                    <RadioButton.Background><ImageBrush ImageSource="image/GRAY/1.png"/></RadioButton.Background>
+                    <RadioButton.Background>
+                        <ImageBrush ImageSource="image/GRAY/1.png"/>
+                    </RadioButton.Background>
                 </RadioButton>
                 <RadioButton x:Name="btnLeftA4" Content="数据传输" Template="{DynamicResource ButtonIcon2nd}" Height="50" Visibility="Collapsed">
-                    <RadioButton.Background><ImageBrush ImageSource="image/ICON/4.ico"/></RadioButton.Background>
+                    <RadioButton.Background>
+                        <ImageBrush ImageSource="image/ICON/4.ico"/>
+                    </RadioButton.Background>
                 </RadioButton>
             </StackPanel>
             <Grid x:Name="gridLeftA1" Grid.Column="2">
@@ -321,10 +340,14 @@
             <GridSplitter x:Name="splitB" Grid.RowSpan="1" Margin="0,50" Width="1" Background="{StaticResource ButtonBack}"/>
             <StackPanel>
                 <RadioButton x:Name="btnLeftB1" Content="数据检索" Template="{DynamicResource ButtonIcon2nd}" Margin="0,50,0,0" Height="50" VerticalAlignment="Top" IsChecked="True">
-                    <RadioButton.Background><ImageBrush ImageSource="image/GRAY/3.png"/></RadioButton.Background>
+                    <RadioButton.Background>
+                        <ImageBrush ImageSource="image/GRAY/3.png"/>
+                    </RadioButton.Background>
                 </RadioButton>
                 <RadioButton x:Name="btnLeftB2" Content="光谱显示" Template="{DynamicResource ButtonIcon2nd}" Margin="0" Height="50" VerticalAlignment="Top">
-                    <RadioButton.Background><ImageBrush ImageSource="image/GRAY/4.png"/></RadioButton.Background>
+                    <RadioButton.Background>
+                        <ImageBrush ImageSource="image/GRAY/4.png"/>
+                    </RadioButton.Background>
                 </RadioButton>
             </StackPanel>
             <Grid x:Name="gridLeftB1" Grid.Column="2">

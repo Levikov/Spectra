@@ -12,9 +12,6 @@ namespace Spectra
 {
     class BmpOper
     {
-        [DllImport("DLL\\DataOperation.dll", EntryPoint = "GetRGBFromBand")]
-        public static extern void GetRGBFromBand(int band, out double R, out double G, out double B);
-
         /// <summary>
         /// 通过三个谱段确定图像内容
         /// </summary>
