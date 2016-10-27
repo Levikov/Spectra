@@ -382,9 +382,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="image\Image_BackGround.jpg" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="image\ICON\1.jpg" />
     <Resource Include="image\ICON\10.jpg" />
     <Resource Include="image\ICON\11.jpg" />
@@ -422,25 +419,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="decFiles\decFiles.txt" />
-    <Resource Include="image\GRAY\1.png" />
-    <Resource Include="image\GRAY\10.png" />
-    <Resource Include="image\GRAY\12.png" />
-    <Resource Include="image\GRAY\13.png" />
-    <Resource Include="image\GRAY\8.png" />
-    <Resource Include="image\GRAY\9.png" />
-    <Resource Include="image\GRAY\14.png" />
-    <Resource Include="image\GRAY\15.png" />
-    <Resource Include="image\GRAY\11.png" />
-    <Resource Include="image\GRAY\3.png" />
-    <Resource Include="image\GRAY\4.png" />
-    <Resource Include="image\GRAY\16.png" />
-    <Resource Include="image\GRAY\17.png" />
-    <Resource Include="image\GRAY\18.png" />
-    <Resource Include="image\GRAY\19.png" />
-    <Resource Include="image\GRAY\2.png" />
-    <Resource Include="image\GRAY\5.png" />
-    <Resource Include="image\GRAY\6.png" />
-    <Resource Include="image\GRAY\7.png" />
     <Resource Include="image\ICON\map-marker-icon.png" />
     <Resource Include="image\16_16\delete.png" />
     <Resource Include="image\16_16\emoticon_smile.png" />
