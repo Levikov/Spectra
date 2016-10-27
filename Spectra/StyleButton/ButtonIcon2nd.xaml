@@ -11,10 +11,10 @@
             </Grid.ColumnDefinitions>
             <Grid Grid.Column="1">
                 <!--<Rectangle x:Name="bord" Stroke="{StaticResource WindowBorder}" StrokeThickness="1" Grid.RowSpan="1" Visibility="Collapsed" VerticalAlignment="Stretch" Width="120"/>-->
-                <Label x:Name="icon" Background="{TemplateBinding Background}" Margin="0"/>
+                <Label x:Name="icon" Background="{TemplateBinding Background}" Margin="10"/>
             </Grid>
             <Grid Grid.Column="2">
-                <Label x:Name="label" Content="{TemplateBinding Content}" FontSize="20" FontFamily="YouYuan" HorizontalAlignment="Center" VerticalAlignment="Center" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
+                <Label x:Name="label" Content="{TemplateBinding Content}" FontSize="18" FontFamily="YouYuan" HorizontalAlignment="Center" VerticalAlignment="Center" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Foreground="White"/>
             </Grid>
         </Grid>
         <ControlTemplate.Resources>
@@ -32,16 +32,16 @@
                 <!--故事板-->
                 <DoubleAnimationUsingKeyFrames BeginTime="00:00:00" Storyboard.TargetName="icon" Storyboard.TargetProperty="Width">
                     <!--开始时间、应用对象、应用属性-->
-                    <SplineDoubleKeyFrame KeyTime="00:00:00.00" Value="49"/>
+                    <SplineDoubleKeyFrame KeyTime="00:00:00.00" Value="29"/>
                     <!--发生时间、值-->
-                    <SplineDoubleKeyFrame KeyTime="00:00:00.50" Value="50"/>
+                    <SplineDoubleKeyFrame KeyTime="00:00:00.50" Value="30"/>
                     <!--发生时间、值-->
                 </DoubleAnimationUsingKeyFrames>
             </Storyboard>
         </ControlTemplate.Resources>
         <ControlTemplate.Triggers>
             <Trigger Property="IsChecked" Value="True">
-                <Setter Property="Foreground" TargetName="label" Value="{StaticResource ButtonFore}"/>
+                <Setter Property="Foreground" TargetName="label" Value="White"/>
                 <Setter Property="Background" TargetName="grid" Value="{StaticResource ButtonBack}"/>
             </Trigger>
             <MultiTrigger>

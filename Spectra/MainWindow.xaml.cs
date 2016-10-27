@@ -391,6 +391,7 @@ namespace Spectra
             ImageInfo.dtImgInfo.Clear();
             dataGrid_Result.ItemsSource = null;
             dataGrid_SatePose.ItemsSource = null;
+            btnMakeImage.IsEnabled = false;
         }
         /*点击生成图像*/
         private async void btnMakeImage_Click(object sender, RoutedEventArgs e)
