@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -503,7 +504,7 @@ namespace Spectra
                     new SQLiteParameter("MD5",md5),
                     new SQLiteParameter("SubId",SubId),
                     new SQLiteParameter("FrameSum",FrameSum),
-                    new SQLiteParameter("SavePath",$"{Environment.CurrentDirectory}\\decFiles\\{md5}\\{SubId}"),
+                    new SQLiteParameter("SavePath",$"{Global.pathDecFiles}{md5}\\{SubId}"),
                     new SQLiteParameter("StartTime",StartTime),
                     new SQLiteParameter("EndTime",EndTime),
                     new SQLiteParameter("StartCoord",StartCoord),
@@ -853,4 +854,239 @@ namespace Spectra
             }
         }
     }
+
+    public class DataProc
+    {
+        [DllImport("DLL\\DataOperation.dll", EntryPoint = "GetRGBFromBand")]
+        public static extern void GetRGBFromBand(int band, out double R, out double G, out double B);
+
+        #region Bitmap Operations
+        /// <summary>
+        /// 通过raw文件转为bmp进行显示
+        /// </summary>
+        /// <param name="path">图像文件的路径</param>
+        /// <param name="v">谱段号</param>
+        /// <param name="cMode">显示的模式:灰度、伪彩、真彩</param>
+        /// <returns></returns>
+        public static Task<Bitmap> GetBmp(string path, int v, ColorRenderMode cMode)
+        {
+            return Task.Run(() =>
+            {
+                int Height = ImageInfo.dtImgInfo.Rows.Count;
+                int Width = 2048;
+                int chanel = 1;
+                if (v == 161 || v == 162) Height = 128;
+                if (v == 163 || v == 164) Width = 128;
+                if (cMode == ColorRenderMode.RealColor) chanel = 3;
+
+                byte[] buf_full = new byte[Width * Height * 3];
+                byte[] buf_band;
+                buf_band = new byte[Width * Height * 2 * chanel];
+
+                if (!File.Exists($"{path}{v}.raw") || Height < 1) return null;
+                FileStream fs = new FileStream($"{path}{v}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
+                if (fs == null) return null;
+                fs.Read(buf_band, 0, Width * Height * 2 * chanel);
+                Parallel.For(0, Width * Height, i =>
+                {
+                    switch (cMode)
+                    {
+                        case ColorRenderMode.Grayscale:
+                            {
+                                buf_full[3 * i] = buf_full[3 * i + 1] = buf_full[3 * i + 2] = (byte)(Math.Floor((double)(readU16_PIC(buf_band, 2 * i)) / 4096 * 256));
+                            }
+                            break;
+                        case ColorRenderMode.ArtColor:
+                            {
+
+                                double fR = 0;
+                                double fG = 0;
+                                double fB = 0;
+                                GetRGBFromBand(i / 2048 + 27, out fR, out fG, out fB);
+                                double R = (double)(readU16_PIC(buf_band, i * 2)) / 4096 * fR * 256;
+                                double G = (double)(readU16_PIC(buf_band, i * 2)) / 4096 * fG * 256;
+                                double B = (double)(readU16_PIC(buf_band, i * 2)) / 4096 * fB * 256;
+
+                                buf_full[3 * i + 2] = (byte)(Math.Floor(R));
+                                buf_full[3 * i + 1] = (byte)(Math.Floor(G));
+                                buf_full[3 * i + 0] = (byte)(Math.Floor(B));
+                            }
+
+                            break;
+                        case ColorRenderMode.RealColor:
+                            {
+                                double R = (double)(readU16_PIC(buf_band, i * 6 + 4)) / 4096 * 256;
+                                double G = (double)(readU16_PIC(buf_band, i * 6 + 2)) / 4096 * 256;
+                                double B = (double)(readU16_PIC(buf_band, i * 6)) / 4096 * 256;
+
+                                buf_full[3 * i + 2] = (byte)(Math.Floor(R));
+                                buf_full[3 * i + 1] = (byte)(Math.Floor(G));
+                                buf_full[3 * i + 0] = (byte)(Math.Floor(B));
+                            }
+
+                            break;
+                        case ColorRenderMode.ArtColorSide:
+                            {
+
+                                double fR = 0;
+                                double fG = 0;
+                                double fB = 0;
+                                GetRGBFromBand(i % Width + 27, out fR, out fG, out fB);
+                                double R = (double)(readU16_PIC(buf_band, i * 2)) / 4096 * fR * 256;
+                                double G = (double)(readU16_PIC(buf_band, i * 2)) / 4096 * fG * 256;
+                                double B = (double)(readU16_PIC(buf_band, i * 2)) / 4096 * fB * 256;
+
+                                buf_full[3 * i + 2] = (byte)(Math.Floor(R));
+                                buf_full[3 * i + 1] = (byte)(Math.Floor(G));
+                                buf_full[3 * i + 0] = (byte)(Math.Floor(B));
+                            }
+
+                            break;
+                        case ColorRenderMode.TrueColor:
+                            {
+                                int band = v;
+                                if (v == 165) v = 27;
+                                if (v == 166) v = 154;
+
+                                double fR = 0;
+                                double fG = 0;
+                                double fB = 0;
+                                GetRGBFromBand(v, out fR, out fG, out fB);
+                                double R = (double)(readU16_PIC(buf_band, i * 2)) / 4096 * fR * 256;
+                                double G = (double)(readU16_PIC(buf_band, i * 2)) / 4096 * fG * 256;
+                                double B = (double)(readU16_PIC(buf_band, i * 2)) / 4096 * fB * 256;
+
+                                buf_full[3 * i + 2] = (byte)(Math.Floor(R));
+                                buf_full[3 * i + 1] = (byte)(Math.Floor(G));
+                                buf_full[3 * i + 0] = (byte)(Math.Floor(B));
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                });
+                fs.Close();
+
+                Bitmap bmpTop = new Bitmap(Width, Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+                BitmapData bmpData = bmpTop.LockBits(new System.Drawing.Rectangle(0, 0, Width, Height), System.Drawing.Imaging.ImageLockMode.WriteOnly, bmpTop.PixelFormat);
+                Marshal.Copy(buf_full, 0, bmpData.Scan0, Width * Height * 3);
+                bmpTop.UnlockBits(bmpData);
+                return bmpTop;
+            });
+        }
+        /// <summary>
+        /// 取三维立方体
+        /// </summary>
+        /// <param name="path">raw文件的存储位置</param>
+        /// <returns>bmp图像</returns>
+        public static Task<Bitmap[]> GetBmp3D(string path)
+        {
+            return Task.Run(async () =>
+            {
+                Bitmap[] r = new Bitmap[6];
+                r[0] = await BmpOper.MakePseudoColor(path, new UInt16[] { 40, 77, 127 }, 4, ImageInfo.imgWidth);
+                r[1] = await BmpOper.MakePseudoColor(path, new UInt16[] { 40, 40, 40 }, 4, ImageInfo.imgWidth);
+                r[3] = await GetBmp(path, 161, ColorRenderMode.ArtColor);
+                r[2] = await GetBmp(path, 162, ColorRenderMode.ArtColor);
+                r[4] = await GetBmp(path, 163, ColorRenderMode.ArtColorSide);
+                r[5] = await GetBmp(path, 164, ColorRenderMode.ArtColorSide);
+                return r;
+            });
+        }
+        #endregion
+
+        #region Spectrum Curves
+        public static Task<double[,]> GetChart()
+        {
+            return Task.Run(() => {
+                double[,] result = new double[160, 2];
+                return result;
+            });
+        }
+        #endregion
+
+        #region 图像检索
+        public static Task<DataTable> QueryResult(string md5, bool isChecked1, bool isChecked2, bool isChecked3, DateTime start_time, DateTime end_time, long start_FrmCnt, long end_FrmCnt, Coord coord_TL, Coord coord_DR)
+        {
+            return Task.Run(() =>
+            {
+                SQLiteConnection conn = new SQLiteConnection(Global.dbConString);
+                conn.Open();
+                SQLiteCommand cmmd = new SQLiteCommand("", conn);
+
+                string command;
+                if (md5 != null && md5 != "")
+                    command = $"SELECT * FROM AuxData WHERE MD5='{md5}'";
+                else
+                    command = $"SELECT * FROM AuxData";
+                if ((bool)isChecked2)
+                {
+                    command += " AND Lat>=" + (coord_DR.Lat.ToString()) + " AND Lat<=" + coord_TL.Lat.ToString() + " AND Lon>=" + (coord_TL.Lon.ToString()) + " AND Lon<=" + coord_DR.Lon.ToString();
+                }
+                if ((bool)isChecked1)
+                {
+                    DateTime selectedStartDate = start_time;
+                    DateTime selectedEndDate = end_time;
+                    DateTime T0 = new DateTime(2012, 1, 1, 0, 0, 0);
+                    TimeSpan ts_Start = selectedStartDate.Subtract(T0);
+                    TimeSpan ts_End = selectedEndDate.Subtract(T0);
+                    command += " AND GST>=" + (ts_Start.TotalSeconds.ToString()) + " AND GST<=" + ts_End.TotalSeconds.ToString();
+                }
+                if ((bool)isChecked3)
+                {
+                    command += " AND FrameId>=" + start_FrmCnt.ToString() + " AND FrameId<=" + end_FrmCnt.ToString();
+                }
+
+                SQLiteDatabase db = new SQLiteDatabase(Global.dbPath);
+                return db.GetDataTable(command);
+            });
+        }
+        #endregion
+
+        #region 处理
+        public static UInt32 readU32(byte[] buf_row, int addr)
+        {
+            byte[] conv = new byte[4] { buf_row[addr + 3], buf_row[addr + 2], buf_row[addr + 1], buf_row[addr] };
+            return BitConverter.ToUInt32(conv, 0);
+        }
+        public static Int32 readI32(byte[] buf_row, int addr)
+        {
+            byte[] conv = new byte[4] { buf_row[addr + 3], buf_row[addr + 2], buf_row[addr + 1], buf_row[addr] };
+            return BitConverter.ToInt32(conv, 0);
+        }
+        public static UInt16 readU16(byte[] buf_row, int addr)
+        {
+            byte[] conv = new byte[2] { buf_row[addr + 1], buf_row[addr] };
+            return BitConverter.ToUInt16(conv, 0);
+        }
+        public static UInt16 readU16_PIC(byte[] buf_row, int addr)
+        {
+            byte[] conv = new byte[2] { buf_row[addr], buf_row[addr + 1] };
+            return BitConverter.ToUInt16(conv, 0);
+        }
+        public static byte readU8(byte[] buf_row, int addr)
+        {
+            return buf_row[addr];
+        }
+        public static float readF32(byte[] buf_row, int addr)
+        {
+            byte[] conv = new byte[4] { buf_row[addr + 3], buf_row[addr + 2], buf_row[addr + 1], buf_row[addr] };
+            int a = BitConverter.ToInt32(conv, 0);
+            float result = (float)a / 1000;
+            return result;
+        }
+        public static float readLength(byte[] buf_row, int addr)
+        {
+            float result = (float)readI32(buf_row, addr) / 1000;
+            return result;
+        }
+        public static float readDegree(byte[] buf_row, int addr)
+        {
+            float result = (float)((float)readI32(buf_row, addr) / 1000 * 180 / Math.PI);
+            return result;
+        }
+        #endregion
+    }
+
+    public enum ColorRenderMode { Grayscale, ArtColor, TrueColor, ArtColorSide, RealColor }
 }

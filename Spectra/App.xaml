@@ -13,7 +13,7 @@
                 <!--Button-->
                 <ResourceDictionary Source="StyleLabel\LabelIcon.xaml"/>
                 <ResourceDictionary Source="StyleLabel\LabelDefault.xaml"/>
-                <ResourceDictionary Source="StyleLabel\CheckBoxDefault.xaml"/>
+                <!--<ResourceDictionary Source="StyleLabel\CheckBoxDefault.xaml"/>-->
                 <ResourceDictionary Source="StyleButton\ButtonDefault.xaml"/>
                 <ResourceDictionary Source="StyleButton\ButtonIcon1st.xaml"/>
                 <ResourceDictionary Source="StyleButton\ButtonIcon2nd.xaml"/>

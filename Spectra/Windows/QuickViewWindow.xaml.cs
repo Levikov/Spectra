@@ -52,7 +52,7 @@ namespace Spectra
                 bord.BorderBrush = new SolidColorBrush(Colors.Yellow);
                 try
                 {
-                    img.Source = new BitmapImage(new Uri($"{Environment.CurrentDirectory}\\decFiles\\{dtTree.Rows[subCnt]["MD5"]}\\{dtTree.Rows[subCnt]["ID"]}.bmp"));
+                    img.Source = new BitmapImage(new Uri($"{Global.pathDecFiles}{dtTree.Rows[subCnt]["MD5"]}\\{dtTree.Rows[subCnt]["ID"]}.bmp"));
                     img.MouseLeftButtonDown += Img_MouseLeftButtonDown;
                 }
                 catch { }
@@ -173,7 +173,7 @@ namespace Spectra
                     Directory.CreateDirectory($"{desPath}{dr["MD5"]}\\{dr["ID"]}");
                     for (int i = 0; i < 160; i++)
                     {
-                        File.Copy($"{Environment.CurrentDirectory}\\decFiles\\{dr["MD5"]}\\{dr["ID"]}\\{i}.raw", $"{desPath}{dr["MD5"]}\\{dr["ID"]}\\{i}.raw", true);
+                        File.Copy($"{Global.pathDecFiles}{dr["MD5"]}\\{dr["ID"]}\\{i}.raw", $"{desPath}{dr["MD5"]}\\{dr["ID"]}\\{i}.raw", true);
                         prog.Report((i + 1 + 160.0 * cnt) / 160.0 / sum);
                     }
                     cnt++;
