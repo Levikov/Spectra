@@ -414,9 +414,6 @@ namespace Spectra
         {
             try
             {
-                //App.global_Win_Map = new MapWindow();
-                //App.global_Win_Map.Show();
-                //App.global_Win_Map.DrawRectangle(new Point((double)ImageInfo.dtImgInfo.Rows[0].ItemArray[3], (double)ImageInfo.dtImgInfo.Rows[0].ItemArray[4]), new Point((double)ImageInfo.dtImgInfo.Rows[ImageInfo.dtImgInfo.Rows.Count - 1].ItemArray[3], (double)ImageInfo.dtImgInfo.Rows[ImageInfo.dtImgInfo.Rows.Count - 1].ItemArray[4]));
                 initWindows(ImageInfo.strFilesPath, WinShowInfo.WindowsCnt, WinShowInfo.dtWinShowInfo);
                 btnLeftB2.IsChecked = true;
             }

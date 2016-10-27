@@ -3,13 +3,14 @@
                     xmlns:local="clr-namespace:Spectra.StyleTextBox">
     <Style TargetType="{x:Type TextBox}">
         <Setter Property="Height" Value="40"/>
+        <Setter Property="FontSize" Value="16"/>
         <Setter Property="BorderBrush" Value="{StaticResource ButtonBack}"/>
         <Setter Property="SelectionBrush" Value="{StaticResource ButtonBackMove}"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="HorizontalContentAlignment" Value="Center"/>
         <Style.Triggers>
             <Trigger Property="IsReadOnly" Value="True">
-                <Setter Property="Background" Value="{StaticResource DgvRowMove}"/>
+                <Setter Property="Background" Value="White"/>
             </Trigger>
         </Style.Triggers>
     </Style> 

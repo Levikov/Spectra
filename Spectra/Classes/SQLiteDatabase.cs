@@ -6,6 +6,9 @@ using System.Linq;
 
 namespace Spectra
 {
+    /// <summary>
+    /// 第三方下载的数据库操作，可进行高效增删改查。
+    /// </summary>
     public class SQLiteDatabase
     {
         String dbConnection;
@@ -202,11 +205,16 @@ namespace Spectra
         }
     }
 
+    /// <summary>
+    /// 海波编写的数据库操作，操作效率未优化，只可进行小数据量操作。
+    /// </summary>
     public static class SQLiteFunc
     {
-
-        #region 查询数据库、插入数据库
-        /*查询一行数据*/
+        /// <summary>
+        /// 查询数据并返回数据表
+        /// </summary>
+        /// <param name="sql">查询语句</param>
+        /// <returns>DataTable类型数据表</returns>
         public static DataTable SelectDTSQL(string sql)
         {
             try
@@ -226,9 +234,14 @@ namespace Spectra
                 throw e;
             }
         }
-        /*执行SQL语句*/
-        /*调用的时候类似：ExcuteSQL("insert into xx (id,name) values (?,'?')", id, name);*/
-        /*update 表名 set 字段1=text1，字段2=text2，字段3=text3 where 条件*/
+
+        /// <summary>
+        /// 执行SQL语句
+        /// 调用的时候类似：ExcuteSQL("insert into xx (id,name) values (?,'?')", id, name);
+        /// update 表名 set 字段1=text1，字段2=text2，字段3=text3 where 条件
+        /// </summary>
+        /// <param name="sql">SQL语句</param>
+        /// <param name="value">参数对象</param>
         public static void ExcuteSQL(string sql, params object[] value)
         {
             try
@@ -257,12 +270,5 @@ namespace Spectra
                 throw e;
             }
         }
-        /*插入错误信息*/
-        public static void insertFileErrors(string md5str, long errorPosi, string errorType)
-        {
-            if (SelectDTSQL("SELECT * from FileErrors where MD5='" + md5str + "' and 错误位置=" + errorPosi.ToString() + " and 错误类型='" + errorType + "'").Rows.Count == 0)
-                ExcuteSQL("insert into FileErrors (错误位置,错误类型,MD5) values ('?','?','?')", errorPosi, errorType,md5str);
-        }
-        #endregion
     }
 }

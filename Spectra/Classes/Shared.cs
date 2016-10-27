@@ -24,9 +24,17 @@ namespace Spectra
         public static string pathDecFiles;                                                      //默认解压文件存放路径
     }
 
+    /// <summary>
+    /// 窗体类型：0-图像；1-曲线；2-立方体；3-地图。
+    /// </summary>
     public enum WinFunc {Image,Curve,Cube,Map};
 
+    /// <summary>
+    /// 窗体模式：0-一；1-二；2-三；3-四。
+    /// </summary>
     public enum GridMode {One,Two,Three,Four};
+
+    public enum ColorRenderMode { Grayscale, ArtColor, TrueColor, ArtColorSide, RealColor }
 
     public class ScreenParams
     {
@@ -116,7 +124,7 @@ namespace Spectra
         }
     }
 
-    public class MapInfo : DependencyObject
+    public class MapInfo
     {
         public static string MapPath = @"C:\Program Files\GMap\satellite";
         public static string MapType = "jpg";

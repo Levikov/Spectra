@@ -1087,6 +1087,4 @@ namespace Spectra
         }
         #endregion
     }
-
-    public enum ColorRenderMode { Grayscale, ArtColor, TrueColor, ArtColorSide, RealColor }
 }

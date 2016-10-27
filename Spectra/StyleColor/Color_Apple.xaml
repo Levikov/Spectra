@@ -4,7 +4,7 @@
     <!--最小化-->
     <SolidColorBrush x:Key="MinBack" Color="#FF2C2C2C"/>
     <SolidColorBrush x:Key="MinMove" Color="Gray"/>
-    <SolidColorBrush x:Key="MinFontFore" Color="#FFE3E3E3"/>
+    <SolidColorBrush x:Key="MinFontFore" Color="White"/>
     <SolidColorBrush x:Key="MinFontMove" Color="Black"/>
     <!--关闭-->
     <SolidColorBrush x:Key="CloseBack" Color="#FF2C2C2C"/>
@@ -19,9 +19,9 @@
     <!--默认Button-->
     <!--<SolidColorBrush x:Key="ButtonBack" Color="#FF2C2C2C"/>-->
     <SolidColorBrush x:Key="ButtonBack" Color="#FF3F7BDB"/>
-    <SolidColorBrush x:Key="ButtonFore" Color="#FFE3E3E3"/>
-    <SolidColorBrush x:Key="ButtonBackMove" Color="Gray"/>
-    <SolidColorBrush x:Key="ButtonForeMove" Color="#FF2C2C2C"/>
+    <SolidColorBrush x:Key="ButtonFore" Color="White"/>
+    <SolidColorBrush x:Key="ButtonBackMove" Color="#703F7BDB"/>
+    <SolidColorBrush x:Key="ButtonForeMove" Color="White"/>
     <!--1级Button-->
     <SolidColorBrush x:Key="Btn1stSelected" Color="Gold"/>
     <!--2级Button-->
@@ -31,6 +31,6 @@
     <SolidColorBrush x:Key="DgvColHeader" Color="#FF909090"/>
     <SolidColorBrush x:Key="DgvRowMove" Color="#FFC0C0C0"/>
     <!--View-->
-    <SolidColorBrush x:Key="WinViewFore" Color="#FFDDDDDD"/>
+    <SolidColorBrush x:Key="WinViewFore" Color="White"/>
     <SolidColorBrush x:Key="WinViewBack" Color="Gray"/>
 </ResourceDictionary>

@@ -103,14 +103,14 @@
         <StatusBar Height="30" Margin="0" VerticalAlignment="Bottom" FontSize="12" Background="{StaticResource TitleBack}" FontWeight="Thin">
             <StackPanel Orientation="Horizontal">
                 <CheckBox x:Name="cbOriShow" Margin="0,0,20,0" VerticalAlignment="Center" VerticalContentAlignment="Center" Content="显示原图" Foreground="{StaticResource WinViewFore}" IsChecked="True"/>
-                <Label HorizontalAlignment="Left" Content="帧号:" Foreground="{StaticResource MinFontFore}"/>
-                <Label x:Name="Row" Content="0" Width="45" Foreground="{StaticResource MinFontFore}"/>
-                <Label HorizontalAlignment="Left" Content="列号:" Foreground="{StaticResource MinFontFore}"/>
-                <Label x:Name="Col" Content="0" Width="40" Foreground="{StaticResource MinFontFore}"/>
-                <Label HorizontalAlignment="Left" Content="谱段:" Foreground="{StaticResource MinFontFore}"/>
-                <Label x:Name="Band" Content="0" Width="35" Foreground="{StaticResource MinFontFore}"/>
-                <Label HorizontalAlignment="Left" Content="当前谱段(抽出):" Foreground="{StaticResource MinFontFore}"/>
-                <Label x:Name="curBand" Content="0" Width="35" Foreground="{StaticResource MinFontFore}"/>
+                <Label HorizontalAlignment="Left" Content="帧号:" Foreground="{StaticResource MinFontFore}" FontSize="12"/>
+                <Label x:Name="Row" Content="0" Width="45" Foreground="{StaticResource MinFontFore}" FontSize="12"/>
+                <Label HorizontalAlignment="Left" Content="列号:" Foreground="{StaticResource MinFontFore}" FontSize="12"/>
+                <Label x:Name="Col" Content="0" Width="40" Foreground="{StaticResource MinFontFore}" FontSize="12"/>
+                <Label HorizontalAlignment="Left" Content="谱段:" Foreground="{StaticResource MinFontFore}" FontSize="12"/>
+                <Label x:Name="Band" Content="0" Width="35" Foreground="{StaticResource MinFontFore}" FontSize="12"/>
+                <Label HorizontalAlignment="Left" Content="当前谱段(抽出):" Foreground="{StaticResource MinFontFore}" FontSize="12"/>
+                <Label x:Name="curBand" Content="0" Width="35" Foreground="{StaticResource MinFontFore}" FontSize="12"/>
             </StackPanel>
         </StatusBar>
         <Border x:Name="borderSection" BorderBrush="Gold" BorderThickness="1" Visibility="Visible"/>

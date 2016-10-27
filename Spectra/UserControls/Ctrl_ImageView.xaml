@@ -60,16 +60,16 @@
         <Slider x:Name="sldLow" Orientation="Vertical" SmallChange="1" Margin="20,0,0,0" Height="300" HorizontalAlignment="Left" Maximum="8" ValueChanged="sldLow_ValueChanged" FontSize="14" Value="4" Minimum="1"/>
         <StatusBar Height="30" Margin="0" VerticalAlignment="Bottom" FontSize="12" Background="{StaticResource TitleBack}" FontWeight="Thin">
             <StackPanel Orientation="Horizontal">
-                <Label HorizontalAlignment="Left" Content="帧号:" Foreground="{StaticResource MinFontFore}"/>
-                <Label x:Name="barFrameId" Content="0" Width="45" Foreground="{StaticResource MinFontFore}"/>
-                <Label HorizontalAlignment="Left" Content="帧频:" Foreground="{StaticResource MinFontFore}"/>
-                <Label x:Name="barFreq" Content="0" Width="35" Foreground="{StaticResource MinFontFore}"/>
-                <Label HorizontalAlignment="Left" Content="起始行:" Foreground="{StaticResource MinFontFore}"/>
-                <Label x:Name="barStartRow" Content="0" Width="35" Foreground="{StaticResource MinFontFore}"/>
-                <Label HorizontalAlignment="Left" Content="积分设置:" Foreground="{StaticResource MinFontFore}"/>
-                <Label x:Name="barIntegral" Content="0" Width="20" Foreground="{StaticResource MinFontFore}"/>
-                <Label HorizontalAlignment="Left" Content="增益设置:" Foreground="{StaticResource MinFontFore}"/>
-                <Label x:Name="barGain" Content="0" Width="20" Foreground="{StaticResource MinFontFore}"/>
+                <Label HorizontalAlignment="Left" Content="帧号:" Foreground="{StaticResource MinFontFore}" FontSize="12"/>
+                <Label x:Name="barFrameId" Content="0" Width="45" Foreground="{StaticResource MinFontFore}" FontSize="12"/>
+                <Label HorizontalAlignment="Left" Content="帧频:" Foreground="{StaticResource MinFontFore}" FontSize="12"/>
+                <Label x:Name="barFreq" Content="0" Width="35" Foreground="{StaticResource MinFontFore}" FontSize="12"/>
+                <Label HorizontalAlignment="Left" Content="起始行:" Foreground="{StaticResource MinFontFore}" FontSize="12"/>
+                <Label x:Name="barStartRow" Content="0" Width="35" Foreground="{StaticResource MinFontFore}" FontSize="12"/>
+                <Label HorizontalAlignment="Left" Content="积分设置:" Foreground="{StaticResource MinFontFore}" FontSize="12"/>
+                <Label x:Name="barIntegral" Content="0" Width="20" Foreground="{StaticResource MinFontFore}" FontSize="12"/>
+                <Label HorizontalAlignment="Left" Content="增益设置:" Foreground="{StaticResource MinFontFore}" FontSize="12"/>
+                <Label x:Name="barGain" Content="0" Width="20" Foreground="{StaticResource MinFontFore}" FontSize="12"/>
             </StackPanel>
         </StatusBar>
         <Border x:Name="borderSection" BorderBrush="Gold" BorderThickness="1" Visibility="Visible"/>

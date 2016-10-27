@@ -27,6 +27,9 @@ namespace Spectra
         private int split = 2;
         DataTable dtSelect = new DataTable();
 
+        /// <summary>
+        /// 构造函数
+        /// </summary>
         public QuickViewWindow()
         {
             InitializeComponent();
@@ -48,7 +51,7 @@ namespace Spectra
                 bord.Child = img;
                 bord.Margin = new Thickness(5);
                 bord.BorderThickness = new Thickness(1);
-                bord.Background = new SolidColorBrush(Colors.YellowGreen);
+                bord.Background = new SolidColorBrush(Colors.GreenYellow);
                 bord.BorderBrush = new SolidColorBrush(Colors.Yellow);
                 try
                 {

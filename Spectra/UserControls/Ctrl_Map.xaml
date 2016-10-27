@@ -35,15 +35,15 @@
         <!--<DockPanel Margin="20" Height="50" VerticalAlignment="Top" HorizontalAlignment="Right"/>-->
         <StatusBar Height="30" Margin="0" VerticalAlignment="Bottom" FontSize="12" Background="{StaticResource TitleBack}" FontWeight="Thin">
             <StackPanel Orientation="Horizontal">
-                <Label HorizontalAlignment="Left" Content="当前经度:" Foreground="{StaticResource MinFontFore}"/>
-                <Label x:Name="pLon" Content="0" Width="130" Foreground="{StaticResource MinFontFore}"/>
-                <Label HorizontalAlignment="Left" Content="当前纬度:" Foreground="{StaticResource MinFontFore}"/>
-                <Label x:Name="pLat" Content="0" Width="130" Foreground="{StaticResource MinFontFore}"/>
-                <Label x:Name="selectionNotice" Visibility="Collapsed" HorizontalAlignment="Left" Content="请点击第二个点" Foreground="Red"/>
-                <Label x:Name="lcLon" HorizontalAlignment="Left" Content="左上经纬:" Visibility="Collapsed" Foreground="{StaticResource MinFontFore}"/>
-                <Label x:Name="cLT" Content="0" Width="260" Visibility="Collapsed" Foreground="{StaticResource MinFontFore}"/>
-                <Label x:Name="lcLat" HorizontalAlignment="Left" Content="右下经纬:" Visibility="Collapsed" Foreground="{StaticResource MinFontFore}"/>
-                <Label x:Name="cRB" Content="0" Width="260" Visibility="Collapsed" Foreground="{StaticResource MinFontFore}"/>                
+                <Label HorizontalAlignment="Left" Content="当前经度:" Foreground="{StaticResource MinFontFore}" FontSize="12"/>
+                <Label x:Name="pLon" Content="0" Width="130" Foreground="{StaticResource MinFontFore}" FontSize="12"/>
+                <Label HorizontalAlignment="Left" Content="当前纬度:" Foreground="{StaticResource MinFontFore}" FontSize="12"/>
+                <Label x:Name="pLat" Content="0" Width="130" Foreground="{StaticResource MinFontFore}" FontSize="12"/>
+                <Label x:Name="selectionNotice" Visibility="Collapsed" HorizontalAlignment="Left" Content="请点击第二个点" Foreground="Red" FontSize="12"/>
+                <Label x:Name="lcLon" HorizontalAlignment="Left" Content="左上经纬:" Visibility="Collapsed" Foreground="{StaticResource MinFontFore}" FontSize="12"/>
+                <Label x:Name="cLT" Content="0" Width="260" Visibility="Collapsed" Foreground="{StaticResource MinFontFore}" FontSize="12"/>
+                <Label x:Name="lcLat" HorizontalAlignment="Left" Content="右下经纬:" Visibility="Collapsed" Foreground="{StaticResource MinFontFore}" FontSize="12"/>
+                <Label x:Name="cRB" Content="0" Width="260" Visibility="Collapsed" Foreground="{StaticResource MinFontFore}" FontSize="12"/>                
             </StackPanel>
         </StatusBar>
     </Grid>

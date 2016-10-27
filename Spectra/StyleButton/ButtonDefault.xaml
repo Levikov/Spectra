@@ -17,7 +17,7 @@
             </Trigger>
             <Trigger Property="IsEnabled" Value="False">
                 <Setter Property="Background" TargetName="btn" Value="WhiteSmoke"/>
-                <Setter Property="Foreground" TargetName="btn" Value="DarkGray"/>
+                <Setter Property="Foreground" TargetName="btn" Value="Gray"/>
             </Trigger>
         </ControlTemplate.Triggers>
     </ControlTemplate>

@@ -813,13 +813,13 @@
                         <RowDefinition Height="1*" MinHeight="35" MaxHeight="50"/>
                         <RowDefinition Height="1*" MinHeight="35" MaxHeight="50"/>
                     </Grid.RowDefinitions>
-                    <CheckBox x:Name="cbModelImage1" Content="单光谱图像" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
-                    <CheckBox x:Name="cbModelImage4" Content="谱段图像对比" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
-                    <CheckBox x:Name="cbModelMap" Content="谷歌地图" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
-                    <CheckBox x:Name="cbModel3D" Content="光谱立方体" Grid.Row="0" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
-                    <CheckBox x:Name="cbModelImageMap" Content="图像/地图模式" Grid.Row="1" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
+                    <CheckBox x:Name="cbModelImage1" Content="单光谱图像" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" VerticalContentAlignment="Center" FontSize="18" Foreground="White"/>
+                    <CheckBox x:Name="cbModelImage4" Content="谱段图像对比" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" VerticalContentAlignment="Center" FontSize="18" Foreground="White"/>
+                    <CheckBox x:Name="cbModelMap" Content="谷歌地图" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" VerticalContentAlignment="Center" FontSize="18" Foreground="White"/>
+                    <CheckBox x:Name="cbModel3D" Content="光谱立方体" Grid.Row="0" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" VerticalContentAlignment="Center" FontSize="18" Foreground="White"/>
+                    <CheckBox x:Name="cbModelImageMap" Content="图像/地图模式" Grid.Row="1" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" VerticalContentAlignment="Center" FontSize="18" Foreground="White"/>
                     <DockPanel Grid.Row="2" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Left">
-                        <CheckBox x:Name="cbModelCurve" Content="曲线模式:" Margin="0,0,20,0" HorizontalAlignment="Center" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
+                        <CheckBox x:Name="cbModelCurve" Content="曲线模式:" Margin="0,0,20,0" HorizontalAlignment="Center" VerticalAlignment="Center" VerticalContentAlignment="Center" FontSize="18" Foreground="White"/>
                         <RadioButton x:Name="rbModelCurve1" Content="模式1" Margin="0,0,10,0" HorizontalAlignment="Center" VerticalAlignment="Center" VerticalContentAlignment="Center" IsChecked="True" IsEnabled="{Binding ElementName=cbModelCurve,Path=IsChecked}" FontSize="18" Foreground="White"/>
                         <RadioButton x:Name="rbModelCurve4" Content="模式4" HorizontalAlignment="Center" VerticalAlignment="Center" VerticalContentAlignment="Center" IsEnabled="{Binding ElementName=cbModelCurve,Path=IsChecked}" FontSize="18" Background="White" Foreground="White"/>
                     </DockPanel>
@@ -978,13 +978,13 @@
                             <RowDefinition Height="50"/>
                             <RowDefinition Height="50"/>
                         </Grid.RowDefinitions>
-                        <CheckBox x:Name="cbShowImage1" Content="图像模式1" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
-                        <CheckBox x:Name="cbShowImage4" Content="图像模式4" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
-                        <CheckBox x:Name="cbShowMap" Content="谷歌地图" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
-                        <CheckBox x:Name="cbShow3D" Content="三维立方体" Grid.Row="0" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
-                        <CheckBox x:Name="cbShowImageMap" Content="图像/地图模式" Grid.Row="1" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
+                        <CheckBox x:Name="cbShowImage1" Content="图像模式1" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" VerticalContentAlignment="Center" FontSize="18" Foreground="White"/>
+                        <CheckBox x:Name="cbShowImage4" Content="图像模式4" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" VerticalContentAlignment="Center" FontSize="18" Foreground="White"/>
+                        <CheckBox x:Name="cbShowMap" Content="谷歌地图" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" VerticalContentAlignment="Center" FontSize="18" Foreground="White"/>
+                        <CheckBox x:Name="cbShow3D" Content="三维立方体" Grid.Row="0" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" VerticalContentAlignment="Center" FontSize="18" Foreground="White"/>
+                        <CheckBox x:Name="cbShowImageMap" Content="图像/地图模式" Grid.Row="1" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" VerticalContentAlignment="Center" FontSize="18" Foreground="White"/>
                         <DockPanel Grid.Row="2" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Left">
-                            <CheckBox x:Name="cbShowCurve" Content="曲线模式:" Margin="0,0,20,0" HorizontalAlignment="Center" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
+                            <CheckBox x:Name="cbShowCurve" Content="曲线模式:" Margin="0,0,20,0" HorizontalAlignment="Center" VerticalAlignment="Center" VerticalContentAlignment="Center" FontSize="18" Foreground="White"/>
                             <RadioButton x:Name="rbShowCurve1" Content="模式1" Margin="0,0,10,0" HorizontalAlignment="Center" VerticalAlignment="Center" VerticalContentAlignment="Center" IsChecked="True" IsEnabled="{Binding ElementName=cbShowCurve,Path=IsChecked}" Foreground="White"/>
                             <RadioButton x:Name="rbShowCurve4" Content="模式4" HorizontalAlignment="Center" VerticalAlignment="Center" VerticalContentAlignment="Center" IsEnabled="{Binding ElementName=cbShowCurve,Path=IsChecked}" Foreground="White"/>
                         </DockPanel>
