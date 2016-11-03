@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Spectra"
         mc:Ignorable="d"
-        Title="快视" Height="512" Width="1024" SizeChanged="winQuickView_SizeChanged" Closing="Window_Closing">
+        Title="快视" Height="512" Width="1024" SizeChanged="winQuickView_SizeChanged" Closing="Window_Closing" WindowStartupLocation="CenterScreen">
     <Grid x:Name="gridFill">
         <ScrollViewer x:Name="scrList" Margin="0" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Auto">
             <WrapPanel x:Name="panelBack" Background="Black" Orientation="Vertical" MouseWheel="panelBack_MouseWheel"/>

@@ -6,6 +6,7 @@ using System.Data.Odbc;
 using System.Windows.Input;
 using System.Windows;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Spectra
 {
@@ -239,6 +240,40 @@ namespace Spectra
             _book = (Excel._Workbook)(_books.Add(_optionalValue));
             _sheets = (Excel.Sheets)_book.Worksheets;
             _sheet = (Excel._Worksheet)(_sheets.get_Item(1));
-        }        
+        }
+
+        /// <summary>
+        /// 保存到Text
+        /// </summary>
+        /// <param name="excelName"></param>
+        public void SaveToText(string textName, DataTable dt)
+        {
+            FileStream fsText = new FileStream(textName, FileMode.Create);
+            var wrText = new StreamWriter(fsText);
+            int col = dt.Columns.Count, row = dt.Rows.Count;
+            for(int i=-1;i<row;i++)
+            {
+                for (int j = 0; j < col; j++)
+                {
+                    if (i == -1)
+                    {
+                        wrText.Write(dt.Columns[j].ColumnName);
+                        if (j == col - 1)
+                            wrText.Write("\n");
+                        else
+                            wrText.Write("\t");
+                    }
+                    else
+                    {
+                        wrText.Write(dt.Rows[i][j]);
+                        if (j == col - 1)
+                            wrText.Write("\n");
+                        else
+                            wrText.Write("\t");
+                    }
+                }
+            }
+            fsText.Close();
+        }
     }
 }

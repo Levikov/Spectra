@@ -47,6 +47,7 @@ namespace Spectra
         /// </summary>
         /// <param name="s">源文件路径全称</param>
         /// <param name="m">源文件的MD5</param>
+        /// <param name="b">是否为1星，true为1星，false为2星</param>
         public DataOper(string s, string m, bool b)
         {
             md5 = m;
@@ -354,6 +355,17 @@ namespace Spectra
                     outFile.Write(imgBuf[b], 0, 2048 * imageWidth * 2);
                     outFile.Close();
                 }
+
+                //将每个分片的图像辅助数据存为excel
+                DataTable dtExcel = dataChannel[0].dtChannel.Copy();
+                dtExcel.Clear();
+                for (int j = 0; j < imageWidth; j++)
+                    dtExcel.ImportRow(dataChannel[0].dtChannel.Rows[i * 4096 + j]);
+                dtExcel.Columns.RemoveAt(0);
+                dtExcel.Columns.RemoveAt(0);
+                ExcelHelper _excelHelper = new ExcelHelper();
+                _excelHelper.SaveToText($"{Global.pathDecFiles}{md5}\\{i}\\辅助数据.xls", dtExcel);
+
                 IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} {i}图像合并完成.");
                 IProg_Bar.Report((double)(i + 1) / splitSum);
             }
@@ -414,13 +426,6 @@ namespace Spectra
                 strStartCoord = $"({StartCoord.Lat},{StartCoord.Lon})";
                 strEndCoord = $"({EndCoord.Lat},{EndCoord.Lon})";
                 Insert(sqlExcute,split,splitCur,StartTime,EndTime,strStartCoord,strEndCoord);
-
-                //DataTable dtExcel = dataChannel[0].dtChannel.Copy();
-                //dtExcel.Clear();
-                //for (int i = 0; i < splitCur; i++)
-                //    dtExcel.ImportRow(dataChannel[0].dtChannel.Rows[split * 4096 + i]);
-                //ExcelHelper _excelHelper = new ExcelHelper();
-                //_excelHelper.SaveToExcel($"{Global.pathDecFiles}{md5}\\{split}\\{srcFileName}_{split}.xls", dtExcel);
             }
 
             //插入辅助信息
@@ -635,6 +640,11 @@ namespace Spectra
         public int frmS, frmE, frmC;
         public string md5,Satellite;
 
+        /// <summary>
+        /// 单通道对象
+        /// </summary>
+        /// <param name="m">MD5</param>
+        /// <param name="s">1星/2星</param>
         public DataChannel(string m,string s)
         {
             md5 = m;
