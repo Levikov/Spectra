@@ -132,7 +132,7 @@
                         <Button x:Name="btnOpenFiles" Margin="0,0,30,0" Content="批处理" Template="{DynamicResource ButtonDefault}" Click="btnOpenFiles_Click" Width="120" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                     </Grid>
                     <DockPanel Margin="30,0">
-                        <CheckBox x:Name="cb280" Content="280" Margin="28,0,0,0" VerticalAlignment="Center" VerticalContentAlignment="Center" IsChecked="True" Visibility="Hidden"/>
+                        <CheckBox x:Name="cbSate1" Content="1星" Margin="28,0,0,0" VerticalAlignment="Center" VerticalContentAlignment="Center" IsChecked="True" Foreground="LightGreen" FontSize="18"/>
                         <ProgressBar x:Name="prog_Import" Height="30" Margin="35,0,0,0" BorderBrush="{StaticResource ButtonBack}"/>
                     </DockPanel>
                     <DockPanel Margin="10,0" LastChildFill="False" Height="50" HorizontalAlignment="Center">

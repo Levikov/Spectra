@@ -116,7 +116,7 @@ namespace Spectra
                         FileInfo.srcFileName = FileInfo.srcFilePathName.Substring(FileInfo.srcFilePathName.LastIndexOf('\\') + 1);      //文件名称
                         tb_Console.Text = FileInfo.checkFileState();                                                                    //检查文件状态
 
-                        DataOper dataOper = new DataOper(FileInfo.srcFilePathName, FileInfo.md5);
+                        DataOper dataOper = new DataOper(FileInfo.srcFilePathName, FileInfo.md5, Convert.ToBoolean(cbSate1.IsChecked));
                         await dataOper.main(IProg_Bar, IProg_Cmd);
                         dataGrid_Errors.ItemsSource = SQLiteFunc.SelectDTSQL("select * from FileErrors where MD5='" + FileInfo.md5 + "'").DefaultView;  //显示错误信息
                     }
@@ -137,7 +137,7 @@ namespace Spectra
         {
             btnDecFile.IsEnabled = false;
 
-            DataOper dataOper = new DataOper(FileInfo.srcFilePathName,FileInfo.md5);
+            DataOper dataOper = new DataOper(FileInfo.srcFilePathName,FileInfo.md5, Convert.ToBoolean(cbSate1.IsChecked));
             IProgress<double> IProg_Bar = new Progress<double>((ProgressValue) => { prog_Import.Value = ProgressValue * prog_Import.Maximum; });
             IProgress<string> IProg_Cmd = new Progress<string>((ProgressString) => { tb_Console.Text = ProgressString + "\n" + tb_Console.Text; });
             await dataOper.main(IProg_Bar, IProg_Cmd);
@@ -213,6 +213,8 @@ namespace Spectra
             if (fbd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 txtSaveFilesPath.Text = fbd.SelectedPath;
+                if (txtSaveFilesPath.Text.Substring(txtSaveFilesPath.Text.Length - 1) != "\\")
+                    txtSaveFilesPath.Text = txtSaveFilesPath.Text + "\\";
                 btnSaveFiles.IsEnabled = true;
             }
         }

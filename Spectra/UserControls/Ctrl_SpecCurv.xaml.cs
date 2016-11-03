@@ -31,7 +31,7 @@ namespace Spectra
                 new System.Windows.Media.Pen(Brushes.Yellow, 2),
                 new CirclePointMarker { Size = 2.0, Fill = Brushes.Yellow },
                 new PenDescription(desp));
-            chart1st.Viewport.Visible = new Rect(new System.Windows.Point(400, 4096), new System.Windows.Point(1020, 0));
+            //chart1st.Viewport.Visible = new Rect(new System.Windows.Point(400, 4096), new System.Windows.Point(1020, 0));
         }
 
         public void initChart(Pen pen ,string desp)
@@ -40,7 +40,7 @@ namespace Spectra
                 pen,
                 new CirclePointMarker { Size = 2.0, Fill = pen.Brush },
                 new PenDescription(desp));
-            chart1st.Viewport.Visible = new Rect(new System.Windows.Point(400, 4096), new System.Windows.Point(1020, 0));
+            //chart1st.Viewport.Visible = new Rect(new System.Windows.Point(400, 4096), new System.Windows.Point(1020, 0));
         }
 
         public void Draw1(Point p, Coord coo, int index)

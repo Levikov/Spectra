@@ -47,13 +47,14 @@ namespace Spectra
         /// </summary>
         /// <param name="s">源文件路径全称</param>
         /// <param name="m">源文件的MD5</param>
-        public DataOper(string s, string m)
+        public DataOper(string s, string m, bool b)
         {
             md5 = m;
             srcFilePathName = s;
             srcFileName = s.Substring(s.LastIndexOf('\\') + 1, s.LastIndexOf('.') - s.LastIndexOf('\\') - 1);
+            
             for (int c = 0; c < 4; c++)
-                dataChannel[c] = new DataChannel(md5);
+                dataChannel[c] = new DataChannel(md5,b?"1":"2");
         }
 
         /// <summary>
@@ -625,11 +626,12 @@ namespace Spectra
     {
         public DataTable dtChannel;
         public int frmS, frmE, frmC;
-        public string md5;
+        public string md5,Satellite;
 
-        public DataChannel(string m)
+        public DataChannel(string m,string s)
         {
             md5 = m;
+            Satellite = s;
             dtChannel = new DataTable();
             dtChannel.Columns.Add("ID", System.Type.GetType("System.Int32"));   //第几帧图像（0计数）
             dtChannel.Columns.Add("row", System.Type.GetType("System.Int32"));  //在第几行开始（0计数）
@@ -694,7 +696,7 @@ namespace Spectra
             StartRow = buf[112] * 256 + buf[113];
             Gain = buf[115];
 
-            dtChannel.Rows.Add(new object[] { ID, row, buf[6] * 256 + buf[7], GST, GST_US, Lat, Lon, X, Y, Z, Vx, Vy, Vz, Ox, Oy, Oz, Q1, Q2, Q3, Q4, Freq, Integral, StartRow, Gain, md5, "1" });
+            dtChannel.Rows.Add(new object[] { ID, row, buf[6] * 256 + buf[7], GST, GST_US, Lat, Lon, X, Y, Z, Vx, Vy, Vz, Ox, Oy, Oz, Q1, Q2, Q3, Q4, Freq, Integral, StartRow, Gain, md5, Satellite });
         }
 
         /// <summary>
