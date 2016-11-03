@@ -414,6 +414,13 @@ namespace Spectra
                 strStartCoord = $"({StartCoord.Lat},{StartCoord.Lon})";
                 strEndCoord = $"({EndCoord.Lat},{EndCoord.Lon})";
                 Insert(sqlExcute,split,splitCur,StartTime,EndTime,strStartCoord,strEndCoord);
+
+                //DataTable dtExcel = dataChannel[0].dtChannel.Copy();
+                //dtExcel.Clear();
+                //for (int i = 0; i < splitCur; i++)
+                //    dtExcel.ImportRow(dataChannel[0].dtChannel.Rows[split * 4096 + i]);
+                //ExcelHelper _excelHelper = new ExcelHelper();
+                //_excelHelper.SaveToExcel($"{Global.pathDecFiles}{md5}\\{split}\\{srcFileName}_{split}.xls", dtExcel);
             }
 
             //插入辅助信息
@@ -758,6 +765,7 @@ namespace Spectra
                 sra = Math.Atan2(cuR[1], cuR[0]);                  //得到经度[-PI PI]
             }
             lon = sra - fgst;
+            
             lon = lon - (int)(lon / Math.PI / 2) * Math.PI * 2;                       //POSE_MODF规整到给定范围
 
             if (lon > Math.PI)
@@ -766,6 +774,9 @@ namespace Spectra
                 lon = lon + Math.PI * 2;
             else { }
             clonlat[0] = lon;                                       //经度
+
+            clonlat[0] = 180 * clonlat[0] / Math.PI;            //经度
+            clonlat[1] = 90 * clonlat[1] / Math.PI / 0.5;       //纬度
             return clonlat;
         }
 
