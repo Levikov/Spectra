@@ -132,7 +132,8 @@
                         <Button x:Name="btnOpenFiles" Margin="0,0,30,0" Content="批处理" Template="{DynamicResource ButtonDefault}" Click="btnOpenFiles_Click" Width="120" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                     </Grid>
                     <DockPanel Margin="30,0">
-                        <CheckBox x:Name="cbSate1" Content="1星" Margin="28,0,0,0" VerticalAlignment="Center" VerticalContentAlignment="Center" IsChecked="True" Foreground="LightGreen" FontSize="18"/>
+                        <Label Content="星号：" Margin="28,0,0,0" VerticalAlignment="Center" VerticalContentAlignment="Center" Foreground="LightGreen" FontSize="18"/>
+                        <TextBox x:Name="txtSateID" Text="0" Margin="0" VerticalAlignment="Center" VerticalContentAlignment="Center" FontSize="18" Width="40" Height="30"/>
                         <ProgressBar x:Name="prog_Import" Height="30" Margin="35,0,0,0" BorderBrush="{StaticResource ButtonBack}"/>
                     </DockPanel>
                     <DockPanel Margin="10,0" LastChildFill="False" Height="50" HorizontalAlignment="Center">

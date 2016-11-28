@@ -329,7 +329,7 @@ namespace Spectra
             DataRow dr = ImageInfo.dtImgInfo.Rows[(int)p.X];
 
             int frm = Convert.ToInt32(dr["FrameId"]);
-            int freq = Convert.ToInt32(dr["Freq"]);
+            double freq = Convert.ToDouble(dr["Freq"]);
             int integral = Convert.ToInt32(dr["Integral"]);
             int startRow = Convert.ToInt32(dr["StartRow"]);
             int gain = Convert.ToInt32(dr["Gain"]);

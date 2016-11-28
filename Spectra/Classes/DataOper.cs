@@ -48,14 +48,14 @@ namespace Spectra
         /// <param name="s">源文件路径全称</param>
         /// <param name="m">源文件的MD5</param>
         /// <param name="b">是否为1星，true为1星，false为2星</param>
-        public DataOper(string s, string m, bool b)
+        public DataOper(string s, string m, string sataID)
         {
             md5 = m;
             srcFilePathName = s;
             srcFileName = s.Substring(s.LastIndexOf('\\') + 1, s.LastIndexOf('.') - s.LastIndexOf('\\') - 1);
             
             for (int c = 0; c < 4; c++)
-                dataChannel[c] = new DataChannel(md5,b?"1":"2");
+                dataChannel[c] = new DataChannel(md5, sataID);
         }
 
         /// <summary>
@@ -808,7 +808,7 @@ namespace Spectra
                     return 5;
                 case 600:
                     return 6;
-                case 1000:
+                case 10000:
                     return 7;
                 default:
                     return 8;

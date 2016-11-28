@@ -25,11 +25,11 @@ namespace Spectra
         /// <param name="integral">积分设置</param>
         /// <param name="startRow">起始行</param>
         /// <param name="gain">增益设置</param>
-        public void imgShow(int frm,int freq,int integral,int startRow,int gain)
+        public void imgShow(int frm,double freq,int integral,int startRow,int gain)
         {
             Show();
             barFrameId.Content = frm.ToString();
-            barFreq.Content = freq.ToString();
+            barFreq.Content = freq.ToString("F2");
             barIntegral.Content = integral.ToString();
             barStartRow.Content = startRow.ToString();
             barGain.Content = gain.ToString();
