@@ -335,7 +335,7 @@ namespace Spectra
             int gain = Convert.ToInt32(dr["Gain"]);
 
             barFrameId.Content = frm.ToString();
-            barFreq.Content = freq.ToString();
+            barFreq.Content = freq.ToString("F2");
             barIntegral.Content = integral.ToString();
             barStartRow.Content = startRow.ToString();
             barGain.Content = gain.ToString();

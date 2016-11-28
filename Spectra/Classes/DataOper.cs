@@ -284,27 +284,30 @@ namespace Spectra
                     channelFile[frm] = new byte[512 * 160 * 2];
                     int rowS = (int)dataChannel[c].dtChannel.Rows[frm]["row"];
                     int rowC = (int)dataChannel[c].dtChannel.Rows[frm + 1]["row"] - rowS;
-                    byte[] jp2BufA = new byte[rowC * 280];
-                    byte[] jp2BufB = new byte[rowC * 256 - 256 - 16];
-                    Array.Copy(inBuf, rowS * 280, jp2BufA, 0, jp2BufA.Length);
+                    if (rowC > 1)
+                    {
+                        byte[] jp2BufA = new byte[rowC * 280];
+                        byte[] jp2BufB = new byte[rowC * 256 - 256 - 16];
+                        Array.Copy(inBuf, rowS * 280, jp2BufA, 0, jp2BufA.Length);
 
-                    Array.Copy(jp2BufA, 1 * 280 + 32, jp2BufB, 0, 240);
-                    for (int r = 2; r < rowC; r++)
-                        Array.Copy(jp2BufA, r * 280 + 16, jp2BufB, (r - 2) * 256 + 240, 256);
-                    try
-                    {
-                        Stream s = new MemoryStream(jp2BufB);
-                        FIBITMAP fibmp = FreeImage.LoadFromStream(s);
-                        Marshal.Copy(FreeImage.GetBits(fibmp), channelFile[frm], 0, 512 * 160 * 2);
-                        FreeImage.Unload(fibmp);
+                        Array.Copy(jp2BufA, 1 * 280 + 32, jp2BufB, 0, 240);
+                        for (int r = 2; r < rowC; r++)
+                            Array.Copy(jp2BufA, r * 280 + 16, jp2BufB, (r - 2) * 256 + 240, 256);
+                        try
+                        {
+                            Stream s = new MemoryStream(jp2BufB);
+                            FIBITMAP fibmp = FreeImage.LoadFromStream(s);
+                            Marshal.Copy(FreeImage.GetBits(fibmp), channelFile[frm], 0, 512 * 160 * 2);
+                            FreeImage.Unload(fibmp);
+                        }
+                        catch
+                        {
+                            errInfo.add(frm, $"{c}通道解压出错");
+                        }
+
+                        if (frm % (dataChannel[c].frmC / 100) == 0)
+                            IProg_Bar.Report((double)frm / dataChannel[c].frmC);
                     }
-                    catch
-                    {
-                        errInfo.add(frm,$"{c}通道解压出错");
-                    }
-                    
-                    if (frm % (dataChannel[c].frmC / 100) == 0)
-                        IProg_Bar.Report((double)frm / dataChannel[c].frmC);
                 });
                 IProg_Bar.Report(1);
                 IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 通道{c}解压完成.");
