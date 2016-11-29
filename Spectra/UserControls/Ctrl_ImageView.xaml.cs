@@ -119,7 +119,7 @@ namespace Spectra
                     p.Y = (p.Y / IMG1.ActualHeight);
                     curXinImg = p.X * ImgW;
                     curYinImg = p.Y * ImgH;
-                    coo = new Coord(Convert.ToDouble(ImageInfo.dtImgInfo.Rows[(int)curXinImg][7]), Convert.ToDouble(ImageInfo.dtImgInfo.Rows[(int)curXinImg][6]));
+                    coo = new Coord(Convert.ToDouble(ImageInfo.dtImgInfo.Rows[(int)curXinImg][5]), Convert.ToDouble(ImageInfo.dtImgInfo.Rows[(int)curXinImg][6]));
                     viewSet();
                 }
             }

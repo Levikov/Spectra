@@ -63,7 +63,7 @@
                 <Label HorizontalAlignment="Left" Content="帧号:" Foreground="{StaticResource MinFontFore}" FontSize="12"/>
                 <Label x:Name="barFrameId" Content="0" Width="45" Foreground="{StaticResource MinFontFore}" FontSize="12"/>
                 <Label HorizontalAlignment="Left" Content="帧频:" Foreground="{StaticResource MinFontFore}" FontSize="12"/>
-                <Label x:Name="barFreq" Content="0" Width="45" Foreground="{StaticResource MinFontFore}" FontSize="12"/>
+                <Label x:Name="barFreq" Content="0" MinWidth="45" Foreground="{StaticResource MinFontFore}" FontSize="12"/>
                 <Label HorizontalAlignment="Left" Content="起始行:" Foreground="{StaticResource MinFontFore}" FontSize="12"/>
                 <Label x:Name="barStartRow" Content="0" Width="35" Foreground="{StaticResource MinFontFore}" FontSize="12"/>
                 <Label HorizontalAlignment="Left" Content="积分设置:" Foreground="{StaticResource MinFontFore}" FontSize="12"/>
