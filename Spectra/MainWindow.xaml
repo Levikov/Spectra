@@ -1054,7 +1054,7 @@
                 </Grid.RowDefinitions>
                 <StackPanel Grid.Row="1" Margin="50,0" Background="{StaticResource WindowBack2}">
                     <Label Content="版  本  号：v1.0" Grid.Row="1" FontSize="18" FontFamily="STKaiti" HorizontalAlignment="Left" Margin="30,30,0,0" VerticalAlignment="Top"/>
-                    <Label Content="版权所有：上海微小卫星工程中心—总体技术研究室" Grid.Row="1" FontSize="18" FontFamily="STKaiti" HorizontalAlignment="Left" Margin="30,10,0,0" VerticalAlignment="Top"/>
+                    <Label Content="版权所有：中科院微小卫星创新研究院—微纳所总体组" Grid.Row="1" FontSize="18" FontFamily="STKaiti" HorizontalAlignment="Left" Margin="30,10,0,0" VerticalAlignment="Top"/>
                     <Label Content="联系地址：上海市浦东新区海科路99号4号楼" Grid.Row="1" FontSize="18" FontFamily="STKaiti" HorizontalAlignment="Left" Margin="30,10,0,0" VerticalAlignment="Top"/>
                     <Label Content="联系电话：+86-021-50735082" Grid.Row="1" FontSize="18" FontFamily="STKaiti" HorizontalAlignment="Left" Margin="30,10,0,0" VerticalAlignment="Top"/>
                     <Label Content="传        真：+86 900 766" Grid.Row="1" FontSize="18" FontFamily="STKaiti" HorizontalAlignment="Left" Margin="30,10,0,0" VerticalAlignment="Top"/>

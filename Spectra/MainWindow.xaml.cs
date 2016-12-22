@@ -80,7 +80,7 @@ namespace Spectra
                 {
                     FileInfo.srcFilePathName = openFile.FileName;                                                                   //文件路径名称
                     FileInfo.srcFileName = FileInfo.srcFilePathName.Substring(FileInfo.srcFilePathName.LastIndexOf('\\') + 1);      //文件名称
-                    tb_Console.Text = FileInfo.checkFileState();                                                                    //检查文件状态
+                    tb_Console.Text = FileInfo.checkFileState(FileInfo.srcFileName);                                                //检查文件状态
                     /*窗体控件*/
                     dataGrid_Errors.ItemsSource = SQLiteFunc.SelectDTSQL("select * from FileErrors where MD5='" + FileInfo.md5 + "'").DefaultView;  //显示错误信息
                     tb_Path.Text = FileInfo.srcFilePathName;
@@ -114,7 +114,7 @@ namespace Spectra
                     {
                         FileInfo.srcFilePathName = openFile.FileNames[fi];                                                                   //文件路径名称
                         FileInfo.srcFileName = FileInfo.srcFilePathName.Substring(FileInfo.srcFilePathName.LastIndexOf('\\') + 1);      //文件名称
-                        tb_Console.Text = FileInfo.checkFileState();                                                                    //检查文件状态
+                        tb_Console.Text = FileInfo.checkFileState(FileInfo.srcFileName);                                                                    //检查文件状态
 
                         DataOper dataOper = new DataOper(FileInfo.srcFilePathName, FileInfo.md5, txtSateID.Text);
                         await dataOper.main(IProg_Bar, IProg_Cmd);
@@ -146,7 +146,7 @@ namespace Spectra
             btnOpenFile.IsEnabled = true;
             btnTopB.IsChecked = true;
             btnLeftB1.IsChecked = true;
-            searchList(FileInfo.md5, false, false, false);
+            //searchList(FileInfo.md5, false, false, false);
         }
 
         /*用于放弃操作*/

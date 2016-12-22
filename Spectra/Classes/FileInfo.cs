@@ -28,21 +28,13 @@ namespace Spectra
         public static Coord endCoord = new Coord(0, 0);
 
         /*检查文件状态*/
-        public static string checkFileState()
+        public static string checkFileState(string md5)
         {
-            //检查MD5
-            string md5str;
-            using (var md5 = MD5.Create())
-            {
-                using (var stream = File.OpenRead(FileInfo.srcFilePathName))
-                {
-                    md5str = BitConverter.ToString(md5.ComputeHash(stream));
-                }
-            }
-            FileInfo.md5 = md5str;
+            //文件名作为唯一标识
+            FileInfo.md5 = md5;
             /*汇报文件状态*/
             string strReport = "";
-            DataTable fileDetail = SQLiteFunc.SelectDTSQL($"SELECT * from FileDetails where MD5='{md5str}'");
+            DataTable fileDetail = SQLiteFunc.SelectDTSQL($"SELECT * from FileDetails where MD5='{FileInfo.md5}'");
             if (fileDetail.Rows.Count == 0)
             {
                 FileInfo.isUnpack = false;                                                                                  //未解包
@@ -59,7 +51,7 @@ namespace Spectra
                 if ((string)fileDetail.Rows[0][3] == "是")
                 {
                     FileInfo.isUnpack = true;
-                    FileInfo.upkFilePathName = Convert.ToString(SQLiteFunc.SelectDTSQL($"SELECT * from FileDetails_dec where MD5='{md5str}'").Rows[0][7]);
+                    FileInfo.upkFilePathName = Convert.ToString(SQLiteFunc.SelectDTSQL($"SELECT * from FileDetails_dec where MD5='{FileInfo.md5}'").Rows[0][7]);
                     strReport += "已解包,";
                 }
                 else
@@ -70,7 +62,7 @@ namespace Spectra
                 if ((string)fileDetail.Rows[0][4] == "是")
                 {
                     FileInfo.isDecomp = true;
-                    DataTable dt = SQLiteFunc.SelectDTSQL($"SELECT * from FileDetails_dec where MD5='{md5str}'");
+                    DataTable dt = SQLiteFunc.SelectDTSQL($"SELECT * from FileDetails_dec where MD5='{FileInfo.md5}'");
                     if (dt.Rows[0][1] != DBNull.Value) FileInfo.frmSum = Convert.ToInt64(dt.Rows[0][1]);           //帧总数
                     if (dt.Rows[0][2] != DBNull.Value) FileInfo.startTime = Convert.ToDateTime(dt.Rows[0][2]);     //起始时间
                     if (dt.Rows[0][3] != DBNull.Value) FileInfo.endTime = Convert.ToDateTime(dt.Rows[0][3]);       //结束时间

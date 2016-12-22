@@ -71,6 +71,7 @@ namespace Spectra
                 try
                 {
                     string strSrc = preData(unpackData(srcFilePathName, IProg_Bar, IProg_Cmd), IProg_Bar, IProg_Cmd);
+                    //string strSrc = srcFilePathName;
                     if (strSrc == string.Empty)
                     {
                         IProg_Cmd.Report(DateTime.Now.ToString("HH:mm:ss") + " 文件不正确，已停止该文件操作！");
@@ -81,7 +82,7 @@ namespace Spectra
                     mergeImage(strSrc, IProg_Bar, IProg_Cmd);
                     IProg_Cmd.Report(DateTime.Now.ToString("HH:mm:ss") + " 开始清理冗余文件！");
                     Task.Run(() => { Directory.Delete("tempFiles", true); }).Wait();
-                    new Thread(() => { Get3DRaw($"{Global.pathDecFiles}{md5}\\"); }).Start();
+                    //new Thread(() => { Get3DRaw($"{Global.pathDecFiles}{md5}\\"); }).Start();
                     IProg_Cmd.Report(DateTime.Now.ToString("HH:mm:ss") + " 操作完成！");
                 }
                 catch{}
@@ -89,7 +90,7 @@ namespace Spectra
         }
 
         /// <summary>
-        /// 解包数据，将1024格式数据解为288/280格式
+        /// 解包数据，将地面站数据格式解为288/280格式
         /// </summary>
         /// <param name="inFilePathName">源文件全路径名称</param>
         /// <param name="IProg_Bar">进度条</param>
@@ -98,47 +99,55 @@ namespace Spectra
         public string unpackData(string inFilePathName, IProgress<double> IProg_Bar, IProgress<string> IProg_Cmd)
         {
             Directory.CreateDirectory("tempFiles");
+            //文件不存在，退出
             if (!File.Exists(inFilePathName))
                 return string.Empty;
             FileStream inFileStream = new FileStream(inFilePathName, FileMode.Open, FileAccess.Read, FileShare.Read);
+            //文件打开失败，退出
             if (inFileStream == null)
                 return string.Empty;
-            byte[] inBuf = new byte[1024];
-            inFileStream.Read(inBuf, 0, 1024);
-            if (inBuf[0] == 0x1A && inBuf[1] == 0xCF && inBuf[2] == 0xFC && inBuf[3] == 0x1D)
+            //文件小于1MB，退出
+            if (inFileStream.Length < 1024 * 1024)
+                return string.Empty;
+            //跳过65536头
+            //int lenHead = 65536;
+            int lenHead = 65536;
+            inFileStream.Seek(lenHead, SeekOrigin.Begin);
+            //要处理的文件长度
+            long lenAll = (inFileStream.Length - lenHead) / 1040 * 1040;
+            //使用1040*1M缓存读文件
+            int lenCache = 1040 * 1024 * 1024;
+            Byte[] cacheBuf = new Byte[lenCache];
+            double cacheSum = Math.Ceiling(lenAll / (double)lenCache);
+            //使用844*1M缓存写文件
+            int lenWr = 884 * 1024 * 1024;
+            Byte[] outBuf = new Byte[lenWr];
+            FileStream outFileStream = new FileStream($"tempFiles\\{srcFileName}_u.dat", FileMode.Create);
+            //开始解包
+            IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 开始解包.");
+            IProg_Bar.Report(0);
+            //除最后一个单元，每次循环处理1040*1M文件
+            for (int cacheCnt = 0; cacheCnt < cacheSum - 1; cacheCnt++)
             {
-                IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 开始解包.");
-                IProg_Bar.Report(0);
-
-                long rowCnt = inFileStream.Length / 1024;
-                byte[] outBuf = new byte[rowCnt * 884];
-                inBuf = new byte[inFileStream.Length];
-
-                inFileStream.Read(inBuf, 0, Convert.ToInt32(inFileStream.Length));
-                inFileStream.Close();
-
-                IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 文件读取完成.");
-                for (int i = 0; i < rowCnt; i++)
-                {
-                    Array.Copy(inBuf, i * 1024 + 12, outBuf, i * 884, 884);
-                    if (i % (rowCnt / 10) == 0)
-                        IProg_Bar.Report((double)i / rowCnt);
-                }
-
-                IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 数据开始写入文件.");
-                FileStream outFileStream = new FileStream($"tempFiles\\{srcFileName}_u.dat", FileMode.Create);
+                inFileStream.Read(cacheBuf, 0, lenCache);
+                for (int i = 0; i < lenCache / 1040; i++)
+                    Array.Copy(cacheBuf, i * 1040 + 12, outBuf, i * 884, 884);
                 outFileStream.Write(outBuf, 0, outBuf.Length);
-                outFileStream.Close();
-
-                IProg_Bar.Report(1);
-                IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 解包完成！");
-                return $"tempFiles\\{srcFileName}_u.dat";
+                outFileStream.Flush();
+                IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} {cacheCnt + 1}G解包完成.");
+                IProg_Bar.Report((cacheCnt + 1) / cacheSum);
             }
-            else
-            {
-                inFileStream.Close();
-                return inFilePathName;
-            }
+            //最后一个单元处理
+            lenCache = (int)(lenAll % lenCache);
+            inFileStream.Read(cacheBuf, 0, lenCache);
+            for (int i = 0; i < lenCache / 1040; i++)
+                Array.Copy(cacheBuf, i * 1040 + 12, outBuf, i * 884, 884);
+            outFileStream.Write(outBuf, 0, lenCache / 1040 * 884);
+            outFileStream.Close();
+            //完成
+            IProg_Bar.Report(1);
+            IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 解包完成！");
+            return $"tempFiles\\{srcFileName}_u.dat";
         }
 
         /// <summary>
@@ -150,37 +159,40 @@ namespace Spectra
         /// <returns>输出文件的全路径名称</returns>
         public string preData(string inFilePathName, IProgress<double> IProg_Bar, IProgress<string> IProg_Cmd)
         {
+            //不存在文件，退出
             if (!File.Exists(inFilePathName))
                 return string.Empty;
             FileStream inFileStream = new FileStream(inFilePathName, FileMode.Open, FileAccess.Read, FileShare.Read);
+            //文件为空，退出
             if (inFileStream == null)
                 return string.Empty;
+            //开始预处理
             IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 开始预处理.");
             IProg_Bar.Report(0);
-            byte[] inBuf = new byte[inFileStream.Length];
-            inFileStream.Read(inBuf, 0, inBuf.Length);
-            inFileStream.Close();
-            IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 文件读取完成.");
-
-            byte[] outBuf = new byte[inBuf.Length];
-            int position = 0, packCnt = 0;
-            while (position < inBuf.Length - 4)
-            {
-                if (inBuf[position] == 0xEB && inBuf[position + 1] == 0x90 && inBuf[position + 2] == 0x57 && inBuf[position + 3] == 0x16)
-                {
-                    if (inBuf.Length - position < 280)
-                        break;
-                    Array.Copy(inBuf, position, outBuf, 280 * packCnt, 280);
-                    position += 280;
-                    packCnt++;
-                }
-                else
-                    position++;
-            }
-
-            IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 文件开始写入.");
+            //输出的数据
+            Byte[] outBuf = new Byte[280];
+            outBuf[0] = 0xEB;   outBuf[1] = 0x90;   outBuf[2] = 0x57;   outBuf[3] = 0x16;
             FileStream outFileStream = new FileStream($"tempFiles\\{srcFileName}_p.dat", FileMode.Create);
-            outFileStream.Write(outBuf, 0, packCnt * 280);
+            //标识文件位置
+            long position = 0;
+            //头缓存
+            Byte[] headBuf = new Byte[276];
+
+            while (position < inFileStream.Length - 280)
+            {
+                inFileStream.Read(headBuf, 0, 4);
+                position = position + 4;
+                if (headBuf[0] == 0xEB && headBuf[1] == 0x90 && headBuf[2] == 0x57 && headBuf[3] == 0x16)
+                {
+                    inFileStream.Read(headBuf, 0, 276);
+                    position = position + 276;
+                    Array.Copy(headBuf, 0, outBuf, 4, 276);
+                    outFileStream.Write(outBuf, 0, 280);
+                    outFileStream.Flush();
+                    IProg_Bar.Report((double)position / inFileStream.Length);
+                }
+            }
+            inFileStream.Close();
             outFileStream.Close();
             IProg_Bar.Report(1);
             IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 预处理完成！");
@@ -196,49 +208,56 @@ namespace Spectra
         /// <param name="IProg_Cmd">控制台</param>
         /// <returns>输出文件的全路径名称(不含尾号)</returns>
         public string splitFile(string inFilePathName, IProgress<double> IProg_Bar, IProgress<string> IProg_Cmd)
-        { 
+        {
+            //文件不存在，退出
             if (!File.Exists(inFilePathName))
                 return string.Empty;
+            //文件为空，退出
             FileStream inFileStream = new FileStream(inFilePathName, FileMode.Open, FileAccess.Read, FileShare.Read);
             if (inFileStream == null)
                 return string.Empty;
-
-            IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 开始分包.");
-            IProg_Bar.Report(0);
-            byte[] inBuf = new byte[inFileStream.Length];
-            inFileStream.Read(inBuf, 0, inBuf.Length);
-            int packSum = (int)(inFileStream.Length / 280);
-            inFileStream.Close();
-            IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 文件读取完成.");
-
+            //输出文件
             FileStream[] outFileStream = new FileStream[4];
-            
             for (int c = 0; c < 4; c++)
             {
-                int row = 0, ID = 0;
-                byte[] buf = new byte[280];
                 outFileStream[c] = new FileStream($"tempFiles\\S{md5}_{c}.dat", FileMode.Create, FileAccess.Write, FileShare.Read);
-                for (int i = 0; i < packSum; i++)
+            }
+            //开始
+            IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 开始分包.");
+            IProg_Bar.Report(0);
+            //包总数
+            long packSum = inFileStream.Length / 280;
+            Byte[] inBuf = new Byte[280];
+
+            int chan = 0;                   //通道号
+            int[] ID = { 0, 0, 0, 0 };      //帧号
+            long[] row = { 0, 0, 0, 0 };    //行号
+            for (long packCnt = 0; packCnt < packSum; packCnt++)
+            {
+                //读1包数据
+                inFileStream.Read(inBuf, 0, 280);
+                //得到通道号
+                chan = inBuf[5] - 1;
+                if (inBuf[4] == 0x08)
                 {
-                    if (inBuf[i * 280 + 5] == c + 1)
-                    {
-                        Array.Copy(inBuf, i * 280, buf, 0, 280);
-                        if (inBuf[i * 280 + 4] == 0x08)
-                        {
-                            dataChannel[c].add(ID, row, buf);
-                            ID++;
-                        }
-                        outFileStream[c].Write(buf, 0, 280);
-                        row++;
-                    }
-                    if ((i + 1) % (packSum / 2) == 0)
-                        IProg_Bar.Report((double)(i + 1) / packSum + 0.25 * c);
+                    dataChannel[chan].add(ID[chan], row[chan], inBuf);
+                    ID[chan]++;
+                    IProg_Bar.Report((double)(packCnt + 1) / packSum);
                 }
+                outFileStream[chan].Write(inBuf, 0, 280);
+                outFileStream[chan].Flush();
+                row[chan]++;
+            }
+            //关闭文件
+            for (int c = 0; c < 4; c++)
+            {
                 outFileStream[c].Close();
             }
+            //修正
+            info();
+            //完成
             IProg_Bar.Report(1);
             IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 分包完成!");
-            info();
 
             return $"tempFiles\\S{md5}_";
         }
@@ -248,14 +267,40 @@ namespace Spectra
         /// </summary>
         public void info()
         {
+            //得到最大的帧号起始
+            Int32[] frmS = { 0, 0, 0, 0 };
+            Int32 max = 0;
             for (int c = 0; c < 4; c++)
-                dataChannel[c].getInfo();
-
-            int S = Math.Max(Math.Max(dataChannel[0].frmS, dataChannel[1].frmS), Math.Max(dataChannel[2].frmS, dataChannel[3].frmS));
-            int E = Math.Min(Math.Min(dataChannel[0].frmE, dataChannel[1].frmE), Math.Min(dataChannel[2].frmE, dataChannel[3].frmE));
-
+            {
+                frmS[c] = (int)dataChannel[c].dtChannel.Rows[0]["FrameId"];
+                if (frmS[c] > max)
+                    max = frmS[c];
+            }
+            //将多余的开始帧删除
             for (int c = 0; c < 4; c++)
-                dataChannel[c].modify(S, E);
+            {
+                for(int i=0;i< max - frmS[c]; i++)
+                    dataChannel[c].dtChannel.Rows.RemoveAt(0);
+            }
+
+            //得到最大的帧总数
+            Int32[] frmE = { 0, 0, 0, 0 };
+            max = 0;
+            for (int c = 0; c < 4; c++)
+            {
+                frmE[c] = dataChannel[c].dtChannel.Rows.Count;
+                if (frmE[c] > max)
+                    max = frmE[c];
+            }
+            //帧总数确定
+            for (int c = 0; c < 4; c++)
+                dataChannel[c].frmC = max - 1;
+            //将多余的尾帧删除
+            for (int c = 0; c < 4; c++)
+            {
+                for (int i = 0; i < max - frmE[c]; i++)
+                    dataChannel[c].dtChannel.Rows.RemoveAt(dataChannel[c].dtChannel.Rows.Count - 1);
+            }
         }
 
         /// <summary>
@@ -282,8 +327,8 @@ namespace Spectra
                 Parallel.For(0, dataChannel[c].frmC, frm =>
                 {
                     channelFile[frm] = new byte[512 * 160 * 2];
-                    int rowS = (int)dataChannel[c].dtChannel.Rows[frm]["row"];
-                    int rowC = (int)dataChannel[c].dtChannel.Rows[frm + 1]["row"] - rowS;
+                    long rowS = (long)dataChannel[c].dtChannel.Rows[frm]["row"];
+                    long rowC = (long)dataChannel[c].dtChannel.Rows[frm + 1]["row"] - rowS;
                     if (rowC > 1)
                     {
                         byte[] jp2BufA = new byte[rowC * 280];
@@ -640,7 +685,7 @@ namespace Spectra
     public class DataChannel
     {
         public DataTable dtChannel;
-        public int frmS, frmE, frmC;
+        public int frmC;
         public string md5,Satellite;
 
         /// <summary>
@@ -654,7 +699,7 @@ namespace Spectra
             Satellite = s;
             dtChannel = new DataTable();
             dtChannel.Columns.Add("ID", System.Type.GetType("System.Int32"));   //第几帧图像（0计数）
-            dtChannel.Columns.Add("row", System.Type.GetType("System.Int32"));  //在第几行开始（0计数）
+            dtChannel.Columns.Add("row", System.Type.GetType("System.Int64"));  //在第几行开始（0计数）
                                                                                 //dtChannel.Columns.Add("InternalId", System.Type.GetType("System.Int32"));
                                                                                 //dtChannel.Columns.Add("FrameSum", System.Type.GetType("System.Int32"));
             dtChannel.Columns.Add("FrameId", System.Type.GetType("System.Int32"));
@@ -681,17 +726,17 @@ namespace Spectra
             dtChannel.Columns.Add("Gain", System.Type.GetType("System.Int32"));
             dtChannel.Columns.Add("MD5", System.Type.GetType("System.String"));
             dtChannel.Columns.Add("Satellite", System.Type.GetType("System.String"));
-            frmS = frmE = frmC = 0;
+            frmC = 0;
         }
 
-        public void add(int ID, int row, byte[] buf)
+        public void add(int ID, long row, byte[] buf)
         {
             double GST, Lat, Lon, X, Y, Z, Vx, Vy, Vz, Ox, Oy, Oz, Q1, Q2, Q3, Q4, Freq, Integral;
             long GST_US;
             int StartRow, Gain;
 
             GST = readU32(buf, 17);
-            GST_US = readU32(buf, 104);
+            GST_US = readU32(buf, 104);     //北京时间+8小时
             X = readI32(buf, 32) / (double)1000;
             Y = readI32(buf, 36) / (double)1000;
             Z = readI32(buf, 40) / (double)1000;
@@ -717,31 +762,6 @@ namespace Spectra
             Gain = buf[115];
 
             dtChannel.Rows.Add(new object[] { ID, row, buf[6] * 256 + buf[7], GST, GST_US, Lat, Lon, X, Y, Z, Vx, Vy, Vz, Ox, Oy, Oz, Q1, Q2, Q3, Q4, Freq, Integral, StartRow, Gain, md5, Satellite });
-        }
-
-        /// <summary>
-        /// 获取首帧帧号、末帧帧号及总帧数
-        /// </summary>
-        public void getInfo()
-        {
-            frmS = (int)dtChannel.Rows[0]["FrameId"];
-            frmE = (int)dtChannel.Rows[dtChannel.Rows.Count - 1]["FrameId"];
-            frmC = dtChannel.Rows.Count;
-        }
-
-        public void modify(int s, int e)
-        {
-            for (int i = 0; i < frmE - e; i++)
-            {
-                dtChannel.Rows.RemoveAt(dtChannel.Rows.Count - 1);
-            }
-            for (int i = 0; i < s - frmS; i++)
-            {
-                dtChannel.Rows.RemoveAt(0);
-            }
-            frmS = s;
-            frmE = e;
-            frmC = dtChannel.Rows.Count - 1;
         }
 
         public UInt32 readU32(byte[] buf, int addr)
