@@ -70,8 +70,8 @@ namespace Spectra
             {
                 try
                 {
-                    string strSrc = preData(unpackData(srcFilePathName, IProg_Bar, IProg_Cmd), IProg_Bar, IProg_Cmd);
-                    //string strSrc = srcFilePathName;
+                    //string strSrc = preData(unpackData(srcFilePathName, IProg_Bar, IProg_Cmd), IProg_Bar, IProg_Cmd);
+                    string strSrc = srcFilePathName;
                     if (strSrc == string.Empty)
                     {
                         IProg_Cmd.Report(DateTime.Now.ToString("HH:mm:ss") + " 文件不正确，已停止该文件操作！");
@@ -318,49 +318,88 @@ namespace Spectra
             for (int c = 0; c < 4; c++)
             {
                 FileStream inFileStream = new FileStream($"{inFilePathName}{c}.dat", FileMode.Open, FileAccess.Read, FileShare.Read);
-                byte[] inBuf = new byte[inFileStream.Length];
-                inFileStream.Read(inBuf, 0, (int)inFileStream.Length);
-                inFileStream.Close();
-                IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 通道{c}读取完成.");
-
-                byte[][] channelFile = new byte[dataChannel[c].frmC][];
-                Parallel.For(0, dataChannel[c].frmC, frm =>
+                //如果文件小于2G，则并行执行
+                if (inFileStream.Length < 2147483648)
                 {
-                    channelFile[frm] = new byte[512 * 160 * 2];
-                    long rowS = (long)dataChannel[c].dtChannel.Rows[frm]["row"];
-                    long rowC = (long)dataChannel[c].dtChannel.Rows[frm + 1]["row"] - rowS;
-                    if (rowC > 1)
+                    byte[] inBuf = new byte[inFileStream.Length];
+                    inFileStream.Read(inBuf, 0, (int)inFileStream.Length);
+                    inFileStream.Close();
+                    IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 通道{c}读取完成.");
+
+                    byte[][] channelFile = new byte[dataChannel[c].frmC][];
+                    Parallel.For(0, dataChannel[c].frmC, frm =>
                     {
-                        byte[] jp2BufA = new byte[rowC * 280];
-                        byte[] jp2BufB = new byte[rowC * 256 - 256 - 16];
-                        Array.Copy(inBuf, rowS * 280, jp2BufA, 0, jp2BufA.Length);
-
-                        Array.Copy(jp2BufA, 1 * 280 + 32, jp2BufB, 0, 240);
-                        for (int r = 2; r < rowC; r++)
-                            Array.Copy(jp2BufA, r * 280 + 16, jp2BufB, (r - 2) * 256 + 240, 256);
-                        try
+                        channelFile[frm] = new byte[512 * 160 * 2];
+                        long rowS = (long)dataChannel[c].dtChannel.Rows[frm]["row"];
+                        long rowC = (long)dataChannel[c].dtChannel.Rows[frm + 1]["row"] - rowS;
+                        if (rowC > 1)
                         {
-                            Stream s = new MemoryStream(jp2BufB);
-                            FIBITMAP fibmp = FreeImage.LoadFromStream(s);
-                            Marshal.Copy(FreeImage.GetBits(fibmp), channelFile[frm], 0, 512 * 160 * 2);
-                            FreeImage.Unload(fibmp);
-                        }
-                        catch
-                        {
-                            errInfo.add(frm, $"{c}通道解压出错");
-                        }
+                            byte[] jp2BufA = new byte[rowC * 280];
+                            byte[] jp2BufB = new byte[rowC * 256 - 256 - 16];
+                            Array.Copy(inBuf, rowS * 280, jp2BufA, 0, jp2BufA.Length);
 
-                        if (frm % (dataChannel[c].frmC / 100) == 0)
-                            IProg_Bar.Report((double)frm / dataChannel[c].frmC);
+                            Array.Copy(jp2BufA, 1 * 280 + 32, jp2BufB, 0, 240);
+                            for (int r = 2; r < rowC; r++)
+                                Array.Copy(jp2BufA, r * 280 + 16, jp2BufB, (r - 2) * 256 + 240, 256);
+                            try
+                            {
+                                Stream s = new MemoryStream(jp2BufB);
+                                FIBITMAP fibmp = FreeImage.LoadFromStream(s);
+                                Marshal.Copy(FreeImage.GetBits(fibmp), channelFile[frm], 0, 512 * 160 * 2);
+                                FreeImage.Unload(fibmp);
+                            }
+                            catch
+                            {
+                                errInfo.add(frm, $"{c}通道解压出错");
+                            }
+
+                            if (frm % (dataChannel[c].frmC / 100) == 0)
+                                IProg_Bar.Report((double)frm / dataChannel[c].frmC);
+                        }
+                    });
+                    IProg_Bar.Report(1);
+                    IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 通道{c}解压完成.");
+                    FileStream fs_out_raw = new FileStream($"tempFiles\\D{md5}_{c}.raw", FileMode.Create);
+                    for (int frm = 0; frm < dataChannel[c].frmC; frm++)
+                        fs_out_raw.Write(channelFile[frm], 0, 512 * 160 * 2);
+                    fs_out_raw.Close();
+                    IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 通道{c}写文件完成！");
+                }
+                else
+                {
+                    byte[] channelFile = new byte[512 * 160 * 2];   //解压后图像
+                    FileStream fs_out_raw = new FileStream($"tempFiles\\D{md5}_{c}.raw", FileMode.Create);
+                    for (int frm = 0;frm< dataChannel[c].frmC;frm++)
+                    {
+                        //行总数
+                        int rowC = (int)((long)dataChannel[c].dtChannel.Rows[frm + 1]["row"] - (long)dataChannel[c].dtChannel.Rows[frm]["row"]);
+                        if (rowC > 1)
+                        {
+                            byte[] jp2BufA = new byte[rowC * 280];
+                            byte[] jp2BufB = new byte[rowC * 256 - 256 - 16];
+                            inFileStream.Read(jp2BufA, 0, rowC * 280);
+
+                            Array.Copy(jp2BufA, 1 * 280 + 32, jp2BufB, 0, 240);
+                            for (int r = 2; r < rowC; r++)
+                                Array.Copy(jp2BufA, r * 280 + 16, jp2BufB, (r - 2) * 256 + 240, 256);
+                            try
+                            {
+                                Stream s = new MemoryStream(jp2BufB);
+                                FIBITMAP fibmp = FreeImage.LoadFromStream(s);
+                                Marshal.Copy(FreeImage.GetBits(fibmp), channelFile, 0, 512 * 160 * 2);
+                                FreeImage.Unload(fibmp);
+                            }
+                            catch
+                            {
+                                errInfo.add(frm, $"{c}通道解压出错");
+                            }
+                            fs_out_raw.Write(channelFile, 0, 512 * 160 * 2);
+                            IProg_Bar.Report((double)(frm + 1) / dataChannel[c].frmC);
+                        }
                     }
-                });
-                IProg_Bar.Report(1);
-                IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 通道{c}解压完成.");
-                FileStream fs_out_raw = new FileStream($"tempFiles\\D{md5}_{c}.raw", FileMode.Create);
-                for (int frm = 0; frm < dataChannel[c].frmC; frm++)
-                    fs_out_raw.Write(channelFile[frm], 0, 512 * 160 * 2);
-                fs_out_raw.Close();
-                IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 通道{c}写文件完成！");
+                    fs_out_raw.Close();
+                    IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 通道{c}解压完成.");
+                }
             }
             return $"tempFiles\\D{md5}_";
         }
