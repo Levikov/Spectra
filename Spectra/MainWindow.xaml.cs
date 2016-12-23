@@ -230,14 +230,14 @@ namespace Spectra
                 if (sel != null)
                 {
                     FileInfo.srcFileName = (string)sel.Row[0];
-                    FileInfo.srcFilePathName = (string)sel.Row[1];
-                    FileInfo.srcFileLength = Convert.ToInt64(sel.Row[2]);
-                    FileInfo.isUnpack = ((string)sel.Row[3] == "是");
+                    //FileInfo.srcFilePathName = (string)sel.Row[1];
+                    //FileInfo.srcFileLength = Convert.ToInt64(sel.Row[2]);
+                    //FileInfo.isUnpack = ((string)sel.Row[3] == "是");
                     FileInfo.isDecomp = ((string)sel.Row[4] == "是");
                     FileInfo.md5 = (string)sel.Row[5];
                     txtCurrentFile.Text = FileInfo.srcFileName;
                     DataTable dt = SQLiteFunc.SelectDTSQL("SELECT * from FileDetails_dec where MD5='" + FileInfo.md5 + "'");
-                    FileInfo.upkFilePathName = dt.Rows[0][7].ToString();
+                    //FileInfo.upkFilePathName = dt.Rows[0][7].ToString();
                     FileInfo.decFilePathName = dt.Rows[0][9].ToString();
                     ImageInfo.strFilesPath = FileInfo.decFilePathName;
                     btnTopB.IsChecked = true;
@@ -321,27 +321,41 @@ namespace Spectra
                 if (!checkImport(path))
                 {
                     System.Windows.MessageBox.Show("导入数据格式不符合要求", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
                 }
                 string[] name = Directory.GetFileSystemEntries(path);
-                DataTable[] dtAux = new DataTable[name.Length];
-                DataTable[] dtFileQV = new DataTable[name.Length];
+                DataTable dtAux = new DataTable();
+                DataTable dtFileQV = new DataTable();
                 for (int len = 0; len < name.Length; len++)
                 {
                     string id = name[len].Substring(name[len].LastIndexOf("\\") + 1);
                     if (id == "图像处理")
                         continue;
                     //获取数据表
-                    dtAux[len] = SQLiteFunc.SelectDTSQL($"{name[len]}\\数据库_{id}.sqlite", "Select * from AuxData");
-                    dtFileQV[len] = SQLiteFunc.SelectDTSQL($"{name[len]}\\数据库_{id}.sqlite", "Select * from FileQuickView");
+                    dtAux.Merge(SQLiteFunc.SelectDTSQL($"{name[len]}\\数据库_{id}.sqlite", "Select * from AuxData"));
                 }
-                if (dtAux[0].Rows.Count > 0)
+                if (dtAux.Rows.Count > 0)
                 {
                     //得到MD5
-                    string md5 = dtAux[0].Rows[0]["MD5"].ToString();
-                    SQLiteFunc.ExcuteSQL($"delete from AuxData where MD5={md5}");
-                    SQLiteFunc.ExcuteSQL($"delete from FileQuickView where MD5={md5}");
-                    SQLiteFunc.ExcuteSQL($"delete from FileDetails where MD5={md5}");
-                    SQLiteFunc.ExcuteSQL($"delete from FileDetails_dec where MD5={md5}");
+                    string md5 = dtAux.Rows[0]["MD5"].ToString();
+                    SQLiteFunc.ExcuteSQL($"delete from FileDetails where MD5='{md5}'");
+                    SQLiteFunc.ExcuteSQL($"insert into FileDetails (文件名,MD5) values ('{md5}','{md5}')");
+                    SQLiteFunc.ExcuteSQL($"delete from FileDetails_dec where MD5='{md5}'");
+                    SQLiteFunc.ExcuteSQL($"insert into FileDetails_dec (MD5) values ('{md5}')");
+                    DataOper dataOper = new DataOper(md5);
+                    dataOper.sqlInsert(Global.dbPath, dtAux, true);
+                    SQLiteFunc.ExcuteSQL($"update FileDetails_dec set 解压后文件路径='{path}' where MD5='{md5}'");
+
+                    for (int len = 0; len < name.Length; len++)
+                    {
+                        string id = name[len].Substring(name[len].LastIndexOf("\\") + 1);
+                        if (id == "图像处理")
+                            continue;
+                        SQLiteFunc.ExcuteSQL($"update FileQuickView set SavePath='{path}id\\' where MD5='{md5}'");
+                    }
+                    dataGrid_srcFile.ItemsSource = SQLiteFunc.SelectDTSQL("SELECT * from FileDetails").DefaultView;
+                    dataGrid_decFile.ItemsSource = null;
+                    System.Windows.MessageBox.Show("导入成功!","提示",MessageBoxButton.OK,MessageBoxImage.Information);
                 }
             }
         }
@@ -369,7 +383,7 @@ namespace Spectra
             {
                 for (int cnt = 0; cnt < 160; cnt++)
                 {
-                    if (!File.Exists($"{name[len]}+\\+{cnt}.raw"))
+                    if (!File.Exists($"{name[len]}\\{cnt}.raw"))
                         return false;
                 }
                 string id = name[len].Substring(name[len].LastIndexOf("\\") + 1);

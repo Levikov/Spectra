@@ -158,7 +158,7 @@ namespace Spectra
                         if (i != splitSum - 1)
                             splitHeight = 4096;
                         else
-                            splitHeight = height % 4096;
+                            splitHeight = height - i * 4096;
                         try
                         {
                             fBmp[0] = new FileStream($"{path}{i}\\{band[0]}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);

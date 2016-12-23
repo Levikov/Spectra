@@ -43,7 +43,16 @@ namespace Spectra
         public ErrorInfo errInfo = new ErrorInfo();
 
         /// <summary>
-        /// 构造函数，获取源文件路径、文件名、MD5
+        /// 构造函数，获取MD5
+        /// </summary>
+        /// <param name="m"></param>
+        public DataOper(string m)
+        {
+            md5 = m;
+        }
+
+        /// <summary>
+        /// 构造函数，获取源文件路径、MD5、文件名
         /// </summary>
         /// <param name="s">源文件路径全称</param>
         /// <param name="m">源文件的MD5</param>
@@ -82,7 +91,7 @@ namespace Spectra
                     mergeImage(strSrc, IProg_Bar, IProg_Cmd);
                     IProg_Cmd.Report(DateTime.Now.ToString("HH:mm:ss") + " 开始清理冗余文件！");
                     Task.Run(() => { Directory.Delete("tempFiles", true); }).Wait();
-                    //new Thread(() => { Get3DRaw($"{Global.pathDecFiles}{md5}\\"); }).Start();
+                    new Thread(() => { Get3DRaw($"{Global.pathDecFiles}{md5}\\"); }).Start();
                     IProg_Cmd.Report(DateTime.Now.ToString("HH:mm:ss") + " 操作完成！");
                 }
                 catch{}
@@ -547,22 +556,22 @@ namespace Spectra
         /// <summary>
         /// 数据库操作，包括插入辅助数据、插入文件信息、插入快视信息、插入错误信息
         /// </summary>
-        private void sqlInsert(string pathDB,DataTable dtDB,Boolean flag)
+        public void sqlInsert(string pathDB,DataTable dtDB,Boolean flag)
         {
             SQLiteDatabase sqlExcute = new SQLiteDatabase(pathDB);
             removeData("AuxData", md5, sqlExcute);
             removeData("FileQuickView", md5, sqlExcute);
             sqlExcute.BeginInsert();
 
-            if (flag)
-            {
-                removeData("FileErrors", md5, sqlExcute);
-                errInfo.update(dataChannel[0].dtChannel);
-                for (int i = 0; i < errInfo.dtErrInfo.Rows.Count; i++)
-                {
-                    Insert(sqlExcute, errInfo.dtErrInfo.Rows[i]);
-                }
-            }
+            //if (flag)
+            //{
+            //    removeData("FileErrors", md5, sqlExcute);
+            //    errInfo.update(dataChannel[0].dtChannel);
+            //    for (int i = 0; i < errInfo.dtErrInfo.Rows.Count; i++)
+            //    {
+            //        Insert(sqlExcute, errInfo.dtErrInfo.Rows[i]);
+            //    }
+            //}
 
             //快视用数据库
             int splitSum = (int)Math.Ceiling((double)dtDB.Rows.Count/4096);
@@ -592,7 +601,7 @@ namespace Spectra
             if (flag)
             {
                 //更新文件信息
-                updateFileInfo(sqlExcute);
+                updateFileInfo(sqlExcute,dtDB);
             }
         }
 
@@ -677,7 +686,7 @@ namespace Spectra
                     new SQLiteParameter("MD5",md5),
                     new SQLiteParameter("SubId",SubId),
                     new SQLiteParameter("FrameSum",FrameSum),
-                    new SQLiteParameter("SavePath",$"{Global.pathDecFiles}{md5}\\{SubId}"),
+                    new SQLiteParameter("SavePath",$"{Global.pathDecFiles}{md5}\\{SubId}\\"),
                     new SQLiteParameter("StartTime",StartTime),
                     new SQLiteParameter("EndTime",EndTime),
                     new SQLiteParameter("StartCoord",StartCoord),
@@ -717,24 +726,24 @@ namespace Spectra
         /// 文件信息插入数据库，将首帧、末帧作为文件图像的起始和结束
         /// </summary>
         /// <param name="sqlExcute">数据库对象</param>
-        private void updateFileInfo(SQLiteDatabase sqlExcute)
+        private void updateFileInfo(SQLiteDatabase sqlExcute, DataTable dtDB)
         {
             //更新文件信息
-            FileInfo.frmSum = dataChannel[0].frmC;// (long)sqlExcute.ExecuteScalar($"SELECT COUNT(*) FROM AuxData WHERE MD5='{FileInfo.md5}'");                                    //帧总数
+            FileInfo.frmSum = dtDB.Rows.Count;// (long)sqlExcute.ExecuteScalar($"SELECT COUNT(*) FROM AuxData WHERE MD5='{FileInfo.md5}'");                                    //帧总数
             DateTime T0 = new DateTime(2012, 1, 1, 8, 0, 0);
-            FileInfo.startTime = T0.AddSeconds((double)dataChannel[0].dtChannel.Rows[0]["GST"]);//sqlExcute.ExecuteScalar($"SELECT GST FROM AuxData WHERE MD5='{FileInfo.md5}' ORDER BY FrameId ASC"));//起始时间
-            FileInfo.endTime = T0.AddSeconds((double)dataChannel[0].dtChannel.Rows[dataChannel[0].frmC-1]["GST"]);//sqlExcute.ExecuteScalar($"SELECT GST FROM AuxData WHERE MD5='{FileInfo.md5}' ORDER BY FrameId DESC")); //结束时间
-            double lat = (double)dataChannel[0].dtChannel.Rows[0]["Lat"];//sqlExcute.ExecuteScalar($"SELECT Lat FROM AuxData WHERE MD5='{FileInfo.md5}' ORDER BY FrameId ASC");
-            double lon = (double)dataChannel[0].dtChannel.Rows[0]["Lon"];//sqlExcute.ExecuteScalar($"SELECT Lon FROM AuxData WHERE MD5='{FileInfo.md5}' ORDER BY FrameId ASC");
+            FileInfo.startTime = T0.AddSeconds((double)dtDB.Rows[0]["GST"]);//sqlExcute.ExecuteScalar($"SELECT GST FROM AuxData WHERE MD5='{FileInfo.md5}' ORDER BY FrameId ASC"));//起始时间
+            FileInfo.endTime = T0.AddSeconds((double)dtDB.Rows[dtDB.Rows.Count-1]["GST"]);//sqlExcute.ExecuteScalar($"SELECT GST FROM AuxData WHERE MD5='{FileInfo.md5}' ORDER BY FrameId DESC")); //结束时间
+            double lat = (double)dtDB.Rows[0]["Lat"];//sqlExcute.ExecuteScalar($"SELECT Lat FROM AuxData WHERE MD5='{FileInfo.md5}' ORDER BY FrameId ASC");
+            double lon = (double)dtDB.Rows[0]["Lon"];//sqlExcute.ExecuteScalar($"SELECT Lon FROM AuxData WHERE MD5='{FileInfo.md5}' ORDER BY FrameId ASC");
             FileInfo.startCoord.convertToCoord($"({lat},{lon})");                                                                                           //起始经纬
-            lat = (double)dataChannel[0].dtChannel.Rows[dataChannel[0].frmC - 1]["Lat"];//sqlExcute.ExecuteScalar($"SELECT Lat FROM AuxData WHERE MD5='{FileInfo.md5}' ORDER BY FrameId DESC");
-            lon = (double)dataChannel[0].dtChannel.Rows[dataChannel[0].frmC - 1]["Lon"];//sqlExcute.ExecuteScalar($"SELECT Lon FROM AuxData WHERE MD5='{FileInfo.md5}' ORDER BY FrameId DESC");
+            lat = (double)dtDB.Rows[dtDB.Rows.Count - 1]["Lat"];//sqlExcute.ExecuteScalar($"SELECT Lat FROM AuxData WHERE MD5='{FileInfo.md5}' ORDER BY FrameId DESC");
+            lon = (double)dtDB.Rows[dtDB.Rows.Count - 1]["Lon"];//sqlExcute.ExecuteScalar($"SELECT Lon FROM AuxData WHERE MD5='{FileInfo.md5}' ORDER BY FrameId DESC");
             FileInfo.endCoord.convertToCoord($"({lat},{lon})");                                                                                             //结束经纬
 
             SQLiteFunc.ExcuteSQL("update FileDetails_dec set 解压时间='?',解压后文件路径='?',帧数='?',起始时间='?',结束时间='?',起始经纬='?',结束经纬='?' where MD5='?'",
-                DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), $"{Global.pathDecFiles}{FileInfo.md5}\\", FileInfo.frmSum, FileInfo.startTime.ToString("yyyy-MM-dd HH:mm:ss"), FileInfo.endTime.ToString("yyyy-MM-dd HH:mm:ss"), FileInfo.startCoord.convertToString(), FileInfo.endCoord.convertToString(), FileInfo.md5);
-            SQLiteFunc.ExcuteSQL("update FileDetails set 是否已解压='是' where MD5='?';", FileInfo.md5);
-            ImageInfo.strFilesPath = FileInfo.decFilePathName = $"{Global.pathDecFiles}{FileInfo.md5}\\";
+                DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), $"{Global.pathDecFiles}{md5}\\", FileInfo.frmSum, FileInfo.startTime.ToString("yyyy-MM-dd HH:mm:ss"), FileInfo.endTime.ToString("yyyy-MM-dd HH:mm:ss"), FileInfo.startCoord.convertToString(), FileInfo.endCoord.convertToString(), md5);
+            SQLiteFunc.ExcuteSQL("update FileDetails set 是否已解压='是' where MD5='?';", md5);
+            ImageInfo.strFilesPath = FileInfo.decFilePathName = $"{Global.pathDecFiles}{md5}\\";
         }
 
         /// <summary>
