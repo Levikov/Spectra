@@ -55,11 +55,11 @@ namespace Spectra
                 bord.BorderBrush = new SolidColorBrush(Colors.Yellow);
                 try
                 {
-                    img.Source = new BitmapImage(new Uri($"{Global.pathDecFiles}{dtTree.Rows[subCnt]["MD5"]}\\{dtTree.Rows[subCnt]["ID"]}.bmp"));
+                    img.Source = new BitmapImage(new Uri($"{dtTree.Rows[subCnt]["SavePath"]}\\{dtTree.Rows[subCnt]["SubId"]}.bmp"));
                     img.MouseLeftButtonDown += Img_MouseLeftButtonDown;
                 }
                 catch { }
-                SetImgInfo(img, dtTree.Rows[subCnt]["MD5"].ToString(), Convert.ToInt32(dtTree.Rows[subCnt]["ID"]));
+                SetImgInfo(img, dtTree.Rows[subCnt]);
                 panelBack.Children.Add(bord);
                 subCnt++;
             }
@@ -86,21 +86,17 @@ namespace Spectra
         /// <param name="img">Image控件</param>
         /// <param name="md5">MD5</param>
         /// <param name="id">子编号</param>
-        public void SetImgInfo(Image img, string md5,int id)
+        public void SetImgInfo(Image img, DataRow dr)
         {
             string str;
-            DataTable dt = SQLiteFunc.SelectDTSQL($"SELECT * from FileQuickView where MD5='{md5}' and SubId={id}");
-            if (dt.Rows.Count > 0)
-            {
-                str = $"文件名:{dt.Rows[0]["Name"]}\n";
-                str += $"编号:{dt.Rows[0]["SubId"]}\n";
-                str += $"像宽:{dt.Rows[0]["FrameSum"]}\n";
-                str += $"起始时间:{dt.Rows[0]["StartTime"]}\n";
-                str += $"结束时间:{dt.Rows[0]["EndTime"]}\n";
-                str += $"起始经纬:{dt.Rows[0]["StartCoord"]}\n";
-                str += $"结束经纬:{dt.Rows[0]["EndCoord"]}";
-                img.ToolTip = str;
-            }
+            str = $"文件名:{dr["MD5"]}\n";
+            str += $"编号:{dr["SubId"]}\n";
+            str += $"像宽:{dr["FrameSum"]}\n";
+            str += $"起始时间:{dr["StartTime"]}\n";
+            str += $"结束时间:{dr["EndTime"]}\n";
+            str += $"起始经纬:{dr["StartCoord"]}\n";
+            str += $"结束经纬:{dr["EndCoord"]}";
+            img.ToolTip = str;
         }
 
         /// <summary>
@@ -173,12 +169,15 @@ namespace Spectra
                 foreach (DataRow dr in dtS.Rows)
                 {
                     Directory.CreateDirectory($"{desPath}{dr["MD5"]}");
-                    Directory.CreateDirectory($"{desPath}{dr["MD5"]}\\{dr["ID"]}");
+                    Directory.CreateDirectory($"{desPath}{dr["MD5"]}\\{dr["SubId"]}");
                     for (int i = 0; i < 160; i++)
                     {
-                        File.Copy($"{Global.pathDecFiles}{dr["MD5"]}\\{dr["ID"]}\\{i}.raw", $"{desPath}{dr["MD5"]}\\{dr["ID"]}\\{i}.raw", true);
+                        File.Copy($"{dr["SavePath"]}\\{i}.raw", $"{desPath}{dr["MD5"]}\\{dr["SubId"]}\\{i}.raw", true);
                         prog.Report((i + 1 + 160.0 * cnt) / 160.0 / sum);
                     }
+                    File.Copy($"{dr["SavePath"]}\\{dr["SubId"]}.bmp", $"{desPath}{dr["MD5"]}\\{dr["SubId"]}\\{dr["SubId"]}.bmp", true);
+                    File.Copy($"{dr["SavePath"]}\\数据库_{dr["SubId"]}.sqlite", $"{desPath}{dr["MD5"]}\\{dr["SubId"]}\\数据库_{dr["SubId"]}.sqlite", true);
+                    File.Copy($"{dr["SavePath"]}\\辅助数据_{dr["SubId"]}.xls", $"{desPath}{dr["MD5"]}\\{dr["SubId"]}\\辅助数据_{dr["SubId"]}.xls", true);
                     cnt++;
                 }
                 prog.Report(1);

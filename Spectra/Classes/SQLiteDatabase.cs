@@ -37,6 +37,38 @@ namespace Spectra
         }
 
         /// <summary>
+        /// 创建数据库用
+        /// </summary>
+        /// <returns></returns>
+        public Boolean createTable()
+        {
+            SQLiteCommand mycommand = new SQLiteCommand("", cnn);
+            try
+            {
+                mycommand.CommandText = "DROP TABLE AuxData";
+                mycommand.ExecuteScalar();
+            }
+            catch { }
+            try
+            {
+                mycommand.CommandText = "DROP TABLE FileQuickView";
+                mycommand.ExecuteScalar();
+            }
+            catch { }
+            mycommand.CommandText = "CREATE TABLE [AuxData]([InternalId] INTEGER DEFAULT (0),[FrameSum] INTEGER,[FrameId] INTEGER DEFAULT(0),[GST] REAL DEFAULT(0),[GST_US] INT64 DEFAULT 0,[Lat] REAL DEFAULT(0),[Lon] REAL DEFAULT(0),[X] REAL DEFAULT(0),[Y] REAL DEFAULT(0),[Z] REAL DEFAULT(0),[Vx] REAL DEFAULT(0),[Vy] REAL DEFAULT(0),[Vz] REAL DEFAULT(0),[Ox] REAL DEFAULT(0),[Oy] REAL DEFAULT(0),[Oz] REAL DEFAULT(0),[Q1] REAL DEFAULT(0),[Q2] REAL DEFAULT(0),[Q3] REAL DEFAULT(0),[Q4] REAL DEFAULT(0),[Freq] REAL,[Integral] REAL,[StartRow] INTEGER,[Gain] INTEGER,[MD5] TEXT(47),[Satellite] TEXT DEFAULT('None')); ";
+            mycommand.ExecuteScalar();
+            mycommand.CommandText = "CREATE TABLE [FileQuickView]([Name] VARCHAR, [MD5] VARCHAR, [SubId] INTEGER, [FrameSum] INTEGER, [SavePath] VARCHAR, [StartTime] DATETIME, [EndTime] DATETIME, [StartCoord] VARCHAR, [EndCoord] VARCHAR);";
+            mycommand.ExecuteScalar();
+            cnn.Close();
+            return true;
+        }
+
+        public Boolean importDB()
+        {
+            return true;
+        }
+
+        /// <summary>
         ///     Single Param Constructor for specifying advanced connection options.
         /// </summary>
         /// <param name="connectionOpts">A dictionary containing all desired options and their values</param>
@@ -210,6 +242,32 @@ namespace Spectra
     /// </summary>
     public static class SQLiteFunc
     {
+        /// <summary>
+        /// 查询数据并返回数据表
+        /// </summary>
+        /// <param name="dbConn">数据库地址</param>
+        /// <param name="sql">查询语句</param>
+        /// <returns>DataTable类型数据表</returns>
+        public static DataTable SelectDTSQL(string dbConn,string sql)
+        {
+            try
+            {
+                SQLiteConnection conn = new SQLiteConnection(dbConn);
+                conn.Open();
+                SQLiteCommand cmmd = new SQLiteCommand("", conn);
+                cmmd.CommandText = sql;
+                SQLiteDataAdapter adapter = new SQLiteDataAdapter(cmmd);
+                DataTable data = new DataTable();
+                adapter.Fill(data);
+                conn.Close();
+                return data;
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+
         /// <summary>
         /// 查询数据并返回数据表
         /// </summary>

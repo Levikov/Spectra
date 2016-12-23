@@ -144,8 +144,8 @@ namespace Spectra
             dataGrid_Errors.ItemsSource = SQLiteFunc.SelectDTSQL("select * from FileErrors where MD5='" + FileInfo.md5 + "'").DefaultView;  //显示错误信息
 
             btnOpenFile.IsEnabled = true;
-            btnTopB.IsChecked = true;
-            btnLeftB1.IsChecked = true;
+            //btnTopB.IsChecked = true;
+            //btnLeftB1.IsChecked = true;
             //searchList(FileInfo.md5, false, false, false);
         }
 
@@ -161,44 +161,36 @@ namespace Spectra
         /*显示列表*/
         private void btnLeftA2_Click(object sender, RoutedEventArgs e)
         {
-            IList<TestTreeView.Model.TreeModel> treeList = new List<TestTreeView.Model.TreeModel>();
-
-            DataTable dtFirst = SQLiteFunc.SelectDTSQL("SELECT * from FileDetails");
-            int cntFirst = dtFirst.Rows.Count;
-            for (int i = 0; i < cntFirst; i++)
-            {
-                TestTreeView.Model.TreeModel tree = new TestTreeView.Model.TreeModel();
-                tree.Id = dtFirst.Rows[i]["MD5"].ToString();
-                tree.Name = dtFirst.Rows[i]["文件名"].ToString();
-                tree.IsExpanded = true;
-
-                DataTable dtSecond = SQLiteFunc.SelectDTSQL($"SELECT * from FileQuickView where MD5='{dtFirst.Rows[i]["MD5"].ToString()}' order by SubId");
-                int cntSecond = dtSecond.Rows.Count;
-                TreeViewItem[] tviSecond = new TreeViewItem[cntSecond];
-                for (int j = 0; j < cntSecond; j++)
-                {
-                    TestTreeView.Model.TreeModel child = new TestTreeView.Model.TreeModel();
-                    child.Id = tree.Id + "_" + j;
-                    child.Name = j.ToString();
-                    child.Parent = tree;
-                    tree.Children.Add(child);
-                }
-                treeList.Add(tree);
-            }
-
-            treeQuickView.ItemsSourceData = treeList;
+            DataTable dtQV = SQLiteFunc.SelectDTSQL("SELECT * from FileQuickView");
+            dataGrid_QuickView.ItemsSource = dtQV.DefaultView;
         }
-        /*开始截取*/
+        /*开始显示*/
         private void btnSectionBegin_Click(object sender, RoutedEventArgs e)
         {
-            IList<TestTreeView.Model.TreeModel> treeList = treeQuickView.CheckedItemsIgnoreRelation();
+            int count = dataGrid_QuickView.SelectedItems.Count;
+            DataRowView[] sel = new DataRowView[count];
+            for (int i=0;i< count; i++)
+                sel[i] = (DataRowView)dataGrid_QuickView.SelectedItems[i];
+
             DataTable dtTreeView = new DataTable();
             dtTreeView.Columns.Add("MD5",Type.GetType("System.String"));
-            dtTreeView.Columns.Add("ID");
-            foreach (TestTreeView.Model.TreeModel tree in treeList)
+            dtTreeView.Columns.Add("SubId",Type.GetType("System.Int32"));
+            dtTreeView.Columns.Add("FrameSum", Type.GetType("System.String"));
+            dtTreeView.Columns.Add("SavePath", Type.GetType("System.String"));
+            dtTreeView.Columns.Add("StartTime", Type.GetType("System.String"));
+            dtTreeView.Columns.Add("EndTime", Type.GetType("System.String"));
+            dtTreeView.Columns.Add("StartCoord", Type.GetType("System.String"));
+            dtTreeView.Columns.Add("EndCoord", Type.GetType("System.String"));
+            for (int i = 0; i < count; i++)
             {
-                if (tree.Id.Contains("_"))
-                    dtTreeView.Rows.Add(new object[] { tree.Id.Substring(0, tree.Id.IndexOf('_')), tree.Id.Substring(tree.Id.IndexOf('_') + 1, 1) });
+                dtTreeView.Rows.Add(new object[] { sel[i].Row["MD5"].ToString(),
+                                                   Convert.ToInt32(sel[i].Row["SubId"]),
+                                                   sel[i].Row["FrameSum"].ToString(),
+                                                   sel[i].Row["SavePath"].ToString(),
+                                                   sel[i].Row["StartTime"].ToString(),
+                                                   sel[i].Row["EndTime"].ToString(),
+                                                   sel[i].Row["StartCoord"].ToString(),
+                                                   sel[i].Row["EndCoord"].ToString() });
             }
 
             if (App.global_QuickViewWindow == null)
@@ -318,6 +310,75 @@ namespace Spectra
             {
                 System.Windows.MessageBox.Show(ex.Message);
             }
+        }
+        /*导入文件*/
+        private void btnImportRecord_Click(object sender, RoutedEventArgs e)
+        {
+            FolderBrowserDialog fbd = new FolderBrowserDialog();
+            if (fbd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                string path = fbd.SelectedPath + "\\";
+                if (!checkImport(path))
+                {
+                    System.Windows.MessageBox.Show("导入数据格式不符合要求", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+                string[] name = Directory.GetFileSystemEntries(path);
+                DataTable[] dtAux = new DataTable[name.Length];
+                DataTable[] dtFileQV = new DataTable[name.Length];
+                for (int len = 0; len < name.Length; len++)
+                {
+                    string id = name[len].Substring(name[len].LastIndexOf("\\") + 1);
+                    if (id == "图像处理")
+                        continue;
+                    //获取数据表
+                    dtAux[len] = SQLiteFunc.SelectDTSQL($"{name[len]}\\数据库_{id}.sqlite", "Select * from AuxData");
+                    dtFileQV[len] = SQLiteFunc.SelectDTSQL($"{name[len]}\\数据库_{id}.sqlite", "Select * from FileQuickView");
+                }
+                if (dtAux[0].Rows.Count > 0)
+                {
+                    //得到MD5
+                    string md5 = dtAux[0].Rows[0]["MD5"].ToString();
+                    SQLiteFunc.ExcuteSQL($"delete from AuxData where MD5={md5}");
+                    SQLiteFunc.ExcuteSQL($"delete from FileQuickView where MD5={md5}");
+                    SQLiteFunc.ExcuteSQL($"delete from FileDetails where MD5={md5}");
+                    SQLiteFunc.ExcuteSQL($"delete from FileDetails_dec where MD5={md5}");
+                }
+            }
+        }
+
+        /*判断导入文件是否符合要求*/
+        Boolean checkImport(string path)
+        {
+            string[] name = Directory.GetFileSystemEntries(path);
+            //首先检查文件夹名是否符合要求
+            for (int len = 0; len < name.Length; len++)
+            {
+                if (len == name.Length - 1)
+                {
+                    if ("图像处理" != name[len].Substring(name[len].LastIndexOf("\\") + 1) && len.ToString() != name[len].Substring(name[len].LastIndexOf("\\") + 1))
+                        return false;
+                }
+                else
+                {
+                    if (len.ToString() != name[len].Substring(name[len].LastIndexOf("\\") + 1))
+                        return false;
+                }
+            }
+            //再检查文件是否存在
+            for (int len = 0; len < name.Length; len++)
+            {
+                for (int cnt = 0; cnt < 160; cnt++)
+                {
+                    if (!File.Exists($"{name[len]}+\\+{cnt}.raw"))
+                        return false;
+                }
+                string id = name[len].Substring(name[len].LastIndexOf("\\") + 1);
+                if (id == "图像处理")
+                    continue;
+                if (!File.Exists($"{name[len]}\\{id}.bmp") || !File.Exists($"{name[len]}\\数据库_{id}.sqlite") || !File.Exists($"{name[len]}\\辅助数据_{id}.xls"))
+                    return false;
+            }
+            return true;
         }
         #endregion
 

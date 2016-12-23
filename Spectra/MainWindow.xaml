@@ -82,7 +82,7 @@
             </Grid.ColumnDefinitions>
             <GridSplitter x:Name="splitA" Grid.RowSpan="1" Margin="0,50" Width="1" Background="{StaticResource ButtonBack}"/>
             <StackPanel>
-                <RadioButton x:Name="btnLeftA1" Content="数据处理" Template="{DynamicResource ButtonIcon2nd}" Margin="0,50,0,0" IsChecked="True">
+                <RadioButton x:Name="btnLeftA1" Content="数据处理" Template="{DynamicResource ButtonIcon2nd}" Margin="0,50,0,0">
                     <RadioButton.Background>
                         <ImageBrush ImageSource="image/UI/二级菜单-数据处理.png"/>
                     </RadioButton.Background>
@@ -92,7 +92,7 @@
                         <ImageBrush ImageSource="image/UI/二级菜单-数据存储.png"/>
                     </RadioButton.Background>
                 </RadioButton>
-                <RadioButton x:Name="btnLeftA3" Content="文件检索" Template="{DynamicResource ButtonIcon2nd}">
+                <RadioButton x:Name="btnLeftA3" Content="文件检索" Template="{DynamicResource ButtonIcon2nd}" IsChecked="True">
                     <RadioButton.Background>
                         <ImageBrush ImageSource="image/UI/二级菜单-文件检索.png"/>
                     </RadioButton.Background>
@@ -197,13 +197,25 @@
                             <ColumnDefinition Width="1*"/>
                         </Grid.ColumnDefinitions>
                     </Grid>
-                    <Button x:Name="btnSectionBegin" Grid.Row="3" Grid.Column="2" Content="开始选择" Template="{DynamicResource ButtonDefault}" Width="160" Click="btnSectionBegin_Click" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <Button x:Name="btnSectionBegin" Grid.Row="3" Grid.Column="2" Content="打开快视" Template="{DynamicResource ButtonDefault}" Width="160" Click="btnSectionBegin_Click" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     <Label Grid.Row="1" Grid.Column="0" Content="文件存储路径:" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     <TextBox x:Name="txtSaveFilesPath" Grid.Row="1" Grid.Column="1" IsReadOnly="True" Height="30"/>
                     <Button x:Name="btnSaveFilesPath" Grid.Row="1" Grid.Column="2" Content="选择存储路径" Template="{DynamicResource ButtonDefault}" Width="160" Click="btnSaveFilesPath_Click" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                     <ProgressBar x:Name="progSaveAs" Grid.Row="2" Grid.ColumnSpan="2" Height="30" BorderBrush="{StaticResource ButtonBack}" Maximum="1" SmallChange="0.001" Margin="40,0,0,0"/>
                     <Button x:Name="btnSaveFiles" Grid.Row="2" Grid.Column="2" Content="开始存储" Template="{DynamicResource ButtonDefault}" Width="160" Click="btnSaveFiles_Click" HorizontalAlignment="Center" VerticalAlignment="Center"  IsEnabled="False"/>
-                    <my:ZsmTreeView x:Name="treeQuickView" Grid.ColumnSpan="2" Margin="40,0,0,0" Grid.Row="3" Grid.RowSpan="2" Background="White"/>
+                    <my:ZsmTreeView x:Name="treeQuickView" Grid.ColumnSpan="2" Margin="40,0,0,0" Grid.Row="3" Grid.RowSpan="2" Background="White" Visibility="Collapsed"/>
+                    <DataGrid x:Name="dataGrid_QuickView" Grid.ColumnSpan="2" Margin="40,0,0,0" Grid.Row="3" Grid.RowSpan="2" LoadingRow="LoadingRowHeader">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="文件名" Binding="{Binding MD5}" Width="auto"/>
+                            <DataGridTextColumn Header="子编号" Binding="{Binding SubId}" Width="auto"/>
+                            <DataGridTextColumn Header="帧数" Binding="{Binding FrameSum}" Width="auto"/>
+                            <DataGridTextColumn Header="开始时间" Binding="{Binding StartTime}" Width="auto"/>
+                            <DataGridTextColumn Header="结束时间" Binding="{Binding EndTime}" Width="auto"/>
+                            <DataGridTextColumn Header="开始经纬" Binding="{Binding StartCoord}" Width="auto"/>
+                            <DataGridTextColumn Header="结束经纬" Binding="{Binding EndCoord}" Width="auto"/>
+                            <DataGridTextColumn Header="存储路径" Binding="{Binding SavePath}" Width="auto"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
                 </Grid>
             </Grid>
             <Grid x:Name="gridLeftA3" Grid.Column="2">
@@ -287,6 +299,8 @@
                         <Grid.RowDefinitions>
                             <RowDefinition Height="55"/>
                             <RowDefinition Height="55"/>
+                            <RowDefinition Height="55"/>
+                            <RowDefinition Height="55"/>
                             <RowDefinition Height="1*"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
@@ -295,11 +309,9 @@
                         </Grid.ColumnDefinitions>
                         <Label Content="文件全称:" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                         <TextBox Grid.Row="0" Grid.Column="1" x:Name="textSelectFile" Margin="10,0" Height="30" VerticalContentAlignment="Center" HorizontalContentAlignment="Left" TextChanged="textSelectFile_TextChanged"/>
-
-                        <StackPanel Margin="0" Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center">
-                            <Button x:Name="btnGetAllRecord" Content="查找所有" Template="{DynamicResource ButtonDefault}" Width="120" Click="btnGetAllRecord_Click" VerticalAlignment="Center"/>
-                            <Button x:Name="btnDelRecord" Content="删除记录" Template="{DynamicResource ButtonDefault}" Width="120" Click="btnDelRecord_Click" Margin="40,0,0,0" VerticalAlignment="Center"/>
-                        </StackPanel>
+                        <Button x:Name="btnGetAllRecord" Content="查找所有" Grid.Row="1" Grid.ColumnSpan="2" Template="{DynamicResource ButtonDefault}" Width="120" Click="btnGetAllRecord_Click" VerticalAlignment="Center"/>
+                        <Button x:Name="btnDelRecord" Content="删除记录" Grid.Row="2" Grid.ColumnSpan="2" Template="{DynamicResource ButtonDefault}" Width="120" Click="btnDelRecord_Click" VerticalAlignment="Center"/>
+                        <Button x:Name="btnImportRecord" Content="导入文件" Grid.Row="3" Grid.ColumnSpan="2" Template="{DynamicResource ButtonDefault}" Width="120" Click="btnImportRecord_Click" VerticalAlignment="Center"/>
                     </Grid>
                 </Grid>
             </Grid>

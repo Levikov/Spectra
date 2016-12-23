@@ -78,7 +78,7 @@ namespace Spectra
                         return;
                     }
                     strSrc = decData(splitFile(strSrc, IProg_Bar, IProg_Cmd), IProg_Bar, IProg_Cmd);
-                    new Thread(() => { sqlInsert(); }).Start();
+                    new Thread(() => { sqlInsert(Global.dbPath, dataChannel[0].dtChannel, true); }).Start();
                     mergeImage(strSrc, IProg_Bar, IProg_Cmd);
                     IProg_Cmd.Report(DateTime.Now.ToString("HH:mm:ss") + " 开始清理冗余文件！");
                     Task.Run(() => { Directory.Delete("tempFiles", true); }).Wait();
@@ -220,7 +220,7 @@ namespace Spectra
             FileStream[] outFileStream = new FileStream[4];
             for (int c = 0; c < 4; c++)
             {
-                outFileStream[c] = new FileStream($"tempFiles\\S{md5}_{c}.dat", FileMode.Create, FileAccess.Write, FileShare.Read);
+                outFileStream[c] = new FileStream($"tempFiles\\S{srcFileName}_{c}.dat", FileMode.Create, FileAccess.Write, FileShare.Read);
             }
             //开始
             IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 开始分包.");
@@ -259,7 +259,7 @@ namespace Spectra
             IProg_Bar.Report(1);
             IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 分包完成!");
 
-            return $"tempFiles\\S{md5}_";
+            return $"tempFiles\\S{srcFileName}_";
         }
 
         /// <summary>
@@ -359,7 +359,7 @@ namespace Spectra
                     });
                     IProg_Bar.Report(1);
                     IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 通道{c}解压完成.");
-                    FileStream fs_out_raw = new FileStream($"tempFiles\\D{md5}_{c}.raw", FileMode.Create);
+                    FileStream fs_out_raw = new FileStream($"tempFiles\\D{srcFileName}_{c}.raw", FileMode.Create);
                     for (int frm = 0; frm < dataChannel[c].frmC; frm++)
                         fs_out_raw.Write(channelFile[frm], 0, 512 * 160 * 2);
                     fs_out_raw.Close();
@@ -368,7 +368,7 @@ namespace Spectra
                 else
                 {
                     byte[] channelFile = new byte[512 * 160 * 2];   //解压后图像
-                    FileStream fs_out_raw = new FileStream($"tempFiles\\D{md5}_{c}.raw", FileMode.Create);
+                    FileStream fs_out_raw = new FileStream($"tempFiles\\D{srcFileName}_{c}.raw", FileMode.Create);
                     for (int frm = 0;frm< dataChannel[c].frmC;frm++)
                     {
                         //行总数
@@ -401,7 +401,60 @@ namespace Spectra
                     IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 通道{c}解压完成.");
                 }
             }
-            return $"tempFiles\\D{md5}_";
+            return $"tempFiles\\D{srcFileName}_";
+        }
+
+        /// <summary>
+        /// 景娟娟专用数据
+        /// </summary>
+        public void mergeJJJ()
+        {
+            Directory.CreateDirectory($"{Global.pathDecFiles}{md5}\\图像处理");
+            //4个通道解压前
+            FileStream[] inSFile = new FileStream[4];
+            for (int c = 0; c < 4; c++)
+                inSFile[c] = new FileStream($"tempFiles\\S{srcFileName}_{c}.dat",FileMode.Open,FileAccess.Read,FileShare.Read);
+            //4个通道解压后
+            FileStream[] inDFile = new FileStream[4];
+            for (int c = 0; c < 4; c++)
+                inDFile[c] = new FileStream($"tempFiles\\D{srcFileName}_{c}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
+            //按照2500为单元切割
+            int splitSum = (int)Math.Ceiling((double)dataChannel[0].frmC / 2500);
+            int len = 2500;
+            long row = 0;
+            Byte[] buf = new Byte[1024];
+            for (int i = 0; i < splitSum; i++)
+            {
+                //创建文件
+                FileStream outFile = new FileStream($"{Global.pathDecFiles}{md5}\\图像处理\\wn_tuxiang_{i}.raw", FileMode.Create);
+                if (i == splitSum - 1)
+                    len = dataChannel[0].frmC - i * 2500;
+                
+                for (int m = 0; m < len; m++)
+                {
+                    for (int c = 0; c < 4; c++)
+                    {
+                        row = (long)dataChannel[c].dtChannel.Rows[m]["row"];
+                        inSFile[c].Seek(row * 280, SeekOrigin.Begin);   //定位辅助数据的位置
+                        inSFile[c].Read(buf, 0, 280);                   //读辅助数据
+                        outFile.Write(buf, 0, 1024);                    //写辅助数据
+                    }
+                    for (int n = 0; n < 160; n++)
+                    {
+                        for (int c = 0; c < 4; c++)
+                        {
+                            inDFile[c].Read(buf, 0, 1024);              //读有效数据
+                            outFile.Write(buf, 0, 1024);                //写有效数据
+                        }
+                    }
+                }
+                outFile.Close();
+            }
+            for (int c = 0; c < 4; c++)
+            {
+                inSFile[c].Close();
+                inDFile[c].Close();
+            }
         }
 
         /// <summary>
@@ -412,25 +465,33 @@ namespace Spectra
         /// <param name="IProg_Cmd">控制台</param>
         public void mergeImage(string inFilePathName, IProgress<double> IProg_Bar, IProgress<string> IProg_Cmd)
         {
-            IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 开始图像合并.");
-            IProg_Bar.Report(0);
+            //开始存图像
             Directory.CreateDirectory($"{Global.pathDecFiles}{md5}");
+            IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 开始图像转存.");
+            IProg_Bar.Report(0);
+            mergeJJJ();
+            IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 开始图像合并.");
+            //4个通道的文件读
             FileStream[] inFileStream = new FileStream[4];
             for (int c = 0; c < 4; c++)
                 inFileStream[c] = new FileStream($"{inFilePathName}{c}.raw", FileMode.Open, FileAccess.Read, FileShare.Read);
+            //图像分割总数
             int splitSum = (int)Math.Ceiling((double)dataChannel[0].frmC / 4096);
+
             int imageWidth = 4096;
             for (int i = 0; i < splitSum; i++)
             {
                 Directory.CreateDirectory($"{Global.pathDecFiles}{md5}\\{i}");
                 byte[][] channelBuf = new byte[4][];
                 if (i == splitSum - 1)
-                    imageWidth = dataChannel[0].frmC % 4096;
+                    imageWidth = dataChannel[0].frmC - i * 4096;
+                //读4个通道图像
                 for (int c = 0; c < 4; c++)
                 {
                     channelBuf[c] = new byte[imageWidth * 512 * 160 * 2];
                     inFileStream[c].Read(channelBuf[c], 0, imageWidth * 512 * 160 * 2);
                 }
+                //保存切割的图像
                 byte[][] imgBuf = new byte[160][];
                 for (int b = 0; b < 160; b++)
                 {
@@ -443,24 +504,30 @@ namespace Spectra
                     outFile.Close();
                 }
 
-                //将每个分片的图像辅助数据存为excel
+                //得到要存储的辅助数据表
                 DataTable dtExcel = dataChannel[0].dtChannel.Copy();
                 dtExcel.Clear();
                 for (int j = 0; j < imageWidth; j++)
                     dtExcel.ImportRow(dataChannel[0].dtChannel.Rows[i * 4096 + j]);
+                //新建数据表存储
+                SQLiteDatabase db = new SQLiteDatabase($"{Global.pathDecFiles}{md5}\\{i}\\数据库_{i}.sqlite");
+                db.createTable();
+                sqlInsert($"{Global.pathDecFiles}{md5}\\{i}\\数据库_{i}.sqlite", dtExcel, false);
+                //移除前2列
                 dtExcel.Columns.RemoveAt(0);
                 dtExcel.Columns.RemoveAt(0);
+                //存储为EXCEL
                 ExcelHelper _excelHelper = new ExcelHelper();
-                _excelHelper.SaveToText($"{Global.pathDecFiles}{md5}\\{i}\\辅助数据.xls", dtExcel);
-
+                _excelHelper.SaveToText($"{Global.pathDecFiles}{md5}\\{i}\\辅助数据_{i}.xls", dtExcel);
+                
                 IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} {i}图像合并完成.");
                 IProg_Bar.Report((double)(i + 1) / splitSum);
             }
+            //关闭文件
             for (int c = 0; c < 4; c++)
             {
                 inFileStream[c].Close();
             }
-
             //生成真彩图
             Bitmap bmp;
             for (int i = 0; i < splitSum; i++)
@@ -470,7 +537,7 @@ namespace Spectra
                     h = dataChannel[0].frmC % 4096;
                 bmp = BmpOper.MakePseudoColor($"{Global.pathDecFiles}{md5}\\{i}\\", new ushort[] { 39, 76, 126 }, h);
                 bmp.RotateFlip(System.Drawing.RotateFlipType.Rotate90FlipX);
-                bmp.Save($"{Global.pathDecFiles}{md5}\\{i}.bmp");
+                bmp.Save($"{Global.pathDecFiles}{md5}\\{i}\\{i}.bmp");
             }
 
             IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 合并完成！");
@@ -480,35 +547,38 @@ namespace Spectra
         /// <summary>
         /// 数据库操作，包括插入辅助数据、插入文件信息、插入快视信息、插入错误信息
         /// </summary>
-        private void sqlInsert()
+        private void sqlInsert(string pathDB,DataTable dtDB,Boolean flag)
         {
-            SQLiteDatabase sqlExcute = new SQLiteDatabase(Global.dbPath);
+            SQLiteDatabase sqlExcute = new SQLiteDatabase(pathDB);
             removeData("AuxData", md5, sqlExcute);
-            removeData("FileErrors", md5, sqlExcute);
             removeData("FileQuickView", md5, sqlExcute);
             sqlExcute.BeginInsert();
 
-            errInfo.update(dataChannel[0].dtChannel);
-            for (int i = 0; i < errInfo.dtErrInfo.Rows.Count; i++)
+            if (flag)
             {
-                Insert(sqlExcute, errInfo.dtErrInfo.Rows[i]);
+                removeData("FileErrors", md5, sqlExcute);
+                errInfo.update(dataChannel[0].dtChannel);
+                for (int i = 0; i < errInfo.dtErrInfo.Rows.Count; i++)
+                {
+                    Insert(sqlExcute, errInfo.dtErrInfo.Rows[i]);
+                }
             }
 
             //快视用数据库
-            int splitSum = (int)Math.Ceiling((double)dataChannel[0].frmC/4096);
+            int splitSum = (int)Math.Ceiling((double)dtDB.Rows.Count/4096);
             int splitCur = 4096;
             for (int split = 0; split < splitSum; split++)
             {
                 if (split == splitSum - 1)
-                    splitCur = dataChannel[0].frmC % 4096;
-                DateTime T0 = new DateTime(2012, 1, 1, 0, 0, 0);
-                DateTime StartTime = T0.AddSeconds((double)dataChannel[0].dtChannel.Rows[split * 4096]["GST"]);
-                DateTime EndTime = T0.AddSeconds((double)dataChannel[0].dtChannel.Rows[split * 4096 + splitCur - 1]["GST"]);
+                    splitCur = dtDB.Rows.Count - 4096 * split;
+                DateTime T0 = new DateTime(2012, 1, 1, 8, 0, 0);
+                DateTime StartTime = T0.AddSeconds((double)dtDB.Rows[split * 4096]["GST"]);                 //开始时间
+                DateTime EndTime = T0.AddSeconds((double)dtDB.Rows[split * 4096 + splitCur - 1]["GST"]);    //结束时间
                 Coord StartCoord = new Coord(0,0), EndCoord = new Coord(0,0);
-                StartCoord.Lon = (double)dataChannel[0].dtChannel.Rows[split * 4096]["Lon"];
-                StartCoord.Lat = (double)dataChannel[0].dtChannel.Rows[split * 4096]["Lat"];
-                EndCoord.Lon = (double)dataChannel[0].dtChannel.Rows[split * 4096 + splitCur - 1]["Lon"];
-                EndCoord.Lat = (double)dataChannel[0].dtChannel.Rows[split * 4096 + splitCur - 1]["Lat"];
+                StartCoord.Lon = (double)dtDB.Rows[split * 4096]["Lon"];                                    //开始经度
+                StartCoord.Lat = (double)dtDB.Rows[split * 4096]["Lat"];                                    //开始纬度
+                EndCoord.Lon = (double)dtDB.Rows[split * 4096 + splitCur - 1]["Lon"];                       //结束经度
+                EndCoord.Lat = (double)dtDB.Rows[split * 4096 + splitCur - 1]["Lat"];                       //结束纬度
                 string strStartCoord, strEndCoord;
                 strStartCoord = $"({StartCoord.Lat},{StartCoord.Lon})";
                 strEndCoord = $"({EndCoord.Lat},{EndCoord.Lon})";
@@ -516,11 +586,14 @@ namespace Spectra
             }
 
             //插入辅助信息
-            for (int f = 0; f < dataChannel[0].frmC; f++)
-                Insert(sqlExcute, f, dataChannel[0].frmC, dataChannel[0].dtChannel.Rows[f]);
+            for (int f = 0; f < dtDB.Rows.Count; f++)
+                Insert(sqlExcute, f, dtDB.Rows.Count, dtDB.Rows[f]);
             sqlExcute.EndInsert();
-            //更新文件信息
-            updateFileInfo(sqlExcute);
+            if (flag)
+            {
+                //更新文件信息
+                updateFileInfo(sqlExcute);
+            }
         }
 
         /// <summary>
@@ -648,7 +721,7 @@ namespace Spectra
         {
             //更新文件信息
             FileInfo.frmSum = dataChannel[0].frmC;// (long)sqlExcute.ExecuteScalar($"SELECT COUNT(*) FROM AuxData WHERE MD5='{FileInfo.md5}'");                                    //帧总数
-            DateTime T0 = new DateTime(2012, 1, 1, 0, 0, 0);
+            DateTime T0 = new DateTime(2012, 1, 1, 8, 0, 0);
             FileInfo.startTime = T0.AddSeconds((double)dataChannel[0].dtChannel.Rows[0]["GST"]);//sqlExcute.ExecuteScalar($"SELECT GST FROM AuxData WHERE MD5='{FileInfo.md5}' ORDER BY FrameId ASC"));//起始时间
             FileInfo.endTime = T0.AddSeconds((double)dataChannel[0].dtChannel.Rows[dataChannel[0].frmC-1]["GST"]);//sqlExcute.ExecuteScalar($"SELECT GST FROM AuxData WHERE MD5='{FileInfo.md5}' ORDER BY FrameId DESC")); //结束时间
             double lat = (double)dataChannel[0].dtChannel.Rows[0]["Lat"];//sqlExcute.ExecuteScalar($"SELECT Lat FROM AuxData WHERE MD5='{FileInfo.md5}' ORDER BY FrameId ASC");
@@ -1112,7 +1185,7 @@ namespace Spectra
                 {
                     DateTime selectedStartDate = start_time;
                     DateTime selectedEndDate = end_time;
-                    DateTime T0 = new DateTime(2012, 1, 1, 0, 0, 0);
+                    DateTime T0 = new DateTime(2012, 1, 1, 8, 0, 0);
                     TimeSpan ts_Start = selectedStartDate.Subtract(T0);
                     TimeSpan ts_End = selectedEndDate.Subtract(T0);
                     command += " AND GST>=" + (ts_Start.TotalSeconds.ToString()) + " AND GST<=" + ts_End.TotalSeconds.ToString();
