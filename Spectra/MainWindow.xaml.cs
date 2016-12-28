@@ -136,6 +136,7 @@ namespace Spectra
         private async void btnDecFile_Click(object sender, RoutedEventArgs e)
         {
             btnDecFile.IsEnabled = false;
+            Global.longJumpLen = Convert.ToInt64(txtJumpLen.Text);
 
             DataOper dataOper = new DataOper(FileInfo.srcFilePathName,FileInfo.md5, txtSateID.Text);
             IProgress<double> IProg_Bar = new Progress<double>((ProgressValue) => { prog_Import.Value = ProgressValue * prog_Import.Maximum; });
@@ -654,7 +655,7 @@ namespace Spectra
                         band[2] = ImageInfo.getBand(Convert.ToDouble(txtSingleB.Text));
                     else
                         band[2] = Convert.ToUInt16(txtSingleB.Text);
-                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[0]).UserControls[0]).RefreshPseudoColor(0,ImageInfo.strFilesPath, 4, band, ColorRenderMode.ArtColor);
+                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[0]).UserControls[0]).RefreshPseudoColor(0,ImageInfo.strFilesPath, 1, band, ColorRenderMode.ArtColor);
                 }
                 else
                 {
@@ -662,7 +663,7 @@ namespace Spectra
                         band[0] = band[1] = band[2] = ImageInfo.getBand(Convert.ToDouble(txtSingleGray.Text));
                     else
                         band[0] = band[1] = band[2] = Convert.ToUInt16(txtSingleGray.Text);
-                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[0]).UserControls[0]).RefreshPseudoColor(0,ImageInfo.strFilesPath, 4, band, ColorRenderMode.Grayscale);
+                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[0]).UserControls[0]).RefreshPseudoColor(0,ImageInfo.strFilesPath, 1, band, ColorRenderMode.Grayscale);
                 }
             }
             catch
@@ -689,14 +690,14 @@ namespace Spectra
             try
             {
                 if (ckb1sub.IsChecked == true)
-                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[1]).UserControls[0]).RefreshPseudoColor(0,ImageInfo.strFilesPath, 4, new UInt16[] { band[0], band[1], band[2] }, ColorRenderMode.ArtColor);
+                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[1]).UserControls[0]).RefreshPseudoColor(0,ImageInfo.strFilesPath, 1, new UInt16[] { band[0], band[1], band[2] }, ColorRenderMode.ArtColor);
                 if (ckb2sub.IsChecked == true)
                 {
                     if (Convert.ToDouble(txtCompareGray2.Text) > 160)
                         band[0] = band[1] = band[2] = ImageInfo.getBand(Convert.ToDouble(txtCompareGray2.Text));
                     else
                         band[0] = band[1] = band[2] = Convert.ToUInt16(txtCompareGray2.Text);
-                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[1]).UserControls[1]).RefreshPseudoColor(1,ImageInfo.strFilesPath, 4, new UInt16[] { band[0], band[1] ,band[2] }, ColorRenderMode.Grayscale);
+                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[1]).UserControls[1]).RefreshPseudoColor(1,ImageInfo.strFilesPath, 1, new UInt16[] { band[0], band[1] ,band[2] }, ColorRenderMode.Grayscale);
                 }
                 if (ckb3sub.IsChecked == true)
                 {
@@ -704,7 +705,7 @@ namespace Spectra
                         band[0] = band[1] = band[2] = ImageInfo.getBand(Convert.ToDouble(txtCompareGray3.Text));
                     else
                         band[0] = band[1] = band[2] = Convert.ToUInt16(txtCompareGray3.Text);
-                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[1]).UserControls[2]).RefreshPseudoColor(2,ImageInfo.strFilesPath, 4, new UInt16[] { band[0], band[1], band[2] }, ColorRenderMode.Grayscale);
+                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[1]).UserControls[2]).RefreshPseudoColor(2,ImageInfo.strFilesPath, 1, new UInt16[] { band[0], band[1], band[2] }, ColorRenderMode.Grayscale);
                 }
                 if (ckb4sub.IsChecked == true)
                 {
@@ -712,7 +713,7 @@ namespace Spectra
                         band[0] = band[1] = band[2] = ImageInfo.getBand(Convert.ToDouble(txtCompareGray4.Text));
                     else
                         band[0] = band[1] = band[2] = Convert.ToUInt16(txtCompareGray4.Text);
-                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[1]).UserControls[3]).RefreshPseudoColor(3,ImageInfo.strFilesPath, 4, new UInt16[] { band[0], band[1], band[2] }, ColorRenderMode.Grayscale);
+                    ((Ctrl_ImageView)((MultiFuncWindow)App.global_Windows[1]).UserControls[3]).RefreshPseudoColor(3,ImageInfo.strFilesPath, 1, new UInt16[] { band[0], band[1], band[2] }, ColorRenderMode.Grayscale);
                 }
             }
             catch (Exception)

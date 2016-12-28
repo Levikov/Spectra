@@ -82,7 +82,7 @@
             </Grid.ColumnDefinitions>
             <GridSplitter x:Name="splitA" Grid.RowSpan="1" Margin="0,50" Width="1" Background="{StaticResource ButtonBack}"/>
             <StackPanel>
-                <RadioButton x:Name="btnLeftA1" Content="数据处理" Template="{DynamicResource ButtonIcon2nd}" Margin="0,50,0,0">
+                <RadioButton x:Name="btnLeftA1" Content="数据处理" Template="{DynamicResource ButtonIcon2nd}" Margin="0,50,0,0" IsChecked="True">
                     <RadioButton.Background>
                         <ImageBrush ImageSource="image/UI/二级菜单-数据处理.png"/>
                     </RadioButton.Background>
@@ -92,7 +92,7 @@
                         <ImageBrush ImageSource="image/UI/二级菜单-数据存储.png"/>
                     </RadioButton.Background>
                 </RadioButton>
-                <RadioButton x:Name="btnLeftA3" Content="文件检索" Template="{DynamicResource ButtonIcon2nd}" IsChecked="True">
+                <RadioButton x:Name="btnLeftA3" Content="文件检索" Template="{DynamicResource ButtonIcon2nd}">
                     <RadioButton.Background>
                         <ImageBrush ImageSource="image/UI/二级菜单-文件检索.png"/>
                     </RadioButton.Background>
@@ -137,6 +137,7 @@
                         <ProgressBar x:Name="prog_Import" Height="30" Margin="35,0,0,0" BorderBrush="{StaticResource ButtonBack}"/>
                     </DockPanel>
                     <DockPanel Margin="10,0" LastChildFill="False" Height="50" HorizontalAlignment="Center">
+                        <TextBox x:Name="txtJumpLen" Text="65536" Margin="30,0" VerticalAlignment="Center" VerticalContentAlignment="Center" FontSize="18" Width="140" Height="30"/>
                         <Button x:Name="btnDecFile" Template="{DynamicResource ButtonDefault}" VerticalAlignment="Center" Margin="0,0,0,0" HorizontalAlignment="Center" Content="解压图像"  Click="btnDecFile_Click" Width="160" IsEnabled="False"/>
                         <Button x:Name="b_Abort_Import" Template="{DynamicResource ButtonDefault}" VerticalAlignment="Center" Margin="200,0,0,0" HorizontalAlignment="Left" Content="放弃" Click="b_Abort_Import_Click" Width="160" IsEnabled="False" Visibility="Collapsed"/>
                     </DockPanel>

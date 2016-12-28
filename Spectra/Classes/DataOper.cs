@@ -77,8 +77,8 @@ namespace Spectra
         {
             return Task.Run(() =>
             {
-                try
-                {
+                //try
+                //{
                     //string strSrc = preData(unpackData(srcFilePathName, IProg_Bar, IProg_Cmd), IProg_Bar, IProg_Cmd);
                     string strSrc = srcFilePathName;
                     if (strSrc == string.Empty)
@@ -89,12 +89,15 @@ namespace Spectra
                     strSrc = decData(splitFile(strSrc, IProg_Bar, IProg_Cmd), IProg_Bar, IProg_Cmd);
                     new Thread(() => { sqlInsert(Global.dbPath, dataChannel[0].dtChannel, true); }).Start();
                     mergeImage(strSrc, IProg_Bar, IProg_Cmd);
-                    IProg_Cmd.Report(DateTime.Now.ToString("HH:mm:ss") + " 开始清理冗余文件！");
-                    Task.Run(() => { Directory.Delete("tempFiles", true); }).Wait();
+                    //IProg_Cmd.Report(DateTime.Now.ToString("HH:mm:ss") + " 开始清理冗余文件！");
+                    //Task.Run(() => { Directory.Delete("tempFiles", true); }).Wait();
                     new Thread(() => { Get3DRaw($"{Global.pathDecFiles}{md5}\\"); }).Start();
                     IProg_Cmd.Report(DateTime.Now.ToString("HH:mm:ss") + " 操作完成！");
-                }
-                catch{}
+                //}
+                //catch(Exception ex)
+                //{
+                //    string str = ex.ToString();
+                //}
             });
         }
 
@@ -119,11 +122,9 @@ namespace Spectra
             if (inFileStream.Length < 1024 * 1024)
                 return string.Empty;
             //跳过65536头
-            //int lenHead = 65536;
-            int lenHead = 65536;
-            inFileStream.Seek(lenHead, SeekOrigin.Begin);
+            inFileStream.Seek(Global.longJumpLen, SeekOrigin.Begin);
             //要处理的文件长度
-            long lenAll = (inFileStream.Length - lenHead) / 1040 * 1040;
+            long lenAll = (inFileStream.Length - Global.longJumpLen) / 1040 * 1040;
             //使用1040*1M缓存读文件
             int lenCache = 1040 * 1024 * 1024;
             Byte[] cacheBuf = new Byte[lenCache];
@@ -136,22 +137,44 @@ namespace Spectra
             IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 开始解包.");
             IProg_Bar.Report(0);
             //除最后一个单元，每次循环处理1040*1M文件
+            int invalidCnt = 0;
             for (int cacheCnt = 0; cacheCnt < cacheSum - 1; cacheCnt++)
             {
+                invalidCnt = 0;
                 inFileStream.Read(cacheBuf, 0, lenCache);
                 for (int i = 0; i < lenCache / 1040; i++)
-                    Array.Copy(cacheBuf, i * 1040 + 12, outBuf, i * 884, 884);
-                outFileStream.Write(outBuf, 0, outBuf.Length);
+                {
+                    if (cacheBuf[i * 1040 + 0] != 0x1A || cacheBuf[i * 1040 + 1] != 0xCF || cacheBuf[i * 1040 + 2] != 0xFC || cacheBuf[i * 1040 + 3] != 0x1D)
+                    {
+                        invalidCnt++;
+                        continue;
+                    }
+                    if (cacheBuf[i * 1040 + 13] == 0xAA && cacheBuf[i * 1040 + 14] == 0xAA && cacheBuf[i * 1040 + 15] == 0xAA && cacheBuf[i * 1040 + 16] == 0xAA)
+                    {
+                        invalidCnt++;
+                        continue;
+                    }
+                    Array.Copy(cacheBuf, i * 1040 + 12, outBuf, (i - invalidCnt) * 884, 884);
+                }
+                outFileStream.Write(outBuf, 0, outBuf.Length - invalidCnt * 884);
                 outFileStream.Flush();
                 IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} {cacheCnt + 1}G解包完成.");
                 IProg_Bar.Report((cacheCnt + 1) / cacheSum);
             }
             //最后一个单元处理
+            invalidCnt = 0;
             lenCache = (int)(lenAll % lenCache);
             inFileStream.Read(cacheBuf, 0, lenCache);
             for (int i = 0; i < lenCache / 1040; i++)
+            {
+                if (cacheBuf[i * 1040 + 13] == 0xAA && cacheBuf[i * 1040 + 14] == 0xAA && cacheBuf[i * 1040 + 15] == 0xAA & cacheBuf[i * 1040 + 16] == 0xAA)
+                {
+                    invalidCnt++;
+                    continue;
+                }
                 Array.Copy(cacheBuf, i * 1040 + 12, outBuf, i * 884, 884);
-            outFileStream.Write(outBuf, 0, lenCache / 1040 * 884);
+            }
+            outFileStream.Write(outBuf, 0, lenCache / 1040 * 884 - invalidCnt * 884);
             outFileStream.Close();
             //完成
             IProg_Bar.Report(1);
@@ -168,6 +191,7 @@ namespace Spectra
         /// <returns>输出文件的全路径名称</returns>
         public string preData(string inFilePathName, IProgress<double> IProg_Bar, IProgress<string> IProg_Cmd)
         {
+            int updateCnt = 0;
             //不存在文件，退出
             if (!File.Exists(inFilePathName))
                 return string.Empty;
@@ -198,7 +222,8 @@ namespace Spectra
                     Array.Copy(headBuf, 0, outBuf, 4, 276);
                     outFileStream.Write(outBuf, 0, 280);
                     outFileStream.Flush();
-                    IProg_Bar.Report((double)position / inFileStream.Length);
+                    if(updateCnt++%10000 == 0)
+                        IProg_Bar.Report((double)position / inFileStream.Length);
                 }
             }
             inFileStream.Close();
@@ -241,21 +266,33 @@ namespace Spectra
             int chan = 0;                   //通道号
             int[] ID = { 0, 0, 0, 0 };      //帧号
             long[] row = { 0, 0, 0, 0 };    //行号
+            bool flagStart = false;
             for (long packCnt = 0; packCnt < packSum; packCnt++)
             {
                 //读1包数据
                 inFileStream.Read(inBuf, 0, 280);
                 //得到通道号
                 chan = inBuf[5] - 1;
+                if (chan > 3 || chan < 0)
+                    continue;
                 if (inBuf[4] == 0x08)
                 {
+                    flagStart = true;
                     dataChannel[chan].add(ID[chan], row[chan], inBuf);
                     ID[chan]++;
+                    outFileStream[chan].Write(inBuf, 0, 280);
+                    outFileStream[chan].Flush();
+                    row[chan]++;
                     IProg_Bar.Report((double)(packCnt + 1) / packSum);
                 }
-                outFileStream[chan].Write(inBuf, 0, 280);
-                outFileStream[chan].Flush();
-                row[chan]++;
+                else if(inBuf[4] == 0x0A)
+                {
+                    if (!flagStart)
+                        continue;
+                    outFileStream[chan].Write(inBuf, 0, 280);
+                    outFileStream[chan].Flush();
+                    row[chan]++;
+                }
             }
             //关闭文件
             for (int c = 0; c < 4; c++)
@@ -263,7 +300,7 @@ namespace Spectra
                 outFileStream[c].Close();
             }
             //修正
-            info();
+            infoTemp();
             //完成
             IProg_Bar.Report(1);
             IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 分包完成!");
@@ -311,6 +348,22 @@ namespace Spectra
                     dataChannel[c].dtChannel.Rows.RemoveAt(dataChannel[c].dtChannel.Rows.Count - 1);
             }
         }
+        public void infoTemp()
+        {
+            for (int i = 0; i < 8903; i++)
+                dataChannel[0].dtChannel.Rows.RemoveAt(0);
+            for (int i = 0; i < 430; i++)
+                dataChannel[1].dtChannel.Rows.RemoveAt(0);
+            for (int i = 0; i < 9173; i++)
+                dataChannel[2].dtChannel.Rows.RemoveAt(0);
+            for (int i = 0; i < 9229; i++)
+                dataChannel[3].dtChannel.Rows.RemoveAt(0);
+            for(int i=0;i<31718;i++)
+                for (int c = 0; c < 4; c++)
+                    dataChannel[c].dtChannel.Rows.RemoveAt(dataChannel[c].dtChannel.Rows.Count-1);
+            for (int c = 0; c < 4; c++)
+                dataChannel[c].frmC = 8192;
+        }
 
         /// <summary>
         /// 通道串行按帧并行解压文件，解压后文件为4个大文件
@@ -328,7 +381,7 @@ namespace Spectra
             {
                 FileStream inFileStream = new FileStream($"{inFilePathName}{c}.dat", FileMode.Open, FileAccess.Read, FileShare.Read);
                 //如果文件小于2G，则并行执行
-                if (inFileStream.Length < 2147483648)
+                if (inFileStream.Length < 1024)
                 {
                     byte[] inBuf = new byte[inFileStream.Length];
                     inFileStream.Read(inBuf, 0, (int)inFileStream.Length);
@@ -378,6 +431,9 @@ namespace Spectra
                 {
                     byte[] channelFile = new byte[512 * 160 * 2];   //解压后图像
                     FileStream fs_out_raw = new FileStream($"tempFiles\\D{srcFileName}_{c}.raw", FileMode.Create);
+                    Stream s;
+                    FIBITMAP fibmp;
+                    inFileStream.Seek((long)dataChannel[c].dtChannel.Rows[0]["row"]*280, SeekOrigin.Begin);
                     for (int frm = 0;frm< dataChannel[c].frmC;frm++)
                     {
                         //行总数
@@ -386,6 +442,7 @@ namespace Spectra
                         {
                             byte[] jp2BufA = new byte[rowC * 280];
                             byte[] jp2BufB = new byte[rowC * 256 - 256 - 16];
+
                             inFileStream.Read(jp2BufA, 0, rowC * 280);
 
                             Array.Copy(jp2BufA, 1 * 280 + 32, jp2BufB, 0, 240);
@@ -393,10 +450,18 @@ namespace Spectra
                                 Array.Copy(jp2BufA, r * 280 + 16, jp2BufB, (r - 2) * 256 + 240, 256);
                             try
                             {
-                                Stream s = new MemoryStream(jp2BufB);
-                                FIBITMAP fibmp = FreeImage.LoadFromStream(s);
-                                Marshal.Copy(FreeImage.GetBits(fibmp), channelFile, 0, 512 * 160 * 2);
-                                FreeImage.Unload(fibmp);
+                                s = new MemoryStream(jp2BufB);
+                                fibmp = FreeImage.LoadFromStream(s);
+                                if (fibmp.IsNull == true)
+                                {
+                                    continue;
+                                }
+                                try
+                                {
+                                    Marshal.Copy(FreeImage.GetBits(fibmp), channelFile, 0, 512 * 160 * 2);
+                                    FreeImage.Unload(fibmp);
+                                }
+                                catch { }
                             }
                             catch
                             {
