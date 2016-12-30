@@ -44,7 +44,7 @@ namespace Spectra
         {
             txtSetFrame.Text = frm.ToString();
             int height = ImageInfo.dtImgInfo.Rows.Count;
-            frm = Convert.ToUInt16(frm - ImageInfo.minFrm);
+            frm = Convert.ToUInt16(frm - ImageInfo.startFrm);
             if (frm < height)
             {
                 Bitmap bmp = BmpOper.MakeFrameImage(frm, height);

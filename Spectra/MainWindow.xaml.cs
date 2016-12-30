@@ -449,8 +449,8 @@ namespace Spectra
             LT_Lon.Text = ImageInfo.startCoord.Lon.ToString();
             RB_Lat.Text = ImageInfo.startCoord.Lat.ToString();
             RB_Lon.Text = ImageInfo.endCoord.Lon.ToString();
-            tb_start_frm.Text = ImageInfo.minFrm.ToString();
-            tb_end_frm.Text = ImageInfo.maxFrm.ToString();
+            tb_start_frm.Text = ImageInfo.startFrm.ToString();
+            tb_end_frm.Text = ImageInfo.endFrm.ToString();
         }
         private void b_Query_Click(object sender, RoutedEventArgs e)
         {
@@ -506,8 +506,8 @@ namespace Spectra
         /*显示图像信息*/
         public void SetImgInfo()
         {
-            lblImgMinFrm.Content = ImageInfo.minFrm.ToString();
-            lblImgMaxFrm.Content = ImageInfo.maxFrm.ToString();
+            lblImgMinFrm.Content = ImageInfo.startFrm.ToString();
+            lblImgMaxFrm.Content = ImageInfo.endFrm.ToString();
             lblImgStartTime.Content = ImageInfo.startTime.ToString();
             lblImgEndTime.Content = ImageInfo.endTime.ToString();
             lblImgWidth.Content = ImageInfo.imgWidth.ToString();

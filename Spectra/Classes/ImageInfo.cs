@@ -32,8 +32,8 @@ namespace Spectra
         public static string strFilesPath = Environment.CurrentDirectory + "\\showFiles\\";         //显示图像的存储位置
 
         //图像检索结果对应的图像信息
-        public static int minFrm;
-        public static int maxFrm;
+        public static int startFrm;
+        public static int endFrm;
         public static double startSec;
         public static double endSec;
         public static DateTime startTime;
@@ -52,16 +52,16 @@ namespace Spectra
         /// </summary>
         public static void GetImgInfo()
         {
-            minFrm = Convert.ToInt32(dtImgInfo.Compute("min(FrameId)", ""));
-            maxFrm = Convert.ToInt32(dtImgInfo.Compute("max(FrameId)", ""));
             imgWidth = dtImgInfo.Rows.Count;
 
-            startSec = Convert.ToDouble(dtImgInfo.Compute("min(GST)", ""));
-            endSec = Convert.ToDouble(dtImgInfo.Compute("max(GST)", ""));
-            startCoord.Lat = Convert.ToDouble(dtImgInfo.Compute("min(Lat)", ""));
-            startCoord.Lon = Convert.ToDouble(dtImgInfo.Compute("min(Lon)", ""));
-            endCoord.Lat = Convert.ToDouble(dtImgInfo.Compute("max(Lat)", ""));
-            endCoord.Lon = Convert.ToDouble(dtImgInfo.Compute("max(Lon)", ""));
+            startFrm = Convert.ToInt32(dtImgInfo.Rows[0]["FrameId"]);
+            endFrm = Convert.ToInt32(dtImgInfo.Rows[imgWidth - 1]["FrameId"]);
+            startSec = Convert.ToDouble(dtImgInfo.Rows[0]["GST"]);
+            endSec = Convert.ToDouble(dtImgInfo.Rows[imgWidth - 1]["GST"]);
+            startCoord.Lat = Convert.ToDouble(dtImgInfo.Rows[0]["Lat"]);
+            startCoord.Lon = Convert.ToDouble(dtImgInfo.Rows[0]["Lon"]);
+            endCoord.Lat = Convert.ToDouble(dtImgInfo.Rows[imgWidth - 1]["Lat"]);
+            endCoord.Lon = Convert.ToDouble(dtImgInfo.Rows[imgWidth - 1]["Lon"]);
             DateTime T0 = new DateTime(2012, 1, 1, 8, 0, 0);
             startTime = T0.AddSeconds(startSec);
             endTime = T0.AddSeconds(endSec);

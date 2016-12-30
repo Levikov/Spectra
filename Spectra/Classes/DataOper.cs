@@ -79,20 +79,20 @@ namespace Spectra
             {
                 //try
                 //{
-                    //string strSrc = preData(unpackData(srcFilePathName, IProg_Bar, IProg_Cmd), IProg_Bar, IProg_Cmd);
-                    string strSrc = srcFilePathName;
-                    if (strSrc == string.Empty)
-                    {
-                        IProg_Cmd.Report(DateTime.Now.ToString("HH:mm:ss") + " 文件不正确，已停止该文件操作！");
-                        return;
-                    }
-                    strSrc = decData(splitFile(strSrc, IProg_Bar, IProg_Cmd), IProg_Bar, IProg_Cmd);
-                    new Thread(() => { sqlInsert(Global.dbPath, dataChannel[0].dtChannel, true); }).Start();
-                    mergeImage(strSrc, IProg_Bar, IProg_Cmd);
-                    //IProg_Cmd.Report(DateTime.Now.ToString("HH:mm:ss") + " 开始清理冗余文件！");
-                    //Task.Run(() => { Directory.Delete("tempFiles", true); }).Wait();
-                    new Thread(() => { Get3DRaw($"{Global.pathDecFiles}{md5}\\"); }).Start();
-                    IProg_Cmd.Report(DateTime.Now.ToString("HH:mm:ss") + " 操作完成！");
+                string strSrc = preData(unpackData(srcFilePathName, IProg_Bar, IProg_Cmd), IProg_Bar, IProg_Cmd);
+                //string strSrc = srcFilePathName;
+                if (strSrc == string.Empty)
+                {
+                    IProg_Cmd.Report(DateTime.Now.ToString("HH:mm:ss") + " 文件不正确，已停止该文件操作！");
+                    return;
+                }
+                strSrc = decData(splitFile(strSrc, IProg_Bar, IProg_Cmd), IProg_Bar, IProg_Cmd);
+                new Thread(() => { sqlInsert(Global.dbPath, dataChannel[0].dtChannel, true); }).Start();
+                mergeImage(strSrc, IProg_Bar, IProg_Cmd);
+                IProg_Cmd.Report(DateTime.Now.ToString("HH:mm:ss") + " 开始清理冗余文件！");
+                Task.Run(() => { Directory.Delete("tempFiles", true); }).Wait();
+                new Thread(() => { Get3DRaw($"{Global.pathDecFiles}{md5}\\"); }).Start();
+                IProg_Cmd.Report(DateTime.Now.ToString("HH:mm:ss") + " 操作完成！");
                 //}
                 //catch(Exception ex)
                 //{
@@ -144,12 +144,14 @@ namespace Spectra
                 inFileStream.Read(cacheBuf, 0, lenCache);
                 for (int i = 0; i < lenCache / 1040; i++)
                 {
+                    //不是包头，跳过
                     if (cacheBuf[i * 1040 + 0] != 0x1A || cacheBuf[i * 1040 + 1] != 0xCF || cacheBuf[i * 1040 + 2] != 0xFC || cacheBuf[i * 1040 + 3] != 0x1D)
                     {
-                        invalidCnt++;
+                        invalidCnt = i + 1;
                         continue;
                     }
-                    if (cacheBuf[i * 1040 + 13] == 0xAA && cacheBuf[i * 1040 + 14] == 0xAA && cacheBuf[i * 1040 + 15] == 0xAA && cacheBuf[i * 1040 + 16] == 0xAA)
+                    //是填充帧，跳过
+                    if (cacheBuf[i * 1040 + 12] == 0xAA && cacheBuf[i * 1040 + 13] == 0xAA && cacheBuf[i * 1040 + 14] == 0xAA && cacheBuf[i * 1040 + 15] == 0xAA)
                     {
                         invalidCnt++;
                         continue;
@@ -167,12 +169,18 @@ namespace Spectra
             inFileStream.Read(cacheBuf, 0, lenCache);
             for (int i = 0; i < lenCache / 1040; i++)
             {
-                if (cacheBuf[i * 1040 + 13] == 0xAA && cacheBuf[i * 1040 + 14] == 0xAA && cacheBuf[i * 1040 + 15] == 0xAA & cacheBuf[i * 1040 + 16] == 0xAA)
+                //不是包头，跳过
+                if (cacheBuf[i * 1040 + 0] != 0x1A || cacheBuf[i * 1040 + 1] != 0xCF || cacheBuf[i * 1040 + 2] != 0xFC || cacheBuf[i * 1040 + 3] != 0x1D)
+                {
+                    invalidCnt = i + 1;
+                    continue;
+                }
+                if (cacheBuf[i * 1040 + 12] == 0xAA && cacheBuf[i * 1040 + 13] == 0xAA && cacheBuf[i * 1040 + 14] == 0xAA && cacheBuf[i * 1040 + 15] == 0xAA)
                 {
                     invalidCnt++;
                     continue;
                 }
-                Array.Copy(cacheBuf, i * 1040 + 12, outBuf, i * 884, 884);
+                Array.Copy(cacheBuf, i * 1040 + 12, outBuf, (i - invalidCnt) * 884, 884);
             }
             outFileStream.Write(outBuf, 0, lenCache / 1040 * 884 - invalidCnt * 884);
             outFileStream.Close();
@@ -300,7 +308,7 @@ namespace Spectra
                 outFileStream[c].Close();
             }
             //修正
-            infoTemp();
+            info();
             //完成
             IProg_Bar.Report(1);
             IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 分包完成!");
@@ -313,20 +321,22 @@ namespace Spectra
         /// </summary>
         public void info()
         {
-            //得到最大的帧号起始
-            Int32[] frmS = { 0, 0, 0, 0 };
-            Int32 max = 0;
+            //得到最大&最小的结束帧号
+            Int32[] frmEnd = { 0, 0, 0, 0 };
+            Int32 max = 0,min = 65535;
             for (int c = 0; c < 4; c++)
             {
-                frmS[c] = (int)dataChannel[c].dtChannel.Rows[0]["FrameId"];
-                if (frmS[c] > max)
-                    max = frmS[c];
+                frmEnd[c] = (int)dataChannel[c].dtChannel.Rows[dataChannel[c].dtChannel.Rows.Count - 1]["FrameId"];
+                if (frmEnd[c] > max)
+                    max = frmEnd[c];
+                if (frmEnd[c] < min)
+                    min = frmEnd[c];
             }
-            //将多余的开始帧删除
+            //将多余的帧尾删除
             for (int c = 0; c < 4; c++)
             {
-                for(int i=0;i< max - frmS[c]; i++)
-                    dataChannel[c].dtChannel.Rows.RemoveAt(0);
+                for (int i = 0; i < frmEnd[c] - min; i++)
+                    dataChannel[c].dtChannel.Rows.RemoveAt(dataChannel[c].dtChannel.Rows.Count - 1);
             }
 
             //得到最大的帧总数
@@ -338,31 +348,21 @@ namespace Spectra
                 if (frmE[c] > max)
                     max = frmE[c];
             }
+            if (frmE[0] < max)
+            {
+                if (frmE[1] > max)
+                    for (int i = 0; i < max - frmE[1]; i++)
+                        dataChannel[1].dtChannel.Rows.RemoveAt(0);
+                if (frmE[2] > max)
+                    for (int i = 0; i < max - frmE[2]; i++)
+                        dataChannel[2].dtChannel.Rows.RemoveAt(0);
+                if (frmE[3] > max)
+                    for (int i = 0; i < max - frmE[3]; i++)
+                        dataChannel[3].dtChannel.Rows.RemoveAt(0);
+            }
             //帧总数确定
             for (int c = 0; c < 4; c++)
-                dataChannel[c].frmC = max - 1;
-            //将多余的尾帧删除
-            for (int c = 0; c < 4; c++)
-            {
-                for (int i = 0; i < max - frmE[c]; i++)
-                    dataChannel[c].dtChannel.Rows.RemoveAt(dataChannel[c].dtChannel.Rows.Count - 1);
-            }
-        }
-        public void infoTemp()
-        {
-            for (int i = 0; i < 8903; i++)
-                dataChannel[0].dtChannel.Rows.RemoveAt(0);
-            for (int i = 0; i < 430; i++)
-                dataChannel[1].dtChannel.Rows.RemoveAt(0);
-            for (int i = 0; i < 9173; i++)
-                dataChannel[2].dtChannel.Rows.RemoveAt(0);
-            for (int i = 0; i < 9229; i++)
-                dataChannel[3].dtChannel.Rows.RemoveAt(0);
-            for(int i=0;i<31718;i++)
-                for (int c = 0; c < 4; c++)
-                    dataChannel[c].dtChannel.Rows.RemoveAt(dataChannel[c].dtChannel.Rows.Count-1);
-            for (int c = 0; c < 4; c++)
-                dataChannel[c].frmC = 8192;
+                dataChannel[c].frmC = frmE[0] - 1;
         }
 
         /// <summary>
@@ -377,68 +377,31 @@ namespace Spectra
             IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 开始解压.");
             IProg_Bar.Report(0);
 
+            //在dtChannel真实的行数，空行数，压缩文件总行数
+            int frmReal = 0,frmEmpty = 0, rowC = 0, updateCnt = 0;
             for (int c = 0; c < 4; c++)
             {
-                FileStream inFileStream = new FileStream($"{inFilePathName}{c}.dat", FileMode.Open, FileAccess.Read, FileShare.Read);
-                //如果文件小于2G，则并行执行
-                if (inFileStream.Length < 1024)
+                FileStream inFileStream = new FileStream($"{inFilePathName}{c}.dat", FileMode.Open, FileAccess.Read, FileShare.Read);       //输入的文件
+                byte[] channelFile = new byte[512 * 160 * 2];                                                                               //解压后图像缓存
+                FileStream fs_out_raw = new FileStream($"tempFiles\\D{srcFileName}_{c}.raw", FileMode.Create);                              //输出的文件
+                inFileStream.Seek((long)dataChannel[c].dtChannel.Rows[0]["row"]*280, SeekOrigin.Begin);                                     //要越过前面不需要的行
+                //每个通道循环总帧数次
+                frmReal = 0;
+                frmEmpty = dataChannel[c].frmC + 1 - dataChannel[c].dtChannel.Rows.Count;
+                updateCnt = 0;
+                for (int frm = 0;frm< dataChannel[c].frmC;frm++)
                 {
-                    byte[] inBuf = new byte[inFileStream.Length];
-                    inFileStream.Read(inBuf, 0, (int)inFileStream.Length);
-                    inFileStream.Close();
-                    IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 通道{c}读取完成.");
-
-                    byte[][] channelFile = new byte[dataChannel[c].frmC][];
-                    Parallel.For(0, dataChannel[c].frmC, frm =>
+                    //空帧填0
+                    if (frm < frmEmpty)
                     {
-                        channelFile[frm] = new byte[512 * 160 * 2];
-                        long rowS = (long)dataChannel[c].dtChannel.Rows[frm]["row"];
-                        long rowC = (long)dataChannel[c].dtChannel.Rows[frm + 1]["row"] - rowS;
-                        if (rowC > 1)
-                        {
-                            byte[] jp2BufA = new byte[rowC * 280];
-                            byte[] jp2BufB = new byte[rowC * 256 - 256 - 16];
-                            Array.Copy(inBuf, rowS * 280, jp2BufA, 0, jp2BufA.Length);
-
-                            Array.Copy(jp2BufA, 1 * 280 + 32, jp2BufB, 0, 240);
-                            for (int r = 2; r < rowC; r++)
-                                Array.Copy(jp2BufA, r * 280 + 16, jp2BufB, (r - 2) * 256 + 240, 256);
-                            try
-                            {
-                                Stream s = new MemoryStream(jp2BufB);
-                                FIBITMAP fibmp = FreeImage.LoadFromStream(s);
-                                Marshal.Copy(FreeImage.GetBits(fibmp), channelFile[frm], 0, 512 * 160 * 2);
-                                FreeImage.Unload(fibmp);
-                            }
-                            catch
-                            {
-                                errInfo.add(frm, $"{c}通道解压出错");
-                            }
-
-                            if (frm % (dataChannel[c].frmC / 100) == 0)
-                                IProg_Bar.Report((double)frm / dataChannel[c].frmC);
-                        }
-                    });
-                    IProg_Bar.Report(1);
-                    IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 通道{c}解压完成.");
-                    FileStream fs_out_raw = new FileStream($"tempFiles\\D{srcFileName}_{c}.raw", FileMode.Create);
-                    for (int frm = 0; frm < dataChannel[c].frmC; frm++)
-                        fs_out_raw.Write(channelFile[frm], 0, 512 * 160 * 2);
-                    fs_out_raw.Close();
-                    IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 通道{c}写文件完成！");
-                }
-                else
-                {
-                    byte[] channelFile = new byte[512 * 160 * 2];   //解压后图像
-                    FileStream fs_out_raw = new FileStream($"tempFiles\\D{srcFileName}_{c}.raw", FileMode.Create);
-                    Stream s;
-                    FIBITMAP fibmp;
-                    inFileStream.Seek((long)dataChannel[c].dtChannel.Rows[0]["row"]*280, SeekOrigin.Begin);
-                    for (int frm = 0;frm< dataChannel[c].frmC;frm++)
+                        Array.Clear(channelFile, 0, 512 * 160 * 2);
+                        fs_out_raw.Write(channelFile, 0, 512 * 160 * 2);
+                    }
+                    else
                     {
-                        //行总数
-                        int rowC = (int)((long)dataChannel[c].dtChannel.Rows[frm + 1]["row"] - (long)dataChannel[c].dtChannel.Rows[frm]["row"]);
-                        if (rowC > 1)
+                        rowC = (int)((long)dataChannel[c].dtChannel.Rows[frmReal + 1]["row"] - (long)dataChannel[c].dtChannel.Rows[frmReal]["row"]);//确定压缩文件的行总数
+                        frmReal++;
+                        if (rowC > 2)
                         {
                             byte[] jp2BufA = new byte[rowC * 280];
                             byte[] jp2BufB = new byte[rowC * 256 - 256 - 16];
@@ -446,34 +409,40 @@ namespace Spectra
                             inFileStream.Read(jp2BufA, 0, rowC * 280);
 
                             Array.Copy(jp2BufA, 1 * 280 + 32, jp2BufB, 0, 240);
-                            for (int r = 2; r < rowC; r++)
-                                Array.Copy(jp2BufA, r * 280 + 16, jp2BufB, (r - 2) * 256 + 240, 256);
-                            try
+                            if (jp2BufB[0] != 0xFF || jp2BufB[1] != 0x4F || jp2BufB[2] != 0xFF || jp2BufB[3] != 0x51)
                             {
-                                s = new MemoryStream(jp2BufB);
-                                fibmp = FreeImage.LoadFromStream(s);
-                                if (fibmp.IsNull == true)
-                                {
-                                    continue;
-                                }
+                                Array.Clear(channelFile, 0, 512 * 160 * 2);
+                                fs_out_raw.Write(channelFile, 0, 512 * 160 * 2);
+                            }
+                            else
+                            {
+                                for (int r = 2; r < rowC; r++)
+                                    Array.Copy(jp2BufA, r * 280 + 16, jp2BufB, (r - 2) * 256 + 240, 256);
                                 try
                                 {
+                                    Stream s = new MemoryStream(jp2BufB);
+                                    FIBITMAP fibmp = FreeImage.LoadFromStream(s);
                                     Marshal.Copy(FreeImage.GetBits(fibmp), channelFile, 0, 512 * 160 * 2);
                                     FreeImage.Unload(fibmp);
                                 }
-                                catch { }
+                                catch
+                                {
+                                    errInfo.add(frmReal, $"{c}通道解压出错");
+                                }
+                                fs_out_raw.Write(channelFile, 0, 512 * 160 * 2);
                             }
-                            catch
-                            {
-                                errInfo.add(frm, $"{c}通道解压出错");
-                            }
+                        }
+                        else
+                        {
+                            Array.Clear(channelFile, 0, 512 * 160 * 2);
                             fs_out_raw.Write(channelFile, 0, 512 * 160 * 2);
-                            IProg_Bar.Report((double)(frm + 1) / dataChannel[c].frmC);
                         }
                     }
-                    fs_out_raw.Close();
-                    IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 通道{c}解压完成.");
+                    if (updateCnt++ % 1000 == 0)
+                        IProg_Bar.Report((double)(frm + 1) / dataChannel[c].frmC);
                 }
+                fs_out_raw.Close();
+                IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 通道{c}解压完成.");
             }
             return $"tempFiles\\D{srcFileName}_";
         }
@@ -541,9 +510,9 @@ namespace Spectra
         {
             //开始存图像
             Directory.CreateDirectory($"{Global.pathDecFiles}{md5}");
-            IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 开始图像转存.");
             IProg_Bar.Report(0);
-            mergeJJJ();
+            //IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 开始图像转存.");
+            //mergeJJJ();
             IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 开始图像合并.");
             //4个通道的文件读
             FileStream[] inFileStream = new FileStream[4];
@@ -577,6 +546,11 @@ namespace Spectra
                     outFile.Write(imgBuf[b], 0, 2048 * imageWidth * 2);
                     outFile.Close();
                 }
+                //生成真彩图
+                Bitmap bmp;
+                bmp = BmpOper.MakePseudoColor($"{Global.pathDecFiles}{md5}\\{i}\\", new ushort[] { 39, 76, 126 }, imageWidth);
+                bmp.RotateFlip(System.Drawing.RotateFlipType.Rotate90FlipX);
+                bmp.Save($"{Global.pathDecFiles}{md5}\\{i}\\{i}.bmp");
 
                 //得到要存储的辅助数据表
                 DataTable dtExcel = dataChannel[0].dtChannel.Copy();
@@ -601,17 +575,6 @@ namespace Spectra
             for (int c = 0; c < 4; c++)
             {
                 inFileStream[c].Close();
-            }
-            //生成真彩图
-            Bitmap bmp;
-            for (int i = 0; i < splitSum; i++)
-            {
-                int h = 4096;
-                if (i == splitSum - 1)
-                    h = dataChannel[0].frmC % 4096;
-                bmp = BmpOper.MakePseudoColor($"{Global.pathDecFiles}{md5}\\{i}\\", new ushort[] { 39, 76, 126 }, h);
-                bmp.RotateFlip(System.Drawing.RotateFlipType.Rotate90FlipX);
-                bmp.Save($"{Global.pathDecFiles}{md5}\\{i}\\{i}.bmp");
             }
 
             IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 合并完成！");
