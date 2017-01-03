@@ -563,7 +563,7 @@ namespace Spectra
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show("数据出错!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
+                System.Windows.MessageBox.Show(ex.ToString(), "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
         /*显示单谱段图像*/
@@ -1227,7 +1227,7 @@ namespace Spectra
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show("数据出错!", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
+                System.Windows.MessageBox.Show(ex.ToString(), "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
         #endregion

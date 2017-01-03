@@ -71,6 +71,7 @@
     <PlatformTarget>x64</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="BruTile, Version=0.18.2.0, Culture=neutral, processorArchitecture=MSIL">
@@ -448,6 +449,7 @@
     <Resource Include="image\UI\二级菜单-关于我们.png" />
     <Resource Include="image\UI\二级菜单-数据设置.png" />
     <Resource Include="image\UI\二级菜单-显示设置.png" />
+    <Content Include="DLL\System.Data.SQLite.dll" />
     <Content Include="Mapsui\BruTile.Desktop.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -509,10 +511,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="DLL\FreeImageNET.dll" />
-    <Content Include="DLL\System.Data.SQLite.dll" />
-    <Content Include="DLL\WFTools3D.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Resource Include="image\未完成工作.txt" />
     <Resource Include="image\20160815-交付要求.txt" />
   </ItemGroup>
