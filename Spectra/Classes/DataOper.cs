@@ -880,9 +880,10 @@ namespace Spectra
 
         public void add(int ID, long row, byte[] buf)
         {
-            double GST, Lat, Lon, X, Y, Z, Vx, Vy, Vz, Ox, Oy, Oz, Q1, Q2, Q3, Q4, Freq, Integral;
+            double Lat, Lon, X, Y, Z, Vx, Vy, Vz, Ox, Oy, Oz, Q1, Q2, Q3, Q4, Freq, Integral;
             long GST_US;
             int StartRow, Gain;
+            UInt32 GST;
 
             GST = readU32(buf, 17);
             GST_US = readU32(buf, 104);     //北京时间+8小时
@@ -931,7 +932,7 @@ namespace Spectra
             //return BitConverter.ToInt32(conv, 0);
         }
 
-        public static double[] CalEarthLonLat(double[] cuR, double fgst)
+        public static double[] CalEarthLonLat(double[] cuR, UInt32 GST)
         {
             double[] clonlat = new double[2];
             double temp, sra, lon;
@@ -946,6 +947,7 @@ namespace Spectra
                 clonlat[1] = Math.Atan(cuR[2] / temp);             //得到纬度[-PI05 PI05]
                 sra = Math.Atan2(cuR[1], cuR[0]);                  //得到经度[-PI PI]
             }
+            double fgst = CalGST(new POSE_TIME(GST,0));
             lon = sra - fgst;
             
             lon = lon - (int)(lon / Math.PI / 2) * Math.PI * 2;                       //POSE_MODF规整到给定范围
@@ -960,6 +962,38 @@ namespace Spectra
             clonlat[0] = 180 * clonlat[0] / Math.PI;            //经度
             clonlat[1] = 90 * clonlat[1] / Math.PI / 0.5;       //纬度
             return clonlat;
+        }
+
+        public static double CalGST(POSE_TIME cTime)
+        {
+            UInt32 POSE_GST0TIME = 63417600;
+            double POSE_GST0 = 5.986782214;
+            double POSE_WE = 0.0000729211514667;
+            double lfgst;
+            double LfDelt;
+            POSE_TIME LgstT = new POSE_TIME();
+
+            LgstT.S = POSE_GST0TIME;    //秒值为宏
+            LgstT.M = 0;                //微秒为0
+
+            LfDelt = CalDeltTime(cTime, LgstT);
+            lfgst = POSE_GST0 + LfDelt * POSE_WE;
+            return lfgst;
+        }
+
+        public static double CalDeltTime(POSE_TIME cTime, POSE_TIME cTime1)
+        {
+            double LfDelt, temp;
+
+            temp = (cTime.M) * 0.001F;
+            if (cTime1.S > cTime.S)
+            {
+                LfDelt = 1.0F * (cTime.S - cTime1.S) - temp;
+                LfDelt = -LfDelt;
+            }
+            else
+                LfDelt = 1.0F * (cTime.S - cTime1.S) + temp;
+            return LfDelt;
         }
 
         public int IntegralToLevel(int integral)
@@ -985,6 +1019,23 @@ namespace Spectra
                 default:
                     return 8;
             }
+        }
+    }
+
+    public class POSE_TIME
+    {
+        public UInt32 S;
+        public UInt32 M;
+        private DateTime now;
+        public POSE_TIME()
+        {
+            S = 0;
+            M = 0;
+        }
+        public POSE_TIME(UInt32 a, UInt32 b)
+        {
+            S = a;
+            M = b;
         }
     }
 
