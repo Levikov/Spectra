@@ -55,7 +55,7 @@ namespace Spectra
                 mycommand.ExecuteScalar();
             }
             catch { }
-            mycommand.CommandText = "CREATE TABLE [AuxData]([InternalId] INTEGER DEFAULT (0),[FrameSum] INTEGER,[FrameId] INTEGER DEFAULT(0),[GST] REAL DEFAULT(0),[GST_US] INT64 DEFAULT 0,[Lat] REAL DEFAULT(0),[Lon] REAL DEFAULT(0),[X] REAL DEFAULT(0),[Y] REAL DEFAULT(0),[Z] REAL DEFAULT(0),[Vx] REAL DEFAULT(0),[Vy] REAL DEFAULT(0),[Vz] REAL DEFAULT(0),[Ox] REAL DEFAULT(0),[Oy] REAL DEFAULT(0),[Oz] REAL DEFAULT(0),[Q1] REAL DEFAULT(0),[Q2] REAL DEFAULT(0),[Q3] REAL DEFAULT(0),[Q4] REAL DEFAULT(0),[Freq] REAL,[Integral] REAL,[StartRow] INTEGER,[Gain] INTEGER,[MD5] TEXT(47),[Satellite] TEXT DEFAULT('None')); ";
+            mycommand.CommandText = "CREATE TABLE [AuxData]([InternalId] INTEGER DEFAULT (0),[FrameSum] INTEGER,[FrameId] INTEGER DEFAULT(0),[GST] REAL DEFAULT(0),[Time] DATETIME, [GST_US] INT64 DEFAULT 0,[Lat] REAL DEFAULT(0),[Lon] REAL DEFAULT(0),[X] REAL DEFAULT(0),[Y] REAL DEFAULT(0),[Z] REAL DEFAULT(0),[Vx] REAL DEFAULT(0),[Vy] REAL DEFAULT(0),[Vz] REAL DEFAULT(0),[Ox] REAL DEFAULT(0),[Oy] REAL DEFAULT(0),[Oz] REAL DEFAULT(0),[Q1] REAL DEFAULT(0),[Q2] REAL DEFAULT(0),[Q3] REAL DEFAULT(0),[Q4] REAL DEFAULT(0),[Freq] REAL,[Integral] REAL,[StartRow] INTEGER,[Gain] INTEGER,[MD5] TEXT(47),[Satellite] TEXT DEFAULT('None')); ";
             mycommand.ExecuteScalar();
             mycommand.CommandText = "CREATE TABLE [FileQuickView]([Name] VARCHAR, [MD5] VARCHAR, [SubId] INTEGER, [FrameSum] INTEGER, [SavePath] VARCHAR, [StartTime] DATETIME, [EndTime] DATETIME, [StartCoord] VARCHAR, [EndCoord] VARCHAR);";
             mycommand.ExecuteScalar();
@@ -129,33 +129,33 @@ namespace Spectra
         /// </summary>
         /// <param name="sql">The SQL to be run.</param>
         /// <returns>An Integer containing the number of rows updated.</returns>
-        public bool ExecuteNonQuery(string sql)
-        {
-            bool successState = false;
-            cnn.Open();
-            using (SQLiteTransaction mytrans = cnn.BeginTransaction())
-            {
-                SQLiteCommand mycommand = new SQLiteCommand(sql, cnn);
-                try
-                {
-                    mycommand.CommandTimeout = 180;
-                    mycommand.ExecuteNonQuery();
-                    mytrans.Commit();
-                    successState = true;
-                    cnn.Close();
-                }
-                catch (Exception e)
-                {
-                    mytrans.Rollback();
-                }
-                finally
-                {
-                    mycommand.Dispose();
-                    cnn.Close();
-                }
-            }
-            return successState;
-        }
+        //public bool ExecuteNonQuery(string sql)
+        //{
+        //    bool successState = false;
+        //    cnn.Open();
+        //    using (SQLiteTransaction mytrans = cnn.BeginTransaction())
+        //    {
+        //        SQLiteCommand mycommand = new SQLiteCommand(sql, cnn);
+        //        try
+        //        {
+        //            mycommand.CommandTimeout = 180;
+        //            mycommand.ExecuteNonQuery();
+        //            mytrans.Commit();
+        //            successState = true;
+        //            cnn.Close();
+        //        }
+        //        catch (Exception e)
+        //        {
+        //            mytrans.Rollback();
+        //        }
+        //        finally
+        //        {
+        //            mycommand.Dispose();
+        //            cnn.Close();
+        //        }
+        //    }
+        //    return successState;
+        //}
 
         public void BeginInsert()
         {
@@ -179,6 +179,16 @@ namespace Spectra
                 trans.Dispose();
                 cnn.Close();
             }
+        }
+
+        public bool ExecuteNonQuery(string sql)
+        {
+            bool successState = false;
+            SQLiteCommand mycommand = new SQLiteCommand(sql, cnn, trans);
+            mycommand.CommandTimeout = 180;
+            mycommand.ExecuteNonQuery();
+            successState = true;
+            return successState;
         }
 
         public bool ExecuteNonQuery(string sql, IList<SQLiteParameter> cmdparams)

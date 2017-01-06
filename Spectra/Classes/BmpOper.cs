@@ -267,9 +267,9 @@ namespace Spectra
         {
             if (band[0] > 160 || band[1] > 160 || band[2] > 160)
                 return null;
-            int width = 2048;
             if (height < 1)
                 return null;
+            int width = 2048;
                 
             byte[] bufBmp = new byte[width * height * 3];                       //RGB图像缓存
             byte[][] bufBand = new byte[3][];                                   //16bit单谱段图像缓存
@@ -391,6 +391,45 @@ namespace Spectra
             Marshal.Copy(frmImage, 0, bmpData.Scan0, 2048 * 160 * 3);
             bmp.UnlockBits(bmpData);
 
+            return bmp;
+        }
+
+        /// <summary>
+        /// 读源文件合成伪彩
+        /// </summary>
+        /// <param name="height">要合成的图像高</param>
+        /// <param name="band">所选取的谱段号（0-159）</param>
+        /// <param name="right">数据右移几位</param>
+        /// <param name="inPath">源文件的全名</param>
+        /// <param name="frmSum">源文件的总帧数</param>
+        /// <param name="startPosi">合成图像的开始帧号(从0计数)</param>
+        /// <returns></returns>
+        public static Bitmap MakePseudo(int height,UInt16[] band,int right,string inPath,int frmSum,int startFrm)
+        {
+            if (band[0] > 159 || band[1] > 159 || band[2] > 159 || height < 1)
+                return null;
+            int width = 2048;
+            byte[][] bandBuf = new byte[3][];
+            FileStream inFile = new FileStream(inPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            //取3张图
+            for (int b = 0; b < 3; b++)
+            {
+                bandBuf[b] = new byte[width*height*2];
+                long seek = (band[b] + 1) * (long)frmSum * width * 2 + startFrm * width * 2;
+                inFile.Seek(seek, SeekOrigin.Begin);
+                inFile.Read(bandBuf[b], 0, height * width * 2);
+            }
+            inFile.Close();
+
+            byte[] bufBmp = new byte[3*width*height*2];
+            Parallel.For(0, width * height, i => {
+                for (int j = 0; j < 3; j++)
+                    bufBmp[i * 3 + 2 - j] = (byte)Math.Min((bandBuf[j][i * 2] + bandBuf[j][i * 2 + 1] * 256)/Math.Pow(2,right), 255);
+            });
+            Bitmap bmp = new Bitmap(width, height, PixelFormat.Format24bppRgb);
+            BitmapData bmpData = bmp.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.WriteOnly, bmp.PixelFormat);
+            Marshal.Copy(bufBmp, 0, bmpData.Scan0, width * height * 3);
+            bmp.UnlockBits(bmpData);
             return bmp;
         }
     }

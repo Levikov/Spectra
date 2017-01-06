@@ -453,6 +453,7 @@
                             <DataGridTextColumn Header ="卫星标识" Binding="{Binding Satellite}" Width="200"/>
                             <DataGridTextColumn Header ="帧号" Binding="{Binding FrameId}" Width="200"/>
                             <DataGridTextColumn Header="GST秒值" Binding="{Binding GST}" Width="200"/>
+                            <DataGridTextColumn Header="拍摄时间" Binding="{Binding Time}" Width="200"/>
                             <DataGridTextColumn Header="GST微秒值" Binding="{Binding GST_US}" Width="200"/>
                             <DataGridTextColumn Header="纬度" Binding="{Binding Lat}" Width="200"/>
                             <DataGridTextColumn Header="经度" Binding="{Binding Lon}" Width="200"/>
