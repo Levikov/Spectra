@@ -95,6 +95,7 @@ namespace Spectra
         private async void btnOpenFiles_Click(object sender, RoutedEventArgs e)
         {
             //DataChannel.CalEarthLonLat(new double[] { 907.1216875, -2544.595, 6548.8195},158248740);
+            Global.longJumpLen = Convert.ToInt64(txtJumpLen.Text);
             FolderBrowserDialog fbd = new FolderBrowserDialog();
             if (fbd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {

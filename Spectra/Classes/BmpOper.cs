@@ -421,10 +421,40 @@ namespace Spectra
             }
             inFile.Close();
 
+            double max = 0;
+            int maxIndex = 0;
+            for (int i = 0; i < 3; i++)
+            {
+                if (DataProc.readU16_PIC(bandBuf[i], height * width) > max)
+                {
+                    max = DataProc.readU16_PIC(bandBuf[i], height * width);
+                    maxIndex = i;
+                }
+            }
+            double[] ratioBand = new double[3];
+            for (int i = 0; i < 3; i++)
+            {
+                ratioBand[i] =
+                ((double)DataProc.readU16_PIC(bandBuf[maxIndex], height * width / 4) +
+                (double)DataProc.readU16_PIC(bandBuf[maxIndex], height * width * 3 / 4) +
+                (double)DataProc.readU16_PIC(bandBuf[maxIndex], height * width / 2) +
+                (double)DataProc.readU16_PIC(bandBuf[maxIndex], height * width) +
+                (double)DataProc.readU16_PIC(bandBuf[maxIndex], height * width * 5 / 4) +
+                (double)DataProc.readU16_PIC(bandBuf[maxIndex], height * width * 3 / 2) +
+                (double)DataProc.readU16_PIC(bandBuf[maxIndex], height * width * 7 / 4)) /
+                (DataProc.readU16_PIC(bandBuf[i], height * width / 4) +
+                DataProc.readU16_PIC(bandBuf[i], height * width * 3 / 4) +
+                DataProc.readU16_PIC(bandBuf[i], height * width / 2) +
+                DataProc.readU16_PIC(bandBuf[i], height * width) +
+                DataProc.readU16_PIC(bandBuf[i], height * width * 5 / 4) +
+                DataProc.readU16_PIC(bandBuf[i], height * width * 3 / 2) +
+                DataProc.readU16_PIC(bandBuf[i], height * width * 7 / 4)
+                );
+            }
             byte[] bufBmp = new byte[3*width*height*2];
             Parallel.For(0, width * height, i => {
                 for (int j = 0; j < 3; j++)
-                    bufBmp[i * 3 + 2 - j] = (byte)Math.Min((bandBuf[j][i * 2] + bandBuf[j][i * 2 + 1] * 256)/Math.Pow(2,right), 255);
+                    bufBmp[i * 3 + 2 - j] = (byte)Math.Min((bandBuf[j][i * 2] + bandBuf[j][i * 2 + 1] * 256) * ratioBand[j] / Math.Pow(2,right), 255);
             });
             Bitmap bmp = new Bitmap(width, height, PixelFormat.Format24bppRgb);
             BitmapData bmpData = bmp.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.WriteOnly, bmp.PixelFormat);
