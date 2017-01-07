@@ -78,11 +78,8 @@ namespace Spectra
                 openFile.Filter = "All Files(*.*)|*.*";
                 if ((bool)openFile.ShowDialog())
                 {
-                    FileInfo.srcFilePathName = openFile.FileName;                                                                   //文件路径名称
-                    FileInfo.srcFileName = FileInfo.srcFilePathName.Substring(FileInfo.srcFilePathName.LastIndexOf('\\') + 1);      //文件名称
-                    tb_Console.Text = FileInfo.checkFileState(FileInfo.srcFileName.Substring(0,FileInfo.srcFileName.LastIndexOf('.')));                                                //检查文件状态
+                    tb_Console.Text = FileInfo.checkFileState(openFile.FileName) + "\n" + tb_Console.Text;                                          //检查文件状态
                     /*窗体控件*/
-                    dataGrid_Errors.ItemsSource = SQLiteFunc.SelectDTSQL("select * from FileErrors where MD5='" + FileInfo.md5 + "'").DefaultView;  //显示错误信息
                     tb_Path.Text = FileInfo.srcFilePathName;
                     txtCurrentFile.Text = FileInfo.srcFileName;
                     prog_Import.Value = 0;
@@ -97,10 +94,9 @@ namespace Spectra
         /*批处理文件*/
         private async void btnOpenFiles_Click(object sender, RoutedEventArgs e)
         {
-            Microsoft.Win32.OpenFileDialog openFile = new Microsoft.Win32.OpenFileDialog();
-            openFile.Filter = "All Files(*.*)|*.*";
-            openFile.Multiselect = true;
-            if ((bool)openFile.ShowDialog())
+            //DataChannel.CalEarthLonLat(new double[] { 907.1216875, -2544.595, 6548.8195},158248740);
+            FolderBrowserDialog fbd = new FolderBrowserDialog();
+            if (fbd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 btnOpenFile.IsEnabled = false;
                 btnOpenFiles.IsEnabled = false;
@@ -108,21 +104,20 @@ namespace Spectra
                 btnDelRecord.IsEnabled = false;
                 IProgress<double> IProg_Bar = new Progress<double>((ProgressValue) => { prog_Import.Value = ProgressValue * prog_Import.Maximum; });
                 IProgress<string> IProg_Cmd = new Progress<string>((ProgressString) => { tb_Console.Text = ProgressString + "\n" + tb_Console.Text; });
-                for (int fi = 0; fi < openFile.SafeFileNames.Length; fi++)
+                string[] openFiles = FileInfo.filterFiles(fbd.SelectedPath);
+                for (int fi = 0; fi < openFiles.Length; fi++)
                 {
                     try
                     {
-                        FileInfo.srcFilePathName = openFile.FileNames[fi];                                                                   //文件路径名称
-                        FileInfo.srcFileName = FileInfo.srcFilePathName.Substring(FileInfo.srcFilePathName.LastIndexOf('\\') + 1);      //文件名称
-                        tb_Console.Text = FileInfo.checkFileState(FileInfo.srcFileName.Substring(0, FileInfo.srcFileName.LastIndexOf('.')));                                                                    //检查文件状态
-
+                        tb_Console.Text = FileInfo.checkFileState(openFiles[fi]) + "\n" + tb_Console.Text;  //检查文件状态
+                        if (FileInfo.isDecomp)
+                            continue;
                         DataOper dataOper = new DataOper(FileInfo.srcFilePathName, FileInfo.md5);
-                        await dataOper.main(IProg_Bar, IProg_Cmd);
-                        dataGrid_Errors.ItemsSource = SQLiteFunc.SelectDTSQL("select * from FileErrors where MD5='" + FileInfo.md5 + "'").DefaultView;  //显示错误信息
+                        await dataOper.main(fi+1,openFiles.Length,IProg_Bar, IProg_Cmd);
                     }
-                    catch
+                    catch(Exception ex)
                     {
-                        //System.Windows.MessageBox.Show(ex.ToString());
+                        tb_Console.Text = ex.ToString() + "\n" + tb_Console.Text;
                     }
                 }
                 btnOpenFile.IsEnabled = true;
@@ -141,7 +136,7 @@ namespace Spectra
             DataOper dataOper = new DataOper(FileInfo.srcFilePathName, FileInfo.md5);
             IProgress<double> IProg_Bar = new Progress<double>((ProgressValue) => { prog_Import.Value = ProgressValue * prog_Import.Maximum; });
             IProgress<string> IProg_Cmd = new Progress<string>((ProgressString) => { tb_Console.Text = ProgressString + "\n" + tb_Console.Text; });
-            await dataOper.main(IProg_Bar, IProg_Cmd);
+            await dataOper.main(1,1,IProg_Bar, IProg_Cmd);
             dataGrid_Errors.ItemsSource = SQLiteFunc.SelectDTSQL("select * from FileErrors where MD5='" + FileInfo.md5 + "'").DefaultView;  //显示错误信息
 
             btnOpenFile.IsEnabled = true;
@@ -262,13 +257,6 @@ namespace Spectra
         {
             dataGrid_srcFile.ItemsSource = SQLiteFunc.SelectDTSQL("SELECT * from FileDetails where 文件路径 like '%" + textSelectFile.Text + "%'").DefaultView;
         }
-        /*选中文件后显示解压情况*/
-        private void dataGrid_srcFile_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            var sel = (DataRowView)dataGrid_srcFile.SelectedItem;
-            if (sel != null)
-                dataGrid_decFile.ItemsSource = SQLiteFunc.SelectDTSQL("SELECT * from FileDetails_dec where MD5='" + sel.Row[5] + "'").DefaultView;
-        }
         /*查找所有文件*/
         private void btnGetAllRecord_Click(object sender, RoutedEventArgs e)
         {
@@ -277,9 +265,9 @@ namespace Spectra
         /*打开解压文件夹*/
         private void decFileOpen_Click(object sender, RoutedEventArgs e)
         {
-            if (dataGrid_decFile.Items.Count > 0)
+            if (dataGrid_srcFile.Items.Count > 0)
             {
-                string path = ((DataRowView)(dataGrid_decFile.Items[0])).Row[9].ToString();
+                string path = ((DataRowView)(dataGrid_srcFile.Items[0])).Row["解压后文件路径"].ToString();
                 System.Diagnostics.Process.Start("explorer.exe", path);
             }
         }
@@ -294,13 +282,11 @@ namespace Spectra
                     if (System.Windows.MessageBox.Show("确认删除该文件的记录?", "提示", MessageBoxButton.OKCancel, MessageBoxImage.Warning) == MessageBoxResult.Cancel) return;
                     else
                     {
-                        SQLiteFunc.ExcuteSQL("delete from FileDetails where MD5='" + sel.Row[5] + "'");
-                        SQLiteFunc.ExcuteSQL("delete from FileDetails_dec where MD5='" + sel.Row[5] + "'");
-                        SQLiteFunc.ExcuteSQL("delete from FileErrors where MD5='" + sel.Row[5] + "'");
-                        SQLiteFunc.ExcuteSQL("delete from AuxData where MD5='" + sel.Row[5] + "'");
-                        SQLiteFunc.ExcuteSQL("delete from FileQuickView where MD5='" + sel.Row[5] + "'");
+                        SQLiteFunc.ExcuteSQL("delete from FileDetails where MD5 like '" + sel.Row["MD5"] + "%'");
+                        SQLiteFunc.ExcuteSQL("delete from FileErrors where MD5 like '" + sel.Row["MD5"] + "%'");
+                        SQLiteFunc.ExcuteSQL("delete from AuxData where MD5 like '" + sel.Row["MD5"] + "%'");
+                        SQLiteFunc.ExcuteSQL("delete from FileQuickView where MD5 like '" + sel.Row["MD5"] + "%'");
                         dataGrid_srcFile.ItemsSource = SQLiteFunc.SelectDTSQL("SELECT * from FileDetails").DefaultView;
-                        dataGrid_decFile.ItemsSource = null;
                     }
                 }
             }
@@ -338,11 +324,7 @@ namespace Spectra
                     string md5 = dtAux.Rows[0]["MD5"].ToString();
                     SQLiteFunc.ExcuteSQL($"delete from FileDetails where MD5='{md5}'");
                     SQLiteFunc.ExcuteSQL($"insert into FileDetails (文件名,MD5) values ('{md5}','{md5}')");
-                    SQLiteFunc.ExcuteSQL($"delete from FileDetails_dec where MD5='{md5}'");
-                    SQLiteFunc.ExcuteSQL($"insert into FileDetails_dec (MD5) values ('{md5}')");
                     DataOper dataOper = new DataOper(md5);
-                    //dataOper.sqlInsert(Global.dbPath, dtAux, true);
-                    SQLiteFunc.ExcuteSQL($"update FileDetails_dec set 解压后文件路径='{path}' where MD5='{md5}'");
 
                     for (int len = 0; len < name.Length; len++)
                     {
@@ -352,7 +334,6 @@ namespace Spectra
                         SQLiteFunc.ExcuteSQL($"update FileQuickView set SavePath='{path}id\\' where MD5='{md5}'");
                     }
                     dataGrid_srcFile.ItemsSource = SQLiteFunc.SelectDTSQL("SELECT * from FileDetails").DefaultView;
-                    dataGrid_decFile.ItemsSource = null;
                     System.Windows.MessageBox.Show("导入成功!","提示",MessageBoxButton.OK,MessageBoxImage.Information);
                 }
             }

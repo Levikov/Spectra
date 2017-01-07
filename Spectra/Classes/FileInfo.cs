@@ -10,65 +10,35 @@ namespace Spectra
     public static class FileInfo
     {
         public static string md5;                   /*文件的MD5值*/
-
         public static string srcFilePathName;       /*源文件路径全称*/
         public static string srcFileName;           /*源文件名称*/
-        public static long srcFileLength;           /*源文件大小*/
-
-        public static bool isUnpack = false;        /*是否已解包*/
-        public static bool isDecomp = false;        /*是否已解压*/
-
-        public static string upkFilePathName;       /*解包后文件路径全称*/
+        public static long srcFileLength;           /*源文件大小*/        
+        public static bool isDecomp = false;        /*是否已解压*/        
         public static string decFilePathName;       /*解压后文件路径全称*/
-
         public static long frmSum;                  /*帧总数*/
-        public static DateTime startTime;
-        public static DateTime endTime;
-        public static Coord startCoord = new Coord(0, 0);
-        public static Coord endCoord = new Coord(0, 0);
 
         /*检查文件状态*/
-        public static string checkFileState(string md5)
+        public static string checkFileState(string file)
         {
-            //文件名作为唯一标识
-            FileInfo.md5 = md5;
+            FileInfo.srcFilePathName = file;                                                                                //文件路径名称
+            FileInfo.srcFileName = FileInfo.srcFilePathName.Substring(FileInfo.srcFilePathName.LastIndexOf('\\') + 1);      //文件名称
+            FileInfo.md5 = FileInfo.srcFileName.Substring(0, FileInfo.srcFileName.LastIndexOf('.'));                        //MD5
+            FileInfo.srcFileLength = File.OpenRead(FileInfo.srcFilePathName).Length;                                        //文件大小
             /*汇报文件状态*/
-            string strReport = "";
+            string strReport = DateTime.Now.ToString("HH:mm:ss") + " \"" + FileInfo.srcFileName.ToString() + "\" ";
             DataTable fileDetail = SQLiteFunc.SelectDTSQL($"SELECT * from FileDetails where MD5='{FileInfo.md5}'");
             if (fileDetail.Rows.Count == 0)
             {
-                FileInfo.isUnpack = false;                                                                                  //未解包
                 FileInfo.isDecomp = false;                                                                                  //未解压
-                SQLiteFunc.ExcuteSQL("insert into FileDetails (文件名,文件路径,文件大小,是否已解包,是否已解压,MD5) values ('?','?','?','?','?','?')",
-                    FileInfo.srcFileName, FileInfo.srcFilePathName, File.OpenRead(FileInfo.srcFilePathName).Length, "否", "否", FileInfo.md5);
-                SQLiteFunc.ExcuteSQL("insert into FileDetails_dec (MD5) values ('?')", FileInfo.md5);
-                strReport = DateTime.Now.ToString("HH:mm:ss") + " 文件"+FileInfo.srcFileName.ToString()+"第一次导入,未解包,未解压";
+                SQLiteFunc.ExcuteSQL("insert into FileDetails (文件名,文件路径,文件大小,是否已解压,MD5) values ('?','?','?','?','?')",
+                    FileInfo.srcFileName, FileInfo.srcFilePathName, FileInfo.srcFileLength, "否", FileInfo.md5);
+                strReport += "未解压";
             }
             else
             {
-                FileInfo.srcFileLength = Convert.ToInt64(fileDetail.Rows[0][2]);       //文件大小
-                strReport = DateTime.Now.ToString("HH:mm:ss") + " 文件"+FileInfo.srcFileName.ToString();
-                if ((string)fileDetail.Rows[0][3] == "是")
-                {
-                    FileInfo.isUnpack = true;
-                    FileInfo.upkFilePathName = Convert.ToString(SQLiteFunc.SelectDTSQL($"SELECT * from FileDetails_dec where MD5='{FileInfo.md5}'").Rows[0][7]);
-                    strReport += "已解包,";
-                }
-                else
-                {
-                    FileInfo.isUnpack = false;
-                    strReport += "未解包,";
-                }
-                if ((string)fileDetail.Rows[0][4] == "是")
+                if ((string)fileDetail.Rows[0]["是否已解压"] == "是")
                 {
                     FileInfo.isDecomp = true;
-                    DataTable dt = SQLiteFunc.SelectDTSQL($"SELECT * from FileDetails_dec where MD5='{FileInfo.md5}'");
-                    if (dt.Rows[0][1] != DBNull.Value) FileInfo.frmSum = Convert.ToInt64(dt.Rows[0][1]);           //帧总数
-                    if (dt.Rows[0][2] != DBNull.Value) FileInfo.startTime = Convert.ToDateTime(dt.Rows[0][2]);     //起始时间
-                    if (dt.Rows[0][3] != DBNull.Value) FileInfo.endTime = Convert.ToDateTime(dt.Rows[0][3]);       //结束时间
-                    if (dt.Rows[0][4] != DBNull.Value) FileInfo.startCoord.convertToCoord((string)dt.Rows[0][4]);  //起始经纬
-                    if (dt.Rows[0][5] != DBNull.Value) FileInfo.endCoord.convertToCoord((string)dt.Rows[0][5]);    //结束经纬
-                    if (dt.Rows[0][9] != DBNull.Value) FileInfo.decFilePathName = (string)dt.Rows[0][9];           //解压后路径
                     strReport += "已解压";
                 }
                 else
@@ -80,38 +50,67 @@ namespace Spectra
             return strReport;
         }
 
-
-
-
-
-
-
-        [DllImport("DLL\\DataOperation.dll", EntryPoint = "preProcess_File")]
-        static extern int preProcess_File(string pathName, int len);
-        public static string preProcessFile(bool isUpk, int packLen)
+        /// <summary>
+        /// 获取所有需要的文件
+        /// </summary>
+        /// <param name="path">选定的路径</param>
+        /// <returns>需要解压的文件列表</returns>
+        public static string[] filterFiles(string path)
         {
-            string path = "";
-            if (isUpk)
+            string[] files = getFiles(path);
+            string name = "";
+            int cnt = files.Length - 1;
+            for (int i = cnt; i >=0 ; i--)
             {
-                if (preProcess_File(FileInfo.upkFilePathName, packLen) == -1)
+                name = files[i];
+                if (name.Substring(name.LastIndexOf('.')) != ".dat" || name.Substring(name.LastIndexOf('\\')+1).Substring(0,3) != "WN0")
                 {
-                    MessageBox.Show("输入文件错误", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return path;
+                    files = removeFiles(files, i);
                 }
-                string[] s = FileInfo.upkFilePathName.Split('.');
-                path = s[0] + "_p." + s[1];
             }
-            else
+            return files;
+        }
+
+        /// <summary>
+        /// 获取路径下的所有文件
+        /// </summary>
+        /// <param name="path">路径</param>
+        /// <returns>文件列表</returns>
+        public static string[] getFiles(string path)
+        {
+            string[] files = Directory.GetFiles(path);
+            foreach (string dir in Directory.GetDirectories(path))
             {
-                if (preProcess_File(FileInfo.srcFilePathName, packLen) == -1)
-                {
-                    MessageBox.Show("输入文件错误", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return path;
-                }
-                string[] s = FileInfo.srcFilePathName.Split('.');
-                path = s[0] + "_p." + s[1];
+                files = addFiles(files, getFiles(dir));
             }
-            return path;
+            return files;
+        }
+
+        /// <summary>
+        /// 将2个字符串数组拼接为1个
+        /// </summary>
+        /// <param name="f1">数组1</param>
+        /// <param name="f2">数组2</param>
+        /// <returns>拼接后数组</returns>
+        public static string[] addFiles(string[] f1,string[] f2)
+        {
+            string[] files = new string[f1.Length+f2.Length];
+            f1.CopyTo(files, 0);
+            f2.CopyTo(files, f1.Length);
+            return files;
+        }
+
+        public static string[] removeFiles(string[] f, int i)
+        {
+            string[] files = new string[f.Length - 1];
+            int j = 0;
+            for (int r = 0; r < f.Length; r++)
+            {
+                if (r == i)
+                    continue;
+                files[j++] = f[r];
+            }
+            return files;
         }
     }
 }

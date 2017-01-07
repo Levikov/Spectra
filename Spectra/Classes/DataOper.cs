@@ -78,12 +78,13 @@ namespace Spectra
         /// <param name="IProg_Bar">进度条</param>
         /// <param name="IProg_Cmd">控制台</param>
         /// <returns>Task</returns>
-        public Task main(IProgress<double> IProg_Bar, IProgress<string> IProg_Cmd)
+        public Task main(int cnt,int sum,IProgress<double> IProg_Bar, IProgress<string> IProg_Cmd)
         {
             return Task.Run(() =>
             {
                 try
                 {
+                    IProg_Cmd.Report(DateTime.Now.ToString("HH:mm:ss") + $" 开始解压第{cnt}个文件,共{sum}个文件.");
                     string strSrc = preData(unpackData(srcFilePathName, IProg_Bar, IProg_Cmd), IProg_Bar, IProg_Cmd);
                     //string strSrc = srcFilePathName;
                     if (strSrc == string.Empty)
@@ -592,6 +593,7 @@ namespace Spectra
                     sqlInsertSplit($"{outName}.sqlite", dtExcel, strTrim);
                     //存储为EXCEL
                     ExcelHelper _excelHelper = new ExcelHelper();
+                    dtExcel.Columns.RemoveAt(1);
                     _excelHelper.SaveToText($"{outName}.xls", dtExcel);
 
                     IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} {i}图像合并完成.");
@@ -662,6 +664,7 @@ namespace Spectra
                 sqlInsertAll($"{outName}.sqlite", dtExcel, strTrim);
                 //存储为EXCEL
                 ExcelHelper _excelHelper = new ExcelHelper();
+                dtExcel.Columns.RemoveAt(1);
                 _excelHelper.SaveToText($"{outName}.xls", dtExcel);
                 //关闭文件
                 for (int i = 0; i < splitSum; i++)
@@ -914,16 +917,14 @@ namespace Spectra
         }
 
         /// <summary>
-        /// 文件信息插入数据库，将首帧、末帧作为文件图像的起始和结束
+        /// 文件信息插入数据库
         /// </summary>
         /// <param name="sqlExcute">数据库对象</param>
         private void updateFileInfo(DataTable dtDB)
         {
-            //更新文件信息
-            FileInfo.frmSum = dtDB.Rows.Count;//帧总数
-
-            SQLiteFunc.ExcuteSQL("update FileDetails_dec set 解压时间='?',解压后文件路径='?',帧数='?',起始经纬='?' where MD5='?'",
+            SQLiteFunc.ExcuteSQL("update FileDetails set 解压时间='?',解压后文件路径='?',帧数='?',开机次数='?' where MD5='?'",
                 DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), $"{Global.pathDecFiles}{md5}\\", FileInfo.frmSum, kjcs.Length.ToString(), md5);
+            FileInfo.frmSum = dtDB.Rows.Count;
             ImageInfo.strFilesPath = FileInfo.decFilePathName = $"{Global.pathDecFiles}{md5}\\";
         }
 
@@ -1092,7 +1093,7 @@ namespace Spectra
             double[] clonlat = new double[2];
             double temp, sra, lon;
             temp = Math.Sqrt(cuR[0] * cuR[0] + cuR[1] * cuR[1]);             //|R|
-            if (Math.Abs(temp) < 0.0000001F)                                //R==0
+            if (Math.Abs(temp) < 0.0000001)                                //R==0
             {
                 clonlat[1] = Math.PI * 0.5 * cuR[2] / Math.Abs(cuR[2]);    //Recs[2]>0.0,则fLati = PI05
                 sra = 0.0F;
@@ -1140,14 +1141,14 @@ namespace Spectra
         {
             double LfDelt, temp;
 
-            temp = (cTime.M) * 0.001F;
+            temp = (cTime.M) * 0.001;
             if (cTime1.S > cTime.S)
             {
-                LfDelt = 1.0F * (cTime.S - cTime1.S) - temp;
+                LfDelt = 1.0 * (cTime1.S - cTime.S) - temp;
                 LfDelt = -LfDelt;
             }
             else
-                LfDelt = 1.0F * (cTime.S - cTime1.S) + temp;
+                LfDelt = 1.0 * (cTime.S - cTime1.S) + temp;
             return LfDelt;
         }
 
@@ -1181,7 +1182,6 @@ namespace Spectra
     {
         public UInt32 S;
         public UInt32 M;
-        private DateTime now;
         public POSE_TIME()
         {
             S = 0;

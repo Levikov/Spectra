@@ -232,7 +232,6 @@
                 </Grid.Resources>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="40"/>
-                    <RowDefinition Height="110"/>
                     <RowDefinition Height="1*"/>
                     <RowDefinition Height="50"/>
                 </Grid.RowDefinitions>
@@ -243,34 +242,17 @@
                     <ColumnDefinition Width="340"/>
                     <ColumnDefinition Width="30"/>
                 </Grid.ColumnDefinitions>
-                <DockPanel Grid.Row="1" Grid.Column="1" Background="{StaticResource WindowBack2}">
-                    <DataGrid x:Name="dataGrid_decFile" Margin="5" LoadingRow="LoadingRowHeader">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="帧数" Binding="{Binding 帧数}" Width="auto"/>
-                            <DataGridTextColumn Header="起始时间" Binding="{Binding 起始时间}" Width="auto"/>
-                            <DataGridTextColumn Header="结束时间" Binding="{Binding 结束时间}" Width="auto"/>
-                            <DataGridTextColumn Header="起始经纬" Binding="{Binding 起始经纬}" Width="auto"/>
-                            <DataGridTextColumn Header="结束经纬" Binding="{Binding 结束经纬}" Width="auto"/>
-                            <!--<DataGridTextColumn Header="解包时间" Binding="{Binding 解包时间}" Width="auto"/>-->
-                            <!--<DataGridTextColumn Header="解包后文件路径" Binding="{Binding 解包后文件路径}" Width="auto"/>-->
-                            <DataGridTextColumn Header="解压时间" Binding="{Binding 解压时间}" Width="auto"/>
-                            <DataGridTextColumn Header="解压后文件路径" Binding="{Binding 解压后文件路径}" Width="auto"/>
-                        </DataGrid.Columns>
-                        <DataGrid.ContextMenu>
-                            <ContextMenu Name="decFileMenu" StaysOpen="True">
-                                <MenuItem x:Name="decFileOpen" Header="打开文件夹" Click="decFileOpen_Click"/>
-                            </ContextMenu>
-                        </DataGrid.ContextMenu>
-                    </DataGrid>
-                </DockPanel>
-                <DockPanel Grid.Row="2" Grid.Column="1" Margin="0,10,0,0" Background="{StaticResource WindowBack2}">
-                    <DataGrid x:Name="dataGrid_srcFile" Margin="5" LoadingRow="LoadingRowHeader" SelectionChanged="dataGrid_srcFile_SelectionChanged">
+                <DockPanel Grid.Row="1" Grid.Column="1" Margin="0,10,0,0" Background="{StaticResource WindowBack2}">
+                    <DataGrid x:Name="dataGrid_srcFile" Margin="5" LoadingRow="LoadingRowHeader">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header ="文件名" Binding="{Binding 文件名}" Width="auto"/>
-                            <DataGridTextColumn Header ="文件路径" Binding="{Binding 文件路径}" Width="auto"/>
-                            <!--<DataGridTextColumn Header ="是否已解包" Binding="{Binding 是否已解包}" Width="auto"/>-->
                             <DataGridTextColumn Header ="是否已解压" Binding="{Binding 是否已解压}" Width="auto"/>
+                            <DataGridTextColumn Header ="开机次数" Binding="{Binding 开机次数}" Width="auto"/>
+                            <DataGridTextColumn Header ="帧数" Binding="{Binding 帧数}" Width="auto"/>
                             <DataGridTextColumn Header ="文件大小(B)" Binding="{Binding 文件大小}" Width="auto"/>
+                            <DataGridTextColumn Header ="解压时间" Binding="{Binding 解压时间}" Width="auto"/>
+                            <DataGridTextColumn Header ="解压后文件路径" Binding="{Binding 解压后文件路径}" Width="auto"/>
+                            <DataGridTextColumn Header ="文件路径" Binding="{Binding 文件路径}" Width="auto"/>
                             <DataGridTextColumn Header ="MD5" Binding="{Binding MD5}" Width="auto"/>
                         </DataGrid.Columns>
                     </DataGrid>
