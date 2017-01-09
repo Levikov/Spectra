@@ -15,13 +15,9 @@ namespace Spectra
 {
     public partial class MainWindow : Window
     {
-        /*构造函数+系统初始化*/
-        SelectedDatesCollection sds;
         public MainWindow()
         {
             InitializeComponent();
-            //sds = new SelectedDatesCollection(calendarFile);
-            //calendarFile.SelectedDates.AddRange((DateTime.Now.Date).AddDays(-100), (DateTime.Now.Date).AddDays(-1));
         }
 
         #region 界面控制
@@ -91,6 +87,7 @@ namespace Spectra
                 System.Windows.MessageBox.Show(ex.ToString());
             }
         }
+
         /*批处理文件*/
         private async void btnOpenFiles_Click(object sender, RoutedEventArgs e)
         {

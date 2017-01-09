@@ -593,7 +593,8 @@ namespace Spectra
                     sqlInsertSplit($"{outName}.sqlite", dtExcel, strTrim);
                     //存储为EXCEL
                     ExcelHelper _excelHelper = new ExcelHelper();
-                    dtExcel.Columns.RemoveAt(1);
+                    for (int j = 0; j < imageWidth; j++)
+                        dtExcel.Rows[j]["row"] = imageWidth;
                     _excelHelper.SaveToText($"{outName}.xls", dtExcel);
 
                     IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} {i}图像合并完成.");
@@ -664,7 +665,8 @@ namespace Spectra
                 sqlInsertAll($"{outName}.sqlite", dtExcel, strTrim);
                 //存储为EXCEL
                 ExcelHelper _excelHelper = new ExcelHelper();
-                dtExcel.Columns.RemoveAt(1);
+                for (int j = 0; j < frmSum; j++)
+                    dtExcel.Rows[j]["row"] = frmSum;
                 _excelHelper.SaveToText($"{outName}.xls", dtExcel);
                 //关闭文件
                 for (int i = 0; i < splitSum; i++)
@@ -1038,7 +1040,7 @@ namespace Spectra
             long GST_US;
             int StartRow, Gain;
             UInt32 GST;
-
+            float test;
             GST = readU32(buf, 17);
             DateTime T0 = new DateTime(2012, 1, 1, 8, 0, 0);
             DateTime Time = T0.AddSeconds((double)GST);
@@ -1047,7 +1049,7 @@ namespace Spectra
             Y = readI32(buf, 36) / (double)1000;
             Z = readI32(buf, 40) / (double)1000;
             double[] latlon = new double[2];
-            latlon = CalEarthLonLat(new double[3] { X, Y, Z }, GST);
+            latlon = CalEarthLonLat(new double[3] { X, Y, Z }, GST, readU32(buf, 28));
             Lat = double.IsNaN(latlon[1]) ? 0 : latlon[1];
             Lon = double.IsNaN(latlon[0]) ? 0 : latlon[0];
 
@@ -1088,7 +1090,7 @@ namespace Spectra
             //return BitConverter.ToInt32(conv, 0);
         }
 
-        public static double[] CalEarthLonLat(double[] cuR, UInt32 GST)
+        public static double[] CalEarthLonLat(double[] cuR, UInt32 GST,UInt32 US)
         {
             double[] clonlat = new double[2];
             double temp, sra, lon;
@@ -1103,21 +1105,26 @@ namespace Spectra
                 clonlat[1] = Math.Atan(cuR[2] / temp);             //得到纬度[-PI05 PI05]
                 sra = Math.Atan2(cuR[1], cuR[0]);                  //得到经度[-PI PI]
             }
-            double fgst = CalGST(new POSE_TIME(GST,0));
+            double fgst = newCalGST(GST);
             lon = sra - fgst;
             
             lon = lon - (int)(lon / Math.PI / 2) * Math.PI * 2;                       //POSE_MODF规整到给定范围
-
-            if (lon > Math.PI)
-                lon = lon - Math.PI * 2;
-            else if (lon < -Math.PI)
-                lon = lon + Math.PI * 2;
-            else { }
+            if (lon < 2 * Math.PI)
+                lon += Math.PI * 2;
+            if(lon>Math.PI)
+                lon = lon - Math.PI*2;
             clonlat[0] = lon;                                       //经度
 
             clonlat[0] = 180 * clonlat[0] / Math.PI;            //经度
             clonlat[1] = 90 * clonlat[1] / Math.PI / 0.5;       //纬度
             return clonlat;
+        }
+
+        public static double newCalGST(UInt32 t1)
+        {
+            double gst = 0;
+            gst = 1.7463799 + 6.3003881 * (t1 / 86400.0 - t1 / 86400) + (t1 / 86400) * 0.0172028;
+            return gst;
         }
 
         public static double CalGST(POSE_TIME cTime)
