@@ -1209,12 +1209,23 @@ namespace Spectra
         #endregion
 
         #region 默认数据设置
+        //选择解压后默认存放路径
+        private void btnSelectDecPath_Click(object sender, RoutedEventArgs e)
+        {
+            FolderBrowserDialog fbd = new FolderBrowserDialog();
+            if (fbd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                if(fbd.SelectedPath.Substring(fbd.SelectedPath.Length - 1) == "\\")
+                    txtSetDecPath.Text = fbd.SelectedPath;
+                else
+                    txtSetDecPath.Text = fbd.SelectedPath + "\\";
+            }
+        }
         //设置解压后默认存放路径
         private void btnSetDecPath_Click(object sender, RoutedEventArgs e)
         {
-            if (txtSetDecPath.Text.Substring(txtSetDecPath.Text.Length - 1) != "\\")
-                txtSetDecPath.Text = txtSetDecPath.Text + "\\";
             SQLiteFunc.ExcuteSQL("update Global set Variable='?' where ID=1", txtSetDecPath.Text);
+            System.Windows.MessageBox.Show("设置成功","提示",MessageBoxButton.OK,MessageBoxImage.Information);
         }
         #endregion
     }

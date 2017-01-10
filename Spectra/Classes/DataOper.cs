@@ -409,7 +409,7 @@ namespace Spectra
             int a = 1;
             for (int row = 2; row < frmE[0] - 1; row++)
             {
-                if ((int)dataChannel[0].dtChannel.Rows[row-1]["FrameId"] - (int)dataChannel[0].dtChannel.Rows[row-2]["FrameId"] == 1 && (int)dataChannel[0].dtChannel.Rows[row]["FrameId"] < (int)dataChannel[0].dtChannel.Rows[row-1]["FrameId"] && (int)dataChannel[0].dtChannel.Rows[row+1]["FrameId"] - (int)dataChannel[0].dtChannel.Rows[row]["FrameId"] == 1)
+                if ((int)dataChannel[0].dtChannel.Rows[row - 1]["FrameId"] - (int)dataChannel[0].dtChannel.Rows[row - 2]["FrameId"] == 1 && (int)dataChannel[0].dtChannel.Rows[row]["FrameId"] < (int)dataChannel[0].dtChannel.Rows[row - 1]["FrameId"] && (int)dataChannel[0].dtChannel.Rows[row + 1]["FrameId"] - (int)dataChannel[0].dtChannel.Rows[row]["FrameId"] == 1 && (int)dataChannel[0].dtChannel.Rows[row - 1]["FrameId"] != 65535)
                 {
                     a++;
                 }
@@ -419,7 +419,7 @@ namespace Spectra
             kjcs[a++] = 0;
             for (int row = 2; row < frmE[0] - 1; row++)
             {
-                if ((int)dataChannel[0].dtChannel.Rows[row - 1]["FrameId"] - (int)dataChannel[0].dtChannel.Rows[row - 2]["FrameId"] == 1 && (int)dataChannel[0].dtChannel.Rows[row]["FrameId"] < (int)dataChannel[0].dtChannel.Rows[row - 1]["FrameId"] && (int)dataChannel[0].dtChannel.Rows[row + 1]["FrameId"] - (int)dataChannel[0].dtChannel.Rows[row]["FrameId"] == 1)
+                if ((int)dataChannel[0].dtChannel.Rows[row - 1]["FrameId"] - (int)dataChannel[0].dtChannel.Rows[row - 2]["FrameId"] == 1 && (int)dataChannel[0].dtChannel.Rows[row]["FrameId"] < (int)dataChannel[0].dtChannel.Rows[row - 1]["FrameId"] && (int)dataChannel[0].dtChannel.Rows[row + 1]["FrameId"] - (int)dataChannel[0].dtChannel.Rows[row]["FrameId"] == 1 && (int)dataChannel[0].dtChannel.Rows[row - 1]["FrameId"] != 65535)
                     kjcs[a++] = row;
             }
 
