@@ -86,13 +86,13 @@ namespace Spectra
                 {
                     IProg_Cmd.Report(DateTime.Now.ToString("HH:mm:ss") + $" 开始解压第{cnt}个文件,共{sum}个文件.");
                     string strSrc = preData(unpackData(srcFilePathName, IProg_Bar, IProg_Cmd), IProg_Bar, IProg_Cmd);
-                    //string strSrc = srcFilePathName;
+                    strSrc = splitFile(strSrc, IProg_Bar, IProg_Cmd);
                     if (strSrc == string.Empty)
                     {
                         IProg_Cmd.Report(DateTime.Now.ToString("HH:mm:ss") + " 文件不正确，已停止该文件操作！");
                         return;
                     }
-                    strSrc = decData(splitFile(strSrc, IProg_Bar, IProg_Cmd), IProg_Bar, IProg_Cmd);
+                    strSrc = decData(strSrc, IProg_Bar, IProg_Cmd);
                     mergeImage(strSrc, IProg_Bar, IProg_Cmd);
                     SQLiteFunc.ExcuteSQL("update FileDetails set 是否已解压='是' where MD5='?';", md5);
                     IProg_Cmd.Report(DateTime.Now.ToString("HH:mm:ss") + " 开始清理冗余文件！");
@@ -241,7 +241,7 @@ namespace Spectra
                 return string.Empty;
             FileStream inFileStream = new FileStream(inFilePathName, FileMode.Open, FileAccess.Read, FileShare.Read);
             //文件为空，退出
-            if (inFileStream == null)
+            if (inFileStream == null || inFileStream.Length < 10 * 1024 * 1024)
                 return string.Empty;
             //开始预处理
             IProg_Cmd.Report($"{DateTime.Now.ToString("HH:mm:ss")} 开始预处理.");
@@ -292,7 +292,7 @@ namespace Spectra
                 return string.Empty;
             //文件为空，退出
             FileStream inFileStream = new FileStream(inFilePathName, FileMode.Open, FileAccess.Read, FileShare.Read);
-            if (inFileStream == null)
+            if (inFileStream == null || inFileStream.Length < 10 * 1024 * 1024)
                 return string.Empty;
             //输出文件
             FileStream[] outFileStream = new FileStream[4];

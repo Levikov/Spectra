@@ -68,7 +68,11 @@ namespace Spectra
                     files = removeFiles(files, i);
                 }
             }
-            return files;
+            //逆序排列，先处理最新文件
+            string[] filesConv = new string[files.Length];
+            for (int i = 0; i < files.Length; i++)
+                filesConv[files.Length - i - 1] = files[i];
+            return filesConv;
         }
 
         /// <summary>
