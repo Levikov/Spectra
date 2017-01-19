@@ -580,6 +580,7 @@ namespace Spectra
                     bmp = BmpOper.MakePseudo(imageWidth, new UInt16[] { 122, 77, 40 }, 2, $"{outName}.raw", imageWidth, 0);
                     bmp.RotateFlip(System.Drawing.RotateFlipType.Rotate90FlipX);
                     bmp.Save($"{outName}.bmp");
+                    bmp.Dispose();
 
                     //得到要存储的辅助数据表
                     DataTable dtExcel = dataChannel[0].dtChannel.Copy();
@@ -677,6 +678,7 @@ namespace Spectra
                 bmp = BmpOper.MakePseudo(frmSum, new UInt16[] { 122, 77, 40 }, 2, $"{outName}.raw", frmSum, 0);
                 bmp.RotateFlip(System.Drawing.RotateFlipType.Rotate90FlipX);
                 bmp.Save($"{outName}.bmp");
+                bmp.Dispose();
             }
         }
 

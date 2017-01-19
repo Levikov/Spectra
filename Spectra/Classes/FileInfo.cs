@@ -32,7 +32,7 @@ namespace Spectra
                 FileInfo.isDecomp = false;                                                                                  //未解压
                 SQLiteFunc.ExcuteSQL("insert into FileDetails (文件名,文件路径,文件大小,是否已解压,MD5) values ('?','?','?','?','?')",
                     FileInfo.srcFileName, FileInfo.srcFilePathName, FileInfo.srcFileLength, "否", FileInfo.md5);
-                strReport += "未解压";
+                strReport += "解压为否";
             }
             else
             {

@@ -103,17 +103,38 @@ namespace Spectra
                 IProgress<double> IProg_Bar = new Progress<double>((ProgressValue) => { prog_Import.Value = ProgressValue * prog_Import.Maximum; });
                 IProgress<string> IProg_Cmd = new Progress<string>((ProgressString) => { tb_Console.Text = ProgressString + "\n" + tb_Console.Text; });
                 string[] openFiles = FileInfo.filterFiles(fbd.SelectedPath);
+                //先处理新文件
                 for (int fi = 0; fi < openFiles.Length; fi++)
                 {
                     try
                     {
-                        tb_Console.Text = FileInfo.checkFileState(openFiles[fi]) + "\n" + tb_Console.Text;  //检查文件状态
+                        string strResult = FileInfo.checkFileState(openFiles[fi]);
+                        if (!strResult.Contains("否"))
+                            continue;
+                        tb_Console.Text = strResult + "\n" + tb_Console.Text;  //检查文件状态
                         if (FileInfo.isDecomp)
                             continue;
                         DataOper dataOper = new DataOper(FileInfo.srcFilePathName, FileInfo.md5);
-                        await dataOper.main(fi+1,openFiles.Length,IProg_Bar, IProg_Cmd);
+                        await dataOper.main(fi + 1, openFiles.Length, IProg_Bar, IProg_Cmd);
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
+                    {
+                        tb_Console.Text = ex.ToString() + "\n" + tb_Console.Text;
+                    }
+                }
+                //再处理解压为否的文件
+                for (int fi = 0; fi < openFiles.Length; fi++)
+                {
+                    try
+                    {
+                        string strResult = FileInfo.checkFileState(openFiles[fi]);
+                        tb_Console.Text = strResult + "\n" + tb_Console.Text;  //检查文件状态
+                        if (FileInfo.isDecomp)
+                            continue;
+                        DataOper dataOper = new DataOper(FileInfo.srcFilePathName, FileInfo.md5);
+                        await dataOper.main(fi + 1, openFiles.Length, IProg_Bar, IProg_Cmd);
+                    }
+                    catch (Exception ex)
                     {
                         tb_Console.Text = ex.ToString() + "\n" + tb_Console.Text;
                     }
@@ -1225,6 +1246,7 @@ namespace Spectra
         private void btnSetDecPath_Click(object sender, RoutedEventArgs e)
         {
             SQLiteFunc.ExcuteSQL("update Global set Variable='?' where ID=1", txtSetDecPath.Text);
+            Global.pathDecFiles = txtSetDecPath.Text;
             System.Windows.MessageBox.Show("设置成功","提示",MessageBoxButton.OK,MessageBoxImage.Information);
         }
         #endregion
