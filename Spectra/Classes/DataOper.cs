@@ -1061,10 +1061,10 @@ namespace Spectra
             Ox = readI32(buf, 81) * 57.3;
             Oy = readI32(buf, 85) * 57.3;
             Oz = readI32(buf, 89) * 57.3;
-            Q1 = readI32(buf, 65) / (double)10000 * 57.3;
-            Q2 = readI32(buf, 69) / (double)10000 * 57.3;
-            Q3 = readI32(buf, 73) / (double)10000 * 57.3;
-            Q4 = readI32(buf, 77) / (double)10000 * 57.3;
+            Q1 = readI32(buf, 65);
+            Q2 = readI32(buf, 69);
+            Q3 = readI32(buf, 73);
+            Q4 = readI32(buf, 77);
 
             Freq = (double)100000 / (buf[102] * 256 + buf[103]);
             Integral = IntegralToLevel(buf[108] * 256 + buf[109]);
